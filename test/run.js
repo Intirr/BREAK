@@ -14,7 +14,7 @@ function quietConsole() { const vc = new VirtualConsole(); vc.on('jsdomError', e
 
 const SRC = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
 const ctx = {}; vm.createContext(ctx);
-vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;', ctx);
+vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;', ctx);
 const TPL = id => JSON.parse(JSON.stringify(ctx.TEMPLATES.find(t => t.id === id)));
 
 /* Monta una app con el motor serializado (prueba que es autocontenido). */
@@ -289,6 +289,33 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     P.close();
   }
 
+  /* 11c. Paletas, tipografías y texturas */
+  {
+    const lum = h => { h = h.replace('#', ''); const c = [0, 2, 4].map(i => { const v = parseInt(h.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    const bad = [];
+    for (const k of Object.keys(ctx.SKINS)) {
+      const sk = ctx.SKINS[k];
+      eq(sk.palettes.length, 5, k + ': cinco paletas');
+      sk.palettes.forEach(p => { const c = p.colors; if (cr(c.ink, c.bg) < 4.5 || cr(c.ink, c.surface) < 4.5 || cr(c.muted, c.bg) < 3) bad.push(k + ' · ' + p.name); });
+      ok(sk.palettes.some(p => JSON.stringify(p.colors) === JSON.stringify(sk.defaults.colors)), k + ': sus colores por defecto son una de sus paletas');
+    }
+    eq(bad.join(', '), '', 'todas las paletas tienen buen contraste');
+    const RT = SRC('runtime.js');
+    eq(ctx.DISPLAY_FONTS.concat(ctx.BODY_FONTS).filter(f => RT.indexOf("'" + f + "': [") < 0).join(', '), '', 'cada tipografía del estudio está en el motor');
+    for (const t of ctx.TEXTURES.map(x => x[0]).filter(x => x !== 'none')) {
+      const cfg = TPL('tpl-araucaria'); cfg.theme.texture = t;
+      const A = mount(cfg, { now: '2026-11-06T15:30:00Z' });
+      ok(A.d.documentElement.getAttribute('data-tex') === t && A.d.getElementById('bk-css').textContent.includes('html[data-tex="' + t + '"]'), 'textura «' + t + '» aplicada');
+      A.close();
+    }
+    const f = TPL('tpl-araucaria'); f.theme.fonts = { display: 'DM Serif Display', body: 'Source Serif 4' };
+    const F2 = mount(f, { now: '2026-11-06T15:30:00Z' });
+    const href = F2.d.getElementById('bk-fonts').href;
+    ok(href.includes('family=DM+Serif+Display:ital@0;1') && href.includes('family=Source+Serif+4:ital,wght@0,400;0,600;1,400'), 'pide a Google Fonts los pesos de las tipografías nuevas');
+    F2.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -397,8 +424,16 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   eq(ST.S.cur.theme.skin, 'cultural', 'cambia la estética');
   eq(ST.S.cur.theme.fonts.display, 'Alfa Slab One', 'aplica la tipografía de la estética');
   eq(ST.S.cur.modules.find(m => m.type === 'carta').s.layout, 'tarjetas', 'aplica el diseño de carta de la estética');
+  eq($$('.pal').length, 5, 'cinco paletas para la estética');
   click($('[data-a="pal"][data-i="2"]'));
   eq(ST.S.cur.theme.colors.bg, '#2A1E17', 'aplica la paleta');
+  eq($$('.tex').length, ctx.TEXTURES.length, 'muestras de todas las texturas');
+  ok($('.texs').getAttribute('style').includes('--tb:#2A1E17'), 'las muestras usan los colores de la paleta');
+  click($('[data-a="tex"][data-v="cuadros"]'));
+  eq(ST.S.cur.theme.texture, 'cuadros', 'elige el mantel de cuadros');
+  ok($('[data-a="tex"][data-v="cuadros"]').getAttribute('aria-pressed') === 'true', 'la muestra elegida queda marcada');
+  await sleep(220);
+  eq(ST.pv.frame.contentDocument.documentElement.getAttribute('data-tex'), 'cuadros', 'la vista previa muestra la textura');
   setVal(d.getElementById('h-accent'), '#ff0000');
   eq(ST.S.cur.theme.colors.accent, '#FF0000', 'color escrito a mano');
   eq(d.getElementById('c-accent').value, '#ff0000', 'sincroniza el selector de color');

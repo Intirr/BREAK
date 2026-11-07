@@ -6,7 +6,9 @@ const SKINS = {
     palettes: [
       { name: 'Noche de pino', colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' } },
       { name: 'Vino', colors: { bg: '#1A0F12', surface: '#26161B', ink: '#F1E6E2', muted: '#B39A9F', accent: '#D9A56B', accent2: '#C26B7C', accent3: '#6E3B47' } },
-      { name: 'Lino', colors: { bg: '#F3F2EE', surface: '#FFFFFF', ink: '#1E1B18', muted: '#6F6A62', accent: '#7A5A2E', accent2: '#4F6B5A', accent3: '#A88B5E' } }
+      { name: 'Lino', colors: { bg: '#F3F2EE', surface: '#FFFFFF', ink: '#1E1B18', muted: '#6F6A62', accent: '#7A5A2E', accent2: '#4F6B5A', accent3: '#A88B5E' } },
+      { name: 'Cacao', colors: { bg: '#17110D', surface: '#211913', ink: '#F1E7DA', muted: '#B6A592', accent: '#D4A26A', accent2: '#9DB08A', accent3: '#A4674A' } },
+      { name: 'Bruma', colors: { bg: '#ECEFEE', surface: '#FFFFFF', ink: '#1A2224', muted: '#56636A', accent: '#2F5D62', accent2: '#8A6B3F', accent3: '#7C8E93' } }
     ]
   },
   animado: {
@@ -15,7 +17,9 @@ const SKINS = {
     palettes: [
       { name: 'Mango', colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' } },
       { name: 'Hierbabuena', colors: { bg: '#B9F0DB', surface: '#FFFFFF', ink: '#13201B', muted: '#3E5A50', accent: '#FF6B4A', accent2: '#6D6BFF', accent3: '#FFD23F' } },
-      { name: 'Mora', colors: { bg: '#E7D8FF', surface: '#FFFFFF', ink: '#1B1530', muted: '#5A4E78', accent: '#FF4F8B', accent2: '#21BF9C', accent3: '#FFC93C' } }
+      { name: 'Mora', colors: { bg: '#E7D8FF', surface: '#FFFFFF', ink: '#1B1530', muted: '#5A4E78', accent: '#FF4F8B', accent2: '#21BF9C', accent3: '#FFC93C' } },
+      { name: 'Sandía', colors: { bg: '#FFD3D0', surface: '#FFF9F8', ink: '#241417', muted: '#634348', accent: '#13915F', accent2: '#E8344A', accent3: '#FFD23F' } },
+      { name: 'Cielo', colors: { bg: '#BFE3FF', surface: '#FFFFFF', ink: '#10213A', muted: '#3D5170', accent: '#FF7A1A', accent2: '#6E5BFF', accent3: '#FFD23F' } }
     ]
   },
   cultural: {
@@ -24,16 +28,20 @@ const SKINS = {
     palettes: [
       { name: 'Zócalo', colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' } },
       { name: 'Cafetal', colors: { bg: '#F3F6F0', surface: '#FFFFFF', ink: '#1F2A22', muted: '#5C6B60', accent: '#B5462E', accent2: '#2F5E3A', accent3: '#C98A1B' } },
-      { name: 'Fonda de noche', colors: { bg: '#2A1E17', surface: '#382920', ink: '#F6EEDF', muted: '#C9B8A3', accent: '#E8573B', accent2: '#3F8F6B', accent3: '#F1B635' } }
+      { name: 'Fonda de noche', colors: { bg: '#2A1E17', surface: '#382920', ink: '#F6EEDF', muted: '#C9B8A3', accent: '#E8573B', accent2: '#3F8F6B', accent3: '#F1B635' } },
+      { name: 'Balcón azul', colors: { bg: '#F3F6FA', surface: '#FFFFFF', ink: '#1E2633', muted: '#5D6878', accent: '#1F57A5', accent2: '#C2362A', accent3: '#E3A92B' } },
+      { name: 'Guadua', colors: { bg: '#F5F0E1', surface: '#FFFDF7', ink: '#2A2519', muted: '#6B6350', accent: '#66751A', accent2: '#8E4B2A', accent3: '#C7952B' } }
     ]
   },
   natural: {
     label: 'Natural', art: 'Cosecha', desc: 'Papel kraft, hojas de café y lomas sembradas; esquinas suaves y una serif cálida. Para cafés, panaderías y restaurantes campestres.', layout: 'tarjetas',
-    defaults: { colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' }, fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'none' },
+    defaults: { colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' }, fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel' },
     palettes: [
       { name: 'Kraft', colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' } },
       { name: 'Huerta', colors: { bg: '#E6EBDD', surface: '#FAFBF5', ink: '#1D2618', muted: '#56624C', accent: '#9E3426', accent2: '#3F6A35', accent3: '#D6A23A' } },
-      { name: 'Tostión', colors: { bg: '#2A1F18', surface: '#372920', ink: '#F2E6D6', muted: '#C3AE95', accent: '#D9A35F', accent2: '#9DBB7A', accent3: '#D0644A' } }
+      { name: 'Tostión', colors: { bg: '#2A1F18', surface: '#372920', ink: '#F2E6D6', muted: '#C3AE95', accent: '#D9A35F', accent2: '#9DBB7A', accent3: '#D0644A' } },
+      { name: 'Salvia', colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4E6E4D', accent2: '#9A4E2A', accent3: '#C9A04A' } },
+      { name: 'Arcilla', colors: { bg: '#EAD9CC', surface: '#FAF3EC', ink: '#2B1D16', muted: '#654D41', accent: '#9C4627', accent2: '#4F6B3A', accent3: '#D9A441' } }
     ]
   },
   nocturna: {
@@ -42,7 +50,9 @@ const SKINS = {
     palettes: [
       { name: 'Neón', colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' } },
       { name: 'Ámbar', colors: { bg: '#120E0A', surface: '#1F1912', ink: '#FFF4E2', muted: '#C4AE8F', accent: '#FFB238', accent2: '#FF6A3D', accent3: '#7EE0D2' } },
-      { name: 'Eléctrica', colors: { bg: '#060A18', surface: '#101833', ink: '#EEF3FF', muted: '#9CA8CC', accent: '#4D8DFF', accent2: '#B6FF3B', accent3: '#FF5EDB' } }
+      { name: 'Eléctrica', colors: { bg: '#060A18', surface: '#101833', ink: '#EEF3FF', muted: '#9CA8CC', accent: '#4D8DFF', accent2: '#B6FF3B', accent3: '#FF5EDB' } },
+      { name: 'Jungla', colors: { bg: '#07130E', surface: '#0F2018', ink: '#ECFFF4', muted: '#9CC2AE', accent: '#3DFF8B', accent2: '#FFE53D', accent3: '#FF5E8A' } },
+      { name: 'Rubí', colors: { bg: '#13070B', surface: '#211017', ink: '#FFEFF2', muted: '#C9A3AC', accent: '#FF2E55', accent2: '#FFC93D', accent3: '#9B6BFF' } }
     ]
   },
   minimalista: {
@@ -51,13 +61,17 @@ const SKINS = {
     palettes: [
       { name: 'Blanco', colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' } },
       { name: 'Hueso', colors: { bg: '#F2EEE6', surface: '#FFFFFF', ink: '#1A1917', muted: '#6A665D', accent: '#B23A1E', accent2: '#1A1917', accent3: '#CFC8BA' } },
-      { name: 'Carbón', colors: { bg: '#121212', surface: '#1C1C1B', ink: '#F1F0EC', muted: '#A3A29B', accent: '#E8C547', accent2: '#F1F0EC', accent3: '#3A3A38' } }
+      { name: 'Carbón', colors: { bg: '#121212', surface: '#1C1C1B', ink: '#F1F0EC', muted: '#A3A29B', accent: '#E8C547', accent2: '#F1F0EC', accent3: '#3A3A38' } },
+      { name: 'Menta', colors: { bg: '#F3F8F6', surface: '#E6F0EC', ink: '#0F1A16', muted: '#52625B', accent: '#00785E', accent2: '#0F1A16', accent3: '#BFD3CB' } },
+      { name: 'Acero', colors: { bg: '#E9ECEF', surface: '#DEE2E6', ink: '#14181C', muted: '#545B62', accent: '#C2410C', accent2: '#14181C', accent3: '#B9C0C7' } }
     ]
   }
 };
 
-const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'Fraunces', 'Young Serif', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Tilt Neon', 'Bricolage Grotesque', 'Schibsted Grotesk', 'Alfa Slab One'];
-const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Barlow', 'Instrument Sans', 'Lora'];
+const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'DM Serif Display', 'Fraunces', 'Young Serif', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Pacifico', 'Caveat', 'Tilt Neon', 'Bricolage Grotesque', 'Schibsted Grotesk', 'Archivo Black', 'Oswald', 'Alfa Slab One'];
+const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Barlow', 'Instrument Sans', 'Rubik', 'Outfit', 'Lora', 'Source Serif 4'];
+/* Detalle de fondo de la app: [clave, nombre en el estudio]. */
+const TEXTURES = [['none', 'Ninguno'], ['grano', 'Grano'], ['papel', 'Papel'], ['puntos', 'Puntos'], ['rayas', 'Rayas'], ['cuadros', 'Mantel'], ['hojas', 'Hojas'], ['ondas', 'Ondas'], ['zocalo', 'Zócalo']];
 const COLOR_KEYS = [['bg', 'Fondo'], ['surface', 'Tarjetas'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3']];
 const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['local', 'De la región'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['picante', 'Picante']];
 const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pedido', 'Hacer un pedido'], ['sellos', 'Tarjeta de sellos'], ['ubicacion', 'Cómo llegar'], ['eventos', 'Ver la agenda'], ['whatsapp', 'Escribir por WhatsApp'], ['none', 'Ninguno']];

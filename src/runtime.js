@@ -24,6 +24,14 @@ function breakApp(win, doc, initialCfg, opts) {
     'Schibsted Grotesk': [':ital,wght@0,400;0,500;0,700;0,800;1,400', '"Helvetica Neue", Arial, system-ui, sans-serif'],
     'Barlow': [':ital,wght@0,400;0,500;0,600;0,700;1,400', 'system-ui, sans-serif'],
     'Instrument Sans': [':ital,wght@0,400;0,500;0,600;0,700;1,400', '"Helvetica Neue", Arial, system-ui, sans-serif'],
+    'DM Serif Display': [':ital@0;1', 'Georgia, serif'],
+    'Archivo Black': ['', '"Arial Black", system-ui, sans-serif'],
+    'Pacifico': ['', '"Brush Script MT", cursive'],
+    'Caveat': [':wght@400;600;700', '"Comic Sans MS", cursive'],
+    'Oswald': [':wght@400;500;600;700', '"Arial Narrow", system-ui, sans-serif'],
+    'Rubik': [':ital,wght@0,400;0,500;0,700;1,400', 'system-ui, sans-serif'],
+    'Outfit': [':wght@400;500;600;700', 'system-ui, sans-serif'],
+    'Source Serif 4': [':ital,wght@0,400;0,600;1,400', 'Georgia, serif'],
     'Jost': [':ital,wght@0,300;0,400;0,500;0,600;1,300', 'system-ui, sans-serif'],
     'Nunito': [':ital,wght@0,400;0,600;0,700;0,800;0,900;1,600', 'system-ui, sans-serif'],
     'Alegreya Sans': [':ital,wght@0,400;0,500;0,700;0,800;1,400', 'system-ui, sans-serif'],
@@ -146,6 +154,8 @@ function breakApp(win, doc, initialCfg, opts) {
   /* Máscaras SVG: la forma viene del SVG y el color del tema (background + mask). */
   const LEAF = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 14\'%3E%3Cpath d=\'M1 7C5 1 15 0 23 7C15 14 5 13 1 7Z\'/%3E%3C/svg%3E")';
   const SQUIG = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 60 10\'%3E%3Cpath d=\'M0 5Q7.5 0 15 5T30 5T45 5T60 5\' fill=\'none\' stroke=\'%23000\' stroke-width=\'2.2\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
+  /* Hojas y ondas se dibujan en el fondo con el color de la paleta ya puesto (ver texCSS). */
+  const LEAF_PATHS = '%3Cpath d=\'M12 30C20 21 34 21 42 30C34 39 20 39 12 30Z\' transform=\'rotate(-28 27 30)\'/%3E%3Cpath d=\'M70 22C78 13 92 13 100 22C92 31 78 31 70 22Z\' transform=\'rotate(40 85 22)\'/%3E%3Cpath d=\'M24 88C32 79 46 79 54 88C46 97 32 97 24 88Z\' transform=\'rotate(62 39 88)\'/%3E%3Cpath d=\'M76 84C84 75 98 75 106 84C98 93 84 93 76 84Z\' transform=\'rotate(-58 91 84)\'/%3E%3Ccircle cx=\'60\' cy=\'56\' r=\'3\'/%3E%3Ccircle cx=\'66\' cy=\'60\' r=\'3\'/%3E';
   const CSS_BASE = `
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -447,6 +457,8 @@ textarea.inp{resize:vertical;min-height:76px}
 html[data-tex="puntos"] body{background-image:radial-gradient(color-mix(in srgb,var(--ink) 11%,transparent) 1.2px,transparent 1.5px);background-size:18px 18px}
 html[data-tex="rayas"] body{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 5%,transparent) 0 2px,transparent 2px 13px)}
 html[data-tex="grano"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+html[data-tex="papel"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .33 0 0 0 0 .25 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+html[data-tex="cuadros"] body{background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%),linear-gradient(color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%);background-size:28px 28px}
 html[data-tex="zocalo"] .m+.m{position:relative}
 html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;right:20px;top:0;height:10px;background:${ZZ};opacity:.9}
 .intro[data-motion="suave"] .m{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
@@ -817,7 +829,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="minimalista"] .ribbon-track span{padding:0}
 [data-skin="minimalista"] .sh-k{color:var(--muted);font-weight:600;letter-spacing:.16em}
 [data-skin="minimalista"] .sh-t{font-weight:800;font-size:clamp(34px,9.6vw,50px);line-height:.98;letter-spacing:-.04em}
-[data-skin="minimalista"] .lay-tarjetas .it,[data-skin="minimalista"] .lay-cuadricula .it,[data-skin="minimalista"] .feat{background:transparent;border:1px solid color-mix(in srgb,var(--ink) 15%,transparent)}
+[data-skin="minimalista"] .lay-tarjetas .it,[data-skin="minimalista"] .lay-cuadricula .it,[data-skin="minimalista"] .feat{background:var(--bg);border:1px solid color-mix(in srgb,var(--ink) 15%,transparent)}
 [data-skin="minimalista"] .cl{background:transparent;border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent);border-radius:0;padding-inline:0}
 [data-skin="minimalista"] .chip{border-width:1px;border-color:color-mix(in srgb,var(--ink) 24%,transparent);border-radius:var(--r);font-weight:500}
 [data-skin="minimalista"] .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -1760,10 +1772,18 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       ';--accent:' + acc + ';--accent2:' + a2 + ';--accent3:' + a3 + ';--on-accent:' + onColor(acc) + ';--on-accent2:' + onColor(a2) + ';--on-accent3:' + onColor(a3) +
       ';--r:' + r + 'px;--fd:' + fontStack(f.display) + ';--fb:' + fontStack(f.body) + ';color-scheme:' + (lum(hexOk(c.bg, '#111412')) < 0.3 ? 'dark' : 'light') + '}';
   }
+  /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
+  function texCSS() {
+    const t = cfg.theme.texture, c = cfg.theme.colors;
+    const col = function (hex, d) { return '%23' + hexOk(hex, d).slice(1); };
+    if (t === 'hojas') return 'html[data-tex="hojas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'132\' height=\'132\' viewBox=\'0 0 120 120\'%3E%3Cg fill=\'' + col(c.accent2, '#7fa088') + '\' fill-opacity=\'.17\'%3E' + LEAF_PATHS + '%3C/g%3E%3C/svg%3E")}';
+    if (t === 'ondas') return 'html[data-tex="ondas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'90\' height=\'24\'%3E%3Cpath d=\'M0 12Q22.5 2 45 12T90 12\' fill=\'none\' stroke=\'' + col(c.accent, '#c8a46a') + '\' stroke-opacity=\'.16\' stroke-width=\'1.6\'/%3E%3C/svg%3E")}';
+    return '';
+  }
   function applyHead() {
     let st = doc.getElementById('bk-css');
     if (!st) { st = doc.createElement('style'); st.id = 'bk-css'; doc.head.appendChild(st); }
-    const css = CSS_BASE + (CSS_SKIN[skin] || '') + tokensCSS();
+    const css = CSS_BASE + (CSS_SKIN[skin] || '') + tokensCSS() + texCSS();
     if (st.textContent !== css) st.textContent = css;
     const href = fontsHref();
     let ln = doc.getElementById('bk-fonts');

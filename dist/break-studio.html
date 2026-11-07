@@ -210,6 +210,20 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .crow input[type="color"]::-moz-color-swatch{border:1px solid rgba(0,0,0,.18);border-radius:9px}
 .hex{width:100px;min-height:36px;padding:4px 8px;font:500 13px/1 var(--f-mono);text-transform:uppercase}
 input[type="range"]{width:100%;accent-color:var(--carbon)}
+.texs{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
+.tex{display:grid;gap:6px;padding:5px 5px 7px;border:1px solid var(--rule);border-radius:11px;background:var(--sheet);font-size:12.5px;font-weight:600;text-align:center;color:var(--ink2)}
+.tex:hover{border-color:var(--ink2)}
+.tex[aria-pressed="true"]{border-color:var(--carbon);box-shadow:0 0 0 1.5px var(--carbon);color:var(--ink)}
+.tex-sw{position:relative;display:block;height:46px;border-radius:7px;overflow:hidden;background-color:var(--tb);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.tx-grano{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .14 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.tx-papel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .36 0 0 0 0 .28 0 0 0 .3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+.tx-puntos{background-image:radial-gradient(color-mix(in srgb,var(--ti) 24%,transparent) 1.2px,transparent 1.5px);background-size:12px 12px}
+.tx-rayas{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ti) 14%,transparent) 0 2px,transparent 2px 9px)}
+.tx-cuadros{background-image:linear-gradient(90deg,color-mix(in srgb,var(--ta) 18%,transparent) 50%,transparent 50%),linear-gradient(color-mix(in srgb,var(--ta) 18%,transparent) 50%,transparent 50%);background-size:16px 16px}
+.tx-hojas::after,.tx-ondas::after,.tx-zocalo::after{content:"";position:absolute}
+.tx-hojas::after{inset:0;background:color-mix(in srgb,var(--ta2) 45%,transparent);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M12 30C20 21 34 21 42 30C34 39 20 39 12 30Z' transform='rotate(-28 27 30)'/%3E%3Cpath d='M70 22C78 13 92 13 100 22C92 31 78 31 70 22Z' transform='rotate(40 85 22)'/%3E%3Cpath d='M24 88C32 79 46 79 54 88C46 97 32 97 24 88Z' transform='rotate(62 39 88)'/%3E%3Cpath d='M76 84C84 75 98 75 106 84C98 93 84 93 76 84Z' transform='rotate(-58 91 84)'/%3E%3C/svg%3E") 0 0/58px 58px;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M12 30C20 21 34 21 42 30C34 39 20 39 12 30Z' transform='rotate(-28 27 30)'/%3E%3Cpath d='M70 22C78 13 92 13 100 22C92 31 78 31 70 22Z' transform='rotate(40 85 22)'/%3E%3Cpath d='M24 88C32 79 46 79 54 88C46 97 32 97 24 88Z' transform='rotate(62 39 88)'/%3E%3Cpath d='M76 84C84 75 98 75 106 84C98 93 84 93 76 84Z' transform='rotate(-58 91 84)'/%3E%3C/svg%3E") 0 0/58px 58px}
+.tx-ondas::after{inset:0;background:color-mix(in srgb,var(--ta) 50%,transparent);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 24'%3E%3Cpath d='M0 12Q22.5 2 45 12T90 12' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") 0 0/45px 12px;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 24'%3E%3Cpath d='M0 12Q22.5 2 45 12T90 12' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") 0 0/45px 12px}
+.tx-zocalo::after{left:0;right:0;bottom:9px;height:8px;background:linear-gradient(135deg,var(--ta) 25%,transparent 25%) -4px 0/8px 8px,linear-gradient(225deg,var(--ta) 25%,transparent 25%) -4px 0/8px 8px,linear-gradient(315deg,var(--ta) 25%,transparent 25%) 0 0/8px 8px,linear-gradient(45deg,var(--ta) 25%,transparent 25%) 0 0/8px 8px,var(--ta3)}
 
 /* Carta */
 .cats{display:grid;gap:8px}
@@ -376,6 +390,14 @@ function breakApp(win, doc, initialCfg, opts) {
     'Schibsted Grotesk': [':ital,wght@0,400;0,500;0,700;0,800;1,400', '"Helvetica Neue", Arial, system-ui, sans-serif'],
     'Barlow': [':ital,wght@0,400;0,500;0,600;0,700;1,400', 'system-ui, sans-serif'],
     'Instrument Sans': [':ital,wght@0,400;0,500;0,600;0,700;1,400', '"Helvetica Neue", Arial, system-ui, sans-serif'],
+    'DM Serif Display': [':ital@0;1', 'Georgia, serif'],
+    'Archivo Black': ['', '"Arial Black", system-ui, sans-serif'],
+    'Pacifico': ['', '"Brush Script MT", cursive'],
+    'Caveat': [':wght@400;600;700', '"Comic Sans MS", cursive'],
+    'Oswald': [':wght@400;500;600;700', '"Arial Narrow", system-ui, sans-serif'],
+    'Rubik': [':ital,wght@0,400;0,500;0,700;1,400', 'system-ui, sans-serif'],
+    'Outfit': [':wght@400;500;600;700', 'system-ui, sans-serif'],
+    'Source Serif 4': [':ital,wght@0,400;0,600;1,400', 'Georgia, serif'],
     'Jost': [':ital,wght@0,300;0,400;0,500;0,600;1,300', 'system-ui, sans-serif'],
     'Nunito': [':ital,wght@0,400;0,600;0,700;0,800;0,900;1,600', 'system-ui, sans-serif'],
     'Alegreya Sans': [':ital,wght@0,400;0,500;0,700;0,800;1,400', 'system-ui, sans-serif'],
@@ -498,6 +520,8 @@ function breakApp(win, doc, initialCfg, opts) {
   /* Máscaras SVG: la forma viene del SVG y el color del tema (background + mask). */
   const LEAF = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 14\'%3E%3Cpath d=\'M1 7C5 1 15 0 23 7C15 14 5 13 1 7Z\'/%3E%3C/svg%3E")';
   const SQUIG = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 60 10\'%3E%3Cpath d=\'M0 5Q7.5 0 15 5T30 5T45 5T60 5\' fill=\'none\' stroke=\'%23000\' stroke-width=\'2.2\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
+  /* Hojas y ondas se dibujan en el fondo con el color de la paleta ya puesto (ver texCSS). */
+  const LEAF_PATHS = '%3Cpath d=\'M12 30C20 21 34 21 42 30C34 39 20 39 12 30Z\' transform=\'rotate(-28 27 30)\'/%3E%3Cpath d=\'M70 22C78 13 92 13 100 22C92 31 78 31 70 22Z\' transform=\'rotate(40 85 22)\'/%3E%3Cpath d=\'M24 88C32 79 46 79 54 88C46 97 32 97 24 88Z\' transform=\'rotate(62 39 88)\'/%3E%3Cpath d=\'M76 84C84 75 98 75 106 84C98 93 84 93 76 84Z\' transform=\'rotate(-58 91 84)\'/%3E%3Ccircle cx=\'60\' cy=\'56\' r=\'3\'/%3E%3Ccircle cx=\'66\' cy=\'60\' r=\'3\'/%3E';
   const CSS_BASE = `
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -799,6 +823,8 @@ textarea.inp{resize:vertical;min-height:76px}
 html[data-tex="puntos"] body{background-image:radial-gradient(color-mix(in srgb,var(--ink) 11%,transparent) 1.2px,transparent 1.5px);background-size:18px 18px}
 html[data-tex="rayas"] body{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 5%,transparent) 0 2px,transparent 2px 13px)}
 html[data-tex="grano"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+html[data-tex="papel"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .33 0 0 0 0 .25 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+html[data-tex="cuadros"] body{background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%),linear-gradient(color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%);background-size:28px 28px}
 html[data-tex="zocalo"] .m+.m{position:relative}
 html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;right:20px;top:0;height:10px;background:${ZZ};opacity:.9}
 .intro[data-motion="suave"] .m{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
@@ -1169,7 +1195,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="minimalista"] .ribbon-track span{padding:0}
 [data-skin="minimalista"] .sh-k{color:var(--muted);font-weight:600;letter-spacing:.16em}
 [data-skin="minimalista"] .sh-t{font-weight:800;font-size:clamp(34px,9.6vw,50px);line-height:.98;letter-spacing:-.04em}
-[data-skin="minimalista"] .lay-tarjetas .it,[data-skin="minimalista"] .lay-cuadricula .it,[data-skin="minimalista"] .feat{background:transparent;border:1px solid color-mix(in srgb,var(--ink) 15%,transparent)}
+[data-skin="minimalista"] .lay-tarjetas .it,[data-skin="minimalista"] .lay-cuadricula .it,[data-skin="minimalista"] .feat{background:var(--bg);border:1px solid color-mix(in srgb,var(--ink) 15%,transparent)}
 [data-skin="minimalista"] .cl{background:transparent;border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent);border-radius:0;padding-inline:0}
 [data-skin="minimalista"] .chip{border-width:1px;border-color:color-mix(in srgb,var(--ink) 24%,transparent);border-radius:var(--r);font-weight:500}
 [data-skin="minimalista"] .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -2112,10 +2138,18 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       ';--accent:' + acc + ';--accent2:' + a2 + ';--accent3:' + a3 + ';--on-accent:' + onColor(acc) + ';--on-accent2:' + onColor(a2) + ';--on-accent3:' + onColor(a3) +
       ';--r:' + r + 'px;--fd:' + fontStack(f.display) + ';--fb:' + fontStack(f.body) + ';color-scheme:' + (lum(hexOk(c.bg, '#111412')) < 0.3 ? 'dark' : 'light') + '}';
   }
+  /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
+  function texCSS() {
+    const t = cfg.theme.texture, c = cfg.theme.colors;
+    const col = function (hex, d) { return '%23' + hexOk(hex, d).slice(1); };
+    if (t === 'hojas') return 'html[data-tex="hojas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'132\' height=\'132\' viewBox=\'0 0 120 120\'%3E%3Cg fill=\'' + col(c.accent2, '#7fa088') + '\' fill-opacity=\'.17\'%3E' + LEAF_PATHS + '%3C/g%3E%3C/svg%3E")}';
+    if (t === 'ondas') return 'html[data-tex="ondas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'90\' height=\'24\'%3E%3Cpath d=\'M0 12Q22.5 2 45 12T90 12\' fill=\'none\' stroke=\'' + col(c.accent, '#c8a46a') + '\' stroke-opacity=\'.16\' stroke-width=\'1.6\'/%3E%3C/svg%3E")}';
+    return '';
+  }
   function applyHead() {
     let st = doc.getElementById('bk-css');
     if (!st) { st = doc.createElement('style'); st.id = 'bk-css'; doc.head.appendChild(st); }
-    const css = CSS_BASE + (CSS_SKIN[skin] || '') + tokensCSS();
+    const css = CSS_BASE + (CSS_SKIN[skin] || '') + tokensCSS() + texCSS();
     if (st.textContent !== css) st.textContent = css;
     const href = fontsHref();
     let ln = doc.getElementById('bk-fonts');
@@ -2658,7 +2692,9 @@ const SKINS = {
     palettes: [
       { name: 'Noche de pino', colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' } },
       { name: 'Vino', colors: { bg: '#1A0F12', surface: '#26161B', ink: '#F1E6E2', muted: '#B39A9F', accent: '#D9A56B', accent2: '#C26B7C', accent3: '#6E3B47' } },
-      { name: 'Lino', colors: { bg: '#F3F2EE', surface: '#FFFFFF', ink: '#1E1B18', muted: '#6F6A62', accent: '#7A5A2E', accent2: '#4F6B5A', accent3: '#A88B5E' } }
+      { name: 'Lino', colors: { bg: '#F3F2EE', surface: '#FFFFFF', ink: '#1E1B18', muted: '#6F6A62', accent: '#7A5A2E', accent2: '#4F6B5A', accent3: '#A88B5E' } },
+      { name: 'Cacao', colors: { bg: '#17110D', surface: '#211913', ink: '#F1E7DA', muted: '#B6A592', accent: '#D4A26A', accent2: '#9DB08A', accent3: '#A4674A' } },
+      { name: 'Bruma', colors: { bg: '#ECEFEE', surface: '#FFFFFF', ink: '#1A2224', muted: '#56636A', accent: '#2F5D62', accent2: '#8A6B3F', accent3: '#7C8E93' } }
     ]
   },
   animado: {
@@ -2667,7 +2703,9 @@ const SKINS = {
     palettes: [
       { name: 'Mango', colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' } },
       { name: 'Hierbabuena', colors: { bg: '#B9F0DB', surface: '#FFFFFF', ink: '#13201B', muted: '#3E5A50', accent: '#FF6B4A', accent2: '#6D6BFF', accent3: '#FFD23F' } },
-      { name: 'Mora', colors: { bg: '#E7D8FF', surface: '#FFFFFF', ink: '#1B1530', muted: '#5A4E78', accent: '#FF4F8B', accent2: '#21BF9C', accent3: '#FFC93C' } }
+      { name: 'Mora', colors: { bg: '#E7D8FF', surface: '#FFFFFF', ink: '#1B1530', muted: '#5A4E78', accent: '#FF4F8B', accent2: '#21BF9C', accent3: '#FFC93C' } },
+      { name: 'Sandía', colors: { bg: '#FFD3D0', surface: '#FFF9F8', ink: '#241417', muted: '#634348', accent: '#13915F', accent2: '#E8344A', accent3: '#FFD23F' } },
+      { name: 'Cielo', colors: { bg: '#BFE3FF', surface: '#FFFFFF', ink: '#10213A', muted: '#3D5170', accent: '#FF7A1A', accent2: '#6E5BFF', accent3: '#FFD23F' } }
     ]
   },
   cultural: {
@@ -2676,16 +2714,20 @@ const SKINS = {
     palettes: [
       { name: 'Zócalo', colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' } },
       { name: 'Cafetal', colors: { bg: '#F3F6F0', surface: '#FFFFFF', ink: '#1F2A22', muted: '#5C6B60', accent: '#B5462E', accent2: '#2F5E3A', accent3: '#C98A1B' } },
-      { name: 'Fonda de noche', colors: { bg: '#2A1E17', surface: '#382920', ink: '#F6EEDF', muted: '#C9B8A3', accent: '#E8573B', accent2: '#3F8F6B', accent3: '#F1B635' } }
+      { name: 'Fonda de noche', colors: { bg: '#2A1E17', surface: '#382920', ink: '#F6EEDF', muted: '#C9B8A3', accent: '#E8573B', accent2: '#3F8F6B', accent3: '#F1B635' } },
+      { name: 'Balcón azul', colors: { bg: '#F3F6FA', surface: '#FFFFFF', ink: '#1E2633', muted: '#5D6878', accent: '#1F57A5', accent2: '#C2362A', accent3: '#E3A92B' } },
+      { name: 'Guadua', colors: { bg: '#F5F0E1', surface: '#FFFDF7', ink: '#2A2519', muted: '#6B6350', accent: '#66751A', accent2: '#8E4B2A', accent3: '#C7952B' } }
     ]
   },
   natural: {
     label: 'Natural', art: 'Cosecha', desc: 'Papel kraft, hojas de café y lomas sembradas; esquinas suaves y una serif cálida. Para cafés, panaderías y restaurantes campestres.', layout: 'tarjetas',
-    defaults: { colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' }, fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'none' },
+    defaults: { colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' }, fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel' },
     palettes: [
       { name: 'Kraft', colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' } },
       { name: 'Huerta', colors: { bg: '#E6EBDD', surface: '#FAFBF5', ink: '#1D2618', muted: '#56624C', accent: '#9E3426', accent2: '#3F6A35', accent3: '#D6A23A' } },
-      { name: 'Tostión', colors: { bg: '#2A1F18', surface: '#372920', ink: '#F2E6D6', muted: '#C3AE95', accent: '#D9A35F', accent2: '#9DBB7A', accent3: '#D0644A' } }
+      { name: 'Tostión', colors: { bg: '#2A1F18', surface: '#372920', ink: '#F2E6D6', muted: '#C3AE95', accent: '#D9A35F', accent2: '#9DBB7A', accent3: '#D0644A' } },
+      { name: 'Salvia', colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4E6E4D', accent2: '#9A4E2A', accent3: '#C9A04A' } },
+      { name: 'Arcilla', colors: { bg: '#EAD9CC', surface: '#FAF3EC', ink: '#2B1D16', muted: '#654D41', accent: '#9C4627', accent2: '#4F6B3A', accent3: '#D9A441' } }
     ]
   },
   nocturna: {
@@ -2694,7 +2736,9 @@ const SKINS = {
     palettes: [
       { name: 'Neón', colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' } },
       { name: 'Ámbar', colors: { bg: '#120E0A', surface: '#1F1912', ink: '#FFF4E2', muted: '#C4AE8F', accent: '#FFB238', accent2: '#FF6A3D', accent3: '#7EE0D2' } },
-      { name: 'Eléctrica', colors: { bg: '#060A18', surface: '#101833', ink: '#EEF3FF', muted: '#9CA8CC', accent: '#4D8DFF', accent2: '#B6FF3B', accent3: '#FF5EDB' } }
+      { name: 'Eléctrica', colors: { bg: '#060A18', surface: '#101833', ink: '#EEF3FF', muted: '#9CA8CC', accent: '#4D8DFF', accent2: '#B6FF3B', accent3: '#FF5EDB' } },
+      { name: 'Jungla', colors: { bg: '#07130E', surface: '#0F2018', ink: '#ECFFF4', muted: '#9CC2AE', accent: '#3DFF8B', accent2: '#FFE53D', accent3: '#FF5E8A' } },
+      { name: 'Rubí', colors: { bg: '#13070B', surface: '#211017', ink: '#FFEFF2', muted: '#C9A3AC', accent: '#FF2E55', accent2: '#FFC93D', accent3: '#9B6BFF' } }
     ]
   },
   minimalista: {
@@ -2703,13 +2747,17 @@ const SKINS = {
     palettes: [
       { name: 'Blanco', colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' } },
       { name: 'Hueso', colors: { bg: '#F2EEE6', surface: '#FFFFFF', ink: '#1A1917', muted: '#6A665D', accent: '#B23A1E', accent2: '#1A1917', accent3: '#CFC8BA' } },
-      { name: 'Carbón', colors: { bg: '#121212', surface: '#1C1C1B', ink: '#F1F0EC', muted: '#A3A29B', accent: '#E8C547', accent2: '#F1F0EC', accent3: '#3A3A38' } }
+      { name: 'Carbón', colors: { bg: '#121212', surface: '#1C1C1B', ink: '#F1F0EC', muted: '#A3A29B', accent: '#E8C547', accent2: '#F1F0EC', accent3: '#3A3A38' } },
+      { name: 'Menta', colors: { bg: '#F3F8F6', surface: '#E6F0EC', ink: '#0F1A16', muted: '#52625B', accent: '#00785E', accent2: '#0F1A16', accent3: '#BFD3CB' } },
+      { name: 'Acero', colors: { bg: '#E9ECEF', surface: '#DEE2E6', ink: '#14181C', muted: '#545B62', accent: '#C2410C', accent2: '#14181C', accent3: '#B9C0C7' } }
     ]
   }
 };
 
-const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'Fraunces', 'Young Serif', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Tilt Neon', 'Bricolage Grotesque', 'Schibsted Grotesk', 'Alfa Slab One'];
-const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Barlow', 'Instrument Sans', 'Lora'];
+const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'DM Serif Display', 'Fraunces', 'Young Serif', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Pacifico', 'Caveat', 'Tilt Neon', 'Bricolage Grotesque', 'Schibsted Grotesk', 'Archivo Black', 'Oswald', 'Alfa Slab One'];
+const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Barlow', 'Instrument Sans', 'Rubik', 'Outfit', 'Lora', 'Source Serif 4'];
+/* Detalle de fondo de la app: [clave, nombre en el estudio]. */
+const TEXTURES = [['none', 'Ninguno'], ['grano', 'Grano'], ['papel', 'Papel'], ['puntos', 'Puntos'], ['rayas', 'Rayas'], ['cuadros', 'Mantel'], ['hojas', 'Hojas'], ['ondas', 'Ondas'], ['zocalo', 'Zócalo']];
 const COLOR_KEYS = [['bg', 'Fondo'], ['surface', 'Tarjetas'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3']];
 const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['local', 'De la región'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['picante', 'Picante']];
 const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pedido', 'Hacer un pedido'], ['sellos', 'Tarjeta de sellos'], ['ubicacion', 'Cómo llegar'], ['eventos', 'Ver la agenda'], ['whatsapp', 'Escribir por WhatsApp'], ['none', 'Ninguno']];
@@ -3291,6 +3339,11 @@ const BRAND_FIELDS = [
       '<p>Edítala para probar. Para conservar los cambios, guárdala como una app tuya.</p></div>' +
       '<button class="btn pri" data-a="save-as"' + (storeReady() ? '' : ' disabled') + '>' + (storeReady() ? 'Guardar como mi app' : 'Conectando…') + '</button></div>';
   }
+  /* Colores de la app para pintar las muestras de textura (solo hexadecimales válidos). */
+  function texVars() {
+    const c = S.cur.theme.colors || {}, hx = function (v, d) { return /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : d; };
+    return '--tb:' + hx(c.bg, '#ffffff') + ';--ti:' + hx(c.ink, '#111111') + ';--ta:' + hx(c.accent, '#888888') + ';--ta2:' + hx(c.accent2, '#888888') + ';--ta3:' + hx(c.accent3, '#888888');
+  }
   function swatches(colors) { return ['bg', 'surface', 'accent', 'accent2', 'accent3'].map(function (k) { return '<i style="background:' + attr(colors[k]) + '"></i>'; }).join(''); }
   function contrastHTML() {
     const c = S.cur.theme.colors, out = [];
@@ -3332,7 +3385,10 @@ const BRAND_FIELDS = [
         '<section class="card"><div class="card-h"><h2>Forma y movimiento</h2></div>' +
         '<div class="fld"><label class="lab" for="f-radius">Esquinas · <output id="radius-out">' + (+th.radius || 0) + ' px</output></label><input type="range" id="f-radius" min="0" max="28" step="1" value="' + (+th.radius || 0) + '" data-p="theme.radius" data-type="num"></div>' +
         '<div class="fld"><span class="lab">Movimiento</span>' + seg('motion', 'motion', [['off', 'Quieto'], ['suave', 'Suave'], ['vivo', 'Vivo']]) + '<p class="help">«Vivo» agrega rebotes, stickers flotantes y confeti al completar sellos o acertar en la trivia.</p></div>' +
-        '<div class="fld"><span class="lab">Detalle de fondo</span>' + seg('texture', 'tex', [['none', 'Ninguno'], ['grano', 'Grano'], ['puntos', 'Puntos'], ['rayas', 'Rayas'], ['zocalo', 'Zócalo']]) + '</div></section>';
+        '<div class="fld"><span class="lab">Detalle de fondo</span><div class="texs" role="group" aria-label="Detalle de fondo" style="' + attr(texVars()) + '">' + TEXTURES.map(function (t) {
+          const on = (th.texture || 'none') === t[0];
+          return '<button type="button" class="tex" data-a="tex" data-v="' + t[0] + '" aria-pressed="' + on + '"><span class="tex-sw tx-' + t[0] + '" aria-hidden="true"></span>' + esc(t[1]) + '</button>';
+        }).join('') + '</div></div></section>';
     },
     modulos: function () {
       const ms = S.cur.modules, on = ms.filter(function (m) { return m.on !== false; }).length;
@@ -3762,7 +3818,7 @@ const BRAND_FIELDS = [
   }
   function afterField(p, t, v) {
     if (p === 'theme.radius') { const o = $('#radius-out'); if (o) o.textContent = v + ' px'; return; }
-    if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') renderHeader(); return; }
+    if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); const tx = $('.texs'); if (tx) tx.setAttribute('style', texVars()); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') renderHeader(); return; }
     if (p === 'brand.name') { renderHeader(); renderStageTop(); return; }
     if (p === 'i18n.bilingual') { if (!v && S.pvLang === 'en') { S.pvLang = 'es'; if (PV.ready) PV.rt.setLang('es'); } renderEditor(); renderStageTop(); renderTabs(); return; }
     if (t.getAttribute('data-rr') || /^brand\.hours\.\d+\.closed$/.test(p)) { renderEditor(); return; }

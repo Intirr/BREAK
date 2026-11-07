@@ -381,6 +381,11 @@
       '<p>Edítala para probar. Para conservar los cambios, guárdala como una app tuya.</p></div>' +
       '<button class="btn pri" data-a="save-as"' + (storeReady() ? '' : ' disabled') + '>' + (storeReady() ? 'Guardar como mi app' : 'Conectando…') + '</button></div>';
   }
+  /* Colores de la app para pintar las muestras de textura (solo hexadecimales válidos). */
+  function texVars() {
+    const c = S.cur.theme.colors || {}, hx = function (v, d) { return /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : d; };
+    return '--tb:' + hx(c.bg, '#ffffff') + ';--ti:' + hx(c.ink, '#111111') + ';--ta:' + hx(c.accent, '#888888') + ';--ta2:' + hx(c.accent2, '#888888') + ';--ta3:' + hx(c.accent3, '#888888');
+  }
   function swatches(colors) { return ['bg', 'surface', 'accent', 'accent2', 'accent3'].map(function (k) { return '<i style="background:' + attr(colors[k]) + '"></i>'; }).join(''); }
   function contrastHTML() {
     const c = S.cur.theme.colors, out = [];
@@ -422,7 +427,10 @@
         '<section class="card"><div class="card-h"><h2>Forma y movimiento</h2></div>' +
         '<div class="fld"><label class="lab" for="f-radius">Esquinas · <output id="radius-out">' + (+th.radius || 0) + ' px</output></label><input type="range" id="f-radius" min="0" max="28" step="1" value="' + (+th.radius || 0) + '" data-p="theme.radius" data-type="num"></div>' +
         '<div class="fld"><span class="lab">Movimiento</span>' + seg('motion', 'motion', [['off', 'Quieto'], ['suave', 'Suave'], ['vivo', 'Vivo']]) + '<p class="help">«Vivo» agrega rebotes, stickers flotantes y confeti al completar sellos o acertar en la trivia.</p></div>' +
-        '<div class="fld"><span class="lab">Detalle de fondo</span>' + seg('texture', 'tex', [['none', 'Ninguno'], ['grano', 'Grano'], ['puntos', 'Puntos'], ['rayas', 'Rayas'], ['zocalo', 'Zócalo']]) + '</div></section>';
+        '<div class="fld"><span class="lab">Detalle de fondo</span><div class="texs" role="group" aria-label="Detalle de fondo" style="' + attr(texVars()) + '">' + TEXTURES.map(function (t) {
+          const on = (th.texture || 'none') === t[0];
+          return '<button type="button" class="tex" data-a="tex" data-v="' + t[0] + '" aria-pressed="' + on + '"><span class="tex-sw tx-' + t[0] + '" aria-hidden="true"></span>' + esc(t[1]) + '</button>';
+        }).join('') + '</div></div></section>';
     },
     modulos: function () {
       const ms = S.cur.modules, on = ms.filter(function (m) { return m.on !== false; }).length;
@@ -852,7 +860,7 @@
   }
   function afterField(p, t, v) {
     if (p === 'theme.radius') { const o = $('#radius-out'); if (o) o.textContent = v + ' px'; return; }
-    if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') renderHeader(); return; }
+    if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); const tx = $('.texs'); if (tx) tx.setAttribute('style', texVars()); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') renderHeader(); return; }
     if (p === 'brand.name') { renderHeader(); renderStageTop(); return; }
     if (p === 'i18n.bilingual') { if (!v && S.pvLang === 'en') { S.pvLang = 'es'; if (PV.ready) PV.rt.setLang('es'); } renderEditor(); renderStageTop(); renderTabs(); return; }
     if (t.getAttribute('data-rr') || /^brand\.hours\.\d+\.closed$/.test(p)) { renderEditor(); return; }
