@@ -433,7 +433,8 @@
           return '<div class="crow"><input type="color" id="' + id + '" value="' + attr(v.toLowerCase()) + '" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="h-' + ck[0] + '" aria-label="' + ck[1] + '"><label for="h-' + ck[0] + '">' + ck[1] + '</label>' +
             '<input class="in hex" id="h-' + ck[0] + '" value="' + attr(v) + '" maxlength="7" spellcheck="false" autocomplete="off" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="' + id + '"></div>';
         }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div></section>' +
-        '<section class="card"><div class="card-h"><h2>Tipografía</h2><p>Todas son de Google Fonts y cargan solas en la app.</p></div><div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div></section>' +
+        '<section class="card"><div class="card-h"><h2>Tipografía</h2><p>Todas son de Google Fonts y cargan solas en la app.</p></div><div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>' +
+        '<div class="fld"><span class="lab">Tamaño del texto</span>' + seg('textSize', 'tsize', [['normal', 'Normal'], ['grande', 'Grande']], 'normal') + '<p class="help">«Grande» sube un 15 % el texto de la carta, los botones y los formularios. Se lee mejor sin gafas.</p></div></section>' +
         '<section class="card"><div class="card-h"><h2>Forma y movimiento</h2></div>' +
         '<div class="fld"><label class="lab" for="f-radius">Esquinas · <output id="radius-out">' + (+th.radius || 0) + ' px</output></label><input type="range" id="f-radius" min="0" max="28" step="1" value="' + (+th.radius || 0) + '" data-p="theme.radius" data-type="num"></div>' +
         '<div class="fld"><span class="lab">Botones</span>' + seg('buttons', 'btns', [['auto', 'Según la estética'], ['redondo', 'Redondos'], ['cuadrado', 'Cuadrados'], ['contorno', 'De contorno']], 'auto') + '</div>' +
@@ -770,6 +771,7 @@
     motion: function (d) { S.cur.theme.motion = d.v; edited(); renderEditor(); },
     tex: function (d) { S.cur.theme.texture = d.v; edited(); renderEditor(); },
     btns: function (d) { S.cur.theme.buttons = d.v; edited(); renderEditor(); },
+    tsize: function (d) { S.cur.theme.textSize = d.v === 'grande' ? 'grande' : 'normal'; edited(); renderEditor(); },
     'mod-open': function (d) { S.openMod = S.openMod === d.mid ? null : d.mid; renderEditor(); if (S.openMod && DESKTOP.matches) pvFocus(d.mid); },
     'mod-mv': function (d) { const i = modIndex(d.mid); if (move(S.cur.modules, i, +d.d)) { edited(); renderEditor(); } },
     'mod-focus': function (d) { if (!DESKTOP.matches) setTab('vista'); setTimeout(function () { pvFocus(d.mid); }, 80); },

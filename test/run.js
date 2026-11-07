@@ -373,6 +373,31 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     D.close();
   }
 
+  /* 11f. Letra grande y etiquetas nuevas */
+  {
+    const cfg = TPL('tpl-zocalo'); cfg.theme.textSize = 'grande';
+    const A = mount(cfg, { now: '2026-11-06T15:30:00Z' });
+    const css = A.d.getElementById('bk-css').textContent;
+    ok(/body\{[^}]*font-size:18\.4px/.test(css) && /\[data-skin="cultural"\]\{font-size:19\.6px/.test(css), 'letra grande: el texto sube un 15 %');
+    ok(!/font-size:16px;line-height:1\.55/.test(css), 'letra grande: no queda el tamaño normal del cuerpo');
+    A.close();
+    const N = mount(TPL('tpl-zocalo'), { now: '2026-11-06T15:30:00Z' });
+    ok(/body\{[^}]*font-size:16px/.test(N.d.getElementById('bk-css').textContent), 'letra normal: el tamaño de siempre');
+    N.close();
+    const t = TPL('tpl-zocalo');
+    t.menu.categories[0].items[0].tags = ['temporada', 'compartir'];
+    t.menu.categories[0].items[1].tags = ['ninos', 'sinlactosa'];
+    const T = mount(t, { now: '2026-11-06T15:30:00Z' });
+    const labels = T.$$('.it .tag').map(x => x.textContent);
+    ok(['De temporada', 'Para compartir', 'Para niños', 'Sin lactosa'].every(l => labels.includes(l)), 'etiquetas nuevas en español');
+    ok(['temporada', 'compartir', 'ninos', 'sinlactosa'].every(k => !!T.$('.filters [data-tag="' + k + '"]')), 'las etiquetas nuevas también filtran');
+    T.click(T.$('[data-act="filter"][data-tag="sinlactosa"]'));
+    eq(T.$$('.carta-body .it').length, 1, 'filtro sin lactosa');
+    T.click(T.$('[data-act="lang"][data-l="en"]'));
+    ok(T.$$('.it .tag').some(x => x.textContent === 'Dairy-free'), 'etiquetas nuevas en inglés');
+    T.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -515,6 +540,12 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   eq(ST.S.cur.theme.buttons, 'contorno', 'elige botones de contorno');
   await sleep(220);
   eq(ST.pv.frame.contentDocument.querySelector('.app').getAttribute('data-btn'), 'contorno', 'la vista previa usa los botones de contorno');
+  ok($('[data-a="tsize"][data-v="normal"]').classList.contains('on'), 'el texto arranca en tamaño normal');
+  click($('[data-a="tsize"][data-v="grande"]'));
+  eq(ST.S.cur.theme.textSize, 'grande', 'elige letra grande');
+  await sleep(220);
+  ok(/font-size:18\.4px/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa letra grande');
+  click($('[data-a="tsize"][data-v="normal"]'));
   setVal(d.getElementById('h-accent'), '#ff0000');
   eq(ST.S.cur.theme.colors.accent, '#FF0000', 'color escrito a mano');
   eq(d.getElementById('c-accent').value, '#ff0000', 'sincroniza el selector de color');
@@ -532,10 +563,12 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   setVal(d.getElementById('f-' + base + '-name'), 'Torta de choclo');
   setVal(d.getElementById('f-' + base + '-price'), '9500');
   eq($('[data-money="menu.categories.' + nCats + '.items.0.price"]').textContent, '$9.500', 'muestra el precio formateado');
+  eq($$('.tg').length, 12, 'doce etiquetas para los platos');
   click($('[data-a="item-tag"][data-tag="nuevo"]'));
+  click($('[data-a="item-tag"][data-tag="sinlactosa"]'));
   click($('[data-a="sheet-close"]'));
   const it = ST.S.cur.menu.categories[nCats].items[0];
-  ok(it.name === 'Torta de choclo' && it.price === 9500 && it.tags.includes('nuevo'), 'plato guardado con precio y etiqueta');
+  ok(it.name === 'Torta de choclo' && it.price === 9500 && it.tags.includes('nuevo') && it.tags.includes('sinlactosa'), 'plato guardado con precio y etiquetas');
   ok($$('.ir-n').some(n => n.textContent.includes('Torta de choclo')), 'el plato aparece en la lista');
 
   // Publicar: revisión y exportaciones

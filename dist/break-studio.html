@@ -457,7 +457,7 @@ function breakApp(win, doc, initialCfg, opts) {
       reviewMsg: 'Hola, {n}. Quiero contarles cómo me fue en mi visita:', guestEn: 'El cliente habla inglés.',
       dayNames: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
       everyday: 'Todos los días', and: 'y', to: 'a',
-      tags: { chef: 'Recomendado', nuevo: 'Nuevo', popular: 'Favorito', vegano: 'Vegano', vegetariano: 'Vegetariano', picante: 'Picante', singluten: 'Sin gluten', local: 'De la región' }
+      tags: { chef: 'Recomendado', nuevo: 'Nuevo', popular: 'Favorito', vegano: 'Vegano', vegetariano: 'Vegetariano', picante: 'Picante', singluten: 'Sin gluten', local: 'De la región', temporada: 'De temporada', compartir: 'Para compartir', ninos: 'Para niños', sinlactosa: 'Sin lactosa' }
     },
     en: {
       menu: 'Sections', close: 'Close', open: 'Open', closed: 'Closed',
@@ -499,7 +499,7 @@ function breakApp(win, doc, initialCfg, opts) {
       t_contacto: 'Contact', t_libre: 'Information',
       dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       everyday: 'Every day', and: 'and', to: 'to',
-      tags: { chef: 'Chef’s pick', nuevo: 'New', popular: 'Favorite', vegano: 'Vegan', vegetariano: 'Vegetarian', picante: 'Spicy', singluten: 'Gluten-free', local: 'Local' }
+      tags: { chef: 'Chef’s pick', nuevo: 'New', popular: 'Favorite', vegano: 'Vegan', vegetariano: 'Vegetarian', picante: 'Spicy', singluten: 'Gluten-free', local: 'Local', temporada: 'Seasonal', compartir: 'To share', ninos: 'Kids', sinlactosa: 'Dairy-free' }
     }
   };
   /* Trato de usted: solo cambian las frases que le hablan al cliente. */
@@ -515,7 +515,7 @@ function breakApp(win, doc, initialCfg, opts) {
     how1: 'Elija en la carta y toque +.', how2: 'Revise su pedido y díganos cómo lo desea.', how3: 'Lo envía por WhatsApp y el local le confirma.',
     copyManual: 'Mantenga presionado el texto para copiarlo.', reviewWa: 'Cuéntenos por WhatsApp'
   };
-  const TAG_ORDER = ['chef', 'popular', 'nuevo', 'local', 'vegano', 'vegetariano', 'singluten', 'picante'];
+  const TAG_ORDER = ['chef', 'popular', 'nuevo', 'temporada', 'local', 'compartir', 'ninos', 'vegano', 'vegetariano', 'singluten', 'sinlactosa', 'picante'];
   const NAVABLE = { carta: 1, destacados: 1, promos: 1, menudia: 1, reservas: 1, sellos: 1, resenas: 1, horario: 1, ubicacion: 1, historia: 1, glosario: 1, eventos: 1, wifi: 1, ruleta: 1, trivia: 1, contacto: 1, libre: 1, pedido: 1 };
 
   /* ---------- CSS ---------- */
@@ -997,6 +997,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="animado"] .tag{border:1.5px solid var(--ink);background:var(--surface);letter-spacing:.04em}
 [data-skin="animado"] .tag.t-picante{background:var(--accent);color:var(--on-accent)}
 [data-skin="animado"] .tag.t-nuevo{background:var(--accent3);color:var(--on-accent3)}
+[data-skin="animado"] .tag.t-temporada{background:var(--accent3);color:var(--on-accent3)}
 [data-skin="animado"] .tag.t-vegano,[data-skin="animado"] .tag.t-vegetariano{background:var(--accent2);color:var(--on-accent2)}
 [data-skin="animado"] .add{border:2.5px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
 [data-skin="animado"][data-motion="vivo"] .add:active{transform:scale(.85)}
@@ -2213,7 +2214,9 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function applyHead() {
     let st = doc.getElementById('bk-css');
     if (!st) { st = doc.createElement('style'); st.id = 'bk-css'; doc.head.appendChild(st); }
-    const css = CSS_BASE + (CSS_SKIN[skin] || '') + CSS_OPT + tokensCSS() + texCSS();
+    let css = CSS_BASE + (CSS_SKIN[skin] || '') + CSS_OPT + tokensCSS() + texCSS();
+    /* Letra grande: todos los tamaños de texto en px suben un 15 %, en cualquier estética. */
+    if (cfg.theme.textSize === 'grande') css = css.replace(/font-size:(\d+(?:\.\d+)?)px/g, function (m0, n) { return 'font-size:' + Math.round(n * 11.5) / 10 + 'px'; });
     if (st.textContent !== css) st.textContent = css;
     const href = fontsHref();
     let ln = doc.getElementById('bk-fonts');
@@ -2832,7 +2835,7 @@ const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', '
 /* Detalle de fondo de la app: [clave, nombre en el estudio]. */
 const TEXTURES = [['none', 'Ninguno'], ['grano', 'Grano'], ['papel', 'Papel'], ['puntos', 'Puntos'], ['rayas', 'Rayas'], ['cuadros', 'Mantel'], ['hojas', 'Hojas'], ['ondas', 'Ondas'], ['zocalo', 'Zócalo']];
 const COLOR_KEYS = [['bg', 'Fondo'], ['surface', 'Tarjetas'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3']];
-const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['local', 'De la región'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['picante', 'Picante']];
+const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['temporada', 'De temporada'], ['local', 'De la región'], ['compartir', 'Para compartir'], ['ninos', 'Para niños'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['sinlactosa', 'Sin lactosa'], ['picante', 'Picante']];
 const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pedido', 'Hacer un pedido'], ['sellos', 'Tarjeta de sellos'], ['ubicacion', 'Cómo llegar'], ['eventos', 'Ver la agenda'], ['whatsapp', 'Escribir por WhatsApp'], ['none', 'Ninguno']];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
 
@@ -3470,7 +3473,8 @@ const BRAND_FIELDS = [
           return '<div class="crow"><input type="color" id="' + id + '" value="' + attr(v.toLowerCase()) + '" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="h-' + ck[0] + '" aria-label="' + ck[1] + '"><label for="h-' + ck[0] + '">' + ck[1] + '</label>' +
             '<input class="in hex" id="h-' + ck[0] + '" value="' + attr(v) + '" maxlength="7" spellcheck="false" autocomplete="off" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="' + id + '"></div>';
         }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div></section>' +
-        '<section class="card"><div class="card-h"><h2>Tipografía</h2><p>Todas son de Google Fonts y cargan solas en la app.</p></div><div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div></section>' +
+        '<section class="card"><div class="card-h"><h2>Tipografía</h2><p>Todas son de Google Fonts y cargan solas en la app.</p></div><div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>' +
+        '<div class="fld"><span class="lab">Tamaño del texto</span>' + seg('textSize', 'tsize', [['normal', 'Normal'], ['grande', 'Grande']], 'normal') + '<p class="help">«Grande» sube un 15 % el texto de la carta, los botones y los formularios. Se lee mejor sin gafas.</p></div></section>' +
         '<section class="card"><div class="card-h"><h2>Forma y movimiento</h2></div>' +
         '<div class="fld"><label class="lab" for="f-radius">Esquinas · <output id="radius-out">' + (+th.radius || 0) + ' px</output></label><input type="range" id="f-radius" min="0" max="28" step="1" value="' + (+th.radius || 0) + '" data-p="theme.radius" data-type="num"></div>' +
         '<div class="fld"><span class="lab">Botones</span>' + seg('buttons', 'btns', [['auto', 'Según la estética'], ['redondo', 'Redondos'], ['cuadrado', 'Cuadrados'], ['contorno', 'De contorno']], 'auto') + '</div>' +
@@ -3807,6 +3811,7 @@ const BRAND_FIELDS = [
     motion: function (d) { S.cur.theme.motion = d.v; edited(); renderEditor(); },
     tex: function (d) { S.cur.theme.texture = d.v; edited(); renderEditor(); },
     btns: function (d) { S.cur.theme.buttons = d.v; edited(); renderEditor(); },
+    tsize: function (d) { S.cur.theme.textSize = d.v === 'grande' ? 'grande' : 'normal'; edited(); renderEditor(); },
     'mod-open': function (d) { S.openMod = S.openMod === d.mid ? null : d.mid; renderEditor(); if (S.openMod && DESKTOP.matches) pvFocus(d.mid); },
     'mod-mv': function (d) { const i = modIndex(d.mid); if (move(S.cur.modules, i, +d.d)) { edited(); renderEditor(); } },
     'mod-focus': function (d) { if (!DESKTOP.matches) setTab('vista'); setTimeout(function () { pvFocus(d.mid); }, 80); },

@@ -88,7 +88,7 @@ function breakApp(win, doc, initialCfg, opts) {
       reviewMsg: 'Hola, {n}. Quiero contarles cómo me fue en mi visita:', guestEn: 'El cliente habla inglés.',
       dayNames: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
       everyday: 'Todos los días', and: 'y', to: 'a',
-      tags: { chef: 'Recomendado', nuevo: 'Nuevo', popular: 'Favorito', vegano: 'Vegano', vegetariano: 'Vegetariano', picante: 'Picante', singluten: 'Sin gluten', local: 'De la región' }
+      tags: { chef: 'Recomendado', nuevo: 'Nuevo', popular: 'Favorito', vegano: 'Vegano', vegetariano: 'Vegetariano', picante: 'Picante', singluten: 'Sin gluten', local: 'De la región', temporada: 'De temporada', compartir: 'Para compartir', ninos: 'Para niños', sinlactosa: 'Sin lactosa' }
     },
     en: {
       menu: 'Sections', close: 'Close', open: 'Open', closed: 'Closed',
@@ -130,7 +130,7 @@ function breakApp(win, doc, initialCfg, opts) {
       t_contacto: 'Contact', t_libre: 'Information',
       dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       everyday: 'Every day', and: 'and', to: 'to',
-      tags: { chef: 'Chef’s pick', nuevo: 'New', popular: 'Favorite', vegano: 'Vegan', vegetariano: 'Vegetarian', picante: 'Spicy', singluten: 'Gluten-free', local: 'Local' }
+      tags: { chef: 'Chef’s pick', nuevo: 'New', popular: 'Favorite', vegano: 'Vegan', vegetariano: 'Vegetarian', picante: 'Spicy', singluten: 'Gluten-free', local: 'Local', temporada: 'Seasonal', compartir: 'To share', ninos: 'Kids', sinlactosa: 'Dairy-free' }
     }
   };
   /* Trato de usted: solo cambian las frases que le hablan al cliente. */
@@ -146,7 +146,7 @@ function breakApp(win, doc, initialCfg, opts) {
     how1: 'Elija en la carta y toque +.', how2: 'Revise su pedido y díganos cómo lo desea.', how3: 'Lo envía por WhatsApp y el local le confirma.',
     copyManual: 'Mantenga presionado el texto para copiarlo.', reviewWa: 'Cuéntenos por WhatsApp'
   };
-  const TAG_ORDER = ['chef', 'popular', 'nuevo', 'local', 'vegano', 'vegetariano', 'singluten', 'picante'];
+  const TAG_ORDER = ['chef', 'popular', 'nuevo', 'temporada', 'local', 'compartir', 'ninos', 'vegano', 'vegetariano', 'singluten', 'sinlactosa', 'picante'];
   const NAVABLE = { carta: 1, destacados: 1, promos: 1, menudia: 1, reservas: 1, sellos: 1, resenas: 1, horario: 1, ubicacion: 1, historia: 1, glosario: 1, eventos: 1, wifi: 1, ruleta: 1, trivia: 1, contacto: 1, libre: 1, pedido: 1 };
 
   /* ---------- CSS ---------- */
@@ -628,6 +628,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="animado"] .tag{border:1.5px solid var(--ink);background:var(--surface);letter-spacing:.04em}
 [data-skin="animado"] .tag.t-picante{background:var(--accent);color:var(--on-accent)}
 [data-skin="animado"] .tag.t-nuevo{background:var(--accent3);color:var(--on-accent3)}
+[data-skin="animado"] .tag.t-temporada{background:var(--accent3);color:var(--on-accent3)}
 [data-skin="animado"] .tag.t-vegano,[data-skin="animado"] .tag.t-vegetariano{background:var(--accent2);color:var(--on-accent2)}
 [data-skin="animado"] .add{border:2.5px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
 [data-skin="animado"][data-motion="vivo"] .add:active{transform:scale(.85)}
@@ -1844,7 +1845,9 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function applyHead() {
     let st = doc.getElementById('bk-css');
     if (!st) { st = doc.createElement('style'); st.id = 'bk-css'; doc.head.appendChild(st); }
-    const css = CSS_BASE + (CSS_SKIN[skin] || '') + CSS_OPT + tokensCSS() + texCSS();
+    let css = CSS_BASE + (CSS_SKIN[skin] || '') + CSS_OPT + tokensCSS() + texCSS();
+    /* Letra grande: todos los tamaños de texto en px suben un 15 %, en cualquier estética. */
+    if (cfg.theme.textSize === 'grande') css = css.replace(/font-size:(\d+(?:\.\d+)?)px/g, function (m0, n) { return 'font-size:' + Math.round(n * 11.5) / 10 + 'px'; });
     if (st.textContent !== css) st.textContent = css;
     const href = fontsHref();
     let ln = doc.getElementById('bk-fonts');
