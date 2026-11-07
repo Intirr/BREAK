@@ -85,8 +85,8 @@ const F = {
 
 const MODULES = {
   hero: {
-    label: 'Portada', code: 'PO', group: 'Esenciales', single: true, desc: 'Nombre, frase, estado abierto o cerrado y los botones principales.',
-    defaults: { kicker: '', title: '', subtitle: '', cta1: 'carta', cta2: 'none', showStatus: true, ribbon: '' },
+    label: 'Portada', code: 'PO', group: 'Esenciales', single: true, desc: 'Nombre, frase, foto, estado abierto o cerrado y los botones principales.',
+    defaults: { kicker: '', title: '', subtitle: '', cta1: 'carta', cta2: 'none', showStatus: true, ribbon: '', img: '', veil: '60', align: 'auto', size: 'm' },
     fields: [
       F.text('kicker', 'Antetítulo', 'Santa Rosa de Cabal · desde 2019'),
       F.text('title', 'Título', 'Vacío = nombre del local'),
@@ -95,7 +95,12 @@ const MODULES = {
       { k: 'cta2', t: 'sel', label: 'Botón secundario', opts: CTA_OPTS },
       { k: 'showStatus', t: 'bool', label: 'Mostrar si está abierto ahora', def: true },
       F.text('ribbon', 'Cinta de palabras', 'Separadas por comas'),
-      { t: 'hint', text: 'En la estética animada la cinta se mueve como marquesina.' }
+      { t: 'hint', text: 'En las estéticas animada y nocturna la cinta se mueve como marquesina.' },
+      { t: 'sep', label: 'Foto y diseño' },
+      { k: 'img', t: 'img', label: 'Foto de portada (opcional)', max: 1100, help: 'Mejor horizontal. En la vista previa de claude.ai solo se ven las fotos subidas; los enlaces https se ven en la app publicada.' },
+      { k: 'veil', t: 'sel', label: 'Velo sobre la foto', def: '60', opts: [['40', 'Suave'], ['60', 'Medio'], ['80', 'Fuerte']] },
+      { k: 'align', t: 'sel', label: 'Alineación del texto', def: 'auto', opts: [['auto', 'La de la estética'], ['izq', 'A la izquierda'], ['centro', 'Centrada']] },
+      { k: 'size', t: 'sel', label: 'Tamaño del título', def: 'm', opts: [['s', 'Pequeño'], ['m', 'Normal'], ['l', 'Grande']] }
     ]
   },
   carta: {

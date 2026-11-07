@@ -326,7 +326,16 @@
           (f.min != null ? ' min="' + f.min + '"' : '') + (f.max != null ? ' max="' + f.max + '"' : '') + ' step="' + (f.step || 1) + '">' +
           (f.money ? '<output class="money" data-money="' + attr(path) + '">' + esc(money(val)) + '</output>' : '') + '</div>';
         break;
+      case 'img': {
+        /* Enlace https o foto subida (se guarda comprimida dentro de la app). */
+        const v = String(val || ''), isData = /^data:image\//.test(v);
+        ctl = (isData ? '<div class="img-row"><img src="' + attr(v) + '" alt="Foto actual" width="96" height="64"><span class="help">Foto subida · ' + Math.round(v.length * 0.75 / 1024) + ' KB</span><button type="button" class="btn sm" data-a="img-clear" data-ip="' + attr(path) + '">Quitar</button></div>'
+          : inputCtl({ t: 'text', ph: 'https://…' }, path, v, id)) +
+          '<label class="btn sm filebtn img-up">' + (isData ? 'Cambiar foto' : 'Subir foto') + '<input type="file" accept="image/*" data-a="img-file" data-ip="' + attr(path) + '" data-max="' + (+f.max || 1100) + '" hidden></label>';
+        break;
+      }
       case 'sel':
+        if (val == null && f.def != null) val = f.def;
         ctl = '<select class="in" id="' + id + '" data-p="' + attr(path) + '"' + (f.rerender ? ' data-rr="1"' : '') + '>' + f.opts.map(function (o) {
           return '<option value="' + attr(o[0]) + '"' + (String(val) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
         }).join('') + '</select>';
@@ -501,7 +510,7 @@
     const tagName = function (t) { return (TAGS.filter(function (x) { return x[0] === t; })[0] || [0, t])[1]; };
     const dshort = function (days) { const v = (days || []).map(Number); return DAYS.filter(function (d) { return v.indexOf(d[0]) >= 0; }).map(function (d) { return d[1]; }).join(' ') || 'sin días'; };
     switch (m.type) {
-      case 'hero': return [s.cta1, s.cta2].filter(function (x) { return x && x !== 'none'; }).map(function (x) { return (CTA_OPTS.filter(function (o) { return o[0] === x; })[0] || [0, x])[1]; }).join(' · ') || 'Sin botones';
+      case 'hero': return ([s.cta1, s.cta2].filter(function (x) { return x && x !== 'none'; }).map(function (x) { return (CTA_OPTS.filter(function (o) { return o[0] === x; })[0] || [0, x])[1]; }).join(' · ') || 'Sin botones') + (s.img ? ' · con foto' : '');
       case 'carta': { const n = c.menu.categories.reduce(function (a, k) { return a + k.items.length; }, 0); return c.menu.categories.length + ' categorías · ' + n + ' platos · ' + ({ lista: 'lista', tarjetas: 'tarjetas', cuadricula: 'cuadrícula' }[s.layout] || 'lista'); }
       case 'destacados': return 'Etiqueta «' + tagName(s.tag) + '» · hasta ' + (s.max || 4);
       case 'promos': return (s.items || []).length + ' promos por día';
@@ -580,6 +589,8 @@
     if (wf && !wf.s.password) out.push({ s: 'warn', t: 'Falta la clave del Wi-Fi', go: 'modulos' });
     const ru = mod('ruleta');
     if (ru && ru.s.mode === 'premios' && (ru.s.options || []).filter(function (o) { return o && o.label; }).length < 2) out.push({ s: 'warn', t: 'La ruleta necesita al menos dos premios', go: 'modulos' });
+    const kb = Math.round(JSON.stringify(c).length / 1024);
+    if (kb > 200) out.push({ s: 'warn', t: 'La app pesa ' + kb + ' KB', d: 'Para guardarla en tu cuenta debe pesar menos de 234 KB. Usa enlaces https para las fotos o sube menos.', go: 'modulos' });
     return out;
   }
 
@@ -817,6 +828,7 @@
     },
     'hours-copy': function () { copyMonday(); },
     'logo-clear': function () { S.cur.brand.logo = { type: 'mono', value: '' }; edited(); renderEditor(); },
+    'img-clear': function (d) { if (d.ip) { setPath(S.cur, d.ip, ''); edited(); renderEditor(); } },
     'exp-html': function () { exportHTML(); },
     'exp-zip': function () { exportZip(); },
     'exp-json': function () { exportJSON(); },
@@ -886,26 +898,48 @@
     if (!f) return;
     if (a === 'imp-json') importJSON(f);
     if (a === 'logo-file') onLogoFile(f);
+    if (a === 'img-file') onPhotoFile(f, t.getAttribute('data-ip'), +t.getAttribute('data-max') || 1100);
   }
-  function onLogoFile(file) {
+  function readImage(file, done) {
     if (!/^image\//.test(file.type)) { toast('Elige una imagen (PNG, JPG o WebP).'); return; }
     const rd = new FileReader();
     rd.onload = function () {
       const im = new Image();
-      im.onload = function () {
-        const N = 256, cv = document.createElement('canvas'); cv.width = cv.height = N;
-        const x = cv.getContext('2d'), r = Math.max(N / im.width, N / im.height), w = im.width * r, h = im.height * r;
-        x.drawImage(im, (N - w) / 2, (N - h) / 2, w, h);
-        let url = cv.toDataURL('image/webp', 0.86);
-        if (!/^data:image\/webp/.test(url)) url = cv.toDataURL('image/png');
-        if (url.length > 160000) url = cv.toDataURL('image/jpeg', 0.82);
-        S.cur.brand.logo = { type: 'img', value: url };
-        edited(); renderEditor(); renderHeader(); toast('Logo cargado.');
-      };
+      im.onload = function () { done(im); };
       im.onerror = function () { toast('No se pudo leer esa imagen.'); };
       im.src = rd.result;
     };
     rd.readAsDataURL(file);
+  }
+  function onLogoFile(file) {
+    readImage(file, function (im) {
+      const N = 256, cv = document.createElement('canvas'); cv.width = cv.height = N;
+      const x = cv.getContext('2d'), r = Math.max(N / im.width, N / im.height), w = im.width * r, h = im.height * r;
+      x.drawImage(im, (N - w) / 2, (N - h) / 2, w, h);
+      let url = cv.toDataURL('image/webp', 0.86);
+      if (!/^data:image\/webp/.test(url)) url = cv.toDataURL('image/png');
+      if (url.length > 160000) url = cv.toDataURL('image/jpeg', 0.82);
+      S.cur.brand.logo = { type: 'img', value: url };
+      edited(); renderEditor(); renderHeader(); toast('Logo cargado.');
+    });
+  }
+  /* Fotos de portada y galería: se reducen y comprimen hasta unos 100 KB para que la app se pueda guardar. */
+  function onPhotoFile(file, path, max) {
+    if (!path) return;
+    readImage(file, function (im) {
+      const enc = function (side, q) {
+        const r = Math.min(1, side / Math.max(im.width, im.height)), w = Math.max(1, Math.round(im.width * r)), h = Math.max(1, Math.round(im.height * r));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(im, 0, 0, w, h);
+        const url = cv.toDataURL('image/webp', q);
+        return /^data:image\/webp/.test(url) ? url : cv.toDataURL('image/jpeg', q);
+      };
+      let url = enc(max, 0.72);
+      if (url.length > 140000) url = enc(Math.round(max * 0.8), 0.6);
+      if (url.length > 140000) url = enc(Math.round(max * 0.6), 0.55);
+      setPath(S.cur, path, url);
+      edited(); renderEditor(); toast('Foto cargada · ' + Math.round(url.length * 0.75 / 1024) + ' KB.');
+    });
   }
   function importJSON(file) {
     const rd = new FileReader();

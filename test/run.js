@@ -316,6 +316,34 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     F2.close();
   }
 
+  /* 11d. Foto de portada */
+  const PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+  {
+    const cfg = TPL('tpl-zocalo');
+    Object.assign(cfg.modules[0].s, { img: PX, veil: '80', align: 'izq', size: 'l' });
+    const A = mount(cfg, { now: '2026-11-06T15:30:00Z' });
+    const box = A.$('.m-hero .hero-box');
+    ok(box && box.classList.contains('has-img') && box.classList.contains('al-izq') && box.classList.contains('hs-l'), 'portada con foto, alineada a la izquierda y con título grande');
+    eq(A.$('.hero-ph img') && A.$('.hero-ph img').getAttribute('src'), PX, 'la foto subida se muestra');
+    ok(/--veil:80%/.test(A.$('.hero-ph i').getAttribute('style')), 'velo fuerte sobre la foto');
+    ok(!A.$('.facade'), 'con foto, la cultural no repite la fachada dibujada');
+    ok(!A.$('.ph-note'), 'en la app publicada no hay avisos de vista previa');
+    A.close();
+    const bad = TPL('tpl-zocalo'); bad.modules[0].s.img = 'javascript:alert(1)';
+    const B = mount(bad, { now: '2026-11-06T15:30:00Z' });
+    ok(!B.$('.hero-ph') && !!B.$('.facade'), 'no acepta fotos javascript: y deja la portada normal');
+    B.close();
+    const link = TPL('tpl-araucaria'); link.modules[0].s.img = 'https://example.com/portada.jpg';
+    const P = mount(link, { mode: 'preview', now: '2026-11-06T15:30:00Z' });
+    ok(!!P.$('.ph-note'), 'en la vista previa explica que los enlaces https se ven en la app publicada');
+    P.$('.hero-ph img').dispatchEvent(new P.w.Event('error'));
+    ok(P.$('.hero-box').classList.contains('ph-fail'), 'si la foto no carga, la portada vuelve a su forma normal');
+    P.close();
+    const D = mount(TPL('tpl-araucaria'), { now: '2026-11-06T15:30:00Z' });
+    eq(D.$('.hero-box') && D.$('.hero-box').className, 'hero-box', 'sin foto ni ajustes, la portada queda como antes');
+    D.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -413,6 +441,22 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="mod-del"][data-mid="' + triviaId + '"]'));
   click($('[data-a="confirm-yes"]'));
   eq(ST.S.cur.modules.length, nMods, 'quitar con confirmación');
+  click($('[data-a="mod-open"][data-mid="hero"]'));
+  const heroImg = d.getElementById('f-modules-0-s-img');
+  ok(!!heroImg, 'campo de foto en la portada');
+  setVal(heroImg, 'https://example.com/portada.jpg');
+  eq(ST.S.cur.modules[0].s.img, 'https://example.com/portada.jpg', 'pegar el enlace de la foto de portada');
+  eq(d.getElementById('f-modules-0-s-veil').value, '60', 'el velo arranca en «Medio»');
+  eq(d.getElementById('f-modules-0-s-align').value, 'auto', 'la alineación arranca en la de la estética');
+  ST.S.cur.modules[0].s.img = PX;
+  click($('[data-a="mod-open"][data-mid="hero"]')); click($('[data-a="mod-open"][data-mid="hero"]'));
+  ok(!!$('.img-row img') && /Foto subida/.test($('.img-row').textContent), 'muestra la foto subida con su peso');
+  ok(/con foto/.test($('.mod[data-mid="hero"] .mod-n small').textContent), 'el resumen de la portada dice que tiene foto');
+  click($('[data-a="img-clear"]'));
+  eq(ST.S.cur.modules[0].s.img, '', 'quitar la foto');
+  const heavy = JSON.parse(JSON.stringify(ST.S.cur)); heavy.modules[0].s.img = 'data:image/webp;base64,' + 'A'.repeat(230000);
+  ok(ST.checks(heavy).some(c => c.s === 'warn' && /pesa/.test(c.t)), 'la revisión avisa si la app pesa demasiado para guardarla');
+  ok(!ST.checks(ST.S.cur).some(c => /pesa/.test(c.t)), 'sin fotos pesadas no hay aviso de peso');
 
   // Estilo: cambiar de estética y de paleta
   click($('[data-a="tab"][data-t="estilo"]'));

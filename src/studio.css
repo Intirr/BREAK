@@ -251,6 +251,9 @@ input[type="range"]{width:100%;accent-color:var(--carbon)}
 .hr .in{min-height:40px;padding:6px 8px;font-variant-numeric:tabular-nums}
 .logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .logo-row img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid var(--rule)}
+.img-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.img-row img{width:96px;height:64px;border-radius:9px;object-fit:cover;border:1px solid var(--rule)}
+.img-up{justify-self:start}
 
 /* Publicar */
 .checks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
