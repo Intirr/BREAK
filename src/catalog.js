@@ -108,7 +108,8 @@ const MODULES = {
     defaults: { title: '', intro: '', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: '' },
     fields: [
       F.title('La carta'), F.area('intro', 'Introducción', '', 2),
-      { k: 'layout', t: 'sel', label: 'Diseño de la carta', opts: [['lista', 'Lista con puntos guía'], ['tarjetas', 'Tarjetas con foto o emoji'], ['cuadricula', 'Cuadrícula de dos columnas']] },
+      { k: 'layout', t: 'sel', label: 'Diseño de la carta', opts: [['lista', 'Lista con puntos guía'], ['tarjetas', 'Tarjetas con foto o emoji'], ['cuadricula', 'Cuadrícula de dos columnas'], ['fotos', 'Fotos grandes'], ['compacta', 'Compacta: nombre y precio']] },
+      { t: 'hint', text: '«Compacta» sirve para cartas largas, como bebidas o panadería: la descripción se ve al tocar el plato.' },
       { k: 'priceStyle', t: 'sel', label: 'Formato de precio', opts: [['full', '$48.000'], ['short', '48 (en miles)']] },
       { k: 'showFilters', t: 'bool', label: 'Filtros por etiqueta', def: true },
       { k: 'showSearch', t: 'bool', label: 'Buscador' },

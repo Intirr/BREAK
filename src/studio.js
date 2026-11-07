@@ -416,8 +416,9 @@
           return '<option' + (f === cur ? ' selected' : '') + '>' + esc(f) + '</option>';
         }).join('') + '</select></div>';
       };
-      const seg = function (key, act, opts) {
-        return '<div class="seg" role="group">' + opts.map(function (o) { return '<button type="button" class="' + (th[key] === o[0] ? 'on' : '') + '" data-a="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (th[key] === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>';
+      const seg = function (key, act, opts, def) {
+        const cur = th[key] || def;
+        return '<div class="seg" role="group">' + opts.map(function (o) { return '<button type="button" class="' + (cur === o[0] ? 'on' : '') + '" data-a="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>';
       };
       return tplBanner() +
         '<section class="card"><div class="card-h"><h2>Estética</h2><p>Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.</p></div>' +
@@ -435,6 +436,7 @@
         '<section class="card"><div class="card-h"><h2>Tipografía</h2><p>Todas son de Google Fonts y cargan solas en la app.</p></div><div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div></section>' +
         '<section class="card"><div class="card-h"><h2>Forma y movimiento</h2></div>' +
         '<div class="fld"><label class="lab" for="f-radius">Esquinas · <output id="radius-out">' + (+th.radius || 0) + ' px</output></label><input type="range" id="f-radius" min="0" max="28" step="1" value="' + (+th.radius || 0) + '" data-p="theme.radius" data-type="num"></div>' +
+        '<div class="fld"><span class="lab">Botones</span>' + seg('buttons', 'btns', [['auto', 'Según la estética'], ['redondo', 'Redondos'], ['cuadrado', 'Cuadrados'], ['contorno', 'De contorno']], 'auto') + '</div>' +
         '<div class="fld"><span class="lab">Movimiento</span>' + seg('motion', 'motion', [['off', 'Quieto'], ['suave', 'Suave'], ['vivo', 'Vivo']]) + '<p class="help">«Vivo» agrega rebotes, stickers flotantes y confeti al completar sellos o acertar en la trivia.</p></div>' +
         '<div class="fld"><span class="lab">Detalle de fondo</span><div class="texs" role="group" aria-label="Detalle de fondo" style="' + attr(texVars()) + '">' + TEXTURES.map(function (t) {
           const on = (th.texture || 'none') === t[0];
@@ -452,7 +454,7 @@
       return tplBanner() + '<section class="card"><div class="card-h row"><div><h2>Carta</h2><p>' + cats.length + ' categorías · ' + n + ' platos' + (noPrice ? ' · <span class="warntxt">' + noPrice + ' sin precio</span>' : '') + '</p></div>' +
         '<button class="btn pri" data-a="cat-add">Nueva categoría</button></div>' +
         (cats.length ? '<div class="cats">' + cats.map(catHTML).join('') + '</div>' : '<p class="empty">La carta está vacía. Crea la primera categoría para empezar a agregar platos.</p>') +
-        '<p class="help">Toca un plato para editar nombre, precio, foto y etiquetas. El diseño de la carta (lista, tarjetas o cuadrícula) se cambia en Módulos › Carta.</p></section>';
+        '<p class="help">Toca un plato para editar nombre, precio, foto y etiquetas. El diseño de la carta (lista, tarjetas, cuadrícula, fotos grandes o compacta) se cambia en Módulos › Carta.</p></section>';
     },
     datos: function () {
       ensureHours();
@@ -511,7 +513,7 @@
     const dshort = function (days) { const v = (days || []).map(Number); return DAYS.filter(function (d) { return v.indexOf(d[0]) >= 0; }).map(function (d) { return d[1]; }).join(' ') || 'sin días'; };
     switch (m.type) {
       case 'hero': return ([s.cta1, s.cta2].filter(function (x) { return x && x !== 'none'; }).map(function (x) { return (CTA_OPTS.filter(function (o) { return o[0] === x; })[0] || [0, x])[1]; }).join(' · ') || 'Sin botones') + (s.img ? ' · con foto' : '');
-      case 'carta': { const n = c.menu.categories.reduce(function (a, k) { return a + k.items.length; }, 0); return c.menu.categories.length + ' categorías · ' + n + ' platos · ' + ({ lista: 'lista', tarjetas: 'tarjetas', cuadricula: 'cuadrícula' }[s.layout] || 'lista'); }
+      case 'carta': { const n = c.menu.categories.reduce(function (a, k) { return a + k.items.length; }, 0); return c.menu.categories.length + ' categorías · ' + n + ' platos · ' + ({ lista: 'lista', tarjetas: 'tarjetas', cuadricula: 'cuadrícula', fotos: 'fotos grandes', compacta: 'compacta' }[s.layout] || 'lista'); }
       case 'destacados': return 'Etiqueta «' + tagName(s.tag) + '» · hasta ' + (s.max || 4);
       case 'promos': return (s.items || []).length + ' promos por día';
       case 'menudia': return (s.price ? money(s.price) + ' · ' : '') + dshort(s.days);
@@ -767,6 +769,7 @@
     pal: function (d) { applyPalette(+d.i); },
     motion: function (d) { S.cur.theme.motion = d.v; edited(); renderEditor(); },
     tex: function (d) { S.cur.theme.texture = d.v; edited(); renderEditor(); },
+    btns: function (d) { S.cur.theme.buttons = d.v; edited(); renderEditor(); },
     'mod-open': function (d) { S.openMod = S.openMod === d.mid ? null : d.mid; renderEditor(); if (S.openMod && DESKTOP.matches) pvFocus(d.mid); },
     'mod-mv': function (d) { const i = modIndex(d.mid); if (move(S.cur.modules, i, +d.d)) { edited(); renderEditor(); } },
     'mod-focus': function (d) { if (!DESKTOP.matches) setTab('vista'); setTimeout(function () { pvFocus(d.mid); }, 80); },

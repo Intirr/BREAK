@@ -344,6 +344,35 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     D.close();
   }
 
+  /* 11e. Diseños de carta y estilo de botones */
+  {
+    const cfg = TPL('tpl-antojo'), ca = cfg.modules.find(m => m.type === 'carta');
+    ca.s.layout = 'fotos'; cfg.menu.categories[0].items[1].on = false;
+    const A = mount(cfg, { now: '2026-11-06T15:30:00Z' });
+    eq(A.$$('.lay-fotos .it').length, itemsIn(cfg), 'fotos grandes: todos los platos');
+    ok(A.$$('.lay-fotos .it .media').length === itemsIn(cfg) && !!A.$('.lay-fotos .it .it-d'), 'fotos grandes: foto o emoji y descripción');
+    ok(!!A.$('.lay-fotos .it .add'), 'fotos grandes: se puede pedir');
+    A.close();
+    ca.s.layout = 'compacta';
+    const B = mount(cfg, { now: '2026-11-06T15:30:00Z' });
+    eq(B.$$('.lay-compacta .it').length, itemsIn(cfg), 'compacta: todos los platos');
+    ok(!B.$('.lay-compacta .it-d') && !B.$('.lay-compacta .media') && !B.$('.lay-compacta .tag:not(.sold)'), 'compacta: sin descripción, foto ni etiquetas');
+    ok(!!B.$('.lay-compacta .it.off .tag.sold'), 'compacta: marca lo agotado');
+    ok(!!B.$('.lay-compacta .it-l .add'), 'compacta: el botón + va en la misma línea');
+    B.click(B.$('.lay-compacta .it[data-id="malt-arequipe"]'));
+    ok(!!B.$('.isheet') && /galleta triturada/.test(B.$('.isheet').textContent), 'compacta: la descripción aparece al tocar el plato');
+    B.close();
+    for (const bt of ['redondo', 'cuadrado', 'contorno']) {
+      const c = TPL('tpl-araucaria'); c.theme.buttons = bt;
+      const C = mount(c, { now: '2026-11-06T15:30:00Z' });
+      ok(C.$('.app').getAttribute('data-btn') === bt && C.d.getElementById('bk-css').textContent.includes('.app[data-btn="' + bt + '"]'), 'botones «' + bt + '»');
+      C.close();
+    }
+    const D = mount(TPL('tpl-araucaria'), { now: '2026-11-06T15:30:00Z' });
+    ok(!D.$('.app').hasAttribute('data-btn'), 'sin elegir, los botones son los de la estética');
+    D.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -441,6 +470,9 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="mod-del"][data-mid="' + triviaId + '"]'));
   click($('[data-a="confirm-yes"]'));
   eq(ST.S.cur.modules.length, nMods, 'quitar con confirmación');
+  const cartaIdx = ST.S.cur.modules.findIndex(m => m.type === 'carta');
+  click($('[data-a="mod-open"][data-mid="carta"]'));
+  eq(d.getElementById('f-modules-' + cartaIdx + '-s-layout').options.length, 5, 'cinco diseños de carta para elegir');
   click($('[data-a="mod-open"][data-mid="hero"]'));
   const heroImg = d.getElementById('f-modules-0-s-img');
   ok(!!heroImg, 'campo de foto en la portada');
@@ -478,6 +510,11 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok($('[data-a="tex"][data-v="cuadros"]').getAttribute('aria-pressed') === 'true', 'la muestra elegida queda marcada');
   await sleep(220);
   eq(ST.pv.frame.contentDocument.documentElement.getAttribute('data-tex'), 'cuadros', 'la vista previa muestra la textura');
+  ok($('[data-a="btns"][data-v="auto"]').classList.contains('on'), 'los botones arrancan según la estética');
+  click($('[data-a="btns"][data-v="contorno"]'));
+  eq(ST.S.cur.theme.buttons, 'contorno', 'elige botones de contorno');
+  await sleep(220);
+  eq(ST.pv.frame.contentDocument.querySelector('.app').getAttribute('data-btn'), 'contorno', 'la vista previa usa los botones de contorno');
   setVal(d.getElementById('h-accent'), '#ff0000');
   eq(ST.S.cur.theme.colors.accent, '#FF0000', 'color escrito a mano');
   eq(d.getElementById('c-accent').value, '#ff0000', 'sincroniza el selector de color');

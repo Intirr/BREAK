@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas). Las fuentes `@fontsource/*` son opcionales: sirven para capturas locales sin acceso a Google Fonts.
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (211 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (227 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las tres apps de ejemplo exportadas.
 - `python3 test/shots.py` — capturas en Chrome con Playwright (requiere Chrome y las fuentes opcionales).
 - `python3 test/overflow.py` — busca desbordes horizontales del estudio a 390 px.
