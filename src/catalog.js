@@ -1,7 +1,7 @@
 /* Break · catálogo del estudio: estéticas, módulos y campos de edición. */
 const SKINS = {
   elegante: {
-    label: 'Elegante', desc: 'Serif de alto contraste, filetes finos y mucho aire. Para cocina de autor y cenas.', layout: 'lista',
+    label: 'Elegante', art: 'Cena', desc: 'Serif de alto contraste, filetes finos y mucho aire. Para cocina de autor y cenas.', layout: 'lista',
     defaults: { colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' }, fonts: { display: 'Bodoni Moda', body: 'Jost' }, radius: 2, motion: 'suave', texture: 'grano' },
     palettes: [
       { name: 'Noche de pino', colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' } },
@@ -10,7 +10,7 @@ const SKINS = {
     ]
   },
   animado: {
-    label: 'Animado', desc: 'Colores vivos, bordes gruesos y movimiento. Para cafés, brunch y comida rápida.', layout: 'cuadricula',
+    label: 'Animado', art: '¡Antojo!', desc: 'Colores vivos, bordes gruesos y movimiento. Para cafés, brunch y comida rápida.', layout: 'cuadricula',
     defaults: { colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' }, fonts: { display: 'Lilita One', body: 'Nunito' }, radius: 18, motion: 'vivo', texture: 'puntos' },
     palettes: [
       { name: 'Mango', colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' } },
@@ -19,18 +19,45 @@ const SKINS = {
     ]
   },
   cultural: {
-    label: 'Cultural', desc: 'Fachada de bahareque, zócalos pintados y letrero de fonda. Para cocina típica y turismo.', layout: 'tarjetas',
+    label: 'Cultural', art: 'Fonda', desc: 'Fachada de bahareque, zócalos pintados y letrero de fonda. Para cocina típica y turismo.', layout: 'tarjetas',
     defaults: { colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' }, fonts: { display: 'Alfa Slab One', body: 'Alegreya Sans' }, radius: 6, motion: 'suave', texture: 'none' },
     palettes: [
       { name: 'Zócalo', colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' } },
       { name: 'Cafetal', colors: { bg: '#F3F6F0', surface: '#FFFFFF', ink: '#1F2A22', muted: '#5C6B60', accent: '#B5462E', accent2: '#2F5E3A', accent3: '#C98A1B' } },
       { name: 'Fonda de noche', colors: { bg: '#2A1E17', surface: '#382920', ink: '#F6EEDF', muted: '#C9B8A3', accent: '#E8573B', accent2: '#3F8F6B', accent3: '#F1B635' } }
     ]
+  },
+  natural: {
+    label: 'Natural', art: 'Cosecha', desc: 'Papel kraft, hojas de café y lomas sembradas; esquinas suaves y una serif cálida. Para cafés, panaderías y restaurantes campestres.', layout: 'tarjetas',
+    defaults: { colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' }, fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'none' },
+    palettes: [
+      { name: 'Kraft', colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' } },
+      { name: 'Huerta', colors: { bg: '#E6EBDD', surface: '#FAFBF5', ink: '#1D2618', muted: '#56624C', accent: '#9E3426', accent2: '#3F6A35', accent3: '#D6A23A' } },
+      { name: 'Tostión', colors: { bg: '#2A1F18', surface: '#372920', ink: '#F2E6D6', muted: '#C3AE95', accent: '#D9A35F', accent2: '#9DBB7A', accent3: '#D0644A' } }
+    ]
+  },
+  nocturna: {
+    label: 'Nocturna', art: 'Neón', desc: 'Fondo de noche, letrero de neón que dice si está abierto y brillos de color. Para bares, gastrobares y comida rápida hasta tarde.', layout: 'tarjetas',
+    defaults: { colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' }, fonts: { display: 'Tilt Neon', body: 'Barlow' }, radius: 12, motion: 'vivo', texture: 'none' },
+    palettes: [
+      { name: 'Neón', colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' } },
+      { name: 'Ámbar', colors: { bg: '#120E0A', surface: '#1F1912', ink: '#FFF4E2', muted: '#C4AE8F', accent: '#FFB238', accent2: '#FF6A3D', accent3: '#7EE0D2' } },
+      { name: 'Eléctrica', colors: { bg: '#060A18', surface: '#101833', ink: '#EEF3FF', muted: '#9CA8CC', accent: '#4D8DFF', accent2: '#B6FF3B', accent3: '#FF5EDB' } }
+    ]
+  },
+  minimalista: {
+    label: 'Minimalista', art: 'Menú', desc: 'Líneas finas, letra grotesca grande y un solo color de acento. Para cafés de especialidad y cocinas modernas.', layout: 'lista',
+    defaults: { colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' }, fonts: { display: 'Schibsted Grotesk', body: 'Instrument Sans' }, radius: 2, motion: 'suave', texture: 'none' },
+    palettes: [
+      { name: 'Blanco', colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' } },
+      { name: 'Hueso', colors: { bg: '#F2EEE6', surface: '#FFFFFF', ink: '#1A1917', muted: '#6A665D', accent: '#B23A1E', accent2: '#1A1917', accent3: '#CFC8BA' } },
+      { name: 'Carbón', colors: { bg: '#121212', surface: '#1C1C1B', ink: '#F1F0EC', muted: '#A3A29B', accent: '#E8C547', accent2: '#F1F0EC', accent3: '#3A3A38' } }
+    ]
   }
 };
 
-const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'Fraunces', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Bricolage Grotesque', 'Alfa Slab One'];
-const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Lora'];
+const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'Fraunces', 'Young Serif', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Tilt Neon', 'Bricolage Grotesque', 'Schibsted Grotesk', 'Alfa Slab One'];
+const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Barlow', 'Instrument Sans', 'Lora'];
 const COLOR_KEYS = [['bg', 'Fondo'], ['surface', 'Tarjetas'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3']];
 const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['local', 'De la región'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['picante', 'Picante']];
 const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pedido', 'Hacer un pedido'], ['sellos', 'Tarjeta de sellos'], ['ubicacion', 'Cómo llegar'], ['eventos', 'Ver la agenda'], ['whatsapp', 'Escribir por WhatsApp'], ['none', 'Ninguno']];

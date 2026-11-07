@@ -14,7 +14,7 @@ function quietConsole() { const vc = new VirtualConsole(); vc.on('jsdomError', e
 
 const SRC = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
 const ctx = {}; vm.createContext(ctx);
-vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;', ctx);
+vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;', ctx);
 const TPL = id => JSON.parse(JSON.stringify(ctx.TEMPLATES.find(t => t.id === id)));
 
 /* Monta una app con el motor serializado (prueba que es autocontenido). */
@@ -256,6 +256,39 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     B.close();
   }
 
+  /* 11b. Estéticas natural, nocturna y minimalista */
+  {
+    for (const k of ['natural', 'nocturna', 'minimalista']) {
+      const cfg = TPL('tpl-antojo');
+      Object.assign(cfg.theme, JSON.parse(JSON.stringify(ctx.SKINS[k].defaults)), { skin: k });
+      const A = mount(cfg, { now: '2026-11-06T15:30:00Z' }); // viernes 10:30 a. m., abierto
+      eq(A.$('.app').getAttribute('data-skin'), k, k + ': estética aplicada');
+      eq(A.$$('section[data-mid]').length, cfg.modules.length, k + ': todas las secciones');
+      ok(A.d.getElementById('bk-css').textContent.includes('[data-skin="' + k + '"]'), k + ': trae su CSS');
+      ok(A.d.getElementById('bk-fonts').href.includes(ctx.SKINS[k].defaults.fonts.display.replace(/ /g, '+')), k + ': carga su tipografía de títulos');
+      eq(A.errors.length, 0, k + ': sin errores de script');
+      if (k === 'natural') ok(!!A.$('.m-hero svg.hills'), 'natural: lomas con surcos de café en la portada');
+      if (k === 'nocturna') {
+        eq(A.$('.neon.on') && A.$('.neon.on').textContent, 'Abierto', 'nocturna: letrero de neón encendido cuando está abierto');
+        eq(A.$$('.ribbon-track span').length, 10, 'nocturna: la cinta se duplica para la marquesina');
+      }
+      if (k === 'minimalista') ok(!!A.$('.hero-t .dot') && A.$('.hero-t').textContent === 'Antojo.', 'minimalista: punto de acento al final del título');
+      A.close();
+    }
+    const night = TPL('tpl-antojo'); night.theme.skin = 'nocturna';
+    const N = mount(night, { now: '2026-11-07T07:00:00Z' }); // sábado 2:00 a. m., cerrado
+    eq(N.$('.neon') && N.$('.neon').className, 'neon off', 'nocturna: letrero apagado cuando está cerrado');
+    N.close();
+    const noSt = TPL('tpl-antojo'); noSt.theme.skin = 'nocturna'; noSt.modules[0].s.showStatus = false;
+    const M = mount(noSt, { now: '2026-11-06T15:30:00Z' });
+    ok(!M.$('.neon'), 'nocturna: sin letrero si se oculta el estado');
+    M.close();
+    const bang = TPL('tpl-antojo'); bang.theme.skin = 'minimalista'; bang.brand.name = '¡Antojo!';
+    const P = mount(bang, { now: '2026-11-06T15:30:00Z' });
+    ok(!P.$('.hero-t .dot'), 'minimalista: sin punto si el título ya termina en un signo');
+    P.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -295,7 +328,8 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(ST.pv.ready, 'la vista previa arrancó dentro del iframe');
   ok(ST.pv.ready && ST.pv.frame.contentDocument.querySelectorAll('section[data-mid]').length === 10, 'la vista previa muestra los 10 módulos de Araucaria');
   eq($$('.tab').length, 6, 'pestañas');
-  ok($$('.skin').length === 3, 'tres estéticas para elegir');
+  eq($$('.skin').length, Object.keys(ctx.SKINS).length, 'todas las estéticas para elegir');
+  eq($$('.skin').length, 6, 'seis estéticas');
 
   // Abrir otra plantilla desde el selector de la vista previa
   click($('[data-a="open-tpl"][data-id="tpl-antojo"]'));
@@ -355,6 +389,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
 
   // Estilo: cambiar de estética y de paleta
   click($('[data-a="tab"][data-t="estilo"]'));
+  click($('[data-a="skin"][data-s="nocturna"]'));
+  eq(ST.S.cur.theme.fonts.display, 'Tilt Neon', 'estética nocturna: tipografía de neón');
+  eq(ST.pv.frame.contentDocument.querySelector('.app').getAttribute('data-skin'), 'nocturna', 'la vista previa cambia a la nocturna');
+  ok(/Neón/.test($('.skin[aria-pressed="true"]').textContent), 'la tarjeta de la nocturna queda marcada');
   click($('[data-a="skin"][data-s="cultural"]'));
   eq(ST.S.cur.theme.skin, 'cultural', 'cambia la estética');
   eq(ST.S.cur.theme.fonts.display, 'Alfa Slab One', 'aplica la tipografía de la estética');

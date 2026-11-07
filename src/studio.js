@@ -409,7 +409,7 @@
         '<section class="card"><div class="card-h"><h2>Estética</h2><p>Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.</p></div>' +
         '<div class="skins">' + Object.keys(SKINS).map(function (k) {
           const on = th.skin === k;
-          return '<button type="button" class="skin" data-a="skin" data-s="' + k + '" aria-pressed="' + on + '"><span class="skin-art sk-' + k + '" aria-hidden="true">' + (k === 'cultural' ? 'Fonda' : k === 'animado' ? '¡Antojo!' : 'Cena') + '</span><span class="skin-t"><span class="skin-n">' + SKINS[k].label + (on ? ' <em>· actual</em>' : '') + '</span><span class="skin-d">' + esc(SKINS[k].desc) + '</span></span></button>';
+          return '<button type="button" class="skin" data-a="skin" data-s="' + k + '" aria-pressed="' + on + '"><span class="skin-art sk-' + k + '" aria-hidden="true">' + esc(SKINS[k].art || SKINS[k].label) + '</span><span class="skin-t"><span class="skin-n">' + SKINS[k].label + (on ? ' <em>· actual</em>' : '') + '</span><span class="skin-d">' + esc(SKINS[k].desc) + '</span></span></button>';
         }).join('') + '</div></section>' +
         '<section class="card"><div class="card-h"><h2>Colores</h2><p>Paletas sugeridas para la estética ' + esc(sk.label.toLowerCase()) + ', o ajusta cada color.</p></div>' +
         '<div class="pals">' + sk.palettes.map(function (p, i) { return '<button type="button" class="pal" data-a="pal" data-i="' + i + '"><span class="sws">' + swatches(p.colors) + '</span>' + esc(p.name) + '</button>'; }).join('') + '</div>' +
