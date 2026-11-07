@@ -795,6 +795,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="natural"] .media.m2{background:color-mix(in srgb,var(--accent2) 15%,var(--surface))}
 [data-skin="natural"] .promo-d,[data-skin="natural"] .ev-w{color:var(--accent2)!important}
 [data-skin="natural"] .badge{background:var(--accent3);color:var(--on-accent3);rotate:5deg}
+[data-skin="natural"] .promo.today .price{color:inherit}
 [data-skin="natural"] .md-price{font-size:32px}
 [data-skin="natural"] .stamp{border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
 [data-skin="natural"] .stamp.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent)}

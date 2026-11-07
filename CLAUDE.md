@@ -8,8 +8,8 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas). Las fuentes `@fontsource/*` son opcionales: sirven para capturas locales sin acceso a Google Fonts.
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (260 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
-- `npm run demos` — genera `dist/demo-*.html`, las tres apps de ejemplo exportadas.
+- `npm test` — compila y corre `test/run.js` (296 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
 - `python3 test/shots.py` — capturas en Chrome con Playwright (requiere Chrome y las fuentes opcionales).
 - `python3 test/overflow.py` — busca desbordes horizontales del estudio a 390 px.
 
@@ -18,14 +18,14 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
 - `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas.
-- `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo) y `blankApp()`. Solo datos.
+- `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo, La Espiga, Neblina, Los Alisos, La Esquina) y `blankApp()`. Solo datos; la portada de Neblina es una ilustración SVG en base64 (`NEBLINA_IMG`), no una foto.
 - `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`) y etiquetas. Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
 - `src/studio.js` — el estudio: estado `S`, editor por pestañas (Estilo, Módulos, Carta, Datos, Publicar), vista previa en un iframe escrito con `document.write`, guardado, exportación (.html, .zip para Cloudflare Pages con manifiesto, service worker e íconos, .json, QR).
 - `src/studio.css`, `src/page.html` — estilos y esqueleto del estudio. `build.js` reemplaza `/*__CSS__*/` y `/*__JS__*/`.
 
 ### Configuración de una app
 
-`{ v, id, brand{name, tagline, logo, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture}, menu{categories[{id,name,icon,note,items[{id,name,desc,price,emoji,img,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
+`{ v, id, brand{name, tagline, logo, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize}, menu{categories[{id,name,icon,note,items[{id,name,desc,price,emoji,img,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
 
 Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está activo. Los días van con 0 = domingo. La hora siempre se calcula en `brand.tz` (America/Bogota).
 

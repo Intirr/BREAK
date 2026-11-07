@@ -39,8 +39,9 @@ function mount(cfg, o) {
 const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 0);
 
 (async function () {
-  /* 1. Las tres apps renderizan completas */
-  for (const id of ['tpl-araucaria', 'tpl-antojo', 'tpl-zocalo']) {
+  /* 1. Todas las apps de ejemplo renderizan completas */
+  eq(ctx.TEMPLATES.length, 7, 'siete apps de ejemplo');
+  for (const id of ctx.TEMPLATES.map(t => t.id)) {
     const cfg = TPL(id);
     const A = mount(cfg, { now: '2026-11-06T15:30:00Z' });
     eq(A.$$('section[data-mid]').length, cfg.modules.length, id + ': una sección por módulo');
@@ -50,6 +51,29 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(!A.$('.pv-empty'), id + ': sin avisos de vista previa en modo app');
     eq(A.errors.length, 0, id + ': sin errores de script');
     A.close();
+  }
+
+  /* 1b. Lo propio de cada app de ejemplo nueva */
+  {
+    const es = mount(TPL('tpl-esquina'), { now: '2026-11-07T06:00:00Z' }); // sábado 1:00 a. m.
+    eq(es.rt._status().open, true, 'La Esquina: abierta a la 1:00 a. m. del sábado');
+    ok(!!es.$('.neon.on'), 'La Esquina: letrero de neón encendido de madrugada');
+    ok(!!es.$('.lay-fotos') && es.$$('section[data-mid="ruleta"] .wl').length === 5, 'La Esquina: carta con fotos grandes y ruleta de cinco premios');
+    es.close();
+    const nb = mount(TPL('tpl-neblina'), { now: '2026-11-06T15:30:00Z' });
+    ok(!!nb.$('.hero-box.has-img .hero-ph img') && /^data:image\/svg\+xml;base64,/.test(nb.$('.hero-ph img').getAttribute('src')), 'Neblina: portada con su ilustración');
+    ok(nb.$$('section[data-mid="servicios"] .svc').length === 6 && !!nb.$('.hero-t .dot'), 'Neblina: servicios y punto de la minimalista');
+    nb.close();
+    const al = mount(TPL('tpl-alisos'), { now: '2026-11-07T16:00:00Z', lang: 'en-US' }); // sábado 11:00 a. m.
+    eq(al.$('.lang button.on').textContent, 'EN', 'Los Alisos: abre en inglés si el celular está en inglés');
+    ok(al.$$('.svc').some(x => x.textContent === 'English spoken') && al.$$('.it h4').some(h => h.textContent === 'Garlic trout'), 'Los Alisos: servicios y carta en inglés');
+    ok(al.$$('.fq summary').some(s => /hot springs/.test(s.textContent)), 'Los Alisos: preguntas frecuentes en inglés');
+    al.close();
+    const ep = mount(TPL('tpl-espiga'), { now: '2026-11-06T15:30:00Z' });
+    ok(!!ep.$('.lay-compacta') && /font-size:18\.4px/.test(ep.d.getElementById('bk-css').textContent), 'La Espiga: carta compacta y letra grande');
+    eq(ep.$('main > section').getAttribute('data-mid'), 'aviso', 'La Espiga: el aviso va arriba de la portada');
+    ok(ep.$('html').getAttribute('data-tex') === 'papel' && !!ep.$('.m-hero svg.hills'), 'La Espiga: papel y lomas de la estética natural');
+    ep.close();
   }
 
   /* 2. Precios */

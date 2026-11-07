@@ -731,7 +731,9 @@
   }
   function openNewApp() {
     const starts = TEMPLATES.map(function (t) {
-      const blurb = { 'tpl-araucaria': 'Elegante · reservas y menú degustación', 'tpl-antojo': 'Animada · pedidos, sellos y ruleta', 'tpl-zocalo': 'Cultural · bilingüe, glosario y trivia' }[t.id] || '';
+      const blurb = { 'tpl-araucaria': 'Elegante · reservas y menú degustación', 'tpl-antojo': 'Animada · pedidos, sellos y ruleta', 'tpl-zocalo': 'Cultural · bilingüe, glosario y trivia',
+        'tpl-espiga': 'Natural · panadería con domicilios, encargos y sellos', 'tpl-neblina': 'Minimalista · café de especialidad con foto de portada y catas',
+        'tpl-alisos': 'Natural · campestre bilingüe con reservas y servicios', 'tpl-esquina': 'Nocturna · comida rápida hasta tarde con ruleta de premios' }[t.id] || '';
       return '<button type="button" class="start" data-a="create-app" data-from="' + t.id + '"><span class="sws">' + swatches(t.theme.colors) + '</span><b>Como ' + esc(t.brand.name) + '</b><span>' + esc(blurb) + '</span></button>';
     }).join('') + '<button type="button" class="start" data-a="create-app" data-from="blank"><span class="sws">' + swatches(blankApp('').theme.colors) + '</span><b>Vacía</b><span>Portada, carta, horario, ubicación y contacto</span></button>';
     openSheet(sheetHead('Nueva app') + '<div class="fld"><label class="lab" for="na-name">Nombre del local</label><input class="in" id="na-name" type="text" placeholder="Panadería La Espiga" autocomplete="off" data-autofocus></div>' +
