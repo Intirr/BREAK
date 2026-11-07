@@ -76,6 +76,8 @@ const COLOR_KEYS = [['bg', 'Fondo'], ['surface', 'Tarjetas'], ['ink', 'Texto'], 
 const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['temporada', 'De temporada'], ['local', 'De la región'], ['compartir', 'Para compartir'], ['ninos', 'Para niños'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['sinlactosa', 'Sin lactosa'], ['picante', 'Picante']];
 const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pedido', 'Hacer un pedido'], ['sellos', 'Tarjeta de sellos'], ['ubicacion', 'Cómo llegar'], ['eventos', 'Ver la agenda'], ['whatsapp', 'Escribir por WhatsApp'], ['none', 'Ninguno']];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
+/* Servicios del local: [clave, nombre en el estudio]. Los textos de la app (es/en) y los íconos están en el motor. */
+const SERVICES = [['parqueadero', 'Parqueadero'], ['mascotas', 'Se admiten mascotas'], ['terraza', 'Terraza o zona al aire libre'], ['infantil', 'Zona infantil'], ['wifi', 'Wi-Fi gratis'], ['tarjeta', 'Pago con tarjeta'], ['transferencia', 'Nequi y Daviplata'], ['accesible', 'Acceso para silla de ruedas'], ['domicilios', 'Domicilios'], ['musica', 'Música en vivo'], ['enchufes', 'Enchufes para trabajar'], ['ingles', 'Atención en inglés']];
 
 const F = {
   title: function (ph) { return { k: 'title', t: 'text', label: 'Título', i18n: true, ph: ph || '' }; },
@@ -252,6 +254,39 @@ const MODULES = {
       F.text('btnLabel', 'Texto del botón'),
       { k: 'btnTarget', t: 'sel', label: 'El botón lleva a', opts: [['none', 'Sin botón'], ['whatsapp', 'WhatsApp con mensaje'], ['url', 'Enlace web'], ['carta', 'La carta'], ['reservas', 'Reservas'], ['eventos', 'La agenda'], ['ubicacion', 'Cómo llegar']] },
       { k: 'url', t: 'text', label: 'Enlace web', ph: 'https://' }, { k: 'waText', t: 'text', label: 'Mensaje de WhatsApp', ph: 'Hola, quiero información sobre…' }]
+  },
+  aviso: {
+    label: 'Aviso destacado', code: 'AV', group: 'Esenciales', desc: 'Un anuncio corto arriba de todo, como «Este festivo abrimos de 8 a 8». Se quita solo después de la fecha que elijas.',
+    defaults: { text: '', icon: '📣', style: 'acento', until: '', cta: 'none' },
+    fields: [
+      F.text('text', 'Aviso', 'Este festivo abrimos de 8:00 a. m. a 8:00 p. m.'),
+      { k: 'icon', t: 'text', label: 'Emoji', ph: '📣' },
+      { k: 'style', t: 'sel', label: 'Estilo', def: 'acento', opts: [['acento', 'Color de acento'], ['suave', 'Suave'], ['alerta', 'Alerta']] },
+      { k: 'until', t: 'date', label: 'Mostrar hasta (incluido)', help: 'Vacío = siempre. Después de esa fecha el aviso deja de verse en la app.' },
+      { k: 'cta', t: 'sel', label: 'Al tocarlo lleva a', def: 'none', opts: CTA_OPTS },
+      { t: 'hint', text: 'Se agrega al principio de la lista para que salga arriba de la portada. Puedes moverlo como cualquier módulo.' }
+    ]
+  },
+  galeria: {
+    label: 'Galería', code: 'GA', group: 'Turismo y contenido', desc: 'Fotos del local y de los platos con pie de foto; se amplían al tocarlas.',
+    defaults: { title: 'Galería', layout: 'carrusel', items: [{ img: '', emoji: '', caption: '' }] },
+    fields: [F.title('Galería'),
+      { k: 'layout', t: 'sel', label: 'Diseño', def: 'carrusel', opts: [['carrusel', 'Carrusel'], ['mosaico', 'Mosaico']] },
+      { k: 'items', t: 'list', label: 'Fotos', item: 'Foto', blank: { img: '', emoji: '', caption: '' },
+        fields: [{ k: 'img', t: 'img', label: 'Foto', max: 800 }, { k: 'emoji', t: 'text', label: 'Emoji si no hay foto', ph: '☕' }, F.text('caption', 'Pie de foto', 'Nuestro fogón de leña')] },
+      { t: 'hint', text: 'Cada foto subida pesa unos 60 KB. Para más de tres, mejor pega enlaces https de fotos publicadas en tu página web.' }]
+  },
+  servicios: {
+    label: 'Servicios del local', code: 'SV', group: 'Turismo y contenido', single: true, seg: 'Turista', desc: 'Parqueadero, mascotas, terraza, zona infantil, pago con tarjeta y más, con íconos.',
+    defaults: { title: 'Servicios', list: ['parqueadero', 'tarjeta', 'wifi'], extra: '', note: '' },
+    fields: [F.title('Servicios'), { k: 'list', t: 'checks', label: 'Qué ofrece el local', opts: SERVICES },
+      F.text('extra', 'Otros servicios', 'Separados por comas: Calefacción, Cambiador de bebé'), F.text('note', 'Nota', 'Parqueadero gratis para clientes')]
+  },
+  faq: {
+    label: 'Preguntas frecuentes', code: 'PF', group: 'Turismo y contenido', seg: 'Turista', desc: 'Preguntas y respuestas que se despliegan: reservas, mascotas, parqueadero, opciones veganas…',
+    defaults: { title: 'Preguntas frecuentes', items: [{ q: '', a: '' }] },
+    fields: [F.title('Preguntas frecuentes'),
+      { k: 'items', t: 'list', label: 'Preguntas', item: 'Pregunta', blank: { q: '', a: '' }, fields: [F.text('q', 'Pregunta', '¿Aceptan mascotas?'), F.area('a', 'Respuesta', 'Sí, en la terraza.', 2)] }]
   }
 };
 

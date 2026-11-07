@@ -22,6 +22,9 @@
     }
     a[ks[ks.length - 1]] = v;
   }
+  /* Fecha de hoy en Colombia (AAAA-MM-DD) y fecha corta en español para los resúmenes. */
+  function todayISO() { try { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date()); } catch (e) { return new Date().toISOString().slice(0, 10); } }
+  function fmtDay(iso) { try { return new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(iso + 'T12:00:00Z')); } catch (e) { return iso; } }
   function move(arr, i, d) { const j = i + d; if (!arr || j < 0 || j >= arr.length) return false; const x = arr.splice(i, 1)[0]; arr.splice(j, 0, x); return true; }
   function lsGet(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento local */ } }
@@ -279,7 +282,8 @@
     if (def.single && S.cur.modules.some(function (m) { return m.type === type; })) { toast('Este módulo ya está en la app.'); return; }
     const m = { id: uid(type), type: type, on: true, s: clone(def.defaults) };
     const ci = S.cur.modules.findIndex(function (x) { return x.type === 'contacto'; });
-    if (ci >= 0) S.cur.modules.splice(ci, 0, m); else S.cur.modules.push(m);
+    if (type === 'aviso') S.cur.modules.unshift(m);
+    else if (ci >= 0) S.cur.modules.splice(ci, 0, m); else S.cur.modules.push(m);
     S.openMod = m.id;
     closeSheet(); edited(); renderEditor();
     setTimeout(function () { pvFocus(m.id); const row = document.querySelector('.mod[data-mid="' + m.id + '"]'); if (row && row.scrollIntoView) row.scrollIntoView({ block: 'nearest' }); }, 180);
@@ -349,6 +353,14 @@
         }).join('') + '</select>';
         break;
       case 'time': ctl = '<input class="in" id="' + id + '" type="time" data-p="' + attr(path) + '" value="' + attr(val || '') + '">'; break;
+      case 'date': ctl = '<input class="in" id="' + id + '" type="date" data-p="' + attr(path) + '" value="' + attr(val || '') + '">'; break;
+      case 'checks': {
+        const v = Array.isArray(val) ? val : [];
+        return '<div class="fld"><span class="lab">' + esc(f.label) + '</span><div class="tagpick" role="group" aria-label="' + attr(f.label) + '">' + f.opts.map(function (o) {
+          const on = v.indexOf(o[0]) >= 0;
+          return '<button type="button" class="tg' + (on ? ' on' : '') + '" data-a="chk" data-p="' + attr(path) + '" data-v="' + attr(o[0]) + '" aria-pressed="' + on + '">' + esc(o[1]) + '</button>';
+        }).join('') + '</div></div>';
+      }
       case 'bool':
         if (val == null) val = !!f.def;
         return '<label class="row-sw" for="' + id + '"><span>' + esc(f.label) + '</span><input type="checkbox" class="sw" id="' + id + '" data-p="' + attr(path) + '" data-type="bool"' + (val ? ' checked' : '') + '></label>';
@@ -532,6 +544,10 @@
       case 'ubicacion': return c.brand.address || 'Sin dirección';
       case 'contacto': return String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? 'WhatsApp listo' : 'Falta WhatsApp';
       case 'libre': return s.style === 'destacado' ? 'Destacado' : 'Normal';
+      case 'aviso': return !s.until ? 'Sin fecha de vencimiento' : (s.until < todayISO() ? 'Venció el ' : 'Hasta el ') + fmtDay(s.until);
+      case 'galeria': return (s.items || []).length + ((s.items || []).length === 1 ? ' foto' : ' fotos') + ' · ' + (s.layout === 'mosaico' ? 'mosaico' : 'carrusel');
+      case 'servicios': { const n = (s.list || []).length + String(s.extra || '').split(',').filter(function (x) { return x.trim(); }).length; return n + (n === 1 ? ' servicio' : ' servicios'); }
+      case 'faq': return (s.items || []).length + ((s.items || []).length === 1 ? ' pregunta' : ' preguntas');
       default: return '';
     }
   }
@@ -592,6 +608,9 @@
     if (wf && !wf.s.password) out.push({ s: 'warn', t: 'Falta la clave del Wi-Fi', go: 'modulos' });
     const ru = mod('ruleta');
     if (ru && ru.s.mode === 'premios' && (ru.s.options || []).filter(function (o) { return o && o.label; }).length < 2) out.push({ s: 'warn', t: 'La ruleta necesita al menos dos premios', go: 'modulos' });
+    c.modules.forEach(function (m) {
+      if (m && m.on !== false && m.type === 'aviso' && /^\d{4}-\d{2}-\d{2}$/.test(m.s.until || '') && m.s.until < todayISO()) out.push({ s: 'warn', t: 'El aviso «' + String(m.s.text || '').slice(0, 40) + '» ya venció', d: 'Cambia la fecha o apaga el módulo.', go: 'modulos' });
+    });
     const kb = Math.round(JSON.stringify(c).length / 1024);
     if (kb > 200) out.push({ s: 'warn', t: 'La app pesa ' + kb + ' KB', d: 'Para guardarla en tu cuenta debe pesar menos de 234 KB. Usa enlaces https para las fotos o sube menos.', go: 'modulos' });
     return out;
@@ -794,6 +813,11 @@
     },
     'li-del': function (d) { const arr = getPath(S.cur, d.p); if (Array.isArray(arr)) { arr.splice(+d.i, 1); edited(); renderEditor(); } },
     'li-mv': function (d) { if (move(getPath(S.cur, d.p), +d.i, +d.d)) { edited(); renderEditor(); } },
+    chk: function (d, el) {
+      let arr = getPath(S.cur, d.p); if (!Array.isArray(arr)) { arr = []; setPath(S.cur, d.p, arr); }
+      const i = arr.indexOf(d.v); if (i >= 0) arr.splice(i, 1); else arr.push(d.v);
+      el.classList.toggle('on', i < 0); el.setAttribute('aria-pressed', String(i < 0)); edited();
+    },
     day: function (d, el) {
       const arr = (getPath(S.cur, d.p) || []).map(Number), n = +d.d, i = arr.indexOf(n);
       if (i >= 0) arr.splice(i, 1); else arr.push(n);
@@ -939,9 +963,10 @@
         const url = cv.toDataURL('image/webp', q);
         return /^data:image\/webp/.test(url) ? url : cv.toDataURL('image/jpeg', q);
       };
+      const lim = max >= 1000 ? 140000 : 90000;
       let url = enc(max, 0.72);
-      if (url.length > 140000) url = enc(Math.round(max * 0.8), 0.6);
-      if (url.length > 140000) url = enc(Math.round(max * 0.6), 0.55);
+      if (url.length > lim) url = enc(Math.round(max * 0.8), 0.6);
+      if (url.length > lim) url = enc(Math.round(max * 0.6), 0.55);
       setPath(S.cur, path, url);
       edited(); renderEditor(); toast('Foto cargada · ' + Math.round(url.length * 0.75 / 1024) + ' KB.');
     });

@@ -398,6 +398,47 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     T.close();
   }
 
+  /* 11g. Módulos nuevos: aviso, galería, servicios y preguntas frecuentes */
+  {
+    const cfg = TPL('tpl-araucaria');
+    cfg.modules.unshift({ id: 'av', type: 'aviso', on: true, s: { text: 'Este festivo abrimos de 8 a 8', icon: '📣', style: 'acento', until: '2026-11-10', cta: 'reservas' } });
+    cfg.modules.push({ id: 'ga', type: 'galeria', on: true, s: { title: 'La casa por dentro', layout: 'mosaico', items: [{ img: PX, caption: 'El comedor' }, { emoji: '🍷', caption: 'La bodega' }, { img: 'javascript:alert(1)', caption: '' }, { img: '', emoji: '', caption: '' }] } });
+    cfg.modules.push({ id: 'sv', type: 'servicios', on: true, s: { title: 'Servicios', list: ['parqueadero', 'mascotas', 'nada'], extra: 'Calefacción, Cambiador de bebé', note: '' } });
+    cfg.modules.push({ id: 'fq', type: 'faq', on: true, s: { title: 'Preguntas frecuentes', items: [{ q: '¿Aceptan mascotas?', a: 'Sí, en la terraza.' }, { q: '', a: 'sin pregunta' }] } });
+    const A = mount(cfg, { now: '2026-11-06T15:30:00Z' });
+    const av = A.$('section[data-mid="av"] .aviso');
+    ok(!!av && av.tagName === 'BUTTON' && /festivo/.test(av.textContent) && av.classList.contains('av-acento'), 'aviso con su estilo y botón');
+    eq(A.$('main > section').getAttribute('data-mid'), 'av', 'el aviso sale antes de la portada');
+    eq(A.$$('section[data-mid="ga"] .gal-i').length, 2, 'galería: fotos y emojis, sin los vacíos');
+    ok(!A.$$('img').some(i => /javascript:/i.test(i.getAttribute('src') || '')), 'galería: no acepta imágenes javascript:');
+    ok(!!A.$('section[data-mid="ga"] .gal-grid'), 'galería en mosaico');
+    A.click(A.$('section[data-mid="ga"] .gal-b[data-i="1"]'));
+    ok(!!A.$('.gsheet') && /La bodega/.test(A.$('.gsheet').textContent), 'galería: amplía la foto al tocarla');
+    A.click(A.$('.sheet [data-act="gal"][data-i="2"]'));
+    ok(/El comedor/.test(A.$('.gsheet').textContent) && /1 \/ 2/.test(A.$('.gal-n').textContent), 'galería: «Siguiente» vuelve a la primera al final');
+    A.click(A.$('[data-act="close"]'));
+    eq(A.$$('section[data-mid="sv"] .svc').map(x => x.textContent).join('|'), 'Parqueadero|Se admiten mascotas|Calefacción|Cambiador de bebé', 'servicios: los marcados y los escritos a mano');
+    eq(A.$$('section[data-mid="sv"] .svc svg').length, 4, 'servicios: cada uno con su ícono');
+    eq(A.$$('section[data-mid="fq"] details.fq').length, 1, 'preguntas: solo las que tienen pregunta y respuesta');
+    ok(/en la terraza/.test(A.$('section[data-mid="fq"] .fq-a').textContent), 'preguntas: la respuesta va adentro');
+    A.click(av);
+    A.click(A.$('[data-act="nav"]'));
+    const nav = A.$$('.navi').map(x => x.textContent);
+    ok(nav.includes('La casa por dentro') && nav.includes('Servicios') && nav.includes('Preguntas frecuentes') && !nav.some(t => /festivo|Aviso/.test(t)), 'el menú de secciones incluye los módulos nuevos, no el aviso');
+    eq(A.errors.length, 0, 'módulos nuevos sin errores de script');
+    A.close();
+    const B = mount(cfg, { now: '2026-11-11T15:30:00Z' });
+    ok(!B.$('section[data-mid="av"]'), 'el aviso vencido ya no aparece en la app');
+    B.close();
+    const C = mount(cfg, { mode: 'preview', now: '2026-11-11T15:30:00Z' });
+    ok(/venció/.test(C.$('section[data-mid="av"]').textContent), 'en la vista previa el aviso vencido lo explica');
+    C.close();
+    const en = JSON.parse(JSON.stringify(cfg)); en.i18n.bilingual = true;
+    const E = mount(en, { now: '2026-11-06T15:30:00Z', lang: 'en-US' });
+    ok(E.$$('section[data-mid="sv"] .svc').some(x => x.textContent === 'Pet friendly'), 'servicios en inglés');
+    E.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -514,6 +555,26 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   const heavy = JSON.parse(JSON.stringify(ST.S.cur)); heavy.modules[0].s.img = 'data:image/webp;base64,' + 'A'.repeat(230000);
   ok(ST.checks(heavy).some(c => c.s === 'warn' && /pesa/.test(c.t)), 'la revisión avisa si la app pesa demasiado para guardarla');
   ok(!ST.checks(ST.S.cur).some(c => /pesa/.test(c.t)), 'sin fotos pesadas no hay aviso de peso');
+  // Módulos nuevos desde el catálogo
+  click($('[data-a="mod-add"]'));
+  click($('.mc[data-type="aviso"]'));
+  eq(ST.S.cur.modules[0].type, 'aviso', 'el aviso se agrega arriba de todo');
+  setVal(d.getElementById('f-modules-0-s-text'), 'Hoy cerramos a las 6');
+  setVal(d.getElementById('f-modules-0-s-until'), '2026-01-01');
+  eq(ST.S.cur.modules[0].s.until, '2026-01-01', 'fecha de vencimiento del aviso');
+  ok(ST.checks(ST.S.cur).some(c => c.s === 'warn' && /ya venció/.test(c.t)), 'la revisión avisa que el aviso venció');
+  click($('[data-a="mod-del"][data-mid="' + ST.S.cur.modules[0].id + '"]'));
+  click($('[data-a="confirm-yes"]'));
+  click($('[data-a="mod-add"]'));
+  click($('.mc[data-type="servicios"]'));
+  const svIdx = ST.S.cur.modules.findIndex(m => m.type === 'servicios');
+  click($('[data-a="chk"][data-p="modules.' + svIdx + '.s.list"][data-v="mascotas"]'));
+  ok(ST.S.cur.modules[svIdx].s.list.includes('mascotas'), 'marcar un servicio');
+  click($('[data-a="chk"][data-p="modules.' + svIdx + '.s.list"][data-v="wifi"]'));
+  ok(!ST.S.cur.modules[svIdx].s.list.includes('wifi'), 'desmarcar un servicio');
+  click($('[data-a="mod-del"][data-mid="' + ST.S.cur.modules[svIdx].id + '"]'));
+  click($('[data-a="confirm-yes"]'));
+  eq(ST.S.cur.modules.length, nMods, 'los módulos de prueba se quitaron');
 
   // Estilo: cambiar de estética y de paleta
   click($('[data-a="tab"][data-t="estilo"]'));
