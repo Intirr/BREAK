@@ -689,6 +689,51 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(css(c) === base, 'en «auto» nada cambia');
   }
 
+  /* 11o. Encabezado, navegación y pie */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    // Pie completo por defecto
+    const e = TPL('tpl-espiga'); e.brand.instagram = 'laespiga'; e.brand.whatsapp = '573001234567'; e.brand.legal = 'NIT 900.123.456-7 <b>x</b>';
+    let A = mount(e, NOW);
+    ok(!!A.$('.foot .foot-tag') && /Hoy\s+6:00 a\. m\./.test(A.$('.foot .foot-hoy').textContent), 'el pie trae el eslogan y el horario de hoy');
+    eq(A.$$('.foot .soc').map(a => a.getAttribute('aria-label')).join(','), 'WhatsApp,Instagram', 'redes con íconos y nombre');
+    ok(A.$('.foot .soc').getAttribute('href') === 'https://wa.me/573001234567' && !A.$('.foot-legal b') && /<b>x<\/b>/.test(A.$('.foot-legal').textContent), 'enlaces de las redes y texto legal escapado');
+    A.close();
+    e.theme.foot = { style: 'simple' };
+    A = mount(e, NOW); ok(!A.$('.foot-soc') && !A.$('.foot-hoy') && !!A.$('.foot .credit'), 'el pie sencillo es el de antes'); A.close();
+    e.theme.foot = { hours: false, social: false, align: 'izq' };
+    A = mount(e, NOW); ok(!A.$('.foot-hoy') && !A.$('.foot-soc') && A.$('.foot').classList.contains('fa-izq'), 'el pie se puede ajustar por partes'); A.close();
+    // Barra inferior con el pedido
+    const an = TPL('tpl-antojo'); an.theme.nav = 'barra';
+    A = mount(an, NOW);
+    eq(A.$$('.bnav button').map(b => b.getAttribute('data-nav')).join(','), 'top,carta,pedido,sellos,mas', 'barra: inicio, carta, dos atajos y más');
+    ok(!A.$('.fab') && !A.$('.top .menu-btn'), 'con la barra no hay botón flotante ni menú arriba');
+    A.click(A.$('.add')); A.click(A.$('.add'));
+    eq(A.$('.bnav [data-nav="pedido"] .q').textContent, '2', 'la barra cuenta el pedido');
+    A.click(A.$('.bnav [data-nav="pedido"]'));
+    ok(A.$('.app').classList.contains('sheet-open') && /\$/.test(A.$('.sheet').textContent), 'tocar «Pedido» abre el pedido');
+    A.click(A.$('[data-act="close"]'));
+    A.click(A.$('.bnav [data-nav="mas"]'));
+    ok(A.$$('.navi').length > 3, '«Más» abre todas las secciones');
+    A.close();
+    // Pestañas arriba
+    const z = TPL('tpl-zocalo'); z.theme.nav = 'pestanas';
+    A = mount(z, NOW);
+    ok(A.$$('.tnav [data-act="goto"]').length >= 5 && A.$$('.tnav button').every(b => A.d.getElementById(b.getAttribute('data-to'))), 'pestañas con las secciones que se ven');
+    A.close();
+    // Encabezado
+    const al = TPL('tpl-alisos'); al.theme.top = { align: 'centro', bg: 'transparente', status: false };
+    A = mount(al, NOW);
+    ok(!!A.$('.top.top-c .top-l .menu-btn') && !!A.$('.top-c .top-r .lang') && !A.$('.top .status'), 'encabezado centrado: menú, nombre e idioma');
+    ok(/#bk \.top\{background:transparent/.test(A.d.getElementById('bk-css').textContent) && /#bk\[data-scrolled\] \.top\{/.test(A.d.getElementById('bk-css').textContent), 'encabezado transparente que se vuelve sólido al bajar');
+    Object.defineProperty(A.w, 'pageYOffset', { value: 200, configurable: true });
+    A.w.dispatchEvent(new A.w.Event('scroll'));
+    ok(A.$('.app').hasAttribute('data-scrolled'), 'al bajar se marca para volverse sólido');
+    A.close();
+    const nb = TPL('tpl-neblina'); nb.theme.top = { logo: false, name: false };
+    A = mount(nb, NOW); ok(!A.$('.brand-mini .logo') && !A.$('.brand-mini b') && A.$('.brand-mini').getAttribute('aria-label') === nb.brand.name, 'el encabezado puede ir sin logo ni nombre'); A.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -974,6 +1019,17 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   await sleep(80);
   ok(deletedAssets.length === 1 && deletedAssets[0] === LB, 'borra solo la foto que nadie usa, después de confirmar');
   eq(docs.get('biblioteca-fotos').items.map(f => f.id).join(','), LA, 'el índice de la biblioteca se actualiza');
+  // Estilo: estructura
+  ok(!!$('section[data-card="navegacion"]') && !!$('section[data-card="pie"]') && !$('section[data-card="encabezado"]'), 'navegación y pie en el modo sencillo; encabezado en el avanzado');
+  click($('[data-a="set"][data-p="theme.nav"][data-v="barra"]'));
+  eq(ST.S.cur.theme.nav, 'barra', 'elige la barra de abajo');
+  await sleep(220);
+  ok(!!ST.pv.frame.contentDocument.querySelector('.bnav'), 'la vista previa muestra la barra');
+  click($('[data-a="set"][data-p="theme.nav"][data-v="menu"]'));
+  click($('[data-a="set"][data-p="theme.foot.style"][data-v="simple"]'));
+  eq(ST.S.cur.theme.foot.style, 'simple', 'elige el pie sencillo');
+  click($('[data-a="style-reset"][data-card="pie"]'));
+  ok(!ST.S.cur.theme.foot || !ST.S.cur.theme.foot.style, 'restablecer el pie');
   // Estilo: formas avanzadas
   click($('[data-a="adv"]'));
   click($('[data-a="sub"][data-g="formas"]'));

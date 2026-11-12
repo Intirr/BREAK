@@ -542,6 +542,7 @@ function breakApp(win, doc, initialCfg, opts) {
       reviewG: 'Escribir reseña en Google', reviewWa: 'Contarnos por WhatsApp', onGoogle: 'en Google',
       share: 'Compartir esta carta', shareSub: 'Envíasela a quien venga contigo', sharePreview: 'En la app publicada se comparte su enlace.',
       call: 'Llamar', writeUs: 'Escríbenos', credit: 'Hecho con Break', facade: 'Fachada de casa de bahareque',
+      todayIs: 'Hoy', sections: 'Secciones', navHome: 'Inicio', navMenu: 'Carta', navOrder: 'Pedido', navBook: 'Reservar', navStamps: 'Sellos', navMap: 'Llegar', navContact: 'Contacto', navMore: 'Más',
       how1: 'Elige en la carta y toca +.', how2: 'Revisa tu pedido y dinos cómo lo quieres.', how3: 'Lo envías por WhatsApp y el local te confirma.',
       cta_carta: 'Ver la carta', cta_reservas: 'Reservar mesa', cta_pedido: 'Hacer un pedido', cta_sellos: 'Mi tarjeta de sellos',
       cta_ubicacion: 'Cómo llegar', cta_whatsapp: 'Escríbenos', cta_eventos: 'Ver la agenda',
@@ -588,6 +589,7 @@ function breakApp(win, doc, initialCfg, opts) {
       reviewG: 'Review us on Google', reviewWa: 'Tell us on WhatsApp', onGoogle: 'on Google',
       share: 'Share this menu', shareSub: 'Send it to whoever is coming with you', sharePreview: 'The published app shares its link.',
       call: 'Call', writeUs: 'Message us', credit: 'Made with Break', facade: 'Front of a bahareque house',
+      todayIs: 'Today', sections: 'Sections', navHome: 'Home', navMenu: 'Menu', navOrder: 'Order', navBook: 'Book', navStamps: 'Stamps', navMap: 'Map', navContact: 'Contact', navMore: 'More',
       how1: 'Pick from the menu and tap +.', how2: 'Check your order and tell us how you want it.', how3: 'Send it on WhatsApp and the place confirms.',
       cta_carta: 'See the menu', cta_reservas: 'Book a table', cta_pedido: 'Place an order', cta_sellos: 'My stamp card',
       cta_ubicacion: 'How to get here', cta_whatsapp: 'Message us', cta_eventos: 'See what’s on',
@@ -1045,6 +1047,35 @@ textarea.inp{resize:vertical;min-height:76px}
 .fq-a p{margin:0}
 .foot{padding-block:60px 26px;text-align:center;color:var(--c-foot-on,var(--muted));font-size:14px;background:var(--c-foot,transparent)}
 .foot p{margin:4px 0}
+.foot .foot-tag{margin:6px auto 0;max-width:40ch;font-size:15px}
+.foot .foot-hoy{margin-top:14px;font-size:14px}
+.foot-hoy b{margin-right:4px;font-weight:700}
+.foot-soc{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:16px 0 12px}
+.soc{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;color:inherit;background:color-mix(in srgb,currentColor 10%,transparent);text-decoration:none}
+.soc .ic{width:20px;height:20px}
+.foot .foot-legal{margin:12px auto 4px;max-width:46ch;font-size:12px;opacity:.85}
+.foot.fa-izq{text-align:left}
+.foot.fa-izq .foot-soc{justify-content:flex-start}
+.foot.fa-izq .foot-tag,.foot.fa-izq .foot-legal{margin-inline:0}
+.foot.fa-centro{text-align:center}
+.foot.fa-centro .foot-soc{justify-content:center}
+.foot.fa-centro .foot-tag,.foot.fa-centro .foot-legal{margin-inline:auto}
+.top.top-c{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.top.top-c .top-l{justify-self:start;display:flex;align-items:center}
+.top.top-c .brand-mini{justify-self:center;max-width:min(56vw,300px)}
+.top.top-c .top-r{justify-self:end}
+.tnav{position:sticky;top:58px;z-index:29;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px max(14px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid color-mix(in srgb,var(--ink) 10%,transparent)}
+.tnav::-webkit-scrollbar{display:none}
+.tnav button{flex:none;padding:7px 13px;border-radius:999px;font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap}
+.tnav button.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg))}
+.app:has(.tnav) .cat-tabs{top:104px}
+.bnav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:40;display:flex;width:100%;max-width:600px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+.bnav button{position:relative;flex:1;min-width:0;display:grid;justify-items:center;gap:3px;padding:6px 2px;font-size:11px;font-weight:700;color:var(--muted)}
+.bnav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bnav .ic{width:24px;height:24px}
+.bnav button.on{color:var(--c-btn,var(--accent))}
+.bnav .q{position:absolute;top:1px;left:calc(50% + 5px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--c-btn,var(--accent));color:var(--c-btn-on,var(--on-accent));font-size:10.5px;font-weight:800;display:grid;place-items:center}
+.bnav .q[hidden]{display:none}
 .foot-n{font-family:var(--fd);font-size:24px;color:var(--c-foot-on,var(--ink))}
 .credit{margin-top:20px!important;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
 .fab{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:12px;min-height:58px;padding:9px 12px 9px 9px;border-radius:999px;background:var(--c-btn,var(--ink));color:var(--c-btn-on,var(--bg));font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.28);width:max-content;max-width:calc(100% - 32px);white-space:nowrap}
@@ -1497,6 +1528,8 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="minimalista"] .seg button.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg));box-shadow:none}
 [data-skin="minimalista"] .wheel,[data-skin="minimalista"] .hub{box-shadow:0 0 0 1px var(--ink)}
 [data-skin="minimalista"] .foot{text-align:left;margin-top:40px;border-top:1px solid var(--ink)}
+[data-skin="minimalista"] .foot-soc{justify-content:flex-start}
+[data-skin="minimalista"] .foot .foot-tag,[data-skin="minimalista"] .foot .foot-legal{margin-inline:0}
 [data-skin="minimalista"] .foot-n{font-weight:800;font-size:30px;letter-spacing:-.03em}
 [data-skin="minimalista"] .navi{font-weight:700;letter-spacing:-.02em}
 `
@@ -2581,7 +2614,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     saveCart(); updateCartUI(false);
   }
   function fabHTML() {
-    if (!ordering()) return '';
+    if (!ordering() || navMode() === 'barra') return '';
     const c = cartCount();
     return '<button class="fab" data-act="cart"' + (c ? '' : ' hidden') + '><span class="fab-n">' + c + '</span><span>' + esc(ui('viewOrder')) + '</span><span class="fab-t">' + esc(money(cartSubtotal(), 'full')) + '</span></button>';
   }
@@ -2593,6 +2626,8 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     else if (old && !fresh) old.parentNode.removeChild(old);
     else if (!old && fresh) root.appendChild(fresh);
     if (fresh && bumpIt) { fresh.classList.add('bump'); }
+    const bq = root.querySelector('.bnav [data-nav="pedido"] .q');
+    if (bq) { const n = cartCount(); bq.textContent = n; bq.hidden = !n; if (bumpIt && n) bump(bq.parentNode); }
     Array.prototype.forEach.call(root.querySelectorAll('.add[data-id]'), function (b) {
       const q = b.querySelector('.q'), n = qtyOf(b.getAttribute('data-id'));
       if (q) { if (n) q.textContent = n; else q.parentNode.removeChild(q); }
@@ -2740,7 +2775,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   }
   function scrollToEl(el, extra) {
     if (!el) return;
-    const top = el.getBoundingClientRect().top + (win.pageYOffset || 0) - (extra || 0);
+    const top = el.getBoundingClientRect().top + (win.pageYOffset || 0) - (extra || 0) - navExtra();
     try { win.scrollTo({ top: Math.max(0, top), behavior: motion() === 'off' ? 'auto' : 'smooth' }); } catch (e) { try { win.scrollTo(0, top); } catch (e2) { /* nada */ } }
   }
   function scrollToId(id, extra) { scrollToEl(doc.getElementById(id), extra == null ? 62 : extra); }
@@ -2839,15 +2874,30 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     for (let i = 0; i < ks.length; i++) { if (o == null || typeof o !== 'object') return def; o = o[ks[i]]; }
     return (o == null || o === '' || o === 'auto') ? def : o;
   }
+  /* Reglas de opciones que no van bajo #bk (por ejemplo, las que dependen de un atributo del propio #bk). */
+  let R2 = [];
   function optCSS() {
-    const R = [];
+    const R = []; R2 = [];
     /* rule('.btn,.chip', 'border-radius:0') → «#bk .btn,#bk .chip{border-radius:0}» */
     const rule = function (sel, css) { R.push(sel.split(',').map(function (s) { return '#bk ' + s.trim(); }).join(',') + '{' + css + '}'); };
     OPTION_RULES.forEach(function (fn) { fn(rule); });
-    return R.join('\n');
+    return R.concat(R2).join('\n');
   }
   /* Cada etapa de personalización agrega aquí una función (rule) => { … } que lee opt() y escribe sus reglas. */
   const OPTION_RULES = [
+    /* Encabezado (theme.top.bg): sólido, o transparente sobre la portada hasta que se baja. */
+    function (rule) {
+      const bg = opt('top.bg', '');
+      if (bg === 'solido') rule('.top', 'background:var(--c-top,var(--bg));-webkit-backdrop-filter:none;backdrop-filter:none');
+      else if (bg === 'transparente') {
+        rule('.top', 'background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom-color:transparent;box-shadow:none;margin-bottom:-58px;transition:background-color .25s');
+        rule('.top::after', 'opacity:0');
+        rule('main', 'padding-top:58px');
+        rule('main>section.m-hero:first-child:has(.hero-box.has-img:not(.ph-fail))', 'margin-top:-58px');
+        rule('.top', 'color:var(--c-top-on,currentColor)');
+      }
+      if (bg === 'transparente') R2.push('#bk[data-scrolled] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 92%,transparent));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}#bk[data-scrolled] .top::after{opacity:1}');
+    },
     /* Formas (theme.shape): esquinas de botones, fotos y chips; relleno de los botones; estilo y borde de las tarjetas. */
     function (rule) {
       const R = { pildora: '999px', redondeado: '12px', recto: '3px' };
@@ -2935,17 +2985,70 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   }
   /* Logo horizontal: ya trae el nombre dibujado, así que el encabezado no lo repite. */
   function wideLogo() { const l = cfg.brand.logo || {}; return l.type === 'img' && l.shape === 'horizontal' && !!safeImg(l.value); }
+  /* Navegación: menú del encabezado (como siempre), barra abajo con íconos o pestañas arriba. */
+  function navMode() { const n = opt('nav', 'menu'); return n === 'barra' || n === 'pestanas' ? n : 'menu'; }
   function renderTop() {
-    const st = statusInfo();
-    return '<header class="top"><button class="brand-mini" data-act="top" aria-label="' + attr(cfg.brand.name || '') + '">' + logoHTML('sm') + (wideLogo() ? '' : '<b>' + esc(cfg.brand.name || '') + '</b>') + '</button><div class="top-r">' +
+    const st = opt('top.status', true) === false ? null : statusInfo(), nav = navMode();
+    const showLogo = opt('top.logo', true) !== false || wideLogo(), showName = opt('top.name', true) !== false && !wideLogo();
+    const brand = '<button class="brand-mini" data-act="top" aria-label="' + attr(cfg.brand.name || '') + '">' + (showLogo ? logoHTML('sm') : '') + (showName ? '<b>' + esc(cfg.brand.name || '') + '</b>' : '') + '</button>';
+    const menuBtn = nav === 'menu' ? '<button class="menu-btn" data-act="nav" aria-label="' + attr(ui('menu')) + '"><span></span><span></span><span></span></button>' : '';
+    const langHTML = bilingual() ? '<div class="lang" role="group" aria-label="Idioma / Language"><button data-act="lang" data-l="es" class="' + (lang() === 'es' ? 'on' : '') + '">ES</button><button data-act="lang" data-l="en" class="' + (lang() === 'en' ? 'on' : '') + '">EN</button></div>' : '';
+    const stHTML = st ? '<span class="status ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.open ? ui('open') : ui('closed')) + '</span>' : '';
+    const tabs = nav === 'pestanas' ? '<nav class="tnav" aria-label="' + attr(ui('sections')) + '"></nav>' : '';
+    /* Centrado: menú a la izquierda, nombre al centro e idioma (o si está abierto) a la derecha. */
+    if (opt('top.align', '') === 'centro') return '<header class="top top-c"><div class="top-l">' + menuBtn + '</div>' + brand + '<div class="top-r">' + (langHTML || stHTML) + '</div></header>' + tabs;
+    return '<header class="top">' + brand + '<div class="top-r">' +
       (st ? '<span class="status ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.open ? ui('open') : ui('closed')) + '</span>' : '') +
       (bilingual() ? '<div class="lang" role="group" aria-label="Idioma / Language"><button data-act="lang" data-l="es" class="' + (lang() === 'es' ? 'on' : '') + '">ES</button><button data-act="lang" data-l="en" class="' + (lang() === 'en' ? 'on' : '') + '">EN</button></div>' : '') +
-      '<button class="menu-btn" data-act="nav" aria-label="' + attr(ui('menu')) + '"><span></span><span></span><span></span></button></div></header>';
+      (nav === 'menu' ? '<button class="menu-btn" data-act="nav" aria-label="' + attr(ui('menu')) + '"><span></span><span></span><span></span></button>' : '') + '</div></header>' +
+      (nav === 'pestanas' ? '<nav class="tnav" aria-label="' + attr(ui('sections')) + '"></nav>' : '');
   }
+  /* Pestañas: se llenan después de pintar, con las secciones que sí se ven. */
+  function fillTabs() {
+    const nav = root.querySelector('.tnav'); if (!nav) return;
+    nav.innerHTML = mods().filter(function (m) { return NAVABLE[m.type] && root.querySelector('section[data-mid="' + m.id + '"]'); })
+      .map(function (m) { return '<button data-act="goto" data-to="' + attr(anchor(m)) + '">' + esc(modTitle(m)) + '</button>'; }).join('');
+  }
+  /* Barra inferior: Inicio, Carta, hasta dos atajos del local y «Más». El pedido va aquí en lugar del botón flotante. */
+  const BNAV = [['pedido', 'bolsa', 'navOrder'], ['reservas', 'calendario', 'navBook'], ['sellos', 'estrella', 'navStamps'], ['ubicacion', 'mapa', 'navMap'], ['contacto', 'whatsapp', 'navContact']];
+  function bnavHTML() {
+    const items = [['top', 'casa', 'navHome']];
+    if (firstMod('carta')) items.push(['carta', 'cubiertos', 'navMenu']);
+    BNAV.forEach(function (b) { if (items.length < 4 && (b[0] === 'pedido' ? ordering() : firstMod(b[0]))) items.push(b); });
+    items.push(['mas', 'menu', 'navMore']);
+    return '<nav class="bnav" aria-label="' + attr(ui('sections')) + '">' + items.map(function (it) {
+      const a = it[0] === 'top' ? 'data-act="top"' : it[0] === 'mas' ? 'data-act="nav"' : it[0] === 'pedido' ? 'data-act="bnav-order"' : 'data-act="goto" data-to="' + attr(anchor(firstMod(it[0]))) + '"';
+      const n = it[0] === 'pedido' ? cartCount() : 0;
+      return '<button ' + a + ' data-nav="' + it[0] + '">' + ico(it[1]) + '<span>' + esc(ui(it[2])) + '</span>' + (it[0] === 'pedido' ? '<b class="q"' + (n ? '' : ' hidden') + '>' + n + '</b>' : '') + '</button>';
+    }).join('') + '</nav>';
+  }
+  function navExtra() { return root && root.querySelector('.tnav') ? 46 : 0; }
+  /* Pie: completo (eslogan, horario de hoy, redes y texto legal) o sencillo (nombre, dirección y firma). */
   function renderFoot() {
     const b = cfg.brand;
-    return '<footer class="foot wrap"><p class="foot-n">' + esc(b.name || '') + '</p>' + ((b.address || b.city) ? '<p>' + esc([b.address, b.city].filter(Boolean).join(' · ')) + '</p>' : '') +
-      (cfg.meta.credit !== false ? '<p class="credit">' + esc(ui('credit')) + '</p>' : '') + '</footer>';
+    const addr = (b.address || b.city) ? '<p>' + esc([b.address, b.city].filter(Boolean).join(' · ')) + '</p>' : '';
+    const credit = cfg.meta.credit !== false ? '<p class="credit">' + esc(ui('credit')) + '</p>' : '';
+    if (opt('foot.style', 'completo') === 'simple') return '<footer class="foot wrap"><p class="foot-n">' + esc(b.name || '') + '</p>' + addr + credit + '</footer>';
+    const al = opt('foot.align', '');
+    const tag = opt('foot.tagline', true) !== false && tx(b, 'tagline') ? '<p class="foot-tag">' + esc(tx(b, 'tagline')) + '</p>' : '';
+    const hoy = opt('foot.hours', true) !== false ? footHours() : '';
+    const soc = opt('foot.social', true) !== false ? socialHTML() : '';
+    const legal = tx(b, 'legal') ? '<p class="foot-legal">' + esc(tx(b, 'legal')) + '</p>' : '';
+    return '<footer class="foot wrap' + (al === 'izq' || al === 'centro' ? ' fa-' + al : '') + '"><p class="foot-n">' + esc(b.name || '') + '</p>' + tag + hoy + addr + soc + legal + credit + '</footer>';
+  }
+  function footHours() {
+    const H = cfg.brand.hours || [];
+    if (!H.length) return '';
+    const now = nowLocal(), h = H.filter(function (x) { return x && +x.d === now.d; })[0], closed = !h || h.closed || !h.open;
+    return '<p class="foot-hoy"><b>' + esc(ui('todayIs')) + '</b> ' + esc(closed ? ui('closed') : fmtTime(h.open) + ' – ' + fmtTime(h.close)) + '</p>';
+  }
+  function socialHTML() {
+    const b = cfg.brand, out = [], wa = digits(b.whatsapp);
+    if (wa.length >= 10) out.push(['https://wa.me/' + wa, 'whatsapp', 'WhatsApp']);
+    if (handle(b.instagram)) out.push(['https://instagram.com/' + handle(b.instagram), 'instagram', 'Instagram']);
+    if (handle(b.facebook)) out.push(['https://facebook.com/' + handle(b.facebook), 'facebook', 'Facebook']);
+    if (handle(b.tiktok)) out.push(['https://www.tiktok.com/@' + handle(b.tiktok), 'tiktok', 'TikTok']);
+    return out.length ? '<div class="foot-soc">' + out.map(function (o) { return '<a class="soc" href="' + attr(o[0]) + '" target="_blank" rel="noopener" aria-label="' + attr(o[2]) + '">' + ico(o[1]) + '</a>'; }).join('') + '</div>' : '';
   }
   function sectionHTML(m) {
     let inner = '';
@@ -2962,10 +3065,11 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     root.setAttribute('data-motion', motion());
     const bt = cfg.theme.buttons;
     if (bt === 'redondo' || bt === 'cuadrado' || bt === 'contorno') root.setAttribute('data-btn', bt); else root.removeAttribute('data-btn');
-    root.innerHTML = renderTop() + '<main>' + mods().map(sectionHTML).join('') + '</main>' + renderFoot() + fabHTML() +
+    root.innerHTML = renderTop() + '<main>' + mods().map(sectionHTML).join('') + '</main>' + renderFoot() + fabHTML() + (navMode() === 'barra' ? bnavHTML() : '') +
       '<div class="sheet-bg" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-hidden="true"><div class="sheet-c"></div></div><div class="toast" role="status" aria-live="polite"></div>';
     sheetEl = root.querySelector('.sheet'); sheetC = root.querySelector('.sheet-c'); toastEl = root.querySelector('.toast');
     watchPhotos(root);
+    fillTabs(); setupNavSpy();
     if (wasOpen) root.classList.remove('sheet-open');
     if (firstRender) {
       firstRender = false;
@@ -2998,6 +3102,23 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     const top = root.querySelector('.top');
     if (top) { const h = doc.createElement('div'); h.innerHTML = renderTop(); top.parentNode.replaceChild(h.firstChild, top); }
     mods().forEach(function (m) { if (m.type === 'horario' || m.type === 'hero' || m.type === 'promos' || m.type === 'menudia' || m.type === 'aviso') rerenderModule(m.id); });
+  }
+  /* Pestañas y barra inferior: marcan la sección que se está viendo. */
+  let navSpy = null;
+  function setupNavSpy() {
+    if (navSpy) { navSpy.disconnect(); navSpy = null; }
+    const btns = root.querySelectorAll('.tnav [data-to], .bnav [data-to]');
+    if (!btns.length || !win.IntersectionObserver) return;
+    navSpy = new win.IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        const id = en.target.id;
+        Array.prototype.forEach.call(btns, function (b) { b.classList.toggle('on', b.getAttribute('data-to') === id); });
+        const on = root.querySelector('.tnav .on');
+        if (on && on.scrollIntoView) { try { on.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { /* nada */ } }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    Array.prototype.forEach.call(btns, function (b) { const sec = doc.getElementById(b.getAttribute('data-to')); if (sec) navSpy.observe(sec); });
   }
   function setupSpy() {
     if (spy) { spy.disconnect(); spy = null; }
@@ -3033,6 +3154,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     switch (act) {
       case 'top': try { win.scrollTo({ top: 0, behavior: motion() === 'off' ? 'auto' : 'smooth' }); } catch (x) { /* nada */ } break;
       case 'nav': openNav(); break;
+      case 'bnav-order': if (cartCount()) renderCart(); else { const pm = firstMod('pedido') || firstMod('carta'); if (pm) scrollToId(anchor(pm)); } break;
       case 'goto': closeSheet(); scrollToId(d.to); break;
       case 'lang': state.lang = d.l === 'en' ? 'en' : 'es'; sset(key('lang'), state.lang); renderAll(true); break;
       case 'cat': scrollToId('c-' + d.c, 118); break;
@@ -3123,6 +3245,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     const cart = sget(key('cart'), []);
     state.cart = Array.isArray(cart) ? cart.filter(function (l) { return l && l.k && l.qty > 0; }) : [];
     root.addEventListener('click', onClick);
+    win.addEventListener('scroll', onScrollTop, { passive: true });
     root.addEventListener('input', onInput);
     root.addEventListener('submit', onSubmit);
     doc.addEventListener('keydown', onKey);
@@ -3130,6 +3253,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     timers.push(win.setInterval(refreshStatus, 60000));
     if (!PREVIEW) splashOff();
   }
+  function onScrollTop() { const on = (win.pageYOffset || 0) > 24; if (root.hasAttribute('data-scrolled') !== on) { if (on) root.setAttribute('data-scrolled', ''); else root.removeAttribute('data-scrolled'); } }
   /* Pantalla de carga (la pone el estudio al exportar): se va cuando cargan las tipografías, o al segundo y medio. */
   function splashOff() {
     const sp = doc.getElementById('bk-splash');
@@ -3174,6 +3298,8 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     destroy: function () {
       timers.forEach(function (t) { win.clearTimeout(t); win.clearInterval(t); });
       if (spy) spy.disconnect();
+      if (navSpy) navSpy.disconnect();
+      win.removeEventListener('scroll', onScrollTop);
       root.removeEventListener('click', onClick); root.removeEventListener('input', onInput); root.removeEventListener('submit', onSubmit);
       doc.removeEventListener('keydown', onKey);
       if (root.parentNode) root.parentNode.removeChild(root);
@@ -3966,6 +4092,26 @@ const STYLE = [
       { k: 'shape.border', t: 'range', label: 'Grosor del borde', min: 1, max: 4, step: .5, unit: 'px', def: 1.5, help: 'Para los estilos con borde y sombra dura.' }
     ] }
   ] },
+  { id: 'estructura', label: 'Estructura', cards: [
+    { id: 'navegacion', title: 'Navegación', fields: [
+      { k: 'nav', t: 'seg', label: 'Cómo se recorre la app', def: 'menu', opts: [['menu', 'Menú en el encabezado'], ['barra', 'Barra abajo con íconos'], ['pestanas', 'Pestañas arriba']],
+        help: 'La barra de abajo trae Inicio, Carta, hasta dos atajos del local (pedido, reservas, sellos…) y «Más». Con ella, el pedido va en la barra en lugar del botón flotante.' }
+    ] },
+    { id: 'encabezado', adv: true, title: 'Encabezado', fields: [
+      { k: 'top.align', t: 'seg', label: 'Nombre', def: 'auto', opts: [['auto', 'A la izquierda'], ['centro', 'Centrado']] },
+      { k: 'top.bg', t: 'seg', label: 'Fondo', def: 'auto', opts: [['auto', 'Según la estética'], ['solido', 'Sólido'], ['transparente', 'Transparente sobre la portada']], help: 'Transparente: deja ver la foto de la portada y se vuelve sólido al bajar.' },
+      { k: 'top.logo', t: 'bool', label: 'Mostrar el logo', def: true },
+      { k: 'top.name', t: 'bool', label: 'Mostrar el nombre', def: true },
+      { k: 'top.status', t: 'bool', label: 'Mostrar si está abierto', def: true }
+    ] },
+    { id: 'pie', title: 'Pie de página', fields: [
+      { k: 'foot.style', t: 'seg', label: 'Contenido', def: 'completo', opts: [['completo', 'Completo'], ['simple', 'Sencillo']], help: 'Completo: eslogan, horario de hoy, dirección, redes con íconos y texto legal (se escribe en Datos).' },
+      { k: 'foot.align', adv: true, t: 'seg', label: 'Alineación', def: 'auto', opts: [['auto', 'Según la estética'], ['centro', 'Centrado'], ['izq', 'A la izquierda']] },
+      { k: 'foot.tagline', adv: true, t: 'bool', label: 'Eslogan', def: true },
+      { k: 'foot.hours', adv: true, t: 'bool', label: 'Horario de hoy', def: true },
+      { k: 'foot.social', adv: true, t: 'bool', label: 'Redes con íconos', def: true }
+    ] }
+  ] },
   { id: 'imagenes', label: 'Imágenes', cards: [
     { id: 'iconos', card: 'icons', title: 'Íconos', desc: 'Lo que se ve en los platos, categorías, avisos y sellos que no tienen foto.', fields: [
       { k: 'icons', t: 'seg', label: 'Dibujos', def: 'emoji', opts: [['emoji', 'Emojis'], ['linea', 'Íconos de línea'], ['ninguno', 'Sin íconos']], help: 'Los íconos de línea toman los colores de la app. El de cada plato o categoría se cambia al editarlo en Carta.' }
@@ -4235,7 +4381,9 @@ const BRAND_FIELDS = [
   { k: 'instagram', t: 'text', label: 'Instagram', ph: 'usuario' },
   { k: 'facebook', t: 'text', label: 'Facebook', ph: 'usuario o página' },
   { k: 'tiktok', t: 'text', label: 'TikTok', ph: 'usuario' },
-  { k: 'reviewUrl', t: 'text', label: 'Enlace para dejar reseña en Google', ph: 'https://g.page/r/…' }
+  { k: 'reviewUrl', t: 'text', label: 'Enlace para dejar reseña en Google', ph: 'https://g.page/r/…' },
+  { t: 'sep', label: 'Pie de página' },
+  F.text('legal', 'Texto legal (opcional)', 'NIT 900.123.456-7 · Precios con impuestos incluidos')
 ];
 
 

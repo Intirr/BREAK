@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (514 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (534 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -32,7 +32,7 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
 ### Configuración de una app
 
-`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}, type{titleWeight,titleCase,titleSpacing,titleScale,textScale,lineHeight,priceFont}, shape{btn,btnFill,photo,chip,card,border}}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
+`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, legal, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}, type{titleWeight,titleCase,titleSpacing,titleScale,textScale,lineHeight,priceFont}, shape{btn,btnFill,photo,chip,card,border}, nav, top{align,bg,logo,name,status}, foot{style,align,tagline,hours,social}}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
 
 El logo (`brand.logo.type`) puede ser `mono` (iniciales), `emoji`, `icon` (un ícono de `ICONS`) o `img`; `shape` es `circulo`, `cuadrado` u `horizontal` (solo imágenes: se muestra completo y reemplaza el nombre en el encabezado). El ícono de la app (`brand.appIcon`) lleva el logo, las iniciales o un ícono sobre un color de la paleta; lo dibujan `svgIcon()` e `iconBlob()` en `studio.js`.
 
@@ -71,6 +71,10 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 ### Color por elemento
 
 Las reglas que pintan botones, títulos, antetítulos, precios, selección, etiquetas, encabezado y pie leen una variable de rol con el color de la estética como respaldo: `var(--c-btn, var(--accent))` y su texto `var(--c-btn-on, var(--on-accent))`. Solo los roles elegidos en `theme.roles` definen la variable (`roleVars()` en `tokensCSS()`), así que sin roles nada cambia. Si una regla nueva de estética pinta una de esas piezas, envuelve su color de la misma forma. `theme.bg` (liso, degradado o foto con velo) lo escribe `bgCSS()` sobre `html`.
+
+### Encabezado, navegación y pie
+
+`theme.nav` es `menu` (el de siempre), `barra` (barra inferior con Inicio, Carta, dos atajos y «Más»; reemplaza el botón flotante del pedido) o `pestanas` (pestañas fijas bajo el encabezado, que se llenan en `fillTabs()` con las secciones visibles). `setupNavSpy()` marca la sección que se está viendo. El encabezado transparente pone `data-scrolled` en `#bk` al bajar; las reglas que dependen de ese atributo van en `R2` dentro de `optCSS()`. El pie completo (`renderFoot()`) es el de serie; `foot.style: 'simple'` deja el de antes.
 
 ### Tipografía
 

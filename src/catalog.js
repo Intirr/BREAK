@@ -120,6 +120,26 @@ const STYLE = [
       { k: 'shape.border', t: 'range', label: 'Grosor del borde', min: 1, max: 4, step: .5, unit: 'px', def: 1.5, help: 'Para los estilos con borde y sombra dura.' }
     ] }
   ] },
+  { id: 'estructura', label: 'Estructura', cards: [
+    { id: 'navegacion', title: 'Navegación', fields: [
+      { k: 'nav', t: 'seg', label: 'Cómo se recorre la app', def: 'menu', opts: [['menu', 'Menú en el encabezado'], ['barra', 'Barra abajo con íconos'], ['pestanas', 'Pestañas arriba']],
+        help: 'La barra de abajo trae Inicio, Carta, hasta dos atajos del local (pedido, reservas, sellos…) y «Más». Con ella, el pedido va en la barra en lugar del botón flotante.' }
+    ] },
+    { id: 'encabezado', adv: true, title: 'Encabezado', fields: [
+      { k: 'top.align', t: 'seg', label: 'Nombre', def: 'auto', opts: [['auto', 'A la izquierda'], ['centro', 'Centrado']] },
+      { k: 'top.bg', t: 'seg', label: 'Fondo', def: 'auto', opts: [['auto', 'Según la estética'], ['solido', 'Sólido'], ['transparente', 'Transparente sobre la portada']], help: 'Transparente: deja ver la foto de la portada y se vuelve sólido al bajar.' },
+      { k: 'top.logo', t: 'bool', label: 'Mostrar el logo', def: true },
+      { k: 'top.name', t: 'bool', label: 'Mostrar el nombre', def: true },
+      { k: 'top.status', t: 'bool', label: 'Mostrar si está abierto', def: true }
+    ] },
+    { id: 'pie', title: 'Pie de página', fields: [
+      { k: 'foot.style', t: 'seg', label: 'Contenido', def: 'completo', opts: [['completo', 'Completo'], ['simple', 'Sencillo']], help: 'Completo: eslogan, horario de hoy, dirección, redes con íconos y texto legal (se escribe en Datos).' },
+      { k: 'foot.align', adv: true, t: 'seg', label: 'Alineación', def: 'auto', opts: [['auto', 'Según la estética'], ['centro', 'Centrado'], ['izq', 'A la izquierda']] },
+      { k: 'foot.tagline', adv: true, t: 'bool', label: 'Eslogan', def: true },
+      { k: 'foot.hours', adv: true, t: 'bool', label: 'Horario de hoy', def: true },
+      { k: 'foot.social', adv: true, t: 'bool', label: 'Redes con íconos', def: true }
+    ] }
+  ] },
   { id: 'imagenes', label: 'Imágenes', cards: [
     { id: 'iconos', card: 'icons', title: 'Íconos', desc: 'Lo que se ve en los platos, categorías, avisos y sellos que no tienen foto.', fields: [
       { k: 'icons', t: 'seg', label: 'Dibujos', def: 'emoji', opts: [['emoji', 'Emojis'], ['linea', 'Íconos de línea'], ['ninguno', 'Sin íconos']], help: 'Los íconos de línea toman los colores de la app. El de cada plato o categoría se cambia al editarlo en Carta.' }
@@ -389,5 +409,7 @@ const BRAND_FIELDS = [
   { k: 'instagram', t: 'text', label: 'Instagram', ph: 'usuario' },
   { k: 'facebook', t: 'text', label: 'Facebook', ph: 'usuario o página' },
   { k: 'tiktok', t: 'text', label: 'TikTok', ph: 'usuario' },
-  { k: 'reviewUrl', t: 'text', label: 'Enlace para dejar reseña en Google', ph: 'https://g.page/r/…' }
+  { k: 'reviewUrl', t: 'text', label: 'Enlace para dejar reseña en Google', ph: 'https://g.page/r/…' },
+  { t: 'sep', label: 'Pie de página' },
+  F.text('legal', 'Texto legal (opcional)', 'NIT 900.123.456-7 · Precios con impuestos incluidos')
 ];
