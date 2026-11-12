@@ -296,6 +296,24 @@ input[type="range"]{width:100%;accent-color:var(--carbon)}
 .img-row img{width:96px;height:64px;border-radius:9px;object-fit:cover;border:1px solid var(--rule)}
 .img-up{justify-self:start}
 .img-acts,.lib-acts{display:flex;flex-wrap:wrap;gap:8px}
+/* Miniaturas de decoración de la portada (el dibujo y su CSS vienen del motor) */
+.dths{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px}
+.dth{display:grid;gap:6px;padding:5px 5px 7px;border:1px solid var(--rule);border-radius:11px;background:var(--sheet);font-size:12.5px;font-weight:600;text-align:center;color:var(--ink2)}
+.dth:hover{border-color:var(--ink2)}
+.dth[aria-pressed="true"]{border-color:var(--carbon);box-shadow:0 0 0 1.5px var(--carbon);color:var(--ink)}
+.dth-a{position:relative;display:block;height:78px;border-radius:7px;overflow:hidden;background:var(--bg);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.dths .dth-a .art-band,.dths .dth-a .hills{position:absolute;left:0;right:0;bottom:0;width:100%;height:44px;margin:0}
+.dths .dth-a .zocalo{position:absolute;left:0;right:0;bottom:0;height:12px;margin:0}
+.dths .dth-a .art-scene,.dths .dth-a .facade{position:absolute;left:50%;top:4px;width:auto;height:58px;max-width:none;margin:0;translate:-50% 0}
+.dths .dth-a .neon{position:absolute;left:50%;top:50%;margin:0;translate:-50% -50%;font-size:15px;padding:6px 10px;border-width:2px;border-radius:10px;white-space:nowrap}
+.dths .dth-a .hero-in{position:absolute;inset:0}
+.dths .dth-a .stk{font-size:26px}
+.dths .dth-a .stk.s1{right:10%;top:10px}
+.dths .dth-a .stk.s2{right:40%;top:6px;font-size:20px}
+.dths .dth-a .stk.s3{right:66%;top:30px;font-size:22px}
+.dths .dth-a .stk.s4{right:30%;top:42px;font-size:20px}
+.dth-mono{position:absolute;left:50%;top:50%;translate:-50% -50%;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1px solid var(--accent);color:var(--accent);font:italic 24px/1 Georgia,serif}
+.dth-none{position:absolute;inset:0;display:grid;place-items:center;padding:0 8px;font-size:11.5px;font-weight:500;color:color-mix(in srgb,var(--ink) 50%,var(--bg))}
 .img-row img.op-t,.logo-row img.op-t{object-position:50% 0}
 .img-row img.op-b,.logo-row img.op-b{object-position:50% 100%}
 .libg{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:4px 0 12px}

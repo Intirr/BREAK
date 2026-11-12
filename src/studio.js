@@ -551,6 +551,15 @@
       }
       case 'list': return listHTML(f, Array.isArray(val) ? val : [], path);
       case 'icon': return icoFieldHTML({ p: path, em: f.emoji ? base + '.' + f.emoji : '', fb: f.fb || '', label: f.label });
+      case 'thumbs': {
+        /* Opciones con miniatura dibujada en los colores de la app (por ahora, la decoración de la portada). */
+        const cur = (val == null || val === '') ? (f.def || '') : val, art = artStyle();
+        return '<div class="fld"><span class="lab">' + esc(f.label) + '</span><div class="dths" role="group" aria-label="' + attr(f.label) + '">' + f.opts.map(function (o) {
+          const on = String(cur) === String(o[0]);
+          return '<button type="button" class="dth' + (on ? ' on' : '') + '" data-a="set" data-p="' + attr(path) + '" data-v="' + attr(o[0]) + '" aria-pressed="' + on + '">' +
+            '<span class="dth-a" aria-hidden="true" style="' + attr(art) + '">' + thumbArt(f.art, o[0]) + '</span><span class="dth-n">' + esc(o[1]) + '</span></button>';
+        }).join('') + '</div>' + (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
+      }
       default: ctl = '';
     }
     let html = '<div class="fld"><label class="lab" for="' + id + '">' + esc(f.label) + '</label>' + ctl + (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
@@ -560,6 +569,32 @@
     }
     return html;
   }
+  /* ---------- Miniaturas de decoración ---------- */
+  /* Colores de la app para pintar las miniaturas (los mismos que usa el motor). */
+  function artStyle() {
+    const c = S.cur.theme.colors || {}, hx = function (v, d) { return /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : d; };
+    const x = { bg: hx(c.bg, '#ffffff'), surface: hx(c.surface, '#ffffff'), ink: hx(c.ink, '#111111'), accent: hx(c.accent, '#888888'), accent2: hx(c.accent2, '#888888'), accent3: hx(c.accent3, '#888888') };
+    return '--bg:' + x.bg + ';--surface:' + x.surface + ';--ink:' + x.ink + ';--accent:' + x.accent + ';--accent2:' + x.accent2 + ';--accent3:' + x.accent3 + ';' + META.artVars(x);
+  }
+  function thumbArt(kind, v) {
+    if (kind !== 'heroDeco') return '';
+    if (v === 'ninguna') return '<span class="dth-none">Sin decoración</span>';
+    if (v === 'auto') {
+      const a = META.heroAuto[S.cur.theme.skin] || {};
+      if (a.deco) return META.heroDeco(a.deco);
+      if (a.logo) return '<span class="dth-mono">' + esc(String(S.cur.brand.name || 'B').charAt(0)) + '</span>';
+      return '<span class="dth-none">La estética no trae</span>';
+    }
+    return META.heroDeco(v);
+  }
+  /* El CSS de las decoraciones viene del motor; aquí se limita a las miniaturas. */
+  function decoStyles() {
+    if (document.getElementById('deco-css')) return;
+    const st = document.createElement('style'); st.id = 'deco-css';
+    st.textContent = String(META.decoCSS).replace(/(^|\})\s*([^{}@]+)\{/g, function (m, a, sel) { return a + sel.split(',').map(function (x) { return '.dth-a ' + x.trim(); }).join(',') + '{'; });
+    document.head.appendChild(st);
+  }
+
   /* ---------- Fotos ---------- */
   const POS_OPTS = [['top', 'Arriba'], ['center', 'Centro'], ['bottom', 'Abajo']];
   function posClass(v) { return v === 'top' ? ' class="op-t"' : v === 'bottom' ? ' class="op-b"' : ''; }
@@ -1642,6 +1677,7 @@
     if (DESKTOP.addEventListener) DESKTOP.addEventListener('change', function () { renderAll(); });
     pvBoot();
     renderAll();
+    decoStyles();
     storeInit();
     libInit();
     const H = window.claude && window.claude.hot;

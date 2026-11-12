@@ -158,6 +158,78 @@ function breakApp(win, doc, initialCfg, opts) {
   const SQUIG = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 60 10\'%3E%3Cpath d=\'M0 5Q7.5 0 15 5T30 5T45 5T60 5\' fill=\'none\' stroke=\'%23000\' stroke-width=\'2.2\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
   /* Hojas y ondas se dibujan en el fondo con el color de la paleta ya puesto (ver texCSS). */
   const LEAF_PATHS = '%3Cpath d=\'M12 30C20 21 34 21 42 30C34 39 20 39 12 30Z\' transform=\'rotate(-28 27 30)\'/%3E%3Cpath d=\'M70 22C78 13 92 13 100 22C92 31 78 31 70 22Z\' transform=\'rotate(40 85 22)\'/%3E%3Cpath d=\'M24 88C32 79 46 79 54 88C46 97 32 97 24 88Z\' transform=\'rotate(62 39 88)\'/%3E%3Cpath d=\'M76 84C84 75 98 75 106 84C98 93 84 93 76 84Z\' transform=\'rotate(-58 91 84)\'/%3E%3Ccircle cx=\'60\' cy=\'56\' r=\'3\'/%3E%3Ccircle cx=\'66\' cy=\'60\' r=\'3\'/%3E';
+  /* Ilustraciones de la región para la portada (araucarias, cafetal, guadua, termales y Willys). Se dibujan con
+     código y toman los colores de la paleta: --leaf, --water y --earth salen de artVars(). */
+const ART_CSS = [
+    '.art{display:block;fill:none}',
+    '.art-band{width:100%;height:96px;margin-top:30px}',
+    '.art-guad{height:112px}',
+    '.art-scene{width:100%;height:auto;max-width:400px;margin:0 auto 18px}',
+    '.art .a-k1{fill:color-mix(in srgb,var(--ink) 13%,var(--bg))}',
+    '.art .a-k2{fill:color-mix(in srgb,var(--ink) 28%,var(--bg))}',
+    '.art .a-t1{fill:color-mix(in srgb,var(--leaf) 30%,var(--bg))}',
+    '.art .a-t2{fill:color-mix(in srgb,var(--leaf) 72%,var(--ink))}',
+    '.art .a-gr{fill:color-mix(in srgb,var(--leaf) 45%,var(--ink))}',
+    '.art .a-l1{fill:color-mix(in srgb,var(--leaf) 34%,var(--bg))}',
+    '.art .a-l2{fill:color-mix(in srgb,var(--leaf) 80%,var(--ink))}',
+    '.art .a-l3{fill:color-mix(in srgb,var(--leaf) 55%,var(--ink))}',
+    '.art .a-cu{fill:color-mix(in srgb,var(--leaf) 58%,var(--bg))}',
+    '.art .a-ch{stroke:var(--earth);stroke-width:4.2;stroke-linecap:round}',
+    '.art .a-nd{stroke:color-mix(in srgb,var(--leaf) 65%,var(--ink));stroke-width:1.8;stroke-linecap:round}',
+    '.art .a-w1{fill:color-mix(in srgb,var(--water) 70%,var(--bg))}',
+    '.art .a-w2{fill:color-mix(in srgb,var(--water) 40%,var(--bg))}',
+    '.art .a-wf{stroke:color-mix(in srgb,var(--water) 35%,var(--surface));stroke-width:3;stroke-linecap:round}',
+    '.art .a-st{stroke:color-mix(in srgb,var(--ink) 30%,var(--bg));stroke-width:3;stroke-linecap:round;opacity:.8}',
+    '.art .a-bd{fill:var(--accent)}',
+    '.art .a-bd2{fill:color-mix(in srgb,var(--accent) 70%,var(--ink))}',
+    '.art .a-fr{stroke:color-mix(in srgb,var(--ink) 80%,var(--accent));stroke-width:4;stroke-linecap:round;stroke-linejoin:round}',
+    '.art .a-lt{fill:color-mix(in srgb,var(--accent3) 40%,var(--surface));stroke:color-mix(in srgb,var(--ink) 80%,var(--accent));stroke-width:3}',
+    '.art .a-wh{fill:color-mix(in srgb,var(--ink) 88%,var(--bg))}',
+    '.art .a-hub{fill:color-mix(in srgb,var(--ink) 18%,var(--surface))}',
+    '.art .a-sk{fill:color-mix(in srgb,var(--accent3) 55%,var(--surface))}',
+    '.art .a-sk2{fill:color-mix(in srgb,var(--accent3) 75%,var(--ink))}',
+    '.art .a-sk3{stroke:color-mix(in srgb,var(--accent3) 45%,var(--ink));stroke-width:2;stroke-linecap:round}',
+    '.art .a-pl{fill:color-mix(in srgb,#e8c547 70%,var(--accent3))}'
+  ].join('\n');
+  /* Decoraciones de la portada. Están en la base para que cualquier estética las use (opción deco de la portada)
+     y el estudio las reutiliza en sus miniaturas (opts.meta). */
+  const DECO_CSS = `
+.hero-mono{display:flex;margin-bottom:24px}
+.zocalo{height:26px;margin-top:34px;background:${ZZ}}
+.facade{display:block;width:100%;height:auto;max-width:440px;margin:0 auto 20px}
+.facade .f-wall{fill:var(--surface);stroke:color-mix(in srgb,var(--ink) 20%,transparent);stroke-width:1.5}
+.facade .f-roof{fill:var(--accent)}
+.facade .f-eave{fill:color-mix(in srgb,var(--ink) 65%,var(--accent))}
+.facade .f-frame,.facade .f-bal,.facade .f-z1{fill:var(--accent2)}
+.facade .f-shut,.facade .f-door{fill:var(--accent3)}
+.facade .f-doorframe{fill:var(--accent2)}
+.facade .f-glass{fill:color-mix(in srgb,var(--ink) 78%,var(--accent3))}
+.facade .f-rail{stroke:var(--accent2);stroke-width:3;fill:none}
+.facade .f-grille{stroke:color-mix(in srgb,var(--surface) 70%,transparent);stroke-width:2;fill:none}
+.facade .f-z2{fill:var(--accent)}
+.facade .f-z3{fill:var(--surface)}
+.facade .f-ground{fill:color-mix(in srgb,var(--ink) 16%,transparent)}
+.facade .f-flower{fill:var(--accent)}
+.facade .f-flower2{fill:color-mix(in srgb,var(--accent2) 60%,var(--surface))}
+.stk{position:absolute;font-size:46px;line-height:1;pointer-events:none;z-index:1;filter:drop-shadow(3px 3px 0 var(--ink))}
+.stk.s1{right:4%;top:6px;rotate:14deg}
+.stk.s2{right:20%;top:-14px;font-size:34px;rotate:-12deg}
+.stk.s3{right:2%;top:86px;font-size:38px;rotate:-8deg}
+.stk.s4{right:26%;top:62px;font-size:30px;rotate:18deg}
+[data-motion="vivo"] .stk{animation:float 3.2s ease-in-out infinite}
+[data-motion="vivo"] .stk.s2{animation-delay:-1.1s}
+[data-motion="vivo"] .stk.s3{animation-delay:-2s}
+[data-motion="vivo"] .stk.s4{animation-delay:-.6s}
+.hills{display:block;width:100%;height:72px;margin-top:30px}
+.hills .hl1{fill:color-mix(in srgb,var(--accent3) 50%,var(--bg))}
+.hills .hl2{fill:color-mix(in srgb,var(--accent) 62%,var(--bg))}
+.hills .hl3{fill:var(--accent)}
+.hills .hrw{fill:none;stroke:color-mix(in srgb,var(--accent) 55%,var(--ink));stroke-width:3.2;stroke-linecap:round;stroke-dasharray:.1 7;vector-effect:non-scaling-stroke}
+.neon{display:inline-block;margin:6px 0 26px;padding:11px 20px 10px;border:2.5px solid var(--accent2);border-radius:16px;font-family:var(--fd);font-size:28px;line-height:1;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb,var(--accent2) 30%,var(--ink));text-shadow:0 0 4px var(--accent2),0 0 16px var(--accent2),0 0 34px color-mix(in srgb,var(--accent2) 70%,transparent);box-shadow:0 0 6px var(--accent2),0 0 24px color-mix(in srgb,var(--accent2) 55%,transparent),inset 0 0 14px color-mix(in srgb,var(--accent2) 40%,transparent);rotate:-3deg}
+.neon.off{border-color:color-mix(in srgb,var(--ink) 24%,transparent);color:color-mix(in srgb,var(--ink) 34%,transparent);text-shadow:none;box-shadow:none}
+[data-motion="vivo"] .neon.on{animation:flick 6s linear infinite}
+.d-stickers .hero-t,.d-stickers .hero-s{position:relative;z-index:2}
+${ART_CSS}`;
   const CSS_BASE = `
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -243,7 +315,6 @@ a{color:inherit}
 .ribbon{margin-top:34px;overflow:hidden;white-space:nowrap;font-size:14px;color:var(--muted);padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
 .ribbon-track{display:inline-flex}
 .ribbon-track span{padding-right:26px}
-.zocalo{height:26px;margin-top:34px;background:${ZZ}}
 .hero-box{position:relative;--fit:calc((min(100vw,600px) - 46px) / (var(--wl,6) * var(--gw,.56)))}
 .hero-box.has-img{display:flex;flex-direction:column;justify-content:flex-end;min-height:min(66vh,560px);padding-top:84px;isolation:isolate}
 section.m-hero:has(.hero-box.has-img:not(.ph-fail)){padding-top:0}
@@ -254,6 +325,16 @@ section.m-hero:has(.hero-box.has-img:not(.ph-fail)){padding-top:0}
 .hero-box.ph-fail{min-height:0;padding-top:0}
 .ph-fail .hero-ph{display:none}
 .ph-fail .ph-note{display:block}
+.hero-box.v-arriba .hero-ph{position:relative;inset:auto;z-index:auto;aspect-ratio:4/3;max-height:62vh;margin:0 0 30px;-webkit-mask-image:none;mask-image:none}
+section.m-hero:has(.hero-box.v-arriba:not(.ph-fail)){padding-top:0}
+.hero-box.v-tarjeta{padding-bottom:20px}
+.hero-box.v-tarjeta .hero-in{margin-inline:16px;padding:24px 20px 26px;border-radius:max(var(--r),12px);background:color-mix(in srgb,var(--surface) 94%,transparent);box-shadow:0 22px 44px -26px rgba(0,0,0,.55)}
+.hero-box.v-tarjeta .ribbon{margin-top:22px;padding:0}
+.hero-box.has-img.hh-baja{min-height:min(46vh,400px)}
+.hero-box.has-img.hh-alta{min-height:min(88svh,780px)}
+.hero-box.v-arriba.hh-baja .hero-ph{aspect-ratio:16/9}
+.hero-box.v-arriba.hh-alta .hero-ph{aspect-ratio:4/5;max-height:76svh}
+.hero-box.hh-alta:not(.has-img):not(.v-arriba){display:flex;flex-direction:column;justify-content:center;min-height:min(78svh,720px)}
 .hs-s{--hs:.78}
 .hs-l{--hs:1.14}
 .al-izq .hero-in,.hero-box.al-izq .ribbon{text-align:left}
@@ -529,21 +610,7 @@ textarea.inp{resize:vertical;min-height:76px}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
 .confetti i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation:fall 1.3s ease-in forwards}
 @keyframes fall{to{transform:translate(var(--dx),105vh) rotate(var(--rot))}}
-.facade{display:block;width:100%;height:auto;max-width:440px;margin:0 auto 20px}
-.facade .f-wall{fill:var(--surface);stroke:color-mix(in srgb,var(--ink) 20%,transparent);stroke-width:1.5}
-.facade .f-roof{fill:var(--accent)}
-.facade .f-eave{fill:color-mix(in srgb,var(--ink) 65%,var(--accent))}
-.facade .f-frame,.facade .f-bal,.facade .f-z1{fill:var(--accent2)}
-.facade .f-shut,.facade .f-door{fill:var(--accent3)}
-.facade .f-doorframe{fill:var(--accent2)}
-.facade .f-glass{fill:color-mix(in srgb,var(--ink) 78%,var(--accent3))}
-.facade .f-rail{stroke:var(--accent2);stroke-width:3;fill:none}
-.facade .f-grille{stroke:color-mix(in srgb,var(--surface) 70%,transparent);stroke-width:2;fill:none}
-.facade .f-z2{fill:var(--accent)}
-.facade .f-z3{fill:var(--surface)}
-.facade .f-ground{fill:color-mix(in srgb,var(--ink) 16%,transparent)}
-.facade .f-flower{fill:var(--accent)}
-.facade .f-flower2{fill:color-mix(in srgb,var(--accent2) 60%,var(--surface))}
+${DECO_CSS}
 html[data-tex="puntos"] body{background-image:radial-gradient(color-mix(in srgb,var(--ink) 11%,transparent) 1.2px,transparent 1.5px);background-size:18px 18px}
 html[data-tex="rayas"] body{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 5%,transparent) 0 2px,transparent 2px 13px)}
 html[data-tex="grano"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
@@ -558,6 +625,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 @keyframes pop{from{transform:translateY(22px) scale(.96);opacity:0}}
 @keyframes wiggle{25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
 @keyframes float{50%{translate:0 -10px}}
+@keyframes flick{0%,6%,8.5%,62%,64%,100%{opacity:1}7%,63%{opacity:.5}}
 @keyframes marq{to{transform:translateX(-50%)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 `;
@@ -653,15 +721,6 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="animado"] .hero-k{display:inline-block;background:var(--ink);color:var(--bg);padding:6px 13px;border-radius:999px;transform:rotate(-2.5deg);letter-spacing:.12em;font-weight:800}
 [data-skin="animado"] .hero-t{font-size:min(calc(clamp(66px,21vw,108px) * var(--hs,1)),var(--fit,999px));line-height:.9;color:var(--ink);text-shadow:4px 4px 0 var(--accent);letter-spacing:.01em;position:relative;z-index:2}
 [data-skin="animado"] .hero-s{color:var(--ink);font-weight:700;font-size:19px;position:relative;z-index:2}
-[data-skin="animado"] .stk{position:absolute;font-size:46px;line-height:1;pointer-events:none;z-index:1;filter:drop-shadow(3px 3px 0 var(--ink))}
-[data-skin="animado"] .stk.s1{right:4%;top:6px;rotate:14deg}
-[data-skin="animado"] .stk.s2{right:20%;top:-14px;font-size:34px;rotate:-12deg}
-[data-skin="animado"] .stk.s3{right:2%;top:86px;font-size:38px;rotate:-8deg}
-[data-skin="animado"] .stk.s4{right:26%;top:62px;font-size:30px;rotate:18deg}
-[data-skin="animado"][data-motion="vivo"] .stk{animation:float 3.2s ease-in-out infinite}
-[data-skin="animado"][data-motion="vivo"] .stk.s2{animation-delay:-1.1s}
-[data-skin="animado"][data-motion="vivo"] .stk.s3{animation-delay:-2s}
-[data-skin="animado"][data-motion="vivo"] .stk.s4{animation-delay:-.6s}
 [data-skin="animado"] .btn{border:2.5px solid var(--ink);border-radius:999px;box-shadow:4px 4px 0 var(--ink);font-weight:800;font-size:16px}
 [data-skin="animado"] .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
 [data-skin="animado"] .btn.pri{color:var(--on-accent)}
@@ -796,11 +855,6 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="natural"] .ribbon-track{display:flex;flex-wrap:wrap;gap:4px 0}
 [data-skin="natural"] .ribbon-track span{padding:0 10px 0 0}
 [data-skin="natural"] .ribbon-track span:not(:last-child)::after{content:"";display:inline-block;width:14px;height:9px;margin-left:10px;background:var(--accent);-webkit-mask:${LEAF} center/contain no-repeat;mask:${LEAF} center/contain no-repeat}
-[data-skin="natural"] .hills{display:block;width:100%;height:72px;margin-top:30px}
-[data-skin="natural"] .hills .hl1{fill:color-mix(in srgb,var(--accent3) 50%,var(--bg))}
-[data-skin="natural"] .hills .hl2{fill:color-mix(in srgb,var(--accent) 62%,var(--bg))}
-[data-skin="natural"] .hills .hl3{fill:var(--accent)}
-[data-skin="natural"] .hills .hrw{fill:none;stroke:color-mix(in srgb,var(--accent) 55%,var(--ink));stroke-width:3.2;stroke-linecap:round;stroke-dasharray:.1 7;vector-effect:non-scaling-stroke}
 [data-skin="natural"] .sh-k{color:var(--accent);letter-spacing:.14em;font-weight:800}
 [data-skin="natural"] .sh-t{font-size:clamp(32px,8.8vw,44px);letter-spacing:-.01em}
 [data-skin="natural"] .sh .orn{display:block;width:84px;height:11px;margin-top:12px;background:var(--accent3);-webkit-mask:${SQUIG} 0 50%/42px 11px repeat-x;mask:${SQUIG} 0 50%/42px 11px repeat-x}
@@ -844,10 +898,6 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="nocturna"] .status.on i{box-shadow:0 0 10px 2px color-mix(in srgb,#2fbf71 80%,transparent)}
 [data-skin="nocturna"] .lang button.on{background:var(--accent2);color:var(--on-accent2)}
 [data-skin="nocturna"] .m-hero{padding-block:34px 0;overflow:hidden}
-[data-skin="nocturna"] .neon{display:inline-block;margin:6px 0 26px;padding:11px 20px 10px;border:2.5px solid var(--accent2);border-radius:16px;font-family:var(--fd);font-size:28px;line-height:1;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb,var(--accent2) 30%,var(--ink));text-shadow:0 0 4px var(--accent2),0 0 16px var(--accent2),0 0 34px color-mix(in srgb,var(--accent2) 70%,transparent);box-shadow:0 0 6px var(--accent2),0 0 24px color-mix(in srgb,var(--accent2) 55%,transparent),inset 0 0 14px color-mix(in srgb,var(--accent2) 40%,transparent);rotate:-3deg}
-[data-skin="nocturna"] .neon.off{border-color:color-mix(in srgb,var(--ink) 24%,transparent);color:color-mix(in srgb,var(--ink) 34%,transparent);text-shadow:none;box-shadow:none}
-[data-skin="nocturna"][data-motion="vivo"] .neon.on{animation:flick 6s linear infinite}
-@keyframes flick{0%,6%,8.5%,62%,64%,100%{opacity:1}7%,63%{opacity:.5}}
 [data-skin="nocturna"] .hero-k{color:var(--accent2);letter-spacing:.26em;font-weight:600}
 [data-skin="nocturna"] .hero-t{font-size:min(calc(clamp(58px,17vw,100px) * var(--hs,1)),var(--fit,999px));line-height:.92;letter-spacing:.01em;color:color-mix(in srgb,var(--accent) 22%,var(--ink));text-shadow:0 0 6px color-mix(in srgb,var(--accent) 85%,transparent),0 0 26px color-mix(in srgb,var(--accent) 60%,transparent),0 0 60px color-mix(in srgb,var(--accent) 40%,transparent)}
 [data-skin="nocturna"] .hero-s{font-size:18px}
@@ -1109,8 +1159,22 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       Array.from(row.slice(i + 1).replace(/[️‍]/g, '')).forEach(function (e) { if (!EMO_ICON[e]) EMO_ICON[e] = key; });
     });
 
+  /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {} };
+  const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
+  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys'];
+  const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG };
+  /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
+  function decoPreview(k) {
+    if (k === 'stickers') return '<div class="hero-in">' + ['☕', '🧁', '🍓', '🥐'].map(function (e, i) { return '<span class="stk s' + (i + 1) + '">' + e + '</span>'; }).join('') + '</div>';
+    if (k === 'fachada') return facadeSVG('') + '<div class="zocalo"></div>';
+    if (k === 'lomas') return hillsSVG();
+    if (k === 'neon') return '<p class="neon on">Abierto</p>';
+    return ART[k] ? ART[k]() : '';
+  }
   /* El estudio pide las constantes del motor (tipografías, estéticas, íconos…) para no repetirlas en su catálogo. */
-  if (opts.meta) return { fonts: FONTS, skins: Object.keys(CSS_SKIN), tags: TAG_ORDER, icons: ICONS, iconSets: ICON_SETS, emoIcon: EMO_ICON, iconOf: emoIcon, glyph: glyphOf };
+  if (opts.meta) return { fonts: FONTS, skins: Object.keys(CSS_SKIN), tags: TAG_ORDER, icons: ICONS, iconSets: ICON_SETS, emoIcon: EMO_ICON, iconOf: emoIcon, glyph: glyphOf,
+    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview };
 
   /* ---------- Estado ---------- */
   let cfg = normalize(initialCfg);
@@ -1341,10 +1405,10 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     if (!ordering() || it.on === false) return '';
     return '<button class="add" data-act="add" data-id="' + attr(it.id) + '" aria-label="' + attr(ui('add') + ' ' + tx(it, 'name')) + '">' + ico('mas') + qBadge(it.id) + '</button>';
   }
-  function facadeSVG() {
+  function facadeSVG(label) {
     let rail = '';
     for (let x = 46; x <= 314; x += 12) rail += 'M' + x + ' 76V96';
-    let s = '<svg class="facade" viewBox="0 0 360 228" role="img" aria-label="' + attr(ui('facade')) + '">';
+    let s = '<svg class="facade" viewBox="0 0 360 228" role="img" aria-label="' + esc(label) + '">';
     s += '<defs><pattern id="bk-zp" width="20" height="20" patternUnits="userSpaceOnUse"><rect class="f-z1" width="20" height="20"/><path class="f-z2" d="M10 2 18 10 10 18 2 10Z"/><circle class="f-z3" cx="10" cy="10" r="2.6"/></pattern></defs>';
     s += '<rect class="f-ground" x="0" y="214" width="360" height="10" rx="2"/>';
     s += '<rect class="f-wall" x="26" y="38" width="308" height="176"/>';
@@ -1372,6 +1436,131 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       '<path class="hrw" d="M12 68C70 52 124 50 184 62M28 77C84 63 140 61 198 71M204 64C254 76 302 80 350 68M224 74C270 84 318 86 372 76"/>' +
       '<path class="hl3" d="M0 80C80 70 160 72 240 80S360 86 400 80V90H0Z"/>' +
       '</svg>';
+  }
+  function artRnd(seed) { let s = seed >>> 0; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+  function r1(n) { return Math.round(n * 10) / 10; }
+
+  /* Araucarias del parque: pinos de pisos horizontales, dos filas, sobre el suelo. Franja de abajo. */
+  function araucariasSVG() {
+    const r = artRnd(7);
+    let back = '', front = '';
+    const tree = function (x, h, w) {
+      const base = 116, top = base - h, tiers = Math.max(5, Math.round(h / 13));
+      let d = 'M' + r1(x - 1.6) + ' ' + base + 'V' + r1(top + 6) + 'H' + r1(x + 1.6) + 'V' + base + 'Z';
+      for (let i = 0; i < tiers; i++) {
+        const t = i / (tiers - 1), y = base - h * 0.2 - (h * 0.76) * t, hw = w * Math.pow(1 - t * 0.86, 1.15) + 2, th = 2.6 + 2.4 * (1 - t);
+        d += 'M' + r1(x - hw) + ' ' + r1(y + th) + 'Q' + r1(x - hw * 0.45) + ' ' + r1(y - th * 0.9) + ' ' + r1(x) + ' ' + r1(y - th * 0.7) + 'Q' + r1(x + hw * 0.45) + ' ' + r1(y - th * 0.9) + ' ' + r1(x + hw) + ' ' + r1(y + th) +
+          'Q' + r1(x) + ' ' + r1(y + th * 0.2) + ' ' + r1(x - hw) + ' ' + r1(y + th) + 'Z';
+      }
+      d += 'M' + r1(x) + ' ' + r1(top - 4) + 'L' + r1(x + 2.2) + ' ' + r1(top + 6) + 'H' + r1(x - 2.2) + 'Z';
+      return d;
+    };
+    [30, 110, 175, 262, 340, 418, 492, 570].forEach(function (x) { back += tree(x + r() * 16, 62 + r() * 26, 17 + r() * 6); });
+    [72, 214, 380, 528].forEach(function (x) { front += tree(x + r() * 20, 92 + r() * 22, 25 + r() * 6); });
+    return '<svg class="art art-band art-arau" viewBox="0 0 600 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">' +
+      '<path class="a-t1" d="' + back + '"/><path class="a-t2" d="' + front + '"/>' +
+      '<path class="a-gr" d="M0 114C120 110 240 112 360 113S540 116 600 112V120H0Z"/></svg>';
+  }
+
+  /* Cafetal en ladera: lomas con surcos de matas de café y granos maduros. Franja de abajo. */
+  function cafetalSVG() {
+    const r = artRnd(11);
+    let bush = '', cherry = '';
+    const rows = [[60, 0.20], [74, 0.22], [89, 0.25], [104, 0.28]];
+    rows.forEach(function (row, ri) {
+      const y0 = row[0], step = 22 - ri * 1.5;
+      for (let x = 6 + ri * 7; x < 600; x += step) {
+        const y = y0 + Math.sin((x + ri * 40) / 95) * 7, s = 6.5 + ri * 1.6 + r() * 1.5;
+        bush += 'M' + r1(x - s) + ' ' + r1(y) + 'a' + r1(s) + ' ' + r1(s * 0.8) + ' 0 0 1 ' + r1(s * 2) + ' 0Z';
+        if (r() < 0.45) cherry += 'M' + r1(x - s * 0.35 + r() * s * 0.7) + ' ' + r1(y - s * 0.35) + 'h.1';
+      }
+    });
+    return '<svg class="art art-band art-cafe" viewBox="0 0 600 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">' +
+      '<path class="a-k1" d="M0 52C90 30 170 26 260 40S420 66 520 44 590 32 600 34V120H0Z"/>' +
+      '<path class="a-l1" d="M0 66C110 50 220 52 330 62S520 78 600 64V120H0Z"/>' +
+      '<path class="a-l2" d="' + bush + '"/><path class="a-ch" d="' + cherry + '"/>' +
+      '<path class="a-l3" d="M0 112C150 104 300 108 450 112S570 116 600 110V120H0Z"/></svg>';
+  }
+
+  /* Guadual: cañas de guadua con nudos y hojas angostas. Franja de abajo. */
+  function guaduaSVG() {
+    const r = artRnd(5);
+    let culm = '', node = '', leaf = '';
+    for (let i = 0; i < 21; i++) {
+      const x = 10 + i * 29 + r() * 12, h = 62 + r() * 64, w = 6.5 + r() * 3.5, lean = (r() - 0.5) * 10, top = 128 - h;
+      culm += 'M' + r1(x - w / 2) + ' 130L' + r1(x - w / 2 + lean) + ' ' + r1(top + 3) + 'Q' + r1(x + lean) + ' ' + r1(top - 2) + ' ' + r1(x + w / 2 + lean) + ' ' + r1(top + 3) + 'L' + r1(x + w / 2) + ' 130Z';
+      for (let y = 120; y > top + 8; y -= 15 + r() * 3) {
+        const k = (130 - y) / h, xx = x + lean * k;
+        node += 'M' + r1(xx - w / 2 - 0.8) + ' ' + r1(y) + 'h' + r1(w + 1.6);
+        if (y < top + h * 0.55 && r() < 0.55) {
+          const dir = r() < 0.5 ? -1 : 1, L = 13 + r() * 9, dy = 3 + r() * 5;
+          leaf += 'M' + r1(xx) + ' ' + r1(y) + 'q' + r1(dir * L * 0.5) + ' ' + r1(-dy - 3) + ' ' + r1(dir * L) + ' ' + r1(-dy + 4) + 'q' + r1(-dir * L * 0.55) + ' ' + r1(-1) + ' ' + r1(-dir * L) + ' ' + r1(dy - 4) + 'Z';
+        }
+      }
+    }
+    return '<svg class="art art-band art-guad" viewBox="0 0 600 130" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">' +
+      '<path class="a-cu" d="' + culm + '"/><path class="a-nd" d="' + node + '"/><path class="a-l2" d="' + leaf + '"/>' +
+      '<path class="a-k1" d="M0 124C150 120 300 122 450 125S570 126 600 122V130H0Z"/></svg>';
+  }
+
+  /* Termales: montañas, cascada que cae a un pozo y vapor. Escena arriba del título. */
+  function termalesSVG() {
+    return '<svg class="art art-scene art-term" viewBox="0 0 360 190" aria-hidden="true" focusable="false">' +
+      '<path class="a-k1" d="M0 120 52 62l30 26 46-58 54 52 30-22 52 46 34-30 62 60V190H0Z"/>' +
+      '<path class="a-k2" d="M0 150 40 118l34 18 38-30 46 34 26-14V190H0Z"/>' +
+      '<path class="a-k2" d="M226 190V92c8-6 16-8 26-6l18 4c10 3 20 3 30 0l60-12V190Z"/>' +
+      '<path class="a-wf" d="M232 94c2 24 1 46 3 70M241 92c1 24 0 48 2 72M250 90c2 26 1 50 3 74"/>' +
+      '<ellipse class="a-k2" cx="168" cy="170" rx="126" ry="19"/>' +
+      '<ellipse class="a-w1" cx="168" cy="167" rx="114" ry="14"/>' +
+      '<ellipse class="a-w2" cx="160" cy="165" rx="70" ry="6"/>' +
+      '<path class="a-k2" d="M50 170c6-8 16-9 22-2 3-5 10-6 14 0H50ZM262 168c5-9 15-10 22-3 4-4 11-4 14 3H262Z"/>' +
+      '<path class="a-st" d="M96 152c-8-9 8-15 0-25s8-15 0-24M136 148c-9-10 9-16 0-28s9-18 0-32M176 146c-9-10 9-17 0-30s9-18 0-34M214 150c-9-10 9-16 0-28s9-16 0-26"/></svg>';
+  }
+
+  /* Jeep Willys cargado con bultos de café y racimos de plátano. Escena arriba del título. */
+  function willysSVG() {
+    return '<svg class="art art-scene art-will" viewBox="0 0 360 200" aria-hidden="true" focusable="false">' +
+      '<ellipse class="a-k1" cx="180" cy="184" rx="150" ry="7"/>' +
+      /* carga: bultos y racimos */
+      '<rect class="a-sk" x="84" y="66" width="56" height="34" rx="12"/><rect class="a-sk" x="128" y="58" width="54" height="40" rx="13"/><rect class="a-sk2" x="104" y="44" width="52" height="30" rx="11"/>' +
+      '<path class="a-sk3" d="M98 78h28M142 74h26M118 56h24"/>' +
+      '<path class="a-pl" d="M176 70c8-14 22-18 34-12-8 2-14 8-16 16-6-6-12-6-18-4Z"/>' +
+      /* cuerpo */
+      '<path class="a-bd" d="M62 98h168v-6h36l38 8c6 1 10 6 10 12v26c0 5-4 8-8 8H62c-6 0-10-4-10-10v-28c0-6 4-10 10-10Z"/>' +
+      '<path class="a-bd2" d="M62 98h168v14H52v-4c0-6 4-10 10-10Z"/>' +
+      /* parabrisas y volante */
+      '<path class="a-fr" d="M228 98 214 52M240 98 226 52M212 52h16"/>' +
+      '<path class="a-fr" d="M200 98v-16l12-6"/>' +
+      /* farol y parrilla */
+      '<circle class="a-lt" cx="298" cy="114" r="6"/><path class="a-fr" d="M306 122v18M312 122v18"/>' +
+      /* llanta de repuesto */
+      '<circle class="a-wh" cx="46" cy="118" r="17"/><circle class="a-hub" cx="46" cy="118" r="7"/>' +
+      /* guardabarros y ruedas */
+      '<path class="a-bd2" d="M82 146a32 32 0 0 1 64 0ZM226 146a32 32 0 0 1 64 0Z"/>' +
+      '<circle class="a-wh" cx="114" cy="156" r="25"/><circle class="a-hub" cx="114" cy="156" r="10"/>' +
+      '<circle class="a-wh" cx="258" cy="156" r="25"/><circle class="a-hub" cx="258" cy="156" r="10"/></svg>';
+  }
+
+  /* Colores para las ilustraciones, sacados de la paleta: el acento más verde para las hojas, el más azul
+     para el agua y el más rojo para los granos. Si ninguno se parece, un tono del texto o el acento. */
+  function hexHSL(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '')); if (!m) return null;
+    const n = parseInt(m[1], 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+    if (!d) return { h: 0, s: 0, l: l };
+    const s = d / (1 - Math.abs(2 * l - 1));
+    let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h *= 60; if (h < 0) h += 360;
+    return { h: h, s: s, l: l };
+  }
+  function artVars(c) {
+    const cols = [c.accent, c.accent2, c.accent3];
+    const near = function (target, max, minS) {
+      let best = null, bd = 999;
+      cols.forEach(function (x) { const q = hexHSL(x); if (!q || q.s < minS || q.l < 0.12 || q.l > 0.9) return; const d = Math.min(Math.abs(q.h - target), 360 - Math.abs(q.h - target)); if (d <= max && d < bd) { bd = d; best = x; } });
+      return best;
+    };
+    return '--leaf:' + (near(115, 65, 0.18) || 'color-mix(in srgb,var(--ink) 62%,var(--bg))') + ';--water:' + (near(200, 50, 0.2) || 'color-mix(in srgb,var(--ink) 28%,var(--bg))') + ';--earth:' + (near(8, 40, 0.3) || 'var(--accent)');
   }
   function stickersHTML() {
     const ems = [];
@@ -1423,34 +1612,45 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       const btns = [s.cta1, s.cta2].filter(function (c, i, a) { return c && c !== 'none' && ctaOk(c) && a.indexOf(c) === i; })
         .map(function (c, i) { return '<button class="btn ' + (i === 0 ? 'pri' : 'ghost') + '" data-act="cta" data-to="' + attr(c) + '">' + esc(ui('cta_' + c)) + '</button>'; }).join('');
       const st = s.showStatus !== false ? statusInfo() : null;
+      /* Diseño: según la foto (auto), solo texto, foto completa con velo, foto arriba o tarjeta sobre la foto. */
+      const variant = HERO_VARIANTS.indexOf(s.variant) >= 0 ? s.variant : 'auto';
       /* Foto de portada: enlace https o imagen subida; el velo es el color de fondo para que el texto se lea. */
-      const img = safeImg(s.img);
+      const img = variant === 'texto' ? '' : safeImg(s.img);
+      const v = img ? (variant === 'arriba' || variant === 'tarjeta' ? variant : 'foto') : 'texto';
+      const auto = HERO_AUTO[skin] || {};
+      const dk = s.deco === 'ninguna' ? '' : (HERO_DECOS.indexOf(s.deco) >= 0 ? s.deco : (auto.deco || ''));
+      const showLogo = s.logo === 'si' ? true : s.logo === 'no' ? false : !!auto.logo;
+      const hh = s.height === 'baja' || s.height === 'alta' ? s.height : '';
       const veil = { '40': 40, '60': 60, '80': 80 }[String(s.veil)] || 60;
       const align = s.align === 'izq' || s.align === 'centro' ? s.align : '';
       const size = s.size === 's' || s.size === 'l' ? s.size : '';
-      let deco = '';
-      if (skin === 'elegante') deco = '<div class="hero-mono">' + logoHTML('lg') + '</div>';
-      else if (skin === 'animado') deco = stickersHTML();
-      else if (skin === 'cultural' && !img) deco = facadeSVG();
-      else if (skin === 'nocturna' && st) deco = '<p class="neon ' + (st.open ? 'on' : 'off') + '" aria-hidden="true">' + esc(st.open ? ui('open') : ui('closed')) + '</p>';
+      /* Piezas de arriba (logo, stickers, escena o letrero) y franjas de abajo (zócalo, lomas, árboles…). */
+      let deco = '', band = '';
+      if (showLogo) deco += '<div class="hero-mono">' + logoHTML('lg') + '</div>';
+      if (dk === 'stickers') deco += stickersHTML();
+      else if (dk === 'fachada') { if (v === 'texto') deco += facadeSVG(ui('facade')); band = '<div class="zocalo" aria-hidden="true"></div>'; }
+      else if (dk === 'neon') { if (st) deco += '<p class="neon ' + (st.open ? 'on' : 'off') + '" aria-hidden="true">' + esc(st.open ? ui('open') : ui('closed')) + '</p>'; }
+      else if (dk === 'lomas') band = hillsSVG();
+      else if (dk === 'termales' || dk === 'willys') { if (v === 'texto') deco += ART[dk](); }
+      else if (dk) band = ART[dk]();
+      const needPh = PREVIEW && !img && (variant === 'foto' || variant === 'arriba' || variant === 'tarjeta') ? '<div class="wrap"><p class="pv-empty">Este diseño de portada necesita una foto. Súbela en «Foto de portada».</p></div>' : '';
       /* En la minimalista el título cierra con un punto del color de acento, salvo que ya termine en un signo. */
       const dot = skin === 'minimalista' && /[\p{L}\p{N}]$/u.test(title) ? '<span class="dot" aria-hidden="true">.</span>' : '';
       const ribbon = splitList(tx(s, 'ribbon'));
-      const photo = img ? '<div class="hero-ph" aria-hidden="true"><img src="' + attr(img) + '" alt="" fetchpriority="high"' + posAttr(s.imgPos) + '><i style="--veil:' + veil + '%"></i></div>' +
+      const photo = img ? '<div class="hero-ph" aria-hidden="true"><img src="' + attr(img) + '" alt="" fetchpriority="high"' + posAttr(s.imgPos) + '>' + (v === 'foto' ? '<i style="--veil:' + veil + '%"></i>' : '') + '</div>' +
         (PREVIEW && !/^data:/.test(img) && !/^asset:/.test(String(s.img).trim()) ? '<p class="pv-empty ph-note">No se pudo cargar la foto. En la vista previa de claude.ai solo se ven las fotos subidas desde el estudio; los enlaces https sí se ven en la app publicada.</p>' : '') : '';
       /* Largo de la palabra más larga: el CSS limita el tamaño del título para que no se parta a la mitad. */
       const wl = Math.max(5, Math.max.apply(null, String(title).split(/\s+/).map(function (w) { return w.length; }))) + (dot ? 1 : 0);
-      return '<div class="hero-box' + (img ? ' has-img' : '') + (align ? ' al-' + align : '') + (size ? ' hs-' + size : '') + '" style="--wl:' + wl + '">' + photo +
+      return needPh + '<div class="hero-box' + (v === 'foto' || v === 'tarjeta' ? ' has-img' : '') + (v === 'arriba' || v === 'tarjeta' ? ' v-' + v : '') + (hh ? ' hh-' + hh : '') + (dk ? ' d-' + dk : '') +
+        (align ? ' al-' + align : '') + (size ? ' hs-' + size : '') + '" style="--wl:' + wl + '">' + photo +
         '<div class="hero-in wrap">' + deco +
         (kicker ? '<p class="hero-k">' + esc(kicker) + '</p>' : '') +
         '<h1 class="hero-t">' + esc(title) + dot + '</h1>' +
         (sub ? '<p class="hero-s">' + esc(sub) + '</p>' : '') +
         '<span class="orn" aria-hidden="true"></span>' +
         (st ? '<p class="hero-st ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.text) + '</p>' : '') +
-        (btns ? '<div class="btns">' + btns + '</div>' : '') +
-        '</div>' + (ribbon.length ? ribbonHTML(ribbon) : '') +
-        (skin === 'cultural' ? '<div class="zocalo" aria-hidden="true"></div>' : '') +
-        (skin === 'natural' ? hillsSVG() : '') + '</div>';
+        (btns ? '<div class="btns">' + btns + '</div>' : '') + (v === 'tarjeta' && ribbon.length ? ribbonHTML(ribbon) : '') +
+        '</div>' + (v !== 'tarjeta' && ribbon.length ? ribbonHTML(ribbon) : '') + band + '</div>';
     },
 
     carta: function (m) {
@@ -2117,7 +2317,8 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     const acc = hexOk(c.accent, '#c8a46a'), a2 = hexOk(c.accent2, '#7fa088'), a3 = hexOk(c.accent3, '#8e6f4e');
     return ':root{--bg:' + hexOk(c.bg, '#111412') + ';--surface:' + hexOk(c.surface, '#191d1a') + ';--ink:' + hexOk(c.ink, '#ede7da') + ';--muted:' + hexOk(c.muted, '#a3a89d') +
       ';--accent:' + acc + ';--accent2:' + a2 + ';--accent3:' + a3 + ';--on-accent:' + onColor(acc) + ';--on-accent2:' + onColor(a2) + ';--on-accent3:' + onColor(a3) +
-      ';--r:' + r + 'px;--fd:' + fontStack(f.display) + ';--fb:' + fontStack(f.body) + ';color-scheme:' + (lum(hexOk(c.bg, '#111412')) < 0.3 ? 'dark' : 'light') + '}';
+      ';--r:' + r + 'px;--fd:' + fontStack(f.display) + ';--fb:' + fontStack(f.body) + ';' + artVars({ accent: acc, accent2: a2, accent3: a3 }) +
+      ';color-scheme:' + (lum(hexOk(c.bg, '#111412')) < 0.3 ? 'dark' : 'light') + '}';
   }
   /* ---------- Opciones de diseño ----------
      Cada opción de theme vale «auto» (lo que trae la estética) hasta que el usuario la cambia.

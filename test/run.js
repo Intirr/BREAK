@@ -563,6 +563,39 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     C.close();
   }
 
+  /* 11j. Portada por piezas: diseño, alto, logo y decoraciones de la región */
+  {
+    const M = ctx.breakApp(null, null, null, { meta: true });
+    const hero = cfg => cfg.modules.find(m => m.type === 'hero').s;
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    // Lo de cada estética sigue igual sin tocar nada
+    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon' };
+    for (const id of Object.keys(auto)) { const A = mount(TPL(id), NOW); ok(!!A.$(auto[id]), id + ': la portada conserva la decoración de su estética'); A.close(); }
+    ok(/--leaf:#[0-9a-f]{6}/i.test((() => { const A = mount(TPL('tpl-espiga'), NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; })()), 'el verde de la paleta queda listo para las ilustraciones');
+    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
+    // Sin decoración
+    const z = TPL('tpl-zocalo'); hero(z).deco = 'ninguna';
+    let A = mount(z, NOW); ok(!A.$('.facade') && !A.$('.zocalo') && !A.$('.hero-box[class*=" d-"]'), '«Ninguna» quita la fachada y el zócalo'); A.close();
+    // Ilustraciones nuevas en cualquier estética
+    const nb = TPL('tpl-neblina'); hero(nb).deco = 'araucarias'; hero(nb).variant = 'texto';
+    A = mount(nb, NOW); ok(!!A.$('.m-hero svg.art-arau') && !A.$('.hero-ph'), 'araucarias en la minimalista, sin la foto en «Solo texto»'); A.close();
+    const ar = TPL('tpl-araucaria'); hero(ar).deco = 'termales'; hero(ar).logo = 'no';
+    A = mount(ar, NOW); ok(!!A.$('.hero-in svg.art-term') && !A.$('.hero-mono'), 'termales arriba del título y sin el monograma'); A.close();
+    hero(ar).img = PX;
+    A = mount(ar, NOW); ok(!A.$('svg.art-term') && !!A.$('.hero-box.has-img'), 'con foto de fondo la escena de arriba se oculta'); A.close();
+    for (const k of ['cafetal', 'guadua', 'willys']) { const c = TPL('tpl-antojo'); hero(c).deco = k; const B = mount(c, NOW); ok(!!B.$('.m-hero svg.art') && !B.$('.stk'), k + ': se dibuja en lugar de los stickers'); B.close(); }
+    const mn = TPL('tpl-neblina'); hero(mn).logo = 'si'; hero(mn).variant = 'texto';
+    A = mount(mn, NOW); ok(!!A.$('.hero-mono .logo'), 'el logo se puede poner en la portada de cualquier estética'); A.close();
+    // Diseños con foto
+    const al = TPL('tpl-alisos'); hero(al).img = PX; hero(al).variant = 'arriba'; hero(al).height = 'alta';
+    A = mount(al, NOW); ok(!!A.$('.hero-box.v-arriba.hh-alta .hero-ph img') && !A.$('.hero-ph i') && !A.$('.hero-box.has-img'), 'foto arriba y texto abajo, sin velo y alta'); A.close();
+    hero(al).variant = 'tarjeta'; hero(al).ribbon = 'Truchas, Termales';
+    A = mount(al, NOW); ok(!!A.$('.hero-box.v-tarjeta.has-img') && !!A.$('.hero-in .ribbon') && !A.$('.hero-ph i'), 'tarjeta sobre la foto con la cinta adentro'); A.close();
+    hero(al).img = ''; hero(al).variant = 'foto';
+    A = mount(al, { mode: 'preview', now: NOW.now }); ok(/necesita una foto/.test(A.$('section[data-mid="hero"]').textContent) && !A.$('.hero-box.has-img'), 'la vista previa avisa si el diseño necesita una foto'); A.close();
+    A = mount(al, NOW); ok(!/necesita una foto/.test(A.$('section[data-mid="hero"]').textContent), 'la app publicada no muestra ese aviso'); A.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -702,6 +735,25 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   eq(ST.S.cur.modules[0].s.imgPos, 'top', 'elige el encuadre de la foto');
   await sleep(220);
   ok(!!ST.pv.frame.contentDocument.querySelector('.hero-ph img.op-t'), 'la vista previa usa el encuadre');
+  // Portada por piezas
+  eq($$('.mod[data-mid="hero"] .dths .dth').length, 11, 'once opciones de decoración con miniatura');
+  ok($('.dth[data-v="auto"]').getAttribute('aria-pressed') === 'true' && /--leaf:/.test($('.dth .dth-a').getAttribute('style')), 'arranca en la de la estética y las miniaturas usan la paleta');
+  ok(!!$('.dth[data-v="willys"] .dth-a svg.art-will') && !!$('#deco-css'), 'la miniatura del Willys se dibuja con el CSS del motor');
+  click($('[data-a="set"][data-p="modules.0.s.deco"][data-v="araucarias"]'));
+  eq(ST.S.cur.modules[0].s.deco, 'araucarias', 'elige las araucarias');
+  setVal(d.getElementById('f-modules-0-s-variant'), 'arriba', 'change');
+  eq(ST.S.cur.modules[0].s.variant, 'arriba', 'elige foto arriba y texto abajo');
+  await sleep(220);
+  ok(!!ST.pv.frame.contentDocument.querySelector('.hero-box.v-arriba svg.art-arau'), 'la vista previa muestra el nuevo diseño con las araucarias');
+  click($('[data-a="set"][data-p="modules.0.s.height"][data-v="alta"]'));
+  eq(ST.S.cur.modules[0].s.height, 'alta', 'elige el alto de la portada');
+  click($('[data-a="set"][data-p="modules.0.s.logo"][data-v="si"]'));
+  await sleep(220);
+  ok(!!ST.pv.frame.contentDocument.querySelector('.hero-box.hh-alta .hero-mono'), 'la vista previa usa el alto y el logo');
+  click($('[data-a="set"][data-p="modules.0.s.deco"][data-v="auto"]'));
+  click($('[data-a="set"][data-p="modules.0.s.logo"][data-v="auto"]'));
+  click($('[data-a="set"][data-p="modules.0.s.height"][data-v="auto"]'));
+  setVal(d.getElementById('f-modules-0-s-variant'), 'auto', 'change');
   const heavy = JSON.parse(JSON.stringify(ST.S.cur)); heavy.modules[0].s.img = 'data:image/webp;base64,' + 'A'.repeat(230000);
   ok(ST.checks(heavy).some(c => c.s === 'warn' && /pesa/.test(c.t)), 'la revisión avisa si la app pesa demasiado para guardarla');
   ok(!ST.checks(ST.S.cur).some(c => /pesa/.test(c.t)), 'sin fotos pesadas no hay aviso de peso');

@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (408 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (435 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -24,6 +24,7 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
 - `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas; `opts.assetURL(id)` (solo lo pasa el estudio) da la dirección de una foto de la biblioteca; `opts.meta` no arranca nada y devuelve las constantes del motor (tipografías, estéticas, etiquetas, íconos y la función `glyph`) para que el estudio no las repita.
   Íconos de línea: `ICONS` (dibujos de 24 × 24 con trazos que toman el color del texto), `ICON_SETS` (los que ofrece el estudio, por grupos) y `EMO_ICON` (emoji → ícono). `ico(clave)` dibuja uno; `glyph(emoji, ico, respaldo)` decide qué ve el cliente según `theme.icons`.
+  Portada: `RENDER.hero` arma la portada por piezas (`variant`, `height`, `logo`, `deco`); en «auto» usa `HERO_AUTO` de cada estética. Las decoraciones (`DECO_CSS`: fachada, zócalo, lomas, neón, stickers y las ilustraciones de `ART`) están en la base para que cualquier estética las use; sus colores salen de la paleta, y `artVars()` elige el acento más verde, más azul y más rojo (`--leaf`, `--water`, `--earth`).
 - `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo, La Espiga, Neblina, Los Alisos, La Esquina) y `blankApp()`. Solo datos; la portada de Neblina es una ilustración SVG en base64 (`NEBLINA_IMG`), no una foto.
 - `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `STYLE` (grupos, tarjetas y campos de la pestaña Estilo), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`), etiquetas y los nombres de los íconos en el selector (`ICON_NAMES`). Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
 - `src/studio.js` — el estudio: estado `S`, editor por pestañas (Estilo, Módulos, Carta, Datos, Publicar), vista previa en un iframe escrito con `document.write`, guardado, exportación (.html, .zip para Cloudflare Pages con manifiesto, service worker e íconos, .json, QR).
@@ -42,7 +43,7 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 ### Añadir un módulo
 
 1. Función en `RENDER` dentro de `runtime.js` (devuelve HTML; usa `esc()`/`attr()` en todo texto del usuario; en modo preview devuelve `emptyNote()` si falta contenido).
-2. Entrada en `MODULES` de `catalog.js` con `label`, `code` (2 letras), `group`, `defaults` y `fields`. Tipos de campo: `text`, `area`, `num`, `sel` (con `def` opcional), `bool`, `days`, `time`, `date`, `tag`, `cat`, `img` (enlace https, foto subida o de la biblioteca, con encuadre), `icon` (selector de ícono de línea; `emoji` es la clave del emoji del mismo elemento y `fb` el ícono de respaldo), `checks` (varias opciones), `list`, `hint` y `sep`.
+2. Entrada en `MODULES` de `catalog.js` con `label`, `code` (2 letras), `group`, `defaults` y `fields`. Tipos de campo: `text`, `area`, `num`, `sel` (con `def` opcional), `bool`, `days`, `time`, `date`, `tag`, `cat`, `img` (enlace https, foto subida o de la biblioteca, con encuadre), `icon` (selector de ícono de línea; `emoji` es la clave del emoji del mismo elemento y `fb` el ícono de respaldo), `seg` (botones de opción), `thumbs` (opciones con miniatura dibujada por el motor, como la decoración de la portada), `checks` (varias opciones), `list`, `hint` y `sep`.
 3. Resumen en `summary()` de `studio.js` y, si aplica, una revisión en `checks()`.
 4. Pruebas en `test/run.js`.
 
@@ -51,6 +52,12 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 1. Dibujo en `ICONS` de `runtime.js`: trazos en una cuadrícula de 24 × 24, sin relleno ni colores propios.
 2. Si se ofrece para platos o avisos, su clave en `ICON_SETS`, su nombre en `ICON_NAMES` de `catalog.js` y, si hay emojis equivalentes, en el mapa de `EMO_ICON`.
 3. Revísalo en grande y a 22 px en Chromium antes de usarlo; las pruebas verifican que cada ícono ofrecido exista y tenga nombre.
+
+### Añadir una decoración de portada
+
+1. Función que devuelve el SVG en `runtime.js` (junto a `araucariasSVG()`), con clases `art art-band` (franja de abajo) o `art art-scene` (escena arriba del título, se oculta con foto) y colores solo por variables en `ART_CSS`.
+2. Su clave en `ART`, `HERO_DECOS` y `decoPreview()`; su nombre en `HERO_DECO_OPTS` de `catalog.js`.
+3. Revísala con la paleta de las seis estéticas antes de usarla, y pruebas en `test/run.js`.
 
 ### Añadir una estética
 
@@ -80,3 +87,4 @@ Biblioteca de fotos (`assets`, solo para quien puede editar el Artifact): cada f
 - Los mensajes de WhatsApp al local siempre van en español, aunque el cliente use la app en inglés.
 - Precios en pesos colombianos, formato `$15.900` (`money()`).
 - Corre `npm test` antes de dar un cambio por terminado.
+- Antes de mover CSS que no debe cambiar el aspecto, `npm run visual:compare` debe dar las siete apps idénticas.

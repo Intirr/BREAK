@@ -112,6 +112,10 @@ const STYLE = [
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
+/* Portada: diseños y decoraciones (los dibujos están en el motor). */
+const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
+const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
+  ['willys', 'Jeep Willys'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',
@@ -135,7 +139,7 @@ const F = {
 const MODULES = {
   hero: {
     label: 'Portada', code: 'PO', group: 'Esenciales', single: true, desc: 'Nombre, frase, foto, estado abierto o cerrado y los botones principales.',
-    defaults: { kicker: '', title: '', subtitle: '', cta1: 'carta', cta2: 'none', showStatus: true, ribbon: '', img: '', veil: '60', align: 'auto', size: 'm' },
+    defaults: { kicker: '', title: '', subtitle: '', cta1: 'carta', cta2: 'none', showStatus: true, ribbon: '', variant: 'auto', img: '', veil: '60', height: 'auto', align: 'auto', size: 'm', logo: 'auto', deco: 'auto' },
     fields: [
       F.text('kicker', 'Antetítulo', 'Santa Rosa de Cabal · desde 2019'),
       F.text('title', 'Título', 'Vacío = nombre del local'),
@@ -146,10 +150,15 @@ const MODULES = {
       F.text('ribbon', 'Cinta de palabras', 'Separadas por comas'),
       { t: 'hint', text: 'En las estéticas animada y nocturna la cinta se mueve como marquesina.' },
       { t: 'sep', label: 'Foto y diseño' },
+      { k: 'variant', t: 'sel', label: 'Diseño de la portada', def: 'auto', opts: HERO_VARIANT_OPTS },
       { k: 'img', t: 'img', label: 'Foto de portada (opcional)', max: 1100, help: 'Mejor horizontal. En la vista previa de claude.ai solo se ven las fotos subidas; los enlaces https se ven en la app publicada.' },
-      { k: 'veil', t: 'sel', label: 'Velo sobre la foto', def: '60', opts: [['40', 'Suave'], ['60', 'Medio'], ['80', 'Fuerte']] },
+      { k: 'veil', t: 'sel', label: 'Velo sobre la foto', def: '60', opts: [['40', 'Suave'], ['60', 'Medio'], ['80', 'Fuerte']], help: 'Solo en el diseño de foto de fondo.' },
+      { k: 'height', t: 'seg', label: 'Alto', def: 'auto', opts: [['baja', 'Baja'], ['auto', 'Normal'], ['alta', 'Alta']] },
       { k: 'align', t: 'sel', label: 'Alineación del texto', def: 'auto', opts: [['auto', 'La de la estética'], ['izq', 'A la izquierda'], ['centro', 'Centrada']] },
-      { k: 'size', t: 'sel', label: 'Tamaño del título', def: 'm', opts: [['s', 'Pequeño'], ['m', 'Normal'], ['l', 'Grande']] }
+      { k: 'size', t: 'sel', label: 'Tamaño del título', def: 'm', opts: [['s', 'Pequeño'], ['m', 'Normal'], ['l', 'Grande']] },
+      { k: 'logo', t: 'seg', label: 'Logo en la portada', def: 'auto', opts: [['auto', 'Según la estética'], ['si', 'Mostrar'], ['no', 'Ocultar']] },
+      { k: 'deco', t: 'thumbs', label: 'Decoración', def: 'auto', art: 'heroDeco', opts: HERO_DECO_OPTS,
+        help: 'Las ilustraciones toman los colores de la paleta. Las de arriba del título (termales, Willys, fachada) se ocultan cuando hay foto.' }
     ]
   },
   carta: {
