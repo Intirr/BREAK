@@ -264,6 +264,11 @@ a{color:inherit}
 .logo.emo{background:color-mix(in srgb,var(--ink) 8%,transparent)}
 .logo.ln .ic{display:block;width:60%;height:60%;color:var(--accent)}
 .logo img{width:100%;height:100%;object-fit:cover}
+.logo.ico .ic{display:block;width:58%;height:58%}
+.logo.hz{width:auto;max-width:170px;border-radius:0;background:none;overflow:visible}
+.logo.hz img{width:auto;max-width:100%;height:100%;object-fit:contain}
+.logo.sm.hz{height:30px}
+.logo.lg.hz{height:64px;max-width:260px}
 .m{padding-block:52px 4px;scroll-margin-top:64px}
 .sh{margin-bottom:22px}
 .sh-k{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
@@ -1371,10 +1376,12 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function modTitle(m) { return tx(m.s, 'title') || ui('t_' + m.type); }
 
   /* ---------- Piezas visuales ---------- */
+  /* Logo: imagen (redonda, cuadrada u horizontal sin recorte), ícono de línea, emoji o iniciales. */
   function logoHTML(size) {
     const l = cfg.brand.logo || {}, name = cfg.brand.name || '';
     const img = l.type === 'img' ? safeImg(l.value) : '';
-    if (img) return '<span class="logo img ' + size + '"><img src="' + attr(img) + '" alt=""' + posAttr(l.imgPos) + '></span>';
+    if (img) return '<span class="logo img ' + size + (l.shape === 'horizontal' ? ' hz' : '') + '"><img src="' + attr(img) + '" alt=""' + (l.shape === 'horizontal' ? '' : posAttr(l.imgPos)) + '></span>';
+    if (l.type === 'icon' && ICONS[l.value]) return '<span class="logo mono ico ' + size + '">' + ico(l.value) + '</span>';
     if (l.type === 'emoji' && l.value) {
       const g = glyph(l.value, l.ico);
       if (g) return '<span class="logo emo ' + size + (isSvg(g) ? ' ln' : '') + '">' + g + '</span>';
@@ -2338,7 +2345,15 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     return R.join('\n');
   }
   /* Cada etapa de personalización agrega aquí una función (rule) => { … } que lee opt() y escribe sus reglas. */
-  const OPTION_RULES = [];
+  const OPTION_RULES = [
+    /* Forma del logo (brand.logo.shape): círculo o cuadrado; el horizontal siempre se ve en el encabezado. */
+    function (rule) {
+      const sh = (cfg.brand.logo || {}).shape;
+      if (sh === 'circulo') rule('.logo:not(.hz)', 'border-radius:50%');
+      else if (sh === 'cuadrado') rule('.logo:not(.hz)', 'border-radius:max(6px,calc(var(--r) * .7))');
+      if (wideLogo()) rule('.brand-mini .logo.hz', 'display:inline-grid;border:0;box-shadow:none');
+    }
+  ];
 
   /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
   function texCSS() {
@@ -2368,9 +2383,11 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     doc.documentElement.setAttribute('data-tex', cfg.theme.texture || 'none');
     if (!PREVIEW && cfg.brand.name) doc.title = cfg.brand.name + (tx(cfg.brand, 'tagline') ? ' · ' + tx(cfg.brand, 'tagline') : '');
   }
+  /* Logo horizontal: ya trae el nombre dibujado, así que el encabezado no lo repite. */
+  function wideLogo() { const l = cfg.brand.logo || {}; return l.type === 'img' && l.shape === 'horizontal' && !!safeImg(l.value); }
   function renderTop() {
     const st = statusInfo();
-    return '<header class="top"><button class="brand-mini" data-act="top" aria-label="' + attr(cfg.brand.name || '') + '">' + logoHTML('sm') + '<b>' + esc(cfg.brand.name || '') + '</b></button><div class="top-r">' +
+    return '<header class="top"><button class="brand-mini" data-act="top" aria-label="' + attr(cfg.brand.name || '') + '">' + logoHTML('sm') + (wideLogo() ? '' : '<b>' + esc(cfg.brand.name || '') + '</b>') + '</button><div class="top-r">' +
       (st ? '<span class="status ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.open ? ui('open') : ui('closed')) + '</span>' : '') +
       (bilingual() ? '<div class="lang" role="group" aria-label="Idioma / Language"><button data-act="lang" data-l="es" class="' + (lang() === 'es' ? 'on' : '') + '">ES</button><button data-act="lang" data-l="en" class="' + (lang() === 'en' ? 'on' : '') + '">EN</button></div>' : '') +
       '<button class="menu-btn" data-act="nav" aria-label="' + attr(ui('menu')) + '"><span></span><span></span><span></span></button></div></header>';
@@ -2561,6 +2578,24 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     doc.addEventListener('keydown', onKey);
     renderAll(false);
     timers.push(win.setInterval(refreshStatus, 60000));
+    if (!PREVIEW) splashOff();
+  }
+  /* Pantalla de carga (la pone el estudio al exportar): se va cuando cargan las tipografías, o al segundo y medio. */
+  function splashOff() {
+    const sp = doc.getElementById('bk-splash');
+    if (!sp) return;
+    let done = false;
+    const go = function () {
+      if (done) return; done = true;
+      if (motion() === 'off') { if (sp.parentNode) sp.parentNode.removeChild(sp); return; }
+      sp.style.opacity = '0';
+      later(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 420);
+    };
+    let ready = null;
+    try { ready = doc.fonts && doc.fonts.ready; } catch (e) { ready = null; }
+    if (!ready || typeof ready.then !== 'function') { go(); return; }
+    ready.then(go, go);
+    later(go, 1500);
   }
   boot();
 

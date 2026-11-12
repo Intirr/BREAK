@@ -550,7 +550,7 @@
         return '<div class="fld"><span class="lab">' + esc(f.label) + '</span>' + ctl + '</div>';
       }
       case 'list': return listHTML(f, Array.isArray(val) ? val : [], path);
-      case 'icon': return icoFieldHTML({ p: path, em: f.emoji ? base + '.' + f.emoji : '', fb: f.fb || '', label: f.label });
+      case 'icon': return icoFieldHTML({ p: path, em: f.emoji ? base + '.' + f.emoji : '', fb: f.fb || '', label: f.label, always: !!f.always });
       case 'thumbs': {
         /* Opciones con miniatura dibujada en los colores de la app (por ahora, la decoración de la portada). */
         const cur = (val == null || val === '') ? (f.def || '') : val, art = artStyle();
@@ -593,6 +593,50 @@
     const st = document.createElement('style'); st.id = 'deco-css';
     st.textContent = String(META.decoCSS).replace(/(^|\})\s*([^{}@]+)\{/g, function (m, a, sel) { return a + sel.split(',').map(function (x) { return '.dth-a ' + x.trim(); }).join(',') + '{'; });
     document.head.appendChild(st);
+  }
+
+  /* ---------- Marca: forma del logo e ícono de la app ---------- */
+  function logoShapeHTML(lt) {
+    const opts = [['auto', 'Según la estética'], ['circulo', 'Círculo'], ['cuadrado', 'Cuadrado']].concat(lt === 'img' ? [['horizontal', 'Horizontal']] : []);
+    return fieldHTML({ k: 'logo.shape', t: 'seg', label: 'Forma del logo', def: 'auto', opts: opts, help: lt === 'img' ? 'Horizontal: para logos anchos con el nombre escrito. Se muestran completos y reemplazan el nombre en el encabezado.' : '' }, 'brand');
+  }
+  const ICON_BG = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3'], ['ink', 'Texto'], ['surface', 'Tarjetas'], ['bg', 'Fondo']];
+  /* Ícono de la app: fondo de la paleta y el logo, las iniciales o un ícono de línea. */
+  function appIconSpec(c) {
+    const ai = c.brand.appIcon || {}, col = c.theme.colors || {}, l = c.brand.logo || {};
+    const ok = function (v) { return /^#[0-9a-f]{6}$/i.test(String(v || '')); };
+    const acc = ok(col.accent) ? col.accent : '#333333', bg = ok(col[ai.bg]) ? col[ai.bg] : acc;
+    const fg = ai.bg && ai.bg !== 'accent' && contrast(acc, bg) >= 3 ? acc : onColor(bg);
+    let kind = 'text', value = initials(c.brand.name);
+    if (ai.content === 'icono') { if (META.icons[ai.icon]) { kind = 'icon'; value = ai.icon; } }
+    else if (ai.content !== 'iniciales') {
+      if (l.type === 'icon' && META.icons[l.value]) { kind = 'icon'; value = l.value; }
+      else if (l.type === 'img' && l.value) { kind = 'img'; value = l.value; }
+      else if ((l.type === 'emoji' || l.type === 'mono') && l.value) { kind = l.type === 'emoji' ? 'emoji' : 'text'; value = String(l.value).slice(0, 3); }
+    }
+    return { bg: bg, fg: fg, kind: kind, value: value, wide: l.shape === 'horizontal' };
+  }
+  function iconSVGMarkup(key, color, size) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"' + (size ? ' width="' + size + '" height="' + size + '"' : '') + ' fill="none" stroke="' + color + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + (META.icons[key] || '') + '</svg>';
+  }
+  /* Vista del ícono en el estudio (con la foto del logo, como queda en el celular). */
+  function appIconPreview(c) {
+    const sp = appIconSpec(c);
+    const inner = sp.kind === 'icon' ? iconSVGMarkup(sp.value, sp.fg, 0)
+      : sp.kind === 'img' ? '<img src="' + attr(imgSrc(sp.value)) + '" alt=""' + (sp.wide ? ' class="wide"' : '') + '>'
+      : '<b style="font-size:' + (sp.kind === 'emoji' ? 34 : String(sp.value).length > 2 ? 22 : 28) + 'px">' + esc(sp.value) + '</b>';
+    return '<span class="appi-ic" style="background:' + attr(sp.bg) + ';color:' + attr(sp.fg) + '">' + inner + '</span>';
+  }
+  function appIconCard() {
+    const ai = S.cur.brand.appIcon || {}, col = S.cur.theme.colors || {}, cur = ai.bg || 'accent';
+    return '<section class="card"><div class="card-h"><h2>Ícono de la app</h2><p>El que se ve en la pantalla del celular al instalar la app y en la pestaña del navegador.</p></div>' +
+      '<div class="appi" aria-hidden="true">' + appIconPreview(S.cur) + '<span>' + esc(String(S.cur.brand.name || '').slice(0, 14)) + '</span></div>' +
+      fieldHTML({ k: 'appIcon.content', t: 'seg', label: 'Dibujo', def: 'logo', opts: [['logo', 'El logo'], ['iniciales', 'Iniciales'], ['icono', 'Un ícono']] }, 'brand') +
+      (ai.content === 'icono' ? fieldHTML({ k: 'appIcon.icon', t: 'icon', label: 'Ícono', always: true }, 'brand') : '') +
+      '<div class="fld"><span class="lab">Fondo</span><div class="swpick" role="group" aria-label="Fondo del ícono">' + ICON_BG.map(function (o) {
+        const on = cur === o[0];
+        return '<button type="button" class="' + (on ? 'on' : '') + '" data-a="set" data-p="brand.appIcon.bg" data-v="' + o[0] + '" aria-pressed="' + on + '"><i style="background:' + attr(col[o[0]] || '#888888') + '"></i>' + o[1] + '</button>';
+      }).join('') + '</div></div></section>';
   }
 
   /* ---------- Fotos ---------- */
@@ -641,10 +685,10 @@
     const auto = META.iconOf(em) || (em ? (o.fb || 'cubiertos') : o.fb);
     const name = own ? icoName(own) : 'Automático' + (auto ? ' · ' + icoName(auto) : '');
     const k = own || auto, id = fid(o.p), mode = iconMode();
-    const help = mode === 'ninguno' ? 'La app está en «Sin íconos» (Estilo › Íconos).'
+    const help = o.always ? '' : mode === 'ninguno' ? 'La app está en «Sin íconos» (Estilo › Íconos).'
       : mode === 'emoji' ? 'La app muestra emojis: este ícono se ve si no hay emoji o si eliges íconos de línea en Estilo.'
       : (own ? '' : 'En automático se usa el ícono que corresponde al emoji.');
-    return '<div class="fld icof" data-icof="' + attr(o.p) + '" data-em="' + attr(o.em || '') + '" data-fb="' + attr(o.fb || '') + '" data-label="' + attr(o.label) + '">' +
+    return '<div class="fld icof" data-icof="' + attr(o.p) + '" data-em="' + attr(o.em || '') + '" data-fb="' + attr(o.fb || '') + '" data-label="' + attr(o.label) + '"' + (o.always ? ' data-always="1"' : '') + '>' +
       '<span class="lab" id="' + id + '-l">' + esc(o.label) + '</span>' +
       '<button type="button" class="icob" id="' + id + '" data-a="ico-open" data-p="' + attr(o.p) + '" aria-expanded="false" aria-labelledby="' + id + '-l ' + id + '-v">' +
       '<span class="icov" aria-hidden="true">' + (k ? icoSVG(k) : '—') + '</span><span id="' + id + '-v">' + esc(name) + '</span><span class="icoc" aria-hidden="true"></span></button>' +
@@ -667,7 +711,7 @@
     for (let i = 0; i < bs.length; i++) {
       const b = bs[i];
       if (b.getAttribute('data-icof') !== path && b.getAttribute('data-em') !== path) continue;
-      b.outerHTML = icoFieldHTML({ p: b.getAttribute('data-icof'), em: b.getAttribute('data-em'), fb: b.getAttribute('data-fb'), label: b.getAttribute('data-label') });
+      b.outerHTML = icoFieldHTML({ p: b.getAttribute('data-icof'), em: b.getAttribute('data-em'), fb: b.getAttribute('data-fb'), label: b.getAttribute('data-label'), always: b.hasAttribute('data-always') });
     }
   }
   function listHTML(f, arr, path) {
@@ -850,10 +894,11 @@
               : fieldHTML({ k: 'logo.value', t: 'text', label: 'Enlace https de la imagen', ph: 'https://…' }, 'brand')) +
               '<div class="img-acts"><label class="btn sm filebtn">Subir imagen<input type="file" accept="image/*" data-a="logo-file" hidden></label>' +
               (LIB.cap && LIB.index.length ? '<button type="button" class="btn sm" data-a="lib-pick" data-ip="brand.logo.value">Elegir de la biblioteca</button>' : '') + '</div>' +
-              (lv ? fieldHTML({ k: 'logo.imgPos', t: 'seg', label: 'Encuadre', def: 'center', opts: POS_OPTS }, 'brand') : '');
+              (lv && b.logo.shape !== 'horizontal' ? fieldHTML({ k: 'logo.imgPos', t: 'seg', label: 'Encuadre', def: 'center', opts: POS_OPTS }, 'brand') : '') + logoShapeHTML(lt);
           }
+          if (lt === 'icon') return fieldHTML({ k: 'logo.value', t: 'icon', label: 'Ícono del logo', always: true }, 'brand') + logoShapeHTML(lt);
           return fieldHTML({ k: 'logo.value', t: 'text', label: lt === 'emoji' ? 'Emoji del logo' : 'Iniciales (vacío = las del nombre)', ph: lt === 'emoji' ? '☕' : 'CZ' }, 'brand') +
-            (lt === 'emoji' ? fieldHTML({ k: 'logo.ico', t: 'icon', label: 'Ícono del logo', emoji: 'logo.value' }, 'brand') : '');
+            (lt === 'emoji' ? fieldHTML({ k: 'logo.ico', t: 'icon', label: 'Ícono del logo', emoji: 'logo.value' }, 'brand') : '') + logoShapeHTML(lt);
         }
         return fieldHTML(f, 'brand');
       }).join('');
@@ -864,7 +909,7 @@
           '<input class="in" type="time" aria-label="' + d[2] + ' abre" data-p="' + base + '.open" value="' + attr(h.open || '') + '"' + (h.closed ? ' disabled' : '') + '>' +
           '<input class="in" type="time" aria-label="' + d[2] + ' cierra" data-p="' + base + '.close" value="' + attr(h.close || '') + '"' + (h.closed ? ' disabled' : '') + '></div>';
       }).join('');
-      return tplBanner() + '<section class="card"><div class="card-h"><h2>Datos del local</h2><p>Lo que la app muestra en la portada, la ubicación y el contacto.</p></div>' + fields + '</section>' +
+      return tplBanner() + '<section class="card"><div class="card-h"><h2>Datos del local</h2><p>Lo que la app muestra en la portada, la ubicación y el contacto.</p></div>' + fields + '</section>' + appIconCard() +
         '<section class="card"><div class="card-h row"><div><h2>Horario</h2><p>Hora de Colombia. La app dice sola si está abierto, aunque el celular del turista tenga otra zona horaria.</p></div><button class="btn sm" data-a="hours-copy">Copiar lunes a todos</button></div>' +
         '<div class="hours-e"><div class="hr hh" aria-hidden="true"><span>Día</span><span>Abre</span><span>Desde</span><span>Hasta</span></div>' + rows + '</div></section>' +
         '<section class="card"><div class="card-h"><h2>Idioma y trato</h2></div>' +
@@ -887,6 +932,9 @@
         '<div class="exp"><div><h3>Archivo único .html</h3><p>Para abrirlo directo o subirlo a cualquier hosting.</p></div><div class="btnrow"><button class="btn" data-a="exp-html">Descargar .html</button><button class="btn ghost" data-a="copy-html">Copiar código</button></div></div>' +
         '<div class="exp"><div><h3>Configuración .json</h3><p>Respaldo de esta app para guardarlo o importarlo después.</p></div><div class="btnrow"><button class="btn" data-a="exp-json">Descargar .json</button><label class="btn ghost filebtn">Importar .json<input type="file" accept=".json,application/json" data-a="imp-json" hidden></label></div></div>' +
         '</div><ol class="deploy"><li>Descarga el .zip.</li><li>En Cloudflare, abre Workers &amp; Pages, crea un proyecto de Pages con la opción de subir archivos y arrastra el .zip.</li><li>Copia la dirección que te da (termina en .pages.dev) y pégala abajo para generar el QR.</li></ol></section>' +
+        '<section class="card"><div class="card-h"><h2>Al compartir y al abrir</h2><p>Así se ve el enlace en WhatsApp o Facebook. La imagen va en el .zip; pega abajo la dirección publicada y vuelve a descargarlo para que la usen.</p></div>' +
+        '<div class="ogp"><img id="og-prev" alt="Imagen para compartir" width="600" height="315" hidden><p class="qr-empty" id="og-empty">Preparando la imagen…</p></div>' +
+        fieldHTML({ k: 'splash', t: 'bool', label: 'Pantalla de carga con el logo al abrir la app', def: true }, 'brand') + '</section>' +
         '<section class="card"><div class="card-h"><h2>QR para las mesas</h2><p>Pega la dirección pública de la app; el QR queda listo para imprimir.</p></div><div class="qr">' +
         fieldHTML({ k: 'url', t: 'text', label: 'Dirección de la app publicada', ph: 'https://' + slug(S.cur.brand.name) + '.pages.dev' }, 'meta') +
         '<div class="qr-box"><canvas id="qr-cv" width="600" height="760" aria-label="Código QR de la app"' + (url ? '' : ' hidden') + '></canvas><p class="qr-empty"' + (url ? ' hidden' : '') + '>El QR aparece aquí cuando pegas la dirección.</p></div>' +
@@ -1026,7 +1074,7 @@
     const keep = act && act.id && ed.contains(act) ? act.id : null;
     ed.innerHTML = (PANELS[S.tab] || PANELS.estilo)();
     if (keep) { const el = document.getElementById(keep); if (el) { try { el.focus({ preventScroll: true }); } catch (e) { /* nada */ } } }
-    if (S.tab === 'publicar') drawQR();
+    if (S.tab === 'publicar') { drawQR(); ogPreview(); }
   }
   function renderStageTop() {
     const bi = bilingual();
@@ -1468,15 +1516,29 @@
   function initials(name) { return String(name || 'B').split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() || 'B'; }
   function logoText(c) { const l = c.brand.logo || {}; if ((l.type === 'emoji' || l.type === 'mono') && l.value) return String(l.value).slice(0, 3); return initials(c.brand.name); }
   function svgIcon(c) {
-    const a = c.theme.colors.accent || '#333', on = onColor(a), l = c.brand.logo || {};
-    const t = esc(logoText(c)), fs = l.type === 'emoji' ? 36 : (t.length > 2 ? 24 : 30);
-    return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="' + a + '"/><text x="32" y="' + (l.type === 'emoji' ? 45 : 42) + '" font-size="' + fs + '" text-anchor="middle" fill="' + on + '" font-family="Georgia,serif">' + t + '</text></svg>');
+    const sp = appIconSpec(c);
+    let inner;
+    if (sp.kind === 'icon') inner = '<g transform="translate(14 14) scale(1.5)" fill="none" stroke="' + sp.fg + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + META.icons[sp.value] + '</g>';
+    else {
+      const t = esc(sp.kind === 'img' ? initials(c.brand.name) : sp.value), fs = sp.kind === 'emoji' ? 36 : (t.length > 2 ? 24 : 30);
+      inner = '<text x="32" y="' + (sp.kind === 'emoji' ? 45 : 42) + '" font-size="' + fs + '" text-anchor="middle" fill="' + sp.fg + '" font-family="Georgia,serif">' + t + '</text>';
+    }
+    return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="' + sp.bg + '"/>' + inner + '</svg>');
   }
   function buildAppHTML(c, o) {
     o = o || {};
     const x = exportCfg(c), bg = x.theme.colors.bg || '#ffffff', name = x.brand.name || 'Carta';
     const desc = [x.brand.tagline, x.brand.kind, x.brand.city].filter(Boolean).join(' · ');
     const json = JSON.stringify(x).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    /* Con la dirección publicada, el enlace se comparte con la imagen og.png del paquete. */
+    const pub = String((x.meta && x.meta.url) || '').trim().replace(/\/+$/, '');
+    const og = o.pwa && o.og && /^https:\/\/[^\s"'<>]+$/i.test(pub) ? ['<meta property="og:type" content="website">', '<meta property="og:url" content="' + attr(pub + '/') + '">', '<meta property="og:image" content="' + attr(pub + '/og.png') + '">',
+      '<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">', '<meta name="twitter:card" content="summary_large_image">'].join('\n') : '';
+    /* Pantalla de carga: el logo sobre el color de fondo mientras cargan las tipografías (el motor la quita). */
+    const lg = x.brand.logo || {}, lgv = String(lg.value || ''), lgImg = lg.type === 'img' && (/^data:image\/(png|jpe?g|webp|gif);base64,/.test(lgv) || /^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/.test(lgv));
+    const splash = x.brand.splash === false ? '' : '<div id="bk-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:' + attr(bg) + ';transition:opacity .4s ease">' +
+      (lgImg ? '<img src="' + attr(lgv) + '" alt="" style="' + (lg.shape === 'horizontal' ? 'height:64px;width:auto;max-width:72vw' : 'width:96px;height:96px;border-radius:50%;object-fit:cover') + '">'
+        : '<img src="' + attr(svgIcon(x)) + '" alt="" width="96" height="96" style="border-radius:24px">') + '</div>\n';
     const head = [
       '<meta charset="utf-8">',
       '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
@@ -1486,11 +1548,12 @@
       '<meta property="og:title" content="' + attr(name) + '">',
       '<meta property="og:description" content="' + attr(desc || 'Carta digital') + '">',
       o.pwa ? '<link rel="manifest" href="manifest.webmanifest">\n<link rel="icon" href="icon-192.png">\n<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">' : '<link rel="icon" href="' + attr(svgIcon(x)) + '">',
+      og,
       '<link rel="preconnect" href="https://fonts.googleapis.com">',
       '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
       '<style>html,body{margin:0;background:' + bg + '}</style>'
     ].join('\n');
-    return '<!doctype html>\n<html lang="es">\n<head>\n' + head + '\n</head>\n<body>\n<noscript><p style="font:16px/1.5 system-ui;padding:24px">Esta carta necesita JavaScript activado.</p></noscript>\n<script>\n' +
+    return '<!doctype html>\n<html lang="es">\n<head>\n' + head.replace(/\n\n/g, '\n') + '\n</head>\n<body>\n' + splash + '<noscript><p style="font:16px/1.5 system-ui;padding:24px">Esta carta necesita JavaScript activado.</p></noscript>\n<script>\n' +
       'window.__BREAK__=' + json + ';\n(' + breakApp.toString() + ')(window,document,window.__BREAK__,{mode:"app"});\n' +
       (o.pwa ? 'if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}\n' : '') +
       '<\/script>\n</body>\n</html>\n';
@@ -1514,9 +1577,10 @@
     return new Promise(function (resolve) {
       const d = (PV.frame && PV.frame.contentDocument && PV.cfgId === c.id) ? PV.frame.contentDocument : document;
       const cv = d.createElement('canvas'); cv.width = cv.height = size;
-      const x = cv.getContext && cv.getContext('2d'), a = c.theme.colors.accent || '#333', l = c.brand.logo || {};
+      const x = cv.getContext && cv.getContext('2d'), sp = appIconSpec(c);
       if (!x) { resolve(null); return; }
-      x.fillStyle = a; x.fillRect(0, 0, size, size);
+      x.fillStyle = sp.bg; x.fillRect(0, 0, size, size);
+      const Img = (d.defaultView && d.defaultView.Image) || Image;
       const done = function () {
         try {
           if (cv.toBlob) cv.toBlob(function (b) { resolve(b || dataToBlob(cv.toDataURL('image/png'))); }, 'image/png');
@@ -1524,20 +1588,101 @@
         } catch (e) { resolve(null); }
       };
       const text = function () {
-        const t = logoText(c);
-        x.fillStyle = onColor(a); x.textAlign = 'center'; x.textBaseline = 'middle';
-        const fs = Math.round(size * (l.type === 'emoji' ? 0.46 : t.length > 2 ? 0.28 : 0.38));
+        const t = sp.kind === 'img' || sp.kind === 'icon' ? initials(c.brand.name) : sp.value;
+        x.fillStyle = sp.fg; x.textAlign = 'center'; x.textBaseline = 'middle';
+        const fs = Math.round(size * (sp.kind === 'emoji' ? 0.46 : t.length > 2 ? 0.28 : 0.38));
         x.font = fs + 'px "' + String(c.theme.fonts.display || 'Georgia').replace(/"/g, '') + '", Georgia, serif';
         x.fillText(t, size / 2, size / 2 + size * 0.03);
       };
-      if (l.type === 'img' && /^data:image\//.test(l.value || '')) {
-        const Img = (d.defaultView && d.defaultView.Image) || Image, im = new Img();
-        im.onload = function () { const s = size * 0.72, o = (size - s) / 2; x.save(); x.beginPath(); x.arc(size / 2, size / 2, s / 2, 0, Math.PI * 2); x.clip(); x.drawImage(im, o, o, s, s); x.restore(); done(); };
+      if (sp.kind === 'icon') {
+        const ic = new Img();
+        ic.onload = function () { const s = size * 0.58, o = (size - s) / 2; x.drawImage(ic, o, o, s, s); done(); };
+        ic.onerror = function () { text(); done(); };
+        ic.src = 'data:image/svg+xml,' + encodeURIComponent(iconSVGMarkup(sp.value, sp.fg, size)); return;
+      }
+      if (sp.kind === 'img' && /^data:image\//.test(sp.value || '')) {
+        const im = new Img();
+        im.onload = function () {
+          if (sp.wide) { const w = size * 0.8, h = Math.min(size * 0.8, w * im.height / Math.max(1, im.width)); x.drawImage(im, (size - w) / 2, (size - h) / 2, w, h); done(); return; }
+          const s = size * 0.72, o = (size - s) / 2; x.save(); x.beginPath(); x.arc(size / 2, size / 2, s / 2, 0, Math.PI * 2); x.clip(); x.drawImage(im, o, o, s, s); x.restore(); done();
+        };
         im.onerror = function () { text(); done(); };
-        im.src = l.value; return;
+        im.src = sp.value; return;
       }
       text(); done();
     });
+  }
+  /* Imagen para compartir el enlace (1200 × 630): ícono, nombre, eslogan, ciudad y, si hay, la foto de portada.
+     Se dibuja en el documento de la vista previa para usar las tipografías de la app. */
+  function ogBlob(c, photo) {
+    return new Promise(function (resolve) {
+      const d = (PV.frame && PV.frame.contentDocument && PV.cfgId === c.id) ? PV.frame.contentDocument : document;
+      const W = 1200, H = 630, cv = d.createElement('canvas'); cv.width = W; cv.height = H;
+      const x = cv.getContext && cv.getContext('2d');
+      if (!x) { resolve(null); return; }
+      const col = c.theme.colors || {}, hx = function (v, f) { return /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : f; };
+      const bg = hx(col.bg, '#ffffff'), ink = hx(col.ink, '#111111'), muted = hx(col.muted, '#666666'), acc = hx(col.accent, '#333333');
+      const font = function (n) { return '"' + String(n || 'Georgia').replace(/"/g, '') + '", Georgia, serif'; };
+      const Img = (d.defaultView && d.defaultView.Image) || Image;
+      let hasPhoto = false;
+      x.fillStyle = bg; x.fillRect(0, 0, W, H);
+      const wrap = function (text, maxW, lines) {
+        const words = String(text || '').split(/\s+/).filter(Boolean), out = []; let line = '';
+        words.forEach(function (w) { const t = line ? line + ' ' + w : w; if (x.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t; });
+        if (line) out.push(line);
+        if (out.length > lines) { out.length = lines; out[lines - 1] = out[lines - 1].replace(/\s*\S*$/, '') + '…'; }
+        return out;
+      };
+      const finish = function () {
+        const left = 80, maxW = hasPhoto ? 540 : 1040, name = String(c.brand.name || 'Carta');
+        let fs = 108;
+        x.font = '400 ' + fs + 'px ' + font(c.theme.fonts.display);
+        while (fs > 54 && x.measureText(name).width > maxW) { fs -= 4; x.font = '400 ' + fs + 'px ' + font(c.theme.fonts.display); }
+        x.fillStyle = ink; x.textBaseline = 'alphabetic'; x.fillText(name, left, 318);
+        x.font = '400 34px ' + font(c.theme.fonts.body); x.fillStyle = muted;
+        wrap(c.brand.tagline || c.brand.kind || '', maxW, 2).forEach(function (l, i) { x.fillText(l, left, 392 + i * 46); });
+        x.font = '700 22px ' + font(c.theme.fonts.body); x.fillStyle = acc;
+        try { x.letterSpacing = '4px'; } catch (e) { /* navegador sin espaciado */ }
+        x.fillText(String(c.brand.city || '').toUpperCase().slice(0, 48), left, 556);
+        try { x.letterSpacing = '0px'; } catch (e) { /* nada */ }
+        x.fillStyle = acc; x.fillRect(0, H - 14, W, 14);
+        const ic = new Img();
+        ic.onload = function () { x.save(); x.beginPath(); if (x.roundRect) x.roundRect(left, 80, 104, 104, 26); else x.rect(left, 80, 104, 104); x.clip(); x.drawImage(ic, left, 80, 104, 104); x.restore(); out(); };
+        ic.onerror = out;
+        ic.src = svgIcon(c);
+      };
+      const out = function () { try { cv.toBlob(function (b) { resolve(b || null); }, 'image/png'); } catch (e) { resolve(null); } };
+      if (photo && /^data:image\/|^https?:/.test(photo)) {
+        const im = new Img();
+        im.onload = function () {
+          const X = 600, w = W - X, r = Math.max(w / im.width, H / im.height), dw = im.width * r, dh = im.height * r;
+          x.save(); x.beginPath(); x.rect(X, 0, w, H); x.clip(); x.drawImage(im, X + (w - dw) / 2, (H - dh) / 2, dw, dh); x.restore();
+          const g = x.createLinearGradient(X, 0, X + 220, 0); g.addColorStop(0, bg); g.addColorStop(1, 'rgba(0,0,0,0)');
+          x.fillStyle = g; x.fillRect(X, 0, 222, H);
+          hasPhoto = true; finish();
+        };
+        im.onerror = finish;
+        im.src = photo; return;
+      }
+      finish();
+    });
+  }
+  /* Foto de portada que puede ir en la imagen para compartir (incrustada o de la biblioteca). */
+  function heroPhoto(c) {
+    const h = (c.modules || []).filter(function (m) { return m && m.type === 'hero' && m.on !== false; })[0];
+    const v = h && h.s && h.s.variant !== 'texto' ? String(h.s.img || '') : '';
+    return /^data:image\/(png|jpe?g|webp|gif)/.test(v) ? v : isAssetRef(v) ? assetURL(v.slice(6)) : '';
+  }
+  let ogTimer = null;
+  function ogPreview() {
+    clearTimeout(ogTimer);
+    ogTimer = setTimeout(function () {
+      const img = $('#og-prev'); if (!img) return;
+      ogBlob(S.cur, heroPhoto(S.cur)).then(function (b) { return b ? blobToDataURL(b) : ''; }).then(function (u) {
+        const el = $('#og-prev'); if (!el) return;
+        if (u) { el.src = u; el.hidden = false; const e = $('#og-empty'); if (e) e.hidden = true; }
+      }, function () { /* sin vista previa */ });
+    }, 200);
   }
   function dataToBlob(url) {
     const parts = String(url).split(','), bin = atob(parts[1] || ''), arr = new Uint8Array(bin.length);
@@ -1572,8 +1717,19 @@
     try { Z = await loadScript(JSZIP_SRC, 'JSZip'); } catch (e) { toast('No se pudo cargar el compresor. Revisa la conexión.'); return; }
     toast('Armando el paquete…');
     const m = await materialize(c, true);
+    /* El ícono de la app usa el logo: si está en la biblioteca, se pasa como imagen incrustada. */
+    const ic = clone(m.cfg), lf = m.files.filter(function (f) { return ic.brand.logo && f.path === ic.brand.logo.value; })[0];
+    if (lf) { try { ic.brand.logo.value = await blobToDataURL(lf.blob); } catch (e) { /* ícono con iniciales */ } }
+    const icons = await Promise.all([iconBlob(ic, 192), iconBlob(ic, 512)]);
+    /* Imagen para compartir el enlace, con la foto de portada si la hay. */
+    const hp = (m.cfg.modules || []).filter(function (x) { return x && x.type === 'hero'; })[0], hpath = hp && hp.s ? String(hp.s.img || '') : '';
+    const hf = m.files.filter(function (f) { return f.path === hpath; })[0];
+    let ogPhoto = /^data:image\//.test(hpath) ? hpath : '';
+    if (hf) { try { ogPhoto = await blobToDataURL(hf.blob); } catch (e) { ogPhoto = ''; } }
+    if (hp && hp.s && hp.s.variant === 'texto') ogPhoto = '';
+    const ogb = await ogBlob(ic, ogPhoto);
     const zip = new Z(), name = c.brand.name || 'Carta', bg = c.theme.colors.bg || '#ffffff';
-    zip.file('index.html', buildAppHTML(m.cfg, { pwa: true }));
+    zip.file('index.html', buildAppHTML(m.cfg, { pwa: true, og: !!ogb }));
     for (const f of m.files) zip.file(f.path, String(await blobToDataURL(f.blob)).split(',')[1] || '', { base64: true });
     zip.file('manifest.webmanifest', JSON.stringify({
       name: name + (c.brand.tagline ? ' · ' + c.brand.tagline : ''), short_name: name.slice(0, 12), description: [c.brand.tagline, c.brand.city].filter(Boolean).join(' · '),
@@ -1584,15 +1740,13 @@
     zip.file('_headers', '/sw.js\n  Cache-Control: no-cache\n/index.html\n  Cache-Control: no-cache\n');
     zip.file('LEEME.txt', name + ' · app de carta hecha con Break\n\n' +
       'Qué hay en esta carpeta\n  index.html            La app completa (motor + configuración).\n  manifest.webmanifest  Permite instalarla en el celular.\n  sw.js                 Guarda la app para que abra sin señal.\n  icon-192.png, icon-512.png\n' +
-      (m.files.length ? '  img/                  Las fotos de la carta.\n' : '') + '  _headers              Reglas de caché para Cloudflare Pages.\n\n' +
+      (m.files.length ? '  img/                  Las fotos de la carta.\n' : '') + '  og.png                Imagen que se ve al compartir el enlace (WhatsApp, Facebook…).\n' +
+      '  _headers              Reglas de caché para Cloudflare Pages.\n\n' +
       'Publicar en Cloudflare Pages\n  1. En el panel de Cloudflare abre Workers & Pages y crea un proyecto de Pages con la opción de subir archivos.\n  2. Ponle nombre y arrastra este .zip (o la carpeta descomprimida).\n  3. Cloudflare te da una dirección que termina en .pages.dev. Pégala en Break Studio › Publicar para generar el QR de las mesas.\n\n' +
       'Para cambiar precios o platos: edita la app en Break Studio, descarga el .zip otra vez y súbelo como nueva versión del mismo proyecto.\n');
-    /* El ícono de la app usa el logo: si está en la biblioteca, se pasa como imagen incrustada. */
-    const ic = clone(m.cfg), lf = m.files.filter(function (f) { return ic.brand.logo && f.path === ic.brand.logo.value; })[0];
-    if (lf) { try { ic.brand.logo.value = await blobToDataURL(lf.blob); } catch (e) { /* ícono con iniciales */ } }
-    const icons = await Promise.all([iconBlob(ic, 192), iconBlob(ic, 512)]);
     if (icons[0]) zip.file('icon-192.png', icons[0]);
     if (icons[1]) zip.file('icon-512.png', icons[1]);
+    if (ogb) zip.file('og.png', String(await blobToDataURL(ogb)).split(',')[1] || '', { base64: true });
     let blob;
     try { blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }); } catch (e) { toast('No se pudo armar el paquete.'); return; }
     if (await saveFile(slug(name) + '-cloudflare.zip', blob)) missingNote(m.missing);

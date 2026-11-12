@@ -27,6 +27,7 @@ function mount(cfg, o) {
   w.scrollTo = () => {};
   const errors = [];
   w.addEventListener('error', e => errors.push(e.message));
+  if (o.body) w.document.body.innerHTML = o.body;
   w.__cfg = cfg;
   w.__opts = Object.assign({ mode: o.mode || 'app', now: o.now }, o.assetURL ? { assetURL: o.assetURL } : {});
   const rt = w.eval('(' + ctx.breakApp.toString() + ')(window, document, window.__cfg, window.__opts)');
@@ -596,6 +597,31 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     A = mount(al, NOW); ok(!/necesita una foto/.test(A.$('section[data-mid="hero"]').textContent), 'la app publicada no muestra ese aviso'); A.close();
   }
 
+  /* 11k. Marca: logo con ícono, forma del logo, logo horizontal y pantalla de carga */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const c1 = TPL('tpl-zocalo'); c1.brand.logo = { type: 'icon', value: 'olla', shape: 'cuadrado' };
+    let A = mount(c1, NOW);
+    ok(!!A.$('.brand-mini .logo.mono.ico svg.ic'), 'logo con un ícono de línea en el encabezado');
+    ok(/#bk \.logo:not\(\.hz\)\{border-radius:max\(6px/.test(A.d.getElementById('bk-css').textContent), 'la forma cuadrada le gana a la estética');
+    A.close();
+    const c2 = TPL('tpl-neblina'); c2.brand.logo = { type: 'icon', value: 'x"><script>window.__pwn=1</script>' };
+    A = mount(c2, NOW); ok(!A.$('.logo.ico') && !!A.$('.brand-mini .logo.mono') && A.w.__pwn === undefined, 'un ícono de logo desconocido vuelve a las iniciales sin inyectar nada'); A.close();
+    const c3 = TPL('tpl-araucaria'); c3.brand.logo = { type: 'img', value: PX, shape: 'horizontal' };
+    A = mount(c3, NOW);
+    ok(!!A.$('.brand-mini .logo.hz img') && !A.$('.brand-mini b'), 'logo horizontal: se ve completo y reemplaza el nombre');
+    ok(A.$('.brand-mini').getAttribute('aria-label') === c3.brand.name && /#bk \.brand-mini \.logo\.hz\{display:inline-grid/.test(A.d.getElementById('bk-css').textContent), 'el nombre sigue para lectores de pantalla y se ve también en la elegante');
+    A.close();
+    A = mount(TPL('tpl-espiga'), Object.assign({ body: '<div id="bk-splash">Cargando</div>' }, NOW));
+    ok(A.d.getElementById('bk-splash').style.opacity === '0', 'la pantalla de carga se desvanece al arrancar la app');
+    await sleep(460);
+    ok(!A.d.getElementById('bk-splash'), 'y luego se quita');
+    A.close();
+    A = mount(TPL('tpl-espiga'), Object.assign({ body: '<div id="bk-splash">Cargando</div>', mode: 'preview' }, NOW));
+    ok(!!A.d.getElementById('bk-splash'), 'la vista previa no toca la pantalla de carga');
+    A.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -672,6 +698,26 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(/Antojo Centro/.test($('#sb').textContent), 'la cabecera se actualiza');
   ok(ST.pv.frame.contentDocument.querySelector('.hero-t').textContent === 'Antojo Centro', 'la vista previa se actualiza');
   setVal(d.getElementById('f-brand-whatsapp'), '573001234567');
+  // Marca: logo con ícono, forma e ícono de la app
+  setVal(d.getElementById('f-brand-logo-type'), 'icon', 'change');
+  ok(!!$('.icof[data-icof="brand.logo.value"]') && !$('.icof[data-icof="brand.logo.value"] .help'), 'el logo puede ser un ícono de línea');
+  click($('.icof[data-icof="brand.logo.value"] [data-a="ico-open"]'));
+  click($('.icof[data-icof="brand.logo.value"] [data-a="ico-pick"][data-v="cafe"]'));
+  eq(ST.S.cur.brand.logo.value, 'cafe', 'elige el ícono del logo');
+  ok(!$('[data-a="set"][data-p="brand.logo.shape"][data-v="horizontal"]'), 'la forma horizontal solo se ofrece para imágenes');
+  click($('[data-a="set"][data-p="brand.logo.shape"][data-v="cuadrado"]'));
+  eq(ST.S.cur.brand.logo.shape, 'cuadrado', 'elige la forma del logo');
+  await sleep(220);
+  ok(!!ST.pv.frame.contentDocument.querySelector('.brand-mini .logo.ico svg'), 'la vista previa muestra el logo con ícono');
+  ok(!!$('.appi .appi-ic svg'), 'el ícono de la app usa el logo con ícono');
+  click($('[data-a="set"][data-p="brand.appIcon.content"][data-v="iniciales"]'));
+  ok(!$('.appi .appi-ic svg') && /AC/.test($('.appi .appi-ic').textContent), 'el ícono de la app puede llevar las iniciales');
+  click($('[data-a="set"][data-p="brand.appIcon.bg"][data-v="ink"]'));
+  eq(ST.S.cur.brand.appIcon.bg, 'ink', 'elige el fondo del ícono');
+  ok($('.appi-ic').getAttribute('style').toLowerCase().includes(ST.S.cur.theme.colors.ink.toLowerCase()), 'la vista del ícono usa ese fondo');
+  click($('[data-a="set"][data-p="brand.appIcon.content"][data-v="logo"]'));
+  click($('[data-a="set"][data-p="brand.appIcon.bg"][data-v="accent"]'));
+  setVal(d.getElementById('f-brand-logo-type'), 'mono', 'change');
   // Horario: cerrar el domingo
   const sunIdx = ST.S.cur.brand.hours.findIndex(h => h.d === 0);
   setChk(d.getElementById('f-brand-hours-' + sunIdx + '-closed'), false);
@@ -938,6 +984,15 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(h && h.filename === 'antojo-centro.html', 'descarga el .html con nombre limpio');
   ok(h && h.data.includes('window.__BREAK__=') && h.data.includes('function breakApp('), 'el .html trae motor y configuración');
   ok(h && h.data.includes('"data:image/webp;base64,') && !/"asset:[\w-]{8,64}"/.test(h.data), 'el .html lleva incrustadas las fotos de la biblioteca');
+  ok(h && /<body>\n<div id="bk-splash"/.test(h.data), 'el .html abre con la pantalla de carga');
+  {
+    const cfgOg = JSON.parse(JSON.stringify(ST.S.cur)); cfgOg.meta = Object.assign({}, cfgOg.meta, { url: 'https://antojo.pages.dev/' });
+    const withOg = ST.buildAppHTML(cfgOg, { pwa: true, og: true });
+    ok(withOg.includes('<meta property="og:image" content="https://antojo.pages.dev/og.png">') && withOg.includes('summary_large_image'), 'con la dirección publicada, el enlace se comparte con og.png');
+    ok(!ST.buildAppHTML(cfgOg, { pwa: true, og: false }).includes('og:image'), 'sin la imagen no se anuncia');
+    cfgOg.brand.splash = false;
+    ok(!/<div id="bk-splash"/.test(ST.buildAppHTML(cfgOg, { pwa: false })), 'la pantalla de carga se puede quitar');
+  }
   ok(h && !/<\/script>[\s\S]*<\/script>/.test(h.data.replace(/<script>[\s\S]*?<\/script>/, '')), 'el .html tiene un solo bloque de script');
   click($('[data-a="exp-json"]'));
   await sleep(60);

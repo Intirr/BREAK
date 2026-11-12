@@ -351,7 +351,7 @@ const BRAND_FIELDS = [
   { k: 'name', t: 'text', label: 'Nombre del local' },
   F.text('tagline', 'Eslogan', 'Café de especialidad'),
   { k: 'kind', t: 'text', label: 'Tipo de negocio', ph: 'Cafetería, restaurante, panadería…' },
-  { k: 'logo.type', t: 'sel', label: 'Logo', opts: [['mono', 'Iniciales'], ['emoji', 'Emoji'], ['img', 'Imagen']], rerender: true },
+  { k: 'logo.type', t: 'sel', label: 'Logo', opts: [['mono', 'Iniciales'], ['emoji', 'Emoji'], ['icon', 'Ícono'], ['img', 'Imagen']], rerender: true },
   { k: 'logo.value', t: 'text', label: 'Iniciales, emoji o enlace https de la imagen' },
   { t: 'sep', label: 'Ubicación' },
   { k: 'city', t: 'text', label: 'Ciudad', ph: 'Santa Rosa de Cabal, Risaralda' },

@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (435 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (456 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -32,7 +32,9 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
 ### Configuración de una app
 
-`{ v, id, brand{name, tagline, logo, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
+`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
+
+El logo (`brand.logo.type`) puede ser `mono` (iniciales), `emoji`, `icon` (un ícono de `ICONS`) o `img`; `shape` es `circulo`, `cuadrado` u `horizontal` (solo imágenes: se muestra completo y reemplaza el nombre en el encabezado). El ícono de la app (`brand.appIcon`) lleva el logo, las iniciales o un ícono sobre un color de la paleta; lo dibujan `svgIcon()` e `iconBlob()` en `studio.js`.
 
 `theme.icons` es `emoji`, `linea` o `ninguno`; sin valor se ven emojis, como en las apps guardadas antes de los íconos. `ico` (en platos, categorías, aviso, sellos, fotos de galería y logo) es un ícono de `ICONS` elegido a mano; vacío, en modo línea se usa el que corresponde al emoji.
 
@@ -79,7 +81,7 @@ Toda opción de `theme` vale «auto» (lo que trae la estética) hasta que el us
 
 El estudio se publica como Artifact de claude.ai y usa sus capacidades `db`, `user`, `downloads` y `assets` (`window.claude.use(...)`). Sin ellas cae a `localStorage`, las descargas se desactivan y las fotos se incrustan en la app (unos 100 KB cada una).
 
-Biblioteca de fotos (`assets`, solo para quien puede editar el Artifact): cada foto se sube aparte y la app guarda `asset:<id>`; el índice es el documento `biblioteca-fotos` de la colección de la cuenta (no es una app: `validApp()` lo ignora). `assets.list()` solo se usa para el medidor y para «Borrar fotos sin usar», que mira todas las apps y plantillas abiertas antes de borrar. Al exportar, `materialize()` trae cada foto de `/_blob/<id>`: en el .zip van como `img/…` y entran al service worker; en el .html y el .json van incrustadas. Al importar un .json, las fotos incrustadas pasan a la biblioteca. Si se va a servir fuera de claude.ai (por ejemplo en Cloudflare Pages), hay que reemplazar `storeInit()`/`saveFile()` en `studio.js` por un backend propio (p. ej. Cloudflare D1 o KV) y descargas con `<a download>`.
+Biblioteca de fotos (`assets`, solo para quien puede editar el Artifact): cada foto se sube aparte y la app guarda `asset:<id>`; el índice es el documento `biblioteca-fotos` de la colección de la cuenta (no es una app: `validApp()` lo ignora). `assets.list()` solo se usa para el medidor y para «Borrar fotos sin usar», que mira todas las apps y plantillas abiertas antes de borrar. Al exportar, `materialize()` trae cada foto de `/_blob/<id>`: en el .zip van como `img/…` y entran al service worker; en el .html y el .json van incrustadas. El .zip también lleva `og.png` (imagen para compartir, `ogBlob()`), que se anuncia con metaetiquetas cuando hay dirección publicada. Toda app exportada abre con una pantalla de carga (`#bk-splash`, se quita con `brand.splash: false`) que el motor retira cuando cargan las tipografías. Al importar un .json, las fotos incrustadas pasan a la biblioteca. Si se va a servir fuera de claude.ai (por ejemplo en Cloudflare Pages), hay que reemplazar `storeInit()`/`saveFile()` en `studio.js` por un backend propio (p. ej. Cloudflare D1 o KV) y descargas con `<a download>`.
 
 ## Reglas
 
