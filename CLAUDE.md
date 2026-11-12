@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (479 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (504 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -32,7 +32,7 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
 ### Configuración de una app
 
-`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
+`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}, type{titleWeight,titleCase,titleSpacing,titleScale,textScale,lineHeight,priceFont}}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
 
 El logo (`brand.logo.type`) puede ser `mono` (iniciales), `emoji`, `icon` (un ícono de `ICONS`) o `img`; `shape` es `circulo`, `cuadrado` u `horizontal` (solo imágenes: se muestra completo y reemplaza el nombre en el encabezado). El ícono de la app (`brand.appIcon`) lleva el logo, las iniciales o un ícono sobre un color de la paleta; lo dibujan `svgIcon()` e `iconBlob()` en `studio.js`.
 
@@ -71,6 +71,10 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 ### Color por elemento
 
 Las reglas que pintan botones, títulos, antetítulos, precios, selección, etiquetas, encabezado y pie leen una variable de rol con el color de la estética como respaldo: `var(--c-btn, var(--accent))` y su texto `var(--c-btn-on, var(--on-accent))`. Solo los roles elegidos en `theme.roles` definen la variable (`roleVars()` en `tokensCSS()`), así que sin roles nada cambia. Si una regla nueva de estética pinta una de esas piezas, envuelve su color de la misma forma. `theme.bg` (liso, degradado o foto con velo) lo escribe `bgCSS()` sobre `html`.
+
+### Tipografía
+
+`theme.type` va por la capa de opciones. La escala de títulos multiplica los tamaños de `.hero-t` y `.sh-t` por `--ts`; mayúsculas y espaciado ajustan el tope que evita partir palabras (`--gwk`, `--gwl` en `.hero-box`). Los deslizadores en su valor de partida no escriben nada. La escala del texto multiplica todos los `font-size` en px con un porcentaje entero (115 % es «Letra grande»). Una tipografía que no está en `FONTS` (escrita a mano en el estudio) carga en su propio enlace, `#bk-fonts2`, para que un nombre mal escrito no rompa las demás.
 
 ### Añadir una opción de diseño
 

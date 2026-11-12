@@ -487,6 +487,7 @@
     if (f.t === 'area') return '<textarea class="in" id="' + id + '" rows="' + (f.rows || 3) + '" data-p="' + attr(path) + '"' + ph + '>' + esc(val || '') + '</textarea>';
     return '<input class="in" id="' + id + '" type="text" data-p="' + attr(path) + '" value="' + attr(val || '') + '"' + ph + ' autocomplete="off">';
   }
+  function rangeText(v, div, unit) { return (div ? (v / div).toFixed(2).replace('.', ',') : v) + (unit ? ' ' + unit : ''); }
   function fieldHTML(f, base) {
     if (f.t === 'hint') return '<p class="hint">' + esc(f.text) + '</p>';
     if (f.t === 'sep') return '<h4 class="sep">' + esc(f.label) + '</h4>';
@@ -511,8 +512,8 @@
       }
       case 'range': {
         const v = (val == null || val === '') ? (f.def != null ? f.def : (f.min || 0)) : (+val || 0);
-        return '<div class="fld"><label class="lab" for="' + id + '">' + esc(f.label) + ' · <output data-out="' + attr(path) + '">' + v + (f.unit ? ' ' + esc(f.unit) : '') + '</output></label>' +
-          '<input type="range" id="' + id + '" min="' + (f.min || 0) + '" max="' + f.max + '" step="' + (f.step || 1) + '" value="' + v + '" data-p="' + attr(path) + '" data-type="num"' + (f.unit ? ' data-unit="' + attr(f.unit) + '"' : '') + '>' +
+        return '<div class="fld"><label class="lab" for="' + id + '">' + esc(f.label) + ' · <output data-out="' + attr(path) + '">' + rangeText(v, f.div, f.unit) + '</output></label>' +
+          '<input type="range" id="' + id + '" min="' + (f.min || 0) + '" max="' + f.max + '" step="' + (f.step || 1) + '" value="' + v + '" data-p="' + attr(path) + '" data-type="num"' + (f.unit ? ' data-unit="' + attr(f.unit) + '"' : '') + (f.div ? ' data-div="' + f.div + '"' : '') + '>' +
           (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
       }
       case 'sel':
@@ -810,6 +811,40 @@
     }); });
     const foot = $('#style-foot'); if (foot) foot.hidden = !themeChanged();
   }
+  /* Selector de tipografías: cada opción se ve con su propia letra. Las muestras cargan de Google Fonts solo las
+     letras necesarias (parámetro text), así pesan poco. */
+  function fontCSS(n) { return '"' + String(n || '').replace(/["\\<>]/g, '') + '", system-ui, sans-serif'; }
+  function fontSamples() {
+    if (document.getElementById('font-samples')) return;
+    const names = DISPLAY_FONTS.concat(BODY_FONTS).filter(function (v, i, a) { return a.indexOf(v) === i; }), chars = {};
+    ('Aa' + names.join('')).split('').forEach(function (ch) { chars[ch] = true; });
+    const ln = document.createElement('link'); ln.id = 'font-samples'; ln.rel = 'stylesheet';
+    ln.href = 'https://fonts.googleapis.com/css2?' + names.map(function (n) { return 'family=' + n.replace(/ /g, '+'); }).join('&') + '&text=' + encodeURIComponent(Object.keys(chars).join('')) + '&display=swap';
+    document.head.appendChild(ln);
+  }
+  function fontPickHTML(k, label, list) {
+    const cur = String(S.cur.theme.fonts[k] || ''), custom = !!cur && list.indexOf(cur) < 0, open = S.fontOpen === k, id = 'fp-' + k;
+    let h = '<div class="fld fontf"><span class="lab" id="' + id + '-l">' + esc(label) + '</span>' +
+      '<button type="button" class="fontb" data-a="font-open" data-k="' + k + '" aria-expanded="' + open + '" aria-labelledby="' + id + '-l ' + id + '-v">' +
+      '<span class="fontb-s" aria-hidden="true" style="font-family:' + attr(fontCSS(cur)) + '">Aa</span><span id="' + id + '-v">' + esc(cur || '—') + (custom ? ' · de Google Fonts' : '') + '</span><span class="icoc" aria-hidden="true"></span></button>';
+    if (open) {
+      h += '<div class="fontg" role="group" aria-label="Tipografías para ' + attr(label.toLowerCase()) + '">' + list.map(function (n) {
+        const on = n === cur;
+        return '<button type="button" data-a="font-pick" data-k="' + k + '" data-v="' + attr(n) + '" aria-pressed="' + on + '"><b style="font-family:' + attr(fontCSS(n)) + '">Aa</b><span style="font-family:' + attr(fontCSS(n)) + '">' + esc(n) + '</span></button>';
+      }).join('') + '</div>' +
+        '<div class="fld"><label class="lab" for="fc-' + k + '">Otra fuente de Google Fonts</label><input class="in" id="fc-' + k + '" type="text" data-p="theme.fonts.' + k + '" data-type="lazy" value="' + attr(custom ? cur : '') + '" placeholder="Nombre exacto, como Josefin Sans" autocomplete="off" spellcheck="false">' +
+        '<p class="help">Escríbelo como sale en fonts.google.com y pulsa Enter. Si el nombre no existe, la app usa una letra del sistema sin dañar las demás.</p></div>';
+    }
+    return h + '</div>';
+  }
+  /* Grosores que trae la tipografía de los títulos (de la tabla del motor). */
+  const WEIGHT_NAMES = { 300: 'Fina', 400: 'Normal', 500: 'Media', 600: 'Seminegrita', 700: 'Negrita', 800: 'Extra negrita', 900: 'Negra' };
+  function fontWeights(n) {
+    const spec = (META.fonts[n] || [''])[0] || '', m = /wght@([^&]+)$/.exec(spec), out = [];
+    if (!m) return [400];
+    m[1].split(';').forEach(function (part) { const xs = part.split(','), w = +(xs.length > 1 ? xs[1] : xs[0]); if ((xs.length < 2 || xs[0] === '0') && w && out.indexOf(w) < 0) out.push(w); });
+    return out.length ? out.sort(function (a, b) { return a - b; }) : [400];
+  }
   function fontSel(k, label, list) {
     const cur = S.cur.theme.fonts[k], id = fid('theme.fonts.' + k);
     const opts = list.indexOf(cur) < 0 && cur ? [cur].concat(list) : list;
@@ -835,7 +870,16 @@
             '<input class="in hex" id="h-' + ck[0] + '" value="' + attr(v) + '" maxlength="7" spellcheck="false" autocomplete="off" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="' + id + '"></div>';
         }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div>';
     },
-    fonts: function () { return '<div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>'; },
+    fonts: function () { return fontPickHTML('display', 'Títulos', DISPLAY_FONTS) + fontPickHTML('body', 'Texto', BODY_FONTS); },
+    titleWeight: function () {
+      const ws = fontWeights(String(S.cur.theme.fonts.display || ''));
+      if (ws.length < 2) return '<p class="help">La tipografía de los títulos tiene un solo grosor.</p>';
+      const cur = String((S.cur.theme.type || {}).titleWeight || 'auto');
+      return '<div class="fld"><span class="lab">Grosor</span><div class="seg" role="group" aria-label="Grosor de los títulos">' + [['auto', 'Según la estética']].concat(ws.map(function (w) { return [String(w), WEIGHT_NAMES[w] || String(w)]; })).map(function (o) {
+        const on = cur === o[0];
+        return '<button type="button" class="' + (on ? 'on' : '') + '" data-a="set" data-p="theme.type.titleWeight" data-v="' + o[0] + '" aria-pressed="' + on + '">' + esc(o[1]) + '</button>';
+      }).join('') + '</div></div>';
+    },
     photos: function () {
       if (!LIB.ready) return '<p class="help">Conectando con la biblioteca de fotos…</p>';
       if (!LIB.cap) return '<p class="help">La biblioteca funciona en claude.ai para quien puede editar el estudio. Mientras tanto, cada foto subida se guarda dentro de la app y pesa unos 100 KB.</p>';
@@ -1365,6 +1409,13 @@
       if (el.closest('#sheet')) repaintIco(d.p); else renderEditor();
       refocus('ico-open', 'p', d.p);
     },
+    'font-open': function (d) { S.fontOpen = S.fontOpen === d.k ? null : d.k; if (S.fontOpen) fontSamples(); renderEditor(); refocus('font-open', 'k', d.k); },
+    'font-pick': function (d) {
+      if (!d.k || !d.v) return;
+      S.cur.theme.fonts[d.k] = d.v; S.fontOpen = null;
+      if (d.k === 'display' && S.cur.theme.type && S.cur.theme.type.titleWeight && fontWeights(d.v).indexOf(+S.cur.theme.type.titleWeight) < 0) delete S.cur.theme.type.titleWeight;
+      edited(); renderEditor(); refocus('font-open', 'k', d.k);
+    },
     'hours-copy': function () { copyMonday(); },
     'logo-clear': function () { S.cur.brand.logo = { type: 'mono', value: '' }; edited(); renderEditor(); },
     'img-clear': function (d) { if (d.ip) { setPath(S.cur, d.ip, ''); delPath(S.cur, d.ip + 'Pos'); photoChanged(d.ip); const inp = document.getElementById(fid(d.ip)); if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { /* nada */ } } } },
@@ -1423,11 +1474,12 @@
     const t = e.target, p = t && t.getAttribute && t.getAttribute('data-p');
     if (!p) return;
     const type = t.getAttribute('data-type');
-    const discrete = type === 'bool' || type === 'boolinv' || t.tagName === 'SELECT' || t.type === 'time';
+    const discrete = type === 'bool' || type === 'boolinv' || type === 'lazy' || t.tagName === 'SELECT' || t.type === 'time';
     if (discrete && e.type === 'input' && t.type !== 'time') return;
     if (!discrete && e.type === 'change' && type !== 'color') return;
     let v;
-    if (type === 'bool') v = t.checked;
+    if (type === 'lazy') { v = String(t.value).replace(/[^\w ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); if (!v) return; }
+    else if (type === 'bool') v = t.checked;
     else if (type === 'boolinv') v = !t.checked;
     else if (type === 'num') { v = t.value === '' ? 0 : Number(t.value); if (!isFinite(v)) return; }
     else if (type === 'color') {
@@ -1443,10 +1495,11 @@
   }
   function afterField(p, t, v) {
     if (p.indexOf('theme.') === 0) syncResets();
+    if (p === 'theme.fonts.display' || p === 'theme.fonts.body') { renderEditor(); return; }
     repaintIco(p);
     if (t.type === 'range') {
-      const outs = document.querySelectorAll('output[data-out]'), unit = t.getAttribute('data-unit');
-      for (let i = 0; i < outs.length; i++) if (outs[i].getAttribute('data-out') === p) outs[i].textContent = v + (unit ? ' ' + unit : '');
+      const outs = document.querySelectorAll('output[data-out]'), unit = t.getAttribute('data-unit'), div = +t.getAttribute('data-div') || 0;
+      for (let i = 0; i < outs.length; i++) if (outs[i].getAttribute('data-out') === p) outs[i].textContent = rangeText(v, div, unit);
       return;
     }
     if (p.indexOf('theme.roles.') === 0) {

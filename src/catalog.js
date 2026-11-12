@@ -92,6 +92,16 @@ const STYLE = [
   { id: 'letra', label: 'Letra', cards: [
     { id: 'tipografia', card: 'fonts', title: 'Tipografía', desc: 'Todas son de Google Fonts y cargan solas en la app.', keys: ['fonts', 'textSize'], fields: [
       { k: 'textSize', t: 'seg', label: 'Tamaño del texto', def: 'normal', opts: [['normal', 'Normal'], ['grande', 'Grande']], help: '«Grande» sube un 15 % el texto de la carta, los botones y los formularios. Se lee mejor sin gafas.' }
+    ] },
+    { id: 'titulos', adv: true, card: 'titleWeight', title: 'Títulos', desc: 'La portada, los títulos de sección y las categorías de la carta.', keys: ['type.titleWeight', 'type.titleCase', 'type.titleSpacing', 'type.titleScale'], fields: [
+      { k: 'type.titleCase', t: 'seg', label: 'Letras', def: 'auto', opts: [['auto', 'Según la estética'], ['normal', 'Como se escriben'], ['mayus', 'MAYÚSCULAS'], ['versal', 'Versalitas']] },
+      { k: 'type.titleSpacing', t: 'range', label: 'Espacio entre letras', min: -5, max: 20, step: 1, div: 100, unit: 'em', def: 0 },
+      { k: 'type.titleScale', t: 'range', label: 'Tamaño', min: 80, max: 130, step: 5, unit: '%', def: 100 }
+    ] },
+    { id: 'texto', adv: true, title: 'Texto', desc: 'Las descripciones, los botones, los formularios y los precios.', fields: [
+      { k: 'type.textScale', t: 'range', label: 'Tamaño exacto del texto', min: 85, max: 130, step: 5, unit: '%', def: 100, help: 'Sin moverlo, el texto sigue «Tamaño del texto» de la tarjeta Tipografía.' },
+      { k: 'type.lineHeight', t: 'range', label: 'Interlineado', min: 130, max: 190, step: 5, div: 100, def: 155 },
+      { k: 'type.priceFont', t: 'seg', label: 'Letra de los precios', def: 'auto', opts: [['auto', 'Según la estética'], ['texto', 'La del texto'], ['titulos', 'La de los títulos'], ['mono', 'Monoespaciada']] }
     ] }
   ] },
   { id: 'formas', label: 'Formas', cards: [

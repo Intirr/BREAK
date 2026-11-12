@@ -355,6 +355,16 @@ button.libi:focus-visible{outline:2px solid var(--carbon);outline-offset:2px}
 .appi-ic img{width:72%;height:72%;border-radius:50%;object-fit:cover}
 .appi-ic img.wide{width:80%;height:auto;border-radius:0;object-fit:contain}
 .swpick{display:flex;flex-wrap:wrap;gap:6px}
+.fontb{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:6px 14px 6px 8px;border:1px solid var(--rule);border-radius:10px;background:var(--sheet);font-weight:600;font-size:14.5px;text-align:left;color:var(--ink)}
+.fontb:hover{border-color:var(--ink2)}
+.fontb-s{display:grid;place-items:center;width:40px;height:40px;flex:none;border-radius:8px;background:var(--rule2);font-size:22px;line-height:1}
+.fontb[aria-expanded="true"] .icoc{transform:rotate(180deg)}
+.fontg{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px;padding:10px;border:1px solid var(--rule);border-radius:12px;background:var(--paper)}
+.fontg button{display:grid;gap:4px;justify-items:start;padding:8px 10px;border-radius:9px;border:1px solid var(--rule2);background:var(--sheet);text-align:left;color:var(--ink)}
+.fontg button b{font-size:26px;font-weight:400;line-height:1.1}
+.fontg button span{font-size:13px;line-height:1.25}
+.fontg button:hover{border-color:var(--ink2)}
+.fontg button[aria-pressed="true"]{border-color:var(--carbon);box-shadow:0 0 0 1.5px var(--carbon)}
 .roles{display:grid;gap:12px}
 .rolepick{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .rolepick button,.rolepick .rc{display:inline-grid;place-items:center;min-width:36px;height:36px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet)}
@@ -728,7 +738,7 @@ a{color:inherit}
 .m{padding-block:52px 4px;scroll-margin-top:64px}
 .sh{margin-bottom:22px}
 .sh-k{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--c-kicker,var(--accent))}
-.sh-t{margin:0;font-family:var(--fd);font-weight:400;font-size:clamp(30px,8vw,40px);line-height:1.08;text-wrap:balance;color:var(--c-title,currentColor)}
+.sh-t{margin:0;font-family:var(--fd);font-weight:400;font-size:calc(clamp(30px,8vw,40px) * var(--ts,1));line-height:1.08;text-wrap:balance;color:var(--c-title,currentColor)}
 .lead-p{margin:-6px 0 20px;color:var(--muted);max-width:60ch}
 .orn{display:none}
 .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
@@ -769,14 +779,14 @@ a{color:inherit}
 .m-hero{padding-block:44px 4px}
 .hero-in{position:relative}
 .hero-k{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--c-kicker,var(--accent))}
-.hero-t{margin:0;font-family:var(--fd);font-weight:400;font-size:min(calc(clamp(48px,14vw,80px) * var(--hs,1)),var(--fit,999px));line-height:.98;letter-spacing:-.01em;text-wrap:balance;overflow-wrap:break-word;color:var(--c-title,currentColor)}
+.hero-t{margin:0;font-family:var(--fd);font-weight:400;font-size:min(calc(clamp(48px,14vw,80px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.98;letter-spacing:-.01em;text-wrap:balance;overflow-wrap:break-word;color:var(--c-title,currentColor)}
 .hero-s{margin:14px 0 0;font-size:18px;color:var(--muted);max-width:34ch}
 .hero-st,.hstat{display:inline-flex;align-items:center;gap:8px;margin:16px 0 0;font-size:14px;font-weight:600}
 .hstat{margin:0 0 14px}
 .ribbon{margin-top:34px;overflow:hidden;white-space:nowrap;font-size:14px;color:var(--muted);padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
 .ribbon-track{display:inline-flex}
 .ribbon-track span{padding-right:26px}
-.hero-box{position:relative;--fit:calc((min(100vw,600px) - 46px) / (var(--wl,6) * var(--gw,.56)))}
+.hero-box{position:relative;--fit:calc((min(100vw,600px) - 46px) / (var(--wl,6) * (var(--gw,.56) * var(--gwk,1) + var(--gwl,0))))}
 .hero-box.has-img{display:flex;flex-direction:column;justify-content:flex-end;min-height:min(66vh,560px);padding-top:84px;isolation:isolate}
 section.m-hero:has(.hero-box.has-img:not(.ph-fail)){padding-top:0}
 .hero-ph{position:absolute;inset:0;z-index:-1;overflow:hidden;background:color-mix(in srgb,var(--ink) 10%,var(--bg));-webkit-mask-image:linear-gradient(180deg,#000 58%,transparent 100%);mask-image:linear-gradient(180deg,#000 58%,transparent 100%)}
@@ -1104,7 +1114,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="elegante"] .hero-mono .logo{background:transparent;border:1px solid var(--accent);color:var(--accent);font-style:italic;font-size:34px}
 [data-skin="elegante"] .hero-mono .logo.img{border:0}
 [data-skin="elegante"] .hero-k{letter-spacing:.34em;font-weight:500;font-size:11px}
-[data-skin="elegante"] .hero-t{font-size:min(calc(clamp(58px,18vw,96px) * var(--hs,1)),var(--fit,999px));letter-spacing:.01em;line-height:.95}
+[data-skin="elegante"] .hero-t{font-size:min(calc(clamp(58px,18vw,96px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));letter-spacing:.01em;line-height:.95}
 [data-skin="elegante"] .hero-s{margin-inline:auto;font-family:var(--fd);font-style:italic;font-size:21px;line-height:1.4;color:var(--muted)}
 [data-skin="elegante"] .hero-st{justify-content:center;font-weight:400;letter-spacing:.04em}
 [data-skin="elegante"] .orn{display:block;position:relative;width:132px;height:9px;margin:28px auto 0;background:linear-gradient(var(--accent),var(--accent)) left 50%/52px 1px no-repeat,linear-gradient(var(--accent),var(--accent)) right 50%/52px 1px no-repeat}
@@ -1118,7 +1128,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="elegante"] .ribbon-track span{padding:0 10px}
 [data-skin="elegante"] .sh{text-align:center}
 [data-skin="elegante"] .sh-k{font-weight:500;letter-spacing:.3em;font-size:11px}
-[data-skin="elegante"] .sh-t{font-size:clamp(34px,9vw,46px)}
+[data-skin="elegante"] .sh-t{font-size:calc(clamp(34px,9vw,46px) * var(--ts,1))}
 [data-skin="elegante"] .sh .orn{margin-top:18px}
 [data-skin="elegante"] .lead-p{text-align:center;margin-inline:auto}
 [data-skin="elegante"] .card,[data-skin="elegante"] .svc,[data-skin="elegante"] .fq{background:transparent;border:1px solid color-mix(in srgb,var(--accent) 26%,transparent)}
@@ -1180,7 +1190,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="animado"] .m-hero{padding-block:24px 0;overflow:hidden}
 [data-skin="animado"] .hero-in{padding-top:30px}
 [data-skin="animado"] .hero-k{display:inline-block;background:var(--c-kicker,var(--ink));color:var(--c-kicker-on,var(--bg));padding:6px 13px;border-radius:999px;transform:rotate(-2.5deg);letter-spacing:.12em;font-weight:800}
-[data-skin="animado"] .hero-t{font-size:min(calc(clamp(66px,21vw,108px) * var(--hs,1)),var(--fit,999px));line-height:.9;color:var(--c-title,var(--ink));text-shadow:4px 4px 0 var(--accent);letter-spacing:.01em;position:relative;z-index:2}
+[data-skin="animado"] .hero-t{font-size:min(calc(clamp(66px,21vw,108px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.9;color:var(--c-title,var(--ink));text-shadow:4px 4px 0 var(--accent);letter-spacing:.01em;position:relative;z-index:2}
 [data-skin="animado"] .hero-s{color:var(--ink);font-weight:700;font-size:19px;position:relative;z-index:2}
 [data-skin="animado"] .btn{border:2.5px solid var(--ink);border-radius:999px;box-shadow:4px 4px 0 var(--ink);font-weight:800;font-size:16px}
 [data-skin="animado"] .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
@@ -1191,7 +1201,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="animado"] .ribbon-track span::after{content:"✸";margin-left:26px;color:var(--accent)}
 [data-skin="animado"][data-motion="vivo"] .ribbon-track,[data-skin="animado"][data-motion="suave"] .ribbon-track{animation:marq 22s linear infinite}
 [data-skin="animado"] .sh-k{display:inline-block;background:var(--c-kicker,var(--accent2));color:var(--c-kicker-on,var(--on-accent2));border:2px solid var(--ink);padding:4px 12px;border-radius:999px;letter-spacing:.1em;rotate:-1.5deg;font-weight:800}
-[data-skin="animado"] .sh-t{font-size:clamp(38px,10.5vw,48px);line-height:1}
+[data-skin="animado"] .sh-t{font-size:calc(clamp(38px,10.5vw,48px) * var(--ts,1));line-height:1}
 [data-skin="animado"] .card,[data-skin="animado"] .svc,[data-skin="animado"] .fq,[data-skin="animado"] .aviso,[data-skin="animado"] .lay-tarjetas .it,[data-skin="animado"] .lay-cuadricula .it,[data-skin="animado"] .lay-fotos .it,[data-skin="animado"] .feat,[data-skin="animado"] .promo,[data-skin="animado"] .cl,[data-skin="animado"] .quote,[data-skin="animado"] .free,[data-skin="animado"] .wres{border:2.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
 [data-skin="animado"] .chip{border:2px solid var(--ink);background:var(--surface);font-weight:800}
 [data-skin="animado"] .chip.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg))}
@@ -1242,7 +1252,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="cultural"] .lang button.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent))}
 [data-skin="cultural"] .m-hero{padding-block:24px 0}
 [data-skin="cultural"] .hero-k{color:var(--c-kicker,var(--accent2));letter-spacing:.16em;font-weight:800}
-[data-skin="cultural"] .hero-t{color:var(--c-title,var(--accent));font-size:min(calc(clamp(46px,13.5vw,76px) * var(--hs,1)),var(--fit,999px));line-height:1;letter-spacing:.005em}
+[data-skin="cultural"] .hero-t{color:var(--c-title,var(--accent));font-size:min(calc(clamp(46px,13.5vw,76px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:1;letter-spacing:.005em}
 [data-skin="cultural"] .hero-s{font-style:italic;color:var(--ink);font-size:20px}
 [data-skin="cultural"] .btn{border-width:2px;text-transform:uppercase;letter-spacing:.06em;font-size:14px;font-weight:800}
 [data-skin="cultural"] .btn.pri{background:var(--c-btn,var(--accent2));border-color:var(--c-btn,var(--accent2));color:var(--c-btn-on,var(--on-accent2))}
@@ -1253,7 +1263,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="cultural"] .ribbon-track span+span::before{content:"✦";color:var(--accent);margin-right:12px}
 [data-skin="cultural"] .zocalo{margin-top:30px}
 [data-skin="cultural"] .sh-k{color:var(--c-kicker,var(--accent3));font-weight:800}
-[data-skin="cultural"] .sh-t{font-size:clamp(32px,9vw,42px)}
+[data-skin="cultural"] .sh-t{font-size:calc(clamp(32px,9vw,42px) * var(--ts,1))}
 [data-skin="cultural"] .sh .orn{display:block;width:86px;height:10px;margin-top:14px;background:${ZZ}}
 [data-skin="cultural"] .cat{padding-top:30px}
 [data-skin="cultural"] .cat-h{position:relative;background:var(--accent2);color:var(--on-accent2);padding:12px 16px 13px;border-radius:var(--r) var(--r) 0 0;margin-bottom:0}
@@ -1305,7 +1315,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="natural"] .m-hero{padding-block:40px 0}
 [data-skin="natural"] .hero-k{display:flex;align-items:center;gap:10px;color:var(--c-kicker,var(--accent));letter-spacing:.14em;font-weight:800}
 [data-skin="natural"] .hero-k::before{content:"";flex:none;width:24px;height:14px;background:color-mix(in srgb,var(--c-kicker,var(--accent)) 75%,var(--bg));-webkit-mask:${LEAF} center/contain no-repeat;mask:${LEAF} center/contain no-repeat}
-[data-skin="natural"] .hero-t{font-size:min(calc(clamp(50px,15vw,86px) * var(--hs,1)),var(--fit,999px));line-height:.95;letter-spacing:-.02em}
+[data-skin="natural"] .hero-t{font-size:min(calc(clamp(50px,15vw,86px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.95;letter-spacing:-.02em}
 [data-skin="natural"] .hero-s{color:color-mix(in srgb,var(--ink) 78%,var(--bg));font-size:19px}
 [data-skin="natural"] .btn{border-radius:999px;border-width:2px}
 [data-skin="natural"] .btn.pri{box-shadow:0 3px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 55%,var(--ink))}
@@ -1317,7 +1327,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="natural"] .ribbon-track span{padding:0 10px 0 0}
 [data-skin="natural"] .ribbon-track span:not(:last-child)::after{content:"";display:inline-block;width:14px;height:9px;margin-left:10px;background:var(--accent);-webkit-mask:${LEAF} center/contain no-repeat;mask:${LEAF} center/contain no-repeat}
 [data-skin="natural"] .sh-k{color:var(--c-kicker,var(--accent));letter-spacing:.14em;font-weight:800}
-[data-skin="natural"] .sh-t{font-size:clamp(32px,8.8vw,44px);letter-spacing:-.01em}
+[data-skin="natural"] .sh-t{font-size:calc(clamp(32px,8.8vw,44px) * var(--ts,1));letter-spacing:-.01em}
 [data-skin="natural"] .sh .orn{display:block;width:84px;height:11px;margin-top:12px;background:var(--accent3);-webkit-mask:${SQUIG} 0 50%/42px 11px repeat-x;mask:${SQUIG} 0 50%/42px 11px repeat-x}
 [data-skin="natural"] .card,[data-skin="natural"] .svc,[data-skin="natural"] .fq,[data-skin="natural"] .lay-tarjetas .it,[data-skin="natural"] .lay-cuadricula .it,[data-skin="natural"] .lay-fotos .it,[data-skin="natural"] .feat,[data-skin="natural"] .promo,[data-skin="natural"] .cl,[data-skin="natural"] .quote,[data-skin="natural"] .free,[data-skin="natural"] .wres{box-shadow:0 1px 0 color-mix(in srgb,var(--ink) 9%,transparent),0 16px 26px -24px color-mix(in srgb,var(--ink) 70%,transparent)}
 [data-skin="natural"] .chip{border-color:color-mix(in srgb,var(--ink) 15%,transparent);background:color-mix(in srgb,var(--surface) 75%,transparent)}
@@ -1360,7 +1370,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="nocturna"] .lang button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
 [data-skin="nocturna"] .m-hero{padding-block:34px 0;overflow:hidden}
 [data-skin="nocturna"] .hero-k{color:var(--c-kicker,var(--accent2));letter-spacing:.26em;font-weight:600}
-[data-skin="nocturna"] .hero-t{font-size:min(calc(clamp(58px,17vw,100px) * var(--hs,1)),var(--fit,999px));line-height:.92;letter-spacing:.01em;color:var(--c-title,color-mix(in srgb,var(--accent) 22%,var(--ink)));text-shadow:0 0 6px color-mix(in srgb,var(--accent) 85%,transparent),0 0 26px color-mix(in srgb,var(--accent) 60%,transparent),0 0 60px color-mix(in srgb,var(--accent) 40%,transparent)}
+[data-skin="nocturna"] .hero-t{font-size:min(calc(clamp(58px,17vw,100px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.92;letter-spacing:.01em;color:var(--c-title,color-mix(in srgb,var(--accent) 22%,var(--ink)));text-shadow:0 0 6px color-mix(in srgb,var(--accent) 85%,transparent),0 0 26px color-mix(in srgb,var(--accent) 60%,transparent),0 0 60px color-mix(in srgb,var(--accent) 40%,transparent)}
 [data-skin="nocturna"] .hero-s{font-size:18px}
 [data-skin="nocturna"] .btn{border-width:1.5px;letter-spacing:.02em}
 [data-skin="nocturna"] .btn.pri{box-shadow:0 0 22px -4px color-mix(in srgb,var(--c-btn,var(--accent)) 85%,transparent)}
@@ -1370,7 +1380,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="nocturna"] .ribbon-track span::after{content:"✦";margin-left:26px;color:var(--accent)}
 [data-skin="nocturna"][data-motion="vivo"] .ribbon-track,[data-skin="nocturna"][data-motion="suave"] .ribbon-track{animation:marq 26s linear infinite}
 [data-skin="nocturna"] .sh-k{color:var(--c-kicker,var(--accent2));letter-spacing:.24em;font-weight:600}
-[data-skin="nocturna"] .sh-t{font-size:clamp(36px,10vw,50px);line-height:1;color:var(--c-title,color-mix(in srgb,var(--accent) 12%,var(--ink)));text-shadow:0 0 20px color-mix(in srgb,var(--accent) 50%,transparent)}
+[data-skin="nocturna"] .sh-t{font-size:calc(clamp(36px,10vw,50px) * var(--ts,1));line-height:1;color:var(--c-title,color-mix(in srgb,var(--accent) 12%,var(--ink)));text-shadow:0 0 20px color-mix(in srgb,var(--accent) 50%,transparent)}
 [data-skin="nocturna"] .card,[data-skin="nocturna"] .svc,[data-skin="nocturna"] .fq,[data-skin="nocturna"] .lay-tarjetas .it,[data-skin="nocturna"] .lay-cuadricula .it,[data-skin="nocturna"] .lay-fotos .it,[data-skin="nocturna"] .feat,[data-skin="nocturna"] .promo,[data-skin="nocturna"] .cl,[data-skin="nocturna"] .quote,[data-skin="nocturna"] .free,[data-skin="nocturna"] .wres{border:1px solid color-mix(in srgb,var(--accent) 22%,transparent)}
 [data-skin="nocturna"] .chip{border-color:color-mix(in srgb,var(--accent2) 40%,transparent)}
 [data-skin="nocturna"] .chip.on{background:var(--c-sel,var(--accent2));border-color:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2));box-shadow:0 0 16px -4px color-mix(in srgb,var(--c-sel,var(--accent2)) 85%,transparent)}
@@ -1430,7 +1440,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="minimalista"] .sh{padding-top:14px;border-top:1px solid var(--ink)}
 [data-skin="minimalista"] .hero-k{display:flex;align-items:center;gap:12px;color:var(--c-kicker,var(--ink));font-weight:600;letter-spacing:.16em}
 [data-skin="minimalista"] .hero-k::before{content:"";flex:none;width:28px;height:2px;background:var(--c-kicker,var(--accent))}
-[data-skin="minimalista"] .hero-t{font-weight:800;font-size:min(calc(clamp(54px,16.5vw,104px) * var(--hs,1)),var(--fit,999px));line-height:.9;letter-spacing:-.05em}
+[data-skin="minimalista"] .hero-t{font-weight:800;font-size:min(calc(clamp(54px,16.5vw,104px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.9;letter-spacing:-.05em}
 [data-skin="minimalista"] .hero-t .dot{color:var(--accent)}
 [data-skin="minimalista"] .hero-s{font-size:19px;max-width:30ch}
 [data-skin="minimalista"] .hero-st{font-weight:500}
@@ -1441,7 +1451,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="minimalista"] .ribbon-track{display:flex;flex-wrap:wrap;gap:4px 18px}
 [data-skin="minimalista"] .ribbon-track span{padding:0}
 [data-skin="minimalista"] .sh-k{color:var(--c-kicker,var(--muted));font-weight:600;letter-spacing:.16em}
-[data-skin="minimalista"] .sh-t{font-weight:800;font-size:clamp(34px,9.6vw,50px);line-height:.98;letter-spacing:-.04em}
+[data-skin="minimalista"] .sh-t{font-weight:800;font-size:calc(clamp(34px,9.6vw,50px) * var(--ts,1));line-height:.98;letter-spacing:-.04em}
 [data-skin="minimalista"] .lay-tarjetas .it,[data-skin="minimalista"] .lay-cuadricula .it,[data-skin="minimalista"] .lay-fotos .it,[data-skin="minimalista"] .feat{background:var(--bg);border:1px solid color-mix(in srgb,var(--ink) 15%,transparent)}
 [data-skin="minimalista"] .cl{background:transparent;border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent);border-radius:0;padding-inline:0}
 [data-skin="minimalista"] .chip{border-width:1px;border-color:color-mix(in srgb,var(--ink) 24%,transparent);border-radius:var(--r);font-weight:500}
@@ -2759,13 +2769,22 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   }
 
   /* ---------- Render ---------- */
-  function fontsHref() {
+  function fontNames(known) {
     const f = cfg.theme.fonts, fams = [];
-    [f.display, f.body].forEach(function (n) { n = String(n || '').replace(/[^\w ]/g, '').trim(); if (n && fams.indexOf(n) < 0) fams.push(n); });
-    if (!fams.length) return '';
-    return 'https://fonts.googleapis.com/css2?' + fams.map(function (n) { return 'family=' + n.replace(/ /g, '+') + ((FONTS[n] && FONTS[n][0]) || ''); }).join('&') + '&display=swap';
+    [f.display, f.body].forEach(function (n) { n = String(n || '').replace(/[^\w ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); if (n && fams.indexOf(n) < 0 && !!FONTS[n] === known) fams.push(n); });
+    return fams;
   }
-  function fontStack(n) { n = String(n || '').replace(/[^\w ]/g, '').trim(); return n ? '"' + n + '", ' + ((FONTS[n] && FONTS[n][1]) || 'system-ui, sans-serif') : 'system-ui, sans-serif'; }
+  function fontsHref() {
+    const fams = fontNames(true);
+    if (!fams.length) return '';
+    return 'https://fonts.googleapis.com/css2?' + fams.map(function (n) { return 'family=' + n.replace(/ /g, '+') + (FONTS[n][0] || ''); }).join('&') + '&display=swap';
+  }
+  /* «Otra fuente de Google» escrita por nombre: enlace propio, en su peso normal. */
+  function customFontsHref() {
+    const fams = fontNames(false);
+    return fams.length ? 'https://fonts.googleapis.com/css2?' + fams.map(function (n) { return 'family=' + n.replace(/ /g, '+'); }).join('&') + '&display=swap' : '';
+  }
+  function fontStack(n) { n = String(n || '').replace(/[^\w ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); return n ? '"' + n + '", ' + ((FONTS[n] && FONTS[n][1]) || 'system-ui, sans-serif') : 'system-ui, sans-serif'; }
   function hexOk(v, d) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '')) ? v : d; }
   function lum(hex) {
     let h = String(hex || '').replace('#', '');
@@ -2829,6 +2848,21 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   }
   /* Cada etapa de personalización agrega aquí una función (rule) => { … } que lee opt() y escribe sus reglas. */
   const OPTION_RULES = [
+    /* Tipografía (theme.type): peso, mayúsculas, espaciado y escala de los títulos; interlineado; fuente de los precios. */
+    function (rule) {
+      const T = '.hero-t,.sh-t,.cat-h h3';
+      const w = String(opt('type.titleWeight', '')), cs = opt('type.titleCase', ''), ls = opt('type.titleSpacing', ''), sc = opt('type.titleScale', ''), lh = opt('type.lineHeight', ''), pf = opt('type.priceFont', '');
+      if (/^[1-9]00$/.test(w)) rule(T, 'font-weight:' + w);
+      if (cs === 'mayus') { rule(T, 'text-transform:uppercase;font-variant-caps:normal'); rule('.hero-box', '--gwk:1.5'); }
+      else if (cs === 'versal') { rule(T, 'text-transform:none;font-variant-caps:all-small-caps'); rule('.hero-box', '--gwk:1.25'); }
+      else if (cs === 'normal') rule(T, 'text-transform:none;font-variant-caps:normal');
+      if (ls !== '' && +ls !== 0 && isFinite(+ls)) { rule(T, 'letter-spacing:' + clamp(+ls, -8, 30) / 100 + 'em'); rule('.hero-box', '--gwl:' + clamp(+ls, -8, 30) / 100); }
+      if (sc !== '' && +sc !== 100 && isFinite(+sc)) rule('', '--ts:' + clamp(+sc, 70, 140) / 100);
+      if (lh !== '' && +lh !== 155 && isFinite(+lh)) rule('', 'line-height:' + clamp(+lh, 110, 220) / 100);
+      if (pf === 'texto') rule('.price', 'font-family:var(--fb)');
+      else if (pf === 'titulos') rule('.price', 'font-family:var(--fd)');
+      else if (pf === 'mono') rule('.price', 'font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:0');
+    },
     /* Forma del logo (brand.logo.shape): círculo o cuadrado; el horizontal siempre se ve en el encabezado. */
     function (rule) {
       const sh = (cfg.brand.logo || {}).shape;
@@ -2850,8 +2884,10 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     let st = doc.getElementById('bk-css');
     if (!st) { st = doc.createElement('style'); st.id = 'bk-css'; doc.head.appendChild(st); }
     let css = CSS_BASE + (CSS_SKIN[skin] || '') + CSS_OPT + tokensCSS() + texCSS() + optCSS() + bgCSS();
-    /* Letra grande: todos los tamaños de texto en px suben un 15 %, en cualquier estética. */
-    if (cfg.theme.textSize === 'grande') css = css.replace(/font-size:(\d+(?:\.\d+)?)px/g, function (m0, n) { return 'font-size:' + Math.round(n * 11.5) / 10 + 'px'; });
+    /* Escala del texto: todos los tamaños en px cambian en la misma proporción, en cualquier estética.
+       «Letra grande» es 115 %; el deslizador de Estilo (type.textScale) manda si se movió. */
+    const ts = opt('type.textScale', ''), pct = ts !== '' && +ts !== 100 && isFinite(+ts) ? Math.round(clamp(+ts, 80, 140)) : (cfg.theme.textSize === 'grande' ? 115 : 100);
+    if (pct !== 100) css = css.replace(/font-size:(\d+(?:\.\d+)?)px/g, function (m0, n) { return 'font-size:' + Math.round(n * pct / 10) / 10 + 'px'; });
     if (st.textContent !== css) st.textContent = css;
     const href = fontsHref();
     let ln = doc.getElementById('bk-fonts');
@@ -2859,6 +2895,12 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       if (!ln) { ln = doc.createElement('link'); ln.id = 'bk-fonts'; ln.rel = 'stylesheet'; doc.head.appendChild(ln); }
       if (ln.getAttribute('href') !== href) ln.setAttribute('href', href);
     }
+    const href2 = customFontsHref();
+    let ln2 = doc.getElementById('bk-fonts2');
+    if (href2) {
+      if (!ln2) { ln2 = doc.createElement('link'); ln2.id = 'bk-fonts2'; ln2.rel = 'stylesheet'; doc.head.appendChild(ln2); }
+      if (ln2.getAttribute('href') !== href2) ln2.setAttribute('href', href2);
+    } else if (ln2 && ln2.parentNode) ln2.parentNode.removeChild(ln2);
     let tc = doc.querySelector('meta[name="theme-color"]');
     if (!tc) { tc = doc.createElement('meta'); tc.setAttribute('name', 'theme-color'); doc.head.appendChild(tc); }
     tc.setAttribute('content', hexOk(cfg.theme.colors.bg, '#111412'));
@@ -3871,6 +3913,16 @@ const STYLE = [
   { id: 'letra', label: 'Letra', cards: [
     { id: 'tipografia', card: 'fonts', title: 'Tipografía', desc: 'Todas son de Google Fonts y cargan solas en la app.', keys: ['fonts', 'textSize'], fields: [
       { k: 'textSize', t: 'seg', label: 'Tamaño del texto', def: 'normal', opts: [['normal', 'Normal'], ['grande', 'Grande']], help: '«Grande» sube un 15 % el texto de la carta, los botones y los formularios. Se lee mejor sin gafas.' }
+    ] },
+    { id: 'titulos', adv: true, card: 'titleWeight', title: 'Títulos', desc: 'La portada, los títulos de sección y las categorías de la carta.', keys: ['type.titleWeight', 'type.titleCase', 'type.titleSpacing', 'type.titleScale'], fields: [
+      { k: 'type.titleCase', t: 'seg', label: 'Letras', def: 'auto', opts: [['auto', 'Según la estética'], ['normal', 'Como se escriben'], ['mayus', 'MAYÚSCULAS'], ['versal', 'Versalitas']] },
+      { k: 'type.titleSpacing', t: 'range', label: 'Espacio entre letras', min: -5, max: 20, step: 1, div: 100, unit: 'em', def: 0 },
+      { k: 'type.titleScale', t: 'range', label: 'Tamaño', min: 80, max: 130, step: 5, unit: '%', def: 100 }
+    ] },
+    { id: 'texto', adv: true, title: 'Texto', desc: 'Las descripciones, los botones, los formularios y los precios.', fields: [
+      { k: 'type.textScale', t: 'range', label: 'Tamaño exacto del texto', min: 85, max: 130, step: 5, unit: '%', def: 100, help: 'Sin moverlo, el texto sigue «Tamaño del texto» de la tarjeta Tipografía.' },
+      { k: 'type.lineHeight', t: 'range', label: 'Interlineado', min: 130, max: 190, step: 5, div: 100, def: 155 },
+      { k: 'type.priceFont', t: 'seg', label: 'Letra de los precios', def: 'auto', opts: [['auto', 'Según la estética'], ['texto', 'La del texto'], ['titulos', 'La de los títulos'], ['mono', 'Monoespaciada']] }
     ] }
   ] },
   { id: 'formas', label: 'Formas', cards: [
@@ -4641,6 +4693,7 @@ const BRAND_FIELDS = [
     if (f.t === 'area') return '<textarea class="in" id="' + id + '" rows="' + (f.rows || 3) + '" data-p="' + attr(path) + '"' + ph + '>' + esc(val || '') + '</textarea>';
     return '<input class="in" id="' + id + '" type="text" data-p="' + attr(path) + '" value="' + attr(val || '') + '"' + ph + ' autocomplete="off">';
   }
+  function rangeText(v, div, unit) { return (div ? (v / div).toFixed(2).replace('.', ',') : v) + (unit ? ' ' + unit : ''); }
   function fieldHTML(f, base) {
     if (f.t === 'hint') return '<p class="hint">' + esc(f.text) + '</p>';
     if (f.t === 'sep') return '<h4 class="sep">' + esc(f.label) + '</h4>';
@@ -4665,8 +4718,8 @@ const BRAND_FIELDS = [
       }
       case 'range': {
         const v = (val == null || val === '') ? (f.def != null ? f.def : (f.min || 0)) : (+val || 0);
-        return '<div class="fld"><label class="lab" for="' + id + '">' + esc(f.label) + ' · <output data-out="' + attr(path) + '">' + v + (f.unit ? ' ' + esc(f.unit) : '') + '</output></label>' +
-          '<input type="range" id="' + id + '" min="' + (f.min || 0) + '" max="' + f.max + '" step="' + (f.step || 1) + '" value="' + v + '" data-p="' + attr(path) + '" data-type="num"' + (f.unit ? ' data-unit="' + attr(f.unit) + '"' : '') + '>' +
+        return '<div class="fld"><label class="lab" for="' + id + '">' + esc(f.label) + ' · <output data-out="' + attr(path) + '">' + rangeText(v, f.div, f.unit) + '</output></label>' +
+          '<input type="range" id="' + id + '" min="' + (f.min || 0) + '" max="' + f.max + '" step="' + (f.step || 1) + '" value="' + v + '" data-p="' + attr(path) + '" data-type="num"' + (f.unit ? ' data-unit="' + attr(f.unit) + '"' : '') + (f.div ? ' data-div="' + f.div + '"' : '') + '>' +
           (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
       }
       case 'sel':
@@ -4964,6 +5017,40 @@ const BRAND_FIELDS = [
     }); });
     const foot = $('#style-foot'); if (foot) foot.hidden = !themeChanged();
   }
+  /* Selector de tipografías: cada opción se ve con su propia letra. Las muestras cargan de Google Fonts solo las
+     letras necesarias (parámetro text), así pesan poco. */
+  function fontCSS(n) { return '"' + String(n || '').replace(/["\\<>]/g, '') + '", system-ui, sans-serif'; }
+  function fontSamples() {
+    if (document.getElementById('font-samples')) return;
+    const names = DISPLAY_FONTS.concat(BODY_FONTS).filter(function (v, i, a) { return a.indexOf(v) === i; }), chars = {};
+    ('Aa' + names.join('')).split('').forEach(function (ch) { chars[ch] = true; });
+    const ln = document.createElement('link'); ln.id = 'font-samples'; ln.rel = 'stylesheet';
+    ln.href = 'https://fonts.googleapis.com/css2?' + names.map(function (n) { return 'family=' + n.replace(/ /g, '+'); }).join('&') + '&text=' + encodeURIComponent(Object.keys(chars).join('')) + '&display=swap';
+    document.head.appendChild(ln);
+  }
+  function fontPickHTML(k, label, list) {
+    const cur = String(S.cur.theme.fonts[k] || ''), custom = !!cur && list.indexOf(cur) < 0, open = S.fontOpen === k, id = 'fp-' + k;
+    let h = '<div class="fld fontf"><span class="lab" id="' + id + '-l">' + esc(label) + '</span>' +
+      '<button type="button" class="fontb" data-a="font-open" data-k="' + k + '" aria-expanded="' + open + '" aria-labelledby="' + id + '-l ' + id + '-v">' +
+      '<span class="fontb-s" aria-hidden="true" style="font-family:' + attr(fontCSS(cur)) + '">Aa</span><span id="' + id + '-v">' + esc(cur || '—') + (custom ? ' · de Google Fonts' : '') + '</span><span class="icoc" aria-hidden="true"></span></button>';
+    if (open) {
+      h += '<div class="fontg" role="group" aria-label="Tipografías para ' + attr(label.toLowerCase()) + '">' + list.map(function (n) {
+        const on = n === cur;
+        return '<button type="button" data-a="font-pick" data-k="' + k + '" data-v="' + attr(n) + '" aria-pressed="' + on + '"><b style="font-family:' + attr(fontCSS(n)) + '">Aa</b><span style="font-family:' + attr(fontCSS(n)) + '">' + esc(n) + '</span></button>';
+      }).join('') + '</div>' +
+        '<div class="fld"><label class="lab" for="fc-' + k + '">Otra fuente de Google Fonts</label><input class="in" id="fc-' + k + '" type="text" data-p="theme.fonts.' + k + '" data-type="lazy" value="' + attr(custom ? cur : '') + '" placeholder="Nombre exacto, como Josefin Sans" autocomplete="off" spellcheck="false">' +
+        '<p class="help">Escríbelo como sale en fonts.google.com y pulsa Enter. Si el nombre no existe, la app usa una letra del sistema sin dañar las demás.</p></div>';
+    }
+    return h + '</div>';
+  }
+  /* Grosores que trae la tipografía de los títulos (de la tabla del motor). */
+  const WEIGHT_NAMES = { 300: 'Fina', 400: 'Normal', 500: 'Media', 600: 'Seminegrita', 700: 'Negrita', 800: 'Extra negrita', 900: 'Negra' };
+  function fontWeights(n) {
+    const spec = (META.fonts[n] || [''])[0] || '', m = /wght@([^&]+)$/.exec(spec), out = [];
+    if (!m) return [400];
+    m[1].split(';').forEach(function (part) { const xs = part.split(','), w = +(xs.length > 1 ? xs[1] : xs[0]); if ((xs.length < 2 || xs[0] === '0') && w && out.indexOf(w) < 0) out.push(w); });
+    return out.length ? out.sort(function (a, b) { return a - b; }) : [400];
+  }
   function fontSel(k, label, list) {
     const cur = S.cur.theme.fonts[k], id = fid('theme.fonts.' + k);
     const opts = list.indexOf(cur) < 0 && cur ? [cur].concat(list) : list;
@@ -4989,7 +5076,16 @@ const BRAND_FIELDS = [
             '<input class="in hex" id="h-' + ck[0] + '" value="' + attr(v) + '" maxlength="7" spellcheck="false" autocomplete="off" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="' + id + '"></div>';
         }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div>';
     },
-    fonts: function () { return '<div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>'; },
+    fonts: function () { return fontPickHTML('display', 'Títulos', DISPLAY_FONTS) + fontPickHTML('body', 'Texto', BODY_FONTS); },
+    titleWeight: function () {
+      const ws = fontWeights(String(S.cur.theme.fonts.display || ''));
+      if (ws.length < 2) return '<p class="help">La tipografía de los títulos tiene un solo grosor.</p>';
+      const cur = String((S.cur.theme.type || {}).titleWeight || 'auto');
+      return '<div class="fld"><span class="lab">Grosor</span><div class="seg" role="group" aria-label="Grosor de los títulos">' + [['auto', 'Según la estética']].concat(ws.map(function (w) { return [String(w), WEIGHT_NAMES[w] || String(w)]; })).map(function (o) {
+        const on = cur === o[0];
+        return '<button type="button" class="' + (on ? 'on' : '') + '" data-a="set" data-p="theme.type.titleWeight" data-v="' + o[0] + '" aria-pressed="' + on + '">' + esc(o[1]) + '</button>';
+      }).join('') + '</div></div>';
+    },
     photos: function () {
       if (!LIB.ready) return '<p class="help">Conectando con la biblioteca de fotos…</p>';
       if (!LIB.cap) return '<p class="help">La biblioteca funciona en claude.ai para quien puede editar el estudio. Mientras tanto, cada foto subida se guarda dentro de la app y pesa unos 100 KB.</p>';
@@ -5519,6 +5615,13 @@ const BRAND_FIELDS = [
       if (el.closest('#sheet')) repaintIco(d.p); else renderEditor();
       refocus('ico-open', 'p', d.p);
     },
+    'font-open': function (d) { S.fontOpen = S.fontOpen === d.k ? null : d.k; if (S.fontOpen) fontSamples(); renderEditor(); refocus('font-open', 'k', d.k); },
+    'font-pick': function (d) {
+      if (!d.k || !d.v) return;
+      S.cur.theme.fonts[d.k] = d.v; S.fontOpen = null;
+      if (d.k === 'display' && S.cur.theme.type && S.cur.theme.type.titleWeight && fontWeights(d.v).indexOf(+S.cur.theme.type.titleWeight) < 0) delete S.cur.theme.type.titleWeight;
+      edited(); renderEditor(); refocus('font-open', 'k', d.k);
+    },
     'hours-copy': function () { copyMonday(); },
     'logo-clear': function () { S.cur.brand.logo = { type: 'mono', value: '' }; edited(); renderEditor(); },
     'img-clear': function (d) { if (d.ip) { setPath(S.cur, d.ip, ''); delPath(S.cur, d.ip + 'Pos'); photoChanged(d.ip); const inp = document.getElementById(fid(d.ip)); if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { /* nada */ } } } },
@@ -5577,11 +5680,12 @@ const BRAND_FIELDS = [
     const t = e.target, p = t && t.getAttribute && t.getAttribute('data-p');
     if (!p) return;
     const type = t.getAttribute('data-type');
-    const discrete = type === 'bool' || type === 'boolinv' || t.tagName === 'SELECT' || t.type === 'time';
+    const discrete = type === 'bool' || type === 'boolinv' || type === 'lazy' || t.tagName === 'SELECT' || t.type === 'time';
     if (discrete && e.type === 'input' && t.type !== 'time') return;
     if (!discrete && e.type === 'change' && type !== 'color') return;
     let v;
-    if (type === 'bool') v = t.checked;
+    if (type === 'lazy') { v = String(t.value).replace(/[^\w ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); if (!v) return; }
+    else if (type === 'bool') v = t.checked;
     else if (type === 'boolinv') v = !t.checked;
     else if (type === 'num') { v = t.value === '' ? 0 : Number(t.value); if (!isFinite(v)) return; }
     else if (type === 'color') {
@@ -5597,10 +5701,11 @@ const BRAND_FIELDS = [
   }
   function afterField(p, t, v) {
     if (p.indexOf('theme.') === 0) syncResets();
+    if (p === 'theme.fonts.display' || p === 'theme.fonts.body') { renderEditor(); return; }
     repaintIco(p);
     if (t.type === 'range') {
-      const outs = document.querySelectorAll('output[data-out]'), unit = t.getAttribute('data-unit');
-      for (let i = 0; i < outs.length; i++) if (outs[i].getAttribute('data-out') === p) outs[i].textContent = v + (unit ? ' ' + unit : '');
+      const outs = document.querySelectorAll('output[data-out]'), unit = t.getAttribute('data-unit'), div = +t.getAttribute('data-div') || 0;
+      for (let i = 0; i < outs.length; i++) if (outs[i].getAttribute('data-out') === p) outs[i].textContent = rangeText(v, div, unit);
       return;
     }
     if (p.indexOf('theme.roles.') === 0) {

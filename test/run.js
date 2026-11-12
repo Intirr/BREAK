@@ -644,6 +644,34 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(!/html\{background/.test(css(f)), 'sin foto, el fondo queda liso');
   }
 
+  /* 11m. Tipografía a fondo */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const head = cfg => { const A = mount(cfg, NOW); const r = { css: A.d.getElementById('bk-css').textContent, f1: (A.d.getElementById('bk-fonts') || {}).href || '', f2: A.d.getElementById('bk-fonts2') ? A.d.getElementById('bk-fonts2').getAttribute('href') : '', head: A.d.head.innerHTML }; A.close(); return r; };
+    const a = TPL('tpl-araucaria'); a.theme.type = { titleWeight: 600, titleCase: 'mayus', titleSpacing: 8, titleScale: 120, lineHeight: 175, priceFont: 'mono' };
+    const h = head(a);
+    ok(h.css.includes('#bk .hero-t,#bk .sh-t,#bk .cat-h h3{font-weight:600}'), 'grosor de los títulos');
+    ok(/text-transform:uppercase/.test(h.css) && h.css.includes('#bk .hero-box{--gwk:1.5}'), 'títulos en mayúsculas, con el tope de tamaño ajustado');
+    ok(h.css.includes('letter-spacing:0.08em') && h.css.includes('--gwl:0.08'), 'espacio entre letras');
+    ok(h.css.includes('#bk {--ts:1.2}') && h.css.includes('#bk {line-height:1.75}'), 'tamaño de títulos e interlineado');
+    ok(/#bk \.price\{font-family:ui-monospace/.test(h.css), 'precios en letra monoespaciada');
+    const d0 = TPL('tpl-araucaria'); d0.theme.type = { titleSpacing: 0, titleScale: 100, lineHeight: 155, textScale: 100 };
+    const h0 = head(d0), hb = head(TPL('tpl-araucaria'));
+    ok(h0.css === hb.css, 'los deslizadores en su valor de partida no cambian nada');
+    const t1 = TPL('tpl-neblina'); t1.theme.type = { textScale: 110 };
+    ok(/body\{margin:0;[^}]*font-size:17\.6px/.test(head(t1).css), 'el texto sube un 10 %');
+    const t2 = TPL('tpl-espiga');
+    ok(/font-size:18\.4px/.test(head(t2).css), 'sin mover el deslizador sigue la letra grande');
+    const g = TPL('tpl-espiga'); g.theme.fonts.display = 'Josefin Sans';
+    const hg = head(g);
+    ok(!/Josefin/.test(hg.f1) && /family=Karla/.test(hg.f1), 'una fuente escrita a mano no va en el enlace de las demás');
+    eq(hg.f2, 'https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap', 'la fuente escrita a mano carga en su propio enlace');
+    ok(/font-family:"Josefin Sans"|--fd:"Josefin Sans"/.test(hg.css), 'los títulos usan la fuente escrita a mano');
+    const bad = TPL('tpl-espiga'); bad.theme.fonts.display = 'Evil"><script>window.__pwn=1</script>';
+    const hx = head(bad);
+    ok(!/<script/i.test(hx.head.replace(/<style[\s\S]*?<\/style>/g, '')) && !/Evil"/.test(hx.css), 'el nombre de la fuente se limpia');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -929,6 +957,36 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   await sleep(80);
   ok(deletedAssets.length === 1 && deletedAssets[0] === LB, 'borra solo la foto que nadie usa, después de confirmar');
   eq(docs.get('biblioteca-fotos').items.map(f => f.id).join(','), LA, 'el índice de la biblioteca se actualiza');
+  // Estilo: tipografías con muestra, otra fuente de Google, títulos y texto
+  eq($$('section[data-card="tipografia"] .fontb').length, 2, 'selector de tipografías para títulos y texto');
+  click($('[data-a="font-open"][data-k="display"]'));
+  eq($$('.fontg [data-a="font-pick"]').length, ctx.DISPLAY_FONTS.length, 'muestra todas las tipografías de títulos');
+  ok(/&text=/.test(($('#font-samples') || {}).href || ''), 'las muestras cargan solo las letras necesarias');
+  click($('[data-a="font-pick"][data-k="display"][data-v="Playfair Display"]'));
+  eq(ST.S.cur.theme.fonts.display, 'Playfair Display', 'elige la tipografía de los títulos');
+  ok(!$('.fontg') && /Playfair Display/.test($('[data-a="font-open"][data-k="display"]').textContent), 'el selector se cierra y muestra la elegida');
+  click($('[data-a="font-open"][data-k="display"]'));
+  setVal(d.getElementById('fc-display'), 'Josefin<Sans>', 'change');
+  eq(ST.S.cur.theme.fonts.display, 'JosefinSans', 'otra fuente de Google por nombre, limpio');
+  setVal(d.getElementById('fc-display'), 'Josefin Sans', 'change');
+  await sleep(220);
+  ok(/family=Josefin\+Sans/.test(ST.pv.frame.contentDocument.getElementById('bk-fonts2').getAttribute('href')), 'la vista previa la carga aparte');
+  click($('[data-a="font-pick"][data-k="display"][data-v="Playfair Display"]'));
+  click($('[data-a="adv"]'));
+  click($('[data-a="sub"][data-g="letra"]'));
+  eq($$('[data-a="set"][data-p="theme.type.titleWeight"]').map(b => b.getAttribute('data-v')).join(','), 'auto,400,600,700', 'el grosor ofrece los que trae la tipografía');
+  click($('[data-a="set"][data-p="theme.type.titleWeight"][data-v="700"]'));
+  eq(ST.S.cur.theme.type.titleWeight, '700', 'títulos en negrita');
+  click($('[data-a="set"][data-p="theme.type.titleCase"][data-v="mayus"]'));
+  eq($('output[data-out="theme.type.lineHeight"]').textContent, '1,55', 'el interlineado se muestra como 1,55');
+  setVal(d.getElementById('f-theme-type-lineHeight'), '170');
+  eq($('output[data-out="theme.type.lineHeight"]').textContent, '1,70', 'y cambia mientras se mueve');
+  await sleep(220);
+  ok(/line-height:1\.7\}/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa el interlineado');
+  click($('[data-a="style-reset"][data-card="titulos"]'));
+  ok(!ST.S.cur.theme.type.titleWeight && !ST.S.cur.theme.type.titleCase, 'restablecer los títulos');
+  click($('[data-a="style-reset"][data-card="texto"]'));
+  click($('[data-a="adv"]'));
   // Estilo: fondo de la app y color por elemento
   ok(!!$('section[data-card="fondoapp"]') && !$('section[data-card="roles"]'), 'el fondo está en el modo sencillo y el color por elemento en el avanzado');
   click($('[data-a="set"][data-p="theme.bg.type"][data-v="degradado"]'));
