@@ -2382,6 +2382,31 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   }
   /* Cada etapa de personalización agrega aquí una función (rule) => { … } que lee opt() y escribe sus reglas. */
   const OPTION_RULES = [
+    /* Formas (theme.shape): esquinas de botones, fotos y chips; relleno de los botones; estilo y borde de las tarjetas. */
+    function (rule) {
+      const R = { pildora: '999px', redondeado: '12px', recto: '3px' };
+      const bt = opt('shape.btn', ''), bf = opt('shape.btnFill', ''), ph = opt('shape.photo', ''), ch = opt('shape.chip', ''), cd = opt('shape.card', ''), bw = opt('shape.border', '');
+      const B = 'var(--c-btn,var(--accent))';
+      if (R[bt]) rule('.btn,.add,.fab', 'border-radius:' + R[bt]);
+      if (bf === 'solido') rule('.btn.pri', 'background:' + B + ';color:var(--c-btn-on,var(--on-accent));border-color:' + B);
+      else if (bf === 'contorno') {
+        rule('.btn.pri', 'background:transparent;color:var(--ink);border:2px solid ' + B + ';box-shadow:none');
+        rule('.add', 'background:transparent;color:' + B + ';border:2px solid ' + B + ';box-shadow:none');
+        rule('.free.hl .btn.pri', 'color:inherit;border-color:currentColor');
+      } else if (bf === 'suave') {
+        rule('.btn.pri,.add', 'background:color-mix(in srgb,' + B + ' 18%,transparent);color:color-mix(in srgb,' + B + ' 62%,var(--ink));border-color:transparent;box-shadow:none');
+        rule('.free.hl .btn.pri', 'background:color-mix(in srgb,currentColor 16%,transparent);color:inherit');
+      }
+      if (ph !== '' && isFinite(+ph)) { rule('.media,.cat-ph,.gsheet .media', 'border-radius:' + clamp(+ph, 0, 40) + 'px'); rule('.lay-fotos .media,.feat .media', 'border-radius:0'); }
+      if (R[ch]) rule('.chip', 'border-radius:' + R[ch]);
+      const w = bw !== '' && isFinite(+bw) ? clamp(+bw, 1, 4) : 1.5;
+      const CARDS = '.card,.svc,.fq,.lay-tarjetas .it,.lay-cuadricula .it,.lay-fotos .it,.feat,.promo,.cl,.quote,.free,.wres';
+      if (cd === 'plana') rule(CARDS, 'border:0;box-shadow:none');
+      else if (cd === 'borde') rule(CARDS, 'border:' + w + 'px solid color-mix(in srgb,var(--ink) 18%,transparent);box-shadow:none');
+      else if (cd === 'suave') rule(CARDS, 'border:0;box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 10%,transparent),0 14px 30px -16px color-mix(in srgb,var(--ink) 50%,transparent)');
+      else if (cd === 'dura') rule(CARDS, 'border:' + Math.max(2, w) + 'px solid var(--ink);box-shadow:4px 4px 0 var(--ink)');
+      else if (cd === 'brillo') rule(CARDS, 'border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);box-shadow:0 0 24px -8px color-mix(in srgb,var(--accent) 75%,transparent)');
+    },
     /* Tipografía (theme.type): peso, mayúsculas, espaciado y escala de los títulos; interlineado; fuente de los precios. */
     function (rule) {
       const T = '.hero-t,.sh-t,.cat-h h3';

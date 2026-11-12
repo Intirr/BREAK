@@ -108,6 +108,16 @@ const STYLE = [
     { id: 'forma', title: 'Esquinas y botones', fields: [
       { k: 'radius', t: 'range', label: 'Esquinas', min: 0, max: 28, unit: 'px' },
       { k: 'buttons', t: 'seg', label: 'Botones', def: 'auto', opts: [['auto', 'Según la estética'], ['redondo', 'Redondos'], ['cuadrado', 'Cuadrados'], ['contorno', 'De contorno']] }
+    ] },
+    { id: 'piezas', adv: true, title: 'Botones, fotos y chips', desc: 'Manda sobre «Botones» de la tarjeta de arriba cuando eliges algo distinto de «Según la estética».', fields: [
+      { k: 'shape.btn', t: 'seg', label: 'Esquinas de los botones', def: 'auto', opts: [['auto', 'Según la estética'], ['pildora', 'Píldora'], ['redondeado', 'Redondeadas'], ['recto', 'Rectas']] },
+      { k: 'shape.btnFill', t: 'seg', label: 'Relleno de los botones', def: 'auto', opts: [['auto', 'Según la estética'], ['solido', 'Sólido'], ['contorno', 'Contorno'], ['suave', 'Suave']] },
+      { k: 'shape.photo', t: 'seg', label: 'Esquinas de las fotos', def: 'auto', opts: [['auto', 'Como las esquinas'], ['0', 'Rectas'], ['8', 'Suaves'], ['18', 'Redondeadas'], ['28', 'Muy redondas']] },
+      { k: 'shape.chip', t: 'seg', label: 'Filtros y opciones', def: 'auto', opts: [['auto', 'Según la estética'], ['pildora', 'Píldora'], ['redondeado', 'Redondeados'], ['recto', 'Rectos']] }
+    ] },
+    { id: 'tarjetas', adv: true, title: 'Tarjetas', desc: 'Platos, promociones, preguntas, contacto y las demás cajas de la app.', fields: [
+      { k: 'shape.card', t: 'seg', label: 'Estilo', def: 'auto', opts: [['auto', 'Según la estética'], ['plana', 'Plana'], ['borde', 'Con borde'], ['suave', 'Sombra suave'], ['dura', 'Sombra dura'], ['brillo', 'Brillo']] },
+      { k: 'shape.border', t: 'range', label: 'Grosor del borde', min: 1, max: 4, step: .5, unit: 'px', def: 1.5, help: 'Para los estilos con borde y sombra dura.' }
     ] }
   ] },
   { id: 'imagenes', label: 'Imágenes', cards: [

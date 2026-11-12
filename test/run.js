@@ -672,6 +672,23 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(!/<script/i.test(hx.head.replace(/<style[\s\S]*?<\/style>/g, '')) && !/Evil"/.test(hx.css), 'el nombre de la fuente se limpia');
   }
 
+  /* 11n. Formas, bordes y sombras */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const css = cfg => { const A = mount(cfg, NOW); const x = A.d.getElementById('bk-css').textContent; A.close(); return x; };
+    const base = css(TPL('tpl-antojo'));
+    const a = TPL('tpl-antojo'); a.theme.shape = { btn: 'recto', btnFill: 'contorno', photo: '0', chip: 'pildora', card: 'suave' };
+    const x = css(a);
+    ok(x.includes('#bk .btn,#bk .add,#bk .fab{border-radius:3px}') && x.includes('#bk .chip{border-radius:999px}'), 'esquinas de botones y chips');
+    ok(/#bk \.btn\.pri\{background:transparent;color:var\(--ink\);border:2px solid var\(--c-btn,var\(--accent\)\)/.test(x), 'botones de contorno que siguen el color de los botones');
+    ok(x.includes('#bk .media,#bk .cat-ph,#bk .gsheet .media{border-radius:0px}') && x.includes('#bk .lay-fotos .media,#bk .feat .media{border-radius:0}'), 'esquinas de las fotos');
+    ok(/#bk \.card,#bk \.svc,[^{]*#bk \.wres\{border:0;box-shadow:0 1px 2px/.test(x), 'tarjetas con sombra suave en toda la app');
+    const b = TPL('tpl-antojo'); b.theme.shape = { card: 'borde', border: 3 };
+    ok(/\{border:3px solid color-mix\(in srgb,var\(--ink\) 18%,transparent\);box-shadow:none\}/.test(css(b)), 'grosor del borde de las tarjetas');
+    const c = TPL('tpl-antojo'); c.theme.shape = { btn: 'auto', btnFill: 'auto', photo: 'auto', chip: 'auto', card: 'auto', border: 1.5 };
+    ok(css(c) === base, 'en «auto» nada cambia');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -957,6 +974,19 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   await sleep(80);
   ok(deletedAssets.length === 1 && deletedAssets[0] === LB, 'borra solo la foto que nadie usa, después de confirmar');
   eq(docs.get('biblioteca-fotos').items.map(f => f.id).join(','), LA, 'el índice de la biblioteca se actualiza');
+  // Estilo: formas avanzadas
+  click($('[data-a="adv"]'));
+  click($('[data-a="sub"][data-g="formas"]'));
+  ok(!!$('section[data-card="piezas"]') && !!$('section[data-card="tarjetas"]'), 'formas avanzadas: botones, fotos, chips y tarjetas');
+  click($('[data-a="set"][data-p="theme.shape.card"][data-v="dura"]'));
+  click($('[data-a="set"][data-p="theme.shape.btn"][data-v="pildora"]'));
+  eq(ST.S.cur.theme.shape.card + ',' + ST.S.cur.theme.shape.btn, 'dura,pildora', 'elige sombra dura y botones en píldora');
+  await sleep(220);
+  ok(/box-shadow:4px 4px 0 var\(--ink\)/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa la sombra dura');
+  click($('[data-a="style-reset"][data-card="tarjetas"]'));
+  click($('[data-a="style-reset"][data-card="piezas"]'));
+  ok(!ST.S.cur.theme.shape || (!ST.S.cur.theme.shape.card && !ST.S.cur.theme.shape.btn), 'restablecer las formas');
+  click($('[data-a="adv"]'));
   // Estilo: tipografías con muestra, otra fuente de Google, títulos y texto
   eq($$('section[data-card="tipografia"] .fontb').length, 2, 'selector de tipografías para títulos y texto');
   click($('[data-a="font-open"][data-k="display"]'));
