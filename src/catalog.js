@@ -75,6 +75,38 @@ const TEXTURES = [['none', 'Ninguno'], ['grano', 'Grano'], ['papel', 'Papel'], [
 const COLOR_KEYS = [['bg', 'Fondo'], ['surface', 'Tarjetas'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3']];
 const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['temporada', 'De temporada'], ['local', 'De la región'], ['compartir', 'Para compartir'], ['ninos', 'Para niños'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['sinlactosa', 'Sin lactosa'], ['picante', 'Picante']];
 const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pedido', 'Hacer un pedido'], ['sellos', 'Tarjeta de sellos'], ['ubicacion', 'Cómo llegar'], ['eventos', 'Ver la agenda'], ['whatsapp', 'Escribir por WhatsApp'], ['none', 'Ninguno']];
+/* Pestaña Estilo: grupos → tarjetas → campos, con rutas dentro de theme.
+   - `card` nombra un dibujo propio del estudio (estéticas, colores, tipografías, texturas); las demás tarjetas se pintan campo por campo.
+   - `keys` son las rutas que la tarjeta controla, para «Restablecer»; si falta, se usan las de sus campos.
+   - `adv: true` en una tarjeta o en un campo lo deja solo para «Opciones avanzadas».
+   Una opción sin valor, o con «auto», deja lo que trae la estética. */
+const STYLE = [
+  { id: 'estetica', label: 'Estética', cards: [
+    { id: 'skin', card: 'skins', title: 'Estética', desc: 'Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.', keys: [] }
+  ] },
+  { id: 'color', label: 'Color', cards: [
+    { id: 'colores', card: 'colors', title: 'Colores', keys: ['colors'] }
+  ] },
+  { id: 'letra', label: 'Letra', cards: [
+    { id: 'tipografia', card: 'fonts', title: 'Tipografía', desc: 'Todas son de Google Fonts y cargan solas en la app.', keys: ['fonts', 'textSize'], fields: [
+      { k: 'textSize', t: 'seg', label: 'Tamaño del texto', def: 'normal', opts: [['normal', 'Normal'], ['grande', 'Grande']], help: '«Grande» sube un 15 % el texto de la carta, los botones y los formularios. Se lee mejor sin gafas.' }
+    ] }
+  ] },
+  { id: 'formas', label: 'Formas', cards: [
+    { id: 'forma', title: 'Esquinas y botones', fields: [
+      { k: 'radius', t: 'range', label: 'Esquinas', min: 0, max: 28, unit: 'px' },
+      { k: 'buttons', t: 'seg', label: 'Botones', def: 'auto', opts: [['auto', 'Según la estética'], ['redondo', 'Redondos'], ['cuadrado', 'Cuadrados'], ['contorno', 'De contorno']] }
+    ] }
+  ] },
+  { id: 'imagenes', label: 'Imágenes', cards: [
+    { id: 'fondo', card: 'textures', title: 'Detalle de fondo', keys: ['texture'] }
+  ] },
+  { id: 'movimiento', label: 'Movimiento', cards: [
+    { id: 'mov', title: 'Movimiento', fields: [
+      { k: 'motion', t: 'seg', label: 'Animaciones', opts: [['off', 'Quieto'], ['suave', 'Suave'], ['vivo', 'Vivo']], help: '«Vivo» agrega rebotes, stickers flotantes y confeti al completar sellos o acertar en la trivia.' }
+    ] }
+  ] }
+];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
 /* Servicios del local: [clave, nombre en el estudio]. Los textos de la app (es/en) y los íconos están en el motor. */
 const SERVICES = [['parqueadero', 'Parqueadero'], ['mascotas', 'Se admiten mascotas'], ['terraza', 'Terraza o zona al aire libre'], ['infantil', 'Zona infantil'], ['wifi', 'Wi-Fi gratis'], ['tarjeta', 'Pago con tarjeta'], ['transferencia', 'Nequi y Daviplata'], ['accesible', 'Acceso para silla de ruedas'], ['domicilios', 'Domicilios'], ['musica', 'Música en vivo'], ['enchufes', 'Enchufes para trabajar'], ['ingles', 'Atención en inglés']];

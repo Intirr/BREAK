@@ -6,20 +6,25 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 ## Comandos
 
-- `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas). Las fuentes `@fontsource/*` son opcionales: sirven para capturas locales sin acceso a Google Fonts.
+- `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (296 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (319 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
-- `python3 test/shots.py` — capturas en Chrome con Playwright (requiere Chrome y las fuentes opcionales).
-- `python3 test/overflow.py` — busca desbordes horizontales del estudio a 390 px.
+
+Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
+
+- `npm run shots` — capturas del estudio y de las apps de ejemplo en `dist/shots/`.
+- `npm run visual:base` — guarda la línea base de píxeles de las apps de ejemplo. Córrelo antes de refactorizar CSS que no debe cambiar el aspecto.
+- `npm run visual:compare` — compara contra la línea base y falla si cambia algún píxel.
+- `npm run overflow` — busca desbordes horizontales del estudio a 390 px, en cada pestaña y con cada módulo abierto.
 
 ## Arquitectura
 
 Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
-- `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas.
+- `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas; `opts.meta` no arranca nada y devuelve las constantes del motor (tipografías, estéticas, etiquetas) para que el estudio no las repita.
 - `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo, La Espiga, Neblina, Los Alisos, La Esquina) y `blankApp()`. Solo datos; la portada de Neblina es una ilustración SVG en base64 (`NEBLINA_IMG`), no una foto.
-- `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`) y etiquetas. Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
+- `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `STYLE` (grupos, tarjetas y campos de la pestaña Estilo), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`) y etiquetas. Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
 - `src/studio.js` — el estudio: estado `S`, editor por pestañas (Estilo, Módulos, Carta, Datos, Publicar), vista previa en un iframe escrito con `document.write`, guardado, exportación (.html, .zip para Cloudflare Pages con manifiesto, service worker e íconos, .json, QR).
 - `src/studio.css`, `src/page.html` — estilos y esqueleto del estudio. `build.js` reemplaza `/*__CSS__*/` y `/*__JS__*/`.
 
@@ -42,6 +47,15 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 2. Entrada en `SKINS` de `catalog.js` con `label`, `art` (texto de la muestra), `desc`, `layout`, `defaults` y `palettes`. Revisa el contraste: texto sobre fondo y sobre tarjetas de 4,5:1 o más.
 3. Muestra `.sk-clave` en `studio.css` y su tipografía en el enlace de Google Fonts de `page.html`.
 4. Pruebas en `test/run.js`.
+
+### Añadir una opción de diseño
+
+Toda opción de `theme` vale «auto» (lo que trae la estética) hasta que el usuario la cambia, así las apps guardadas no cambian solas.
+
+1. En `runtime.js`, una función en `OPTION_RULES` que lee la opción con `opt('ruta', valorPorDefecto)` y escribe sus reglas con `rule(selectores, css)`. `optCSS()` les pone el prefijo `#bk` (el id del contenedor de la app) para que le ganen a cualquier estética sin tocar `CSS_SKIN`.
+2. En `catalog.js`, un campo en una tarjeta de `STYLE` con su ruta dentro de `theme`. Tipos propios de Estilo: `seg` (botones de opción) y `range` (deslizador). `adv: true` lo deja solo para «Opciones avanzadas».
+3. «Restablecer» sale solo: cada tarjeta compara sus rutas con los valores de la estética (`isDefaultAt()` en `studio.js`).
+4. Pruebas en `test/run.js` y `npm run visual:compare` para confirmar que sin tocar la opción nada cambia.
 
 ## Plataforma actual
 

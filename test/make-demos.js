@@ -1,4 +1,4 @@
-// Genera las tres apps exportadas con el mismo código del estudio, para revisarlas en Chrome.
+// Genera las apps de ejemplo exportadas con el mismo código del estudio, para revisarlas en el navegador.
 const { JSDOM, VirtualConsole } = require('jsdom'); const fs = require('fs');
 const html = fs.readFileSync('dist/break-studio.html', 'utf8');
 const vc = new VirtualConsole();

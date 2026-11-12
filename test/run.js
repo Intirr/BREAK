@@ -14,7 +14,7 @@ function quietConsole() { const vc = new VirtualConsole(); vc.on('jsdomError', e
 
 const SRC = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
 const ctx = {}; vm.createContext(ctx);
-vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;', ctx);
+vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;this.STYLE=STYLE;', ctx);
 const TPL = id => JSON.parse(JSON.stringify(ctx.TEMPLATES.find(t => t.id === id)));
 
 /* Monta una app con el motor serializado (prueba que es autocontenido). */
@@ -620,22 +620,57 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok($('[data-a="tex"][data-v="cuadros"]').getAttribute('aria-pressed') === 'true', 'la muestra elegida queda marcada');
   await sleep(220);
   eq(ST.pv.frame.contentDocument.documentElement.getAttribute('data-tex'), 'cuadros', 'la vista previa muestra la textura');
-  ok($('[data-a="btns"][data-v="auto"]').classList.contains('on'), 'los botones arrancan según la estética');
-  click($('[data-a="btns"][data-v="contorno"]'));
+  ok($('[data-a="set"][data-p="theme.buttons"][data-v="auto"]').classList.contains('on'), 'los botones arrancan según la estética');
+  click($('[data-a="set"][data-p="theme.buttons"][data-v="contorno"]'));
   eq(ST.S.cur.theme.buttons, 'contorno', 'elige botones de contorno');
   await sleep(220);
   eq(ST.pv.frame.contentDocument.querySelector('.app').getAttribute('data-btn'), 'contorno', 'la vista previa usa los botones de contorno');
-  ok($('[data-a="tsize"][data-v="normal"]').classList.contains('on'), 'el texto arranca en tamaño normal');
-  click($('[data-a="tsize"][data-v="grande"]'));
+  ok($('[data-a="set"][data-p="theme.textSize"][data-v="normal"]').classList.contains('on'), 'el texto arranca en tamaño normal');
+  click($('[data-a="set"][data-p="theme.textSize"][data-v="grande"]'));
   eq(ST.S.cur.theme.textSize, 'grande', 'elige letra grande');
   await sleep(220);
   ok(/font-size:18\.4px/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa letra grande');
-  click($('[data-a="tsize"][data-v="normal"]'));
+  click($('[data-a="set"][data-p="theme.textSize"][data-v="normal"]'));
   setVal(d.getElementById('h-accent'), '#ff0000');
   eq(ST.S.cur.theme.colors.accent, '#FF0000', 'color escrito a mano');
   eq(d.getElementById('c-accent').value, '#ff0000', 'sincroniza el selector de color');
   setVal(d.getElementById('h-ink'), '#2A1E18');
   ok(/Poco contraste/.test($('#contrast').textContent), 'avisa si el texto no se lee');
+
+  // Estilo: modo sencillo, opciones avanzadas y restablecer
+  const basicCards = ctx.STYLE.reduce((a, g) => a + g.cards.filter(c => !c.adv).length, 0);
+  eq(ST.S.adv, false, 'el estudio arranca en modo sencillo');
+  eq($$('.editor section[data-card]').length, basicCards, 'modo sencillo: todas las tarjetas básicas en una sola página');
+  ok(!$('.subnav'), 'modo sencillo: sin secciones');
+  const rad = d.getElementById('f-theme-radius');
+  ok(!!rad && rad.type === 'range', 'las esquinas son un deslizador');
+  setVal(rad, '20');
+  eq(ST.S.cur.theme.radius, 20, 'el deslizador cambia las esquinas');
+  eq($('output[data-out="theme.radius"]').textContent, '20 px', 'y muestra el valor mientras se mueve');
+  ok(!$('[data-a="style-reset"][data-card="forma"]').hidden, 'aparece «Restablecer» en la tarjeta que cambió');
+  click($('[data-a="set"][data-p="theme.motion"][data-v="vivo"]'));
+  eq(ST.S.cur.theme.motion, 'vivo', 'elige el movimiento con los botones de opción');
+  ok(!$('[data-a="style-reset"][data-card="mov"]').hidden && $('[data-a="set"][data-p="theme.motion"][data-v="vivo"]').classList.contains('on'), 'la opción elegida queda marcada');
+  click($('[data-a="style-reset"][data-card="forma"]'));
+  eq(ST.S.cur.theme.radius, ctx.SKINS.cultural.defaults.radius, 'restablecer devuelve las esquinas de la estética');
+  ok(!('buttons' in ST.S.cur.theme), 'y quita la opción de botones, que no viene de la estética');
+  ok($('[data-a="style-reset"][data-card="forma"]').hidden, 'la tarjeta restablecida ya no ofrece «Restablecer»');
+  eq(ST.S.cur.theme.motion, 'vivo', 'restablecer una tarjeta no toca las demás');
+  click($('[data-a="adv"]'));
+  eq(ST.S.adv, true, 'activa las opciones avanzadas');
+  eq(w.localStorage.getItem('break.studio.adv'), 'true', 'y lo recuerda en el navegador');
+  eq($('[data-a="adv"]').getAttribute('aria-checked'), 'true', 'el interruptor queda encendido');
+  eq($$('.subnav [data-a="sub"]').length, ctx.STYLE.filter(g => g.cards.length).length, 'modo avanzado: una sección por grupo');
+  eq($$('.editor section[data-card]').length, 1, 'modo avanzado: solo se ve la sección abierta');
+  click($('[data-a="sub"][data-g="color"]'));
+  ok(!!d.getElementById('h-accent') && !$('.skins') && $('[data-a="sub"][data-g="color"]').getAttribute('aria-selected') === 'true', 'cambia a la sección Color');
+  click($('[data-a="adv"]'));
+  eq($$('.editor section[data-card]').length, basicCards, 'vuelve al modo sencillo');
+  ok(!$('#style-foot').hidden, 'avisa que la app tiene ajustes propios');
+  click($('[data-a="style-reset-all"]'));
+  click($('[data-a="confirm-yes"]'));
+  ok(JSON.stringify(ST.S.cur.theme) === JSON.stringify(Object.assign({ skin: 'cultural' }, ctx.SKINS.cultural.defaults)), 'volver a la estética deja el tema como viene de fábrica');
+  ok($('#style-foot').hidden && $$('[data-a="style-reset"]').every(b => b.hidden), 'sin ajustes propios no se ofrece restablecer');
 
   // Carta: categoría, plato, etiquetas
   click($('[data-a="tab"][data-t="carta"]'));

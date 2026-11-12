@@ -69,7 +69,9 @@
   const S = {
     apps: [], cur: null, kind: 'tpl', tpl: {}, tab: DESKTOP.matches ? 'estilo' : 'vista',
     openMod: null, openCat: null, edit: null, save: 'idle', store: 'loading', storeNote: '', dirty: false,
-    pvLang: 'es', full: false, confirmFn: null, sheetOnClose: null, restored: false, opener: null
+    pvLang: 'es', full: false, confirmFn: null, sheetOnClose: null, restored: false, opener: null,
+    /* Estilo: «Opciones avanzadas» se recuerda en el navegador; sub es la sección abierta en ese modo. */
+    adv: !!lsGet('break.studio.adv', false), sub: 'estetica'
   };
   let saveTimer = null;
 
@@ -338,6 +340,20 @@
           '<label class="btn sm filebtn img-up">' + (isData ? 'Cambiar foto' : 'Subir foto') + '<input type="file" accept="image/*" data-a="img-file" data-ip="' + attr(path) + '" data-max="' + (+f.max || 1100) + '" hidden></label>';
         break;
       }
+      case 'seg': {
+        /* Botones de opción. Sin valor guardado se marca `def`. */
+        const cur = (val == null || val === '') ? f.def : val;
+        return '<div class="fld"><span class="lab">' + esc(f.label) + '</span><div class="seg" role="group" aria-label="' + attr(f.label) + '">' + f.opts.map(function (o) {
+          const on = String(cur) === String(o[0]);
+          return '<button type="button" class="' + (on ? 'on' : '') + '" data-a="set" data-p="' + attr(path) + '" data-v="' + attr(o[0]) + '" aria-pressed="' + on + '">' + esc(o[1]) + '</button>';
+        }).join('') + '</div>' + (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
+      }
+      case 'range': {
+        const v = (val == null || val === '') ? (f.def != null ? f.def : (f.min || 0)) : (+val || 0);
+        return '<div class="fld"><label class="lab" for="' + id + '">' + esc(f.label) + ' · <output data-out="' + attr(path) + '">' + v + (f.unit ? ' ' + esc(f.unit) : '') + '</output></label>' +
+          '<input type="range" id="' + id + '" min="' + (f.min || 0) + '" max="' + f.max + '" step="' + (f.step || 1) + '" value="' + v + '" data-p="' + attr(path) + '" data-type="num"' + (f.unit ? ' data-unit="' + attr(f.unit) + '"' : '') + '>' +
+          (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
+      }
       case 'sel':
         if (val == null && f.def != null) val = f.def;
         ctl = '<select class="in" id="' + id + '" data-p="' + attr(path) + '"' + (f.rerender ? ' data-rr="1"' : '') + '>' + f.opts.map(function (o) {
@@ -417,44 +433,111 @@
     if (!out.length) return '<p class="okline">Buen contraste: el texto se lee bien sobre el fondo y las tarjetas.</p>';
     return '<p class="warnline"><b>Poco contraste.</b> ' + esc(out.join(' · ')) + '. Lo recomendable es 4,5:1 o más.</p>';
   }
-  const PANELS = {
-    vista: function () { return ''; },
-    estilo: function () {
+  /* ---------- Estilo: se arma desde el esquema STYLE del catálogo ---------- */
+  function skinDefaults() { return (SKINS[S.cur.theme.skin] || SKINS.elegante).defaults; }
+  /* Valor por defecto que declara el esquema para cada ruta (el resto arranca vacío o en «auto»). */
+  const STYLE_DEF = {};
+  STYLE.forEach(function (g) { g.cards.forEach(function (c) { (c.fields || []).forEach(function (f) { if (f.k && f.def != null) STYLE_DEF[f.k] = f.def; }); }); });
+  function sameVal(a, b) {
+    if (a && b && typeof a === 'object' && typeof b === 'object') {
+      const ka = Object.keys(a), kb = Object.keys(b);
+      return ka.length === kb.length && ka.every(function (k) { return sameVal(a[k], b[k]); });
+    }
+    return String(a == null ? '' : a).toLowerCase() === String(b == null ? '' : b).toLowerCase();
+  }
+  /* ¿La ruta de theme está como la trae la estética? */
+  function isDefaultAt(p) {
+    const v = getPath(S.cur.theme, p), d = getPath(skinDefaults(), p);
+    if (d !== undefined) return sameVal(v, d);
+    if (v && typeof v === 'object') return Object.keys(v).every(function (k) { return isDefaultAt(p + '.' + k); });
+    return v == null || v === '' || v === 'auto' || (STYLE_DEF[p] != null && String(STYLE_DEF[p]) === String(v));
+  }
+  function cardKeys(c) { return c.keys || (c.fields || []).map(function (f) { return f.k; }).filter(Boolean); }
+  function cardChanged(c) { return cardKeys(c).some(function (k) { return !isDefaultAt(k); }); }
+  function themeChanged() {
+    return Object.keys(Object.assign({}, skinDefaults(), S.cur.theme)).some(function (k) { return k !== 'skin' && !isDefaultAt(k); });
+  }
+  function findCard(id) {
+    let out = null;
+    STYLE.forEach(function (g) { g.cards.forEach(function (c) { if (c.id === id) out = c; }); });
+    return out;
+  }
+  function resetKeys(keys) {
+    const th = S.cur.theme, d = skinDefaults();
+    keys.forEach(function (k) {
+      const dv = getPath(d, k);
+      if (dv !== undefined) { setPath(th, k, clone(dv)); return; }
+      const ks = k.split('.'), last = ks.pop(), parent = ks.length ? getPath(th, ks.join('.')) : th;
+      if (parent && typeof parent === 'object') delete parent[last];
+    });
+  }
+  /* Muestra u oculta los botones «Restablecer» sin volver a pintar el editor (para no cortar un deslizador a medio mover). */
+  function syncResets() {
+    STYLE.forEach(function (g) { g.cards.forEach(function (c) {
+      const bs = document.querySelectorAll('[data-a="style-reset"]');
+      for (let i = 0; i < bs.length; i++) if (bs[i].getAttribute('data-card') === c.id) bs[i].hidden = !cardChanged(c);
+    }); });
+    const foot = $('#style-foot'); if (foot) foot.hidden = !themeChanged();
+  }
+  function fontSel(k, label, list) {
+    const cur = S.cur.theme.fonts[k], id = fid('theme.fonts.' + k);
+    const opts = list.indexOf(cur) < 0 && cur ? [cur].concat(list) : list;
+    return '<div class="fld"><label class="lab" for="' + id + '">' + label + '</label><select class="in" id="' + id + '" data-p="theme.fonts.' + k + '">' + opts.map(function (f) {
+      return '<option' + (f === cur ? ' selected' : '') + '>' + esc(f) + '</option>';
+    }).join('') + '</select></div>';
+  }
+  /* Tarjetas con dibujo propio. */
+  const STYLE_CARDS = {
+    skins: function () {
+      const th = S.cur.theme;
+      return '<div class="skins">' + Object.keys(SKINS).map(function (k) {
+        const on = th.skin === k;
+        return '<button type="button" class="skin" data-a="skin" data-s="' + k + '" aria-pressed="' + on + '"><span class="skin-art sk-' + k + '" aria-hidden="true">' + esc(SKINS[k].art || SKINS[k].label) + '</span><span class="skin-t"><span class="skin-n">' + SKINS[k].label + (on ? ' <em>· actual</em>' : '') + '</span><span class="skin-d">' + esc(SKINS[k].desc) + '</span></span></button>';
+      }).join('') + '</div>';
+    },
+    colors: function () {
       const th = S.cur.theme, sk = SKINS[th.skin] || SKINS.elegante;
-      const fontSel = function (k, label, list) {
-        const cur = th.fonts[k], id = fid('theme.fonts.' + k);
-        const opts = list.indexOf(cur) < 0 && cur ? [cur].concat(list) : list;
-        return '<div class="fld"><label class="lab" for="' + id + '">' + label + '</label><select class="in" id="' + id + '" data-p="theme.fonts.' + k + '">' + opts.map(function (f) {
-          return '<option' + (f === cur ? ' selected' : '') + '>' + esc(f) + '</option>';
-        }).join('') + '</select></div>';
-      };
-      const seg = function (key, act, opts, def) {
-        const cur = th[key] || def;
-        return '<div class="seg" role="group">' + opts.map(function (o) { return '<button type="button" class="' + (cur === o[0] ? 'on' : '') + '" data-a="' + act + '" data-v="' + o[0] + '" aria-pressed="' + (cur === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>';
-      };
-      return tplBanner() +
-        '<section class="card"><div class="card-h"><h2>Estética</h2><p>Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.</p></div>' +
-        '<div class="skins">' + Object.keys(SKINS).map(function (k) {
-          const on = th.skin === k;
-          return '<button type="button" class="skin" data-a="skin" data-s="' + k + '" aria-pressed="' + on + '"><span class="skin-art sk-' + k + '" aria-hidden="true">' + esc(SKINS[k].art || SKINS[k].label) + '</span><span class="skin-t"><span class="skin-n">' + SKINS[k].label + (on ? ' <em>· actual</em>' : '') + '</span><span class="skin-d">' + esc(SKINS[k].desc) + '</span></span></button>';
-        }).join('') + '</div></section>' +
-        '<section class="card"><div class="card-h"><h2>Colores</h2><p>Paletas sugeridas para la estética ' + esc(sk.label.toLowerCase()) + ', o ajusta cada color.</p></div>' +
-        '<div class="pals">' + sk.palettes.map(function (p, i) { return '<button type="button" class="pal" data-a="pal" data-i="' + i + '"><span class="sws">' + swatches(p.colors) + '</span>' + esc(p.name) + '</button>'; }).join('') + '</div>' +
+      return '<div class="pals">' + sk.palettes.map(function (p, i) { return '<button type="button" class="pal" data-a="pal" data-i="' + i + '"><span class="sws">' + swatches(p.colors) + '</span>' + esc(p.name) + '</button>'; }).join('') + '</div>' +
         '<div class="colors">' + COLOR_KEYS.map(function (ck) {
           const v = String(th.colors[ck[0]] || '#000000').toUpperCase(), id = 'c-' + ck[0];
           return '<div class="crow"><input type="color" id="' + id + '" value="' + attr(v.toLowerCase()) + '" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="h-' + ck[0] + '" aria-label="' + ck[1] + '"><label for="h-' + ck[0] + '">' + ck[1] + '</label>' +
             '<input class="in hex" id="h-' + ck[0] + '" value="' + attr(v) + '" maxlength="7" spellcheck="false" autocomplete="off" data-p="theme.colors.' + ck[0] + '" data-type="color" data-pair="' + id + '"></div>';
-        }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div></section>' +
-        '<section class="card"><div class="card-h"><h2>Tipografía</h2><p>Todas son de Google Fonts y cargan solas en la app.</p></div><div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>' +
-        '<div class="fld"><span class="lab">Tamaño del texto</span>' + seg('textSize', 'tsize', [['normal', 'Normal'], ['grande', 'Grande']], 'normal') + '<p class="help">«Grande» sube un 15 % el texto de la carta, los botones y los formularios. Se lee mejor sin gafas.</p></div></section>' +
-        '<section class="card"><div class="card-h"><h2>Forma y movimiento</h2></div>' +
-        '<div class="fld"><label class="lab" for="f-radius">Esquinas · <output id="radius-out">' + (+th.radius || 0) + ' px</output></label><input type="range" id="f-radius" min="0" max="28" step="1" value="' + (+th.radius || 0) + '" data-p="theme.radius" data-type="num"></div>' +
-        '<div class="fld"><span class="lab">Botones</span>' + seg('buttons', 'btns', [['auto', 'Según la estética'], ['redondo', 'Redondos'], ['cuadrado', 'Cuadrados'], ['contorno', 'De contorno']], 'auto') + '</div>' +
-        '<div class="fld"><span class="lab">Movimiento</span>' + seg('motion', 'motion', [['off', 'Quieto'], ['suave', 'Suave'], ['vivo', 'Vivo']]) + '<p class="help">«Vivo» agrega rebotes, stickers flotantes y confeti al completar sellos o acertar en la trivia.</p></div>' +
-        '<div class="fld"><span class="lab">Detalle de fondo</span><div class="texs" role="group" aria-label="Detalle de fondo" style="' + attr(texVars()) + '">' + TEXTURES.map(function (t) {
-          const on = (th.texture || 'none') === t[0];
-          return '<button type="button" class="tex" data-a="tex" data-v="' + t[0] + '" aria-pressed="' + on + '"><span class="tex-sw tx-' + t[0] + '" aria-hidden="true"></span>' + esc(t[1]) + '</button>';
-        }).join('') + '</div></div></section>';
+        }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div>';
+    },
+    fonts: function () { return '<div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>'; },
+    textures: function () {
+      const th = S.cur.theme;
+      return '<div class="texs" role="group" aria-label="Detalle de fondo" style="' + attr(texVars()) + '">' + TEXTURES.map(function (t) {
+        const on = (th.texture || 'none') === t[0];
+        return '<button type="button" class="tex" data-a="tex" data-v="' + t[0] + '" aria-pressed="' + on + '"><span class="tex-sw tx-' + t[0] + '" aria-hidden="true"></span>' + esc(t[1]) + '</button>';
+      }).join('') + '</div>';
+    }
+  };
+  function styleCard(c) {
+    const sk = SKINS[S.cur.theme.skin] || SKINS.elegante;
+    const desc = c.card === 'colors' ? 'Paletas sugeridas para la estética ' + sk.label.toLowerCase() + ', o ajusta cada color.' : c.desc;
+    const fields = (c.fields || []).filter(function (f) { return S.adv || !f.adv; }).map(function (f) { return fieldHTML(f, 'theme'); }).join('');
+    return '<section class="card" data-card="' + attr(c.id) + '"><div class="card-h"><div class="card-t"><h2>' + esc(c.title) + '</h2>' +
+      (cardKeys(c).length ? '<button type="button" class="btn sm" data-a="style-reset" data-card="' + attr(c.id) + '"' + (cardChanged(c) ? '' : ' hidden') + '>Restablecer</button>' : '') + '</div>' +
+      (desc ? '<p>' + esc(desc) + '</p>' : '') + '</div>' +
+      (c.card ? STYLE_CARDS[c.card](c) : '') + fields + '</section>';
+  }
+  const PANELS = {
+    vista: function () { return ''; },
+    estilo: function () {
+      const sk = SKINS[S.cur.theme.skin] || SKINS.elegante;
+      const groups = STYLE.map(function (g) { return { id: g.id, label: g.label, cards: g.cards.filter(function (c) { return S.adv || !c.adv; }) }; })
+        .filter(function (g) { return g.cards.length; });
+      const head = '<div class="st-head"><div class="adv-t"><b id="adv-l">Opciones avanzadas</b><small>' + (S.adv ? 'Ves todos los ajustes de diseño, por secciones.' : 'Actívalas para ver todos los ajustes de diseño.') + '</small></div>' +
+        '<button type="button" class="swb" role="switch" aria-checked="' + S.adv + '" aria-labelledby="adv-l" data-a="adv"></button></div>';
+      const foot = '<div class="st-foot" id="style-foot"' + (themeChanged() ? '' : ' hidden') + '><p>Esta app tiene ajustes de diseño propios.</p>' +
+        '<button type="button" class="btn sm" data-a="style-reset-all">Volver a la estética ' + esc(sk.label.toLowerCase()) + '</button></div>';
+      if (!S.adv) return tplBanner() + head + groups.map(function (g) { return g.cards.map(styleCard).join(''); }).join('') + foot;
+      if (!groups.some(function (g) { return g.id === S.sub; })) S.sub = groups[0].id;
+      const cur = groups.filter(function (g) { return g.id === S.sub; })[0];
+      return tplBanner() + head + '<div class="subnav" role="tablist" aria-label="Secciones de estilo">' + groups.map(function (g) {
+        return '<button type="button" role="tab" data-a="sub" data-g="' + g.id + '" aria-selected="' + (g.id === S.sub) + '">' + esc(g.label) + '</button>';
+      }).join('') + '</div>' + cur.cards.map(styleCard).join('') + foot;
     },
     modulos: function () {
       const ms = S.cur.modules, on = ms.filter(function (m) { return m.on !== false; }).length;
@@ -789,10 +872,28 @@
     },
     skin: function (d) { applySkin(d.s); },
     pal: function (d) { applyPalette(+d.i); },
-    motion: function (d) { S.cur.theme.motion = d.v; edited(); renderEditor(); },
-    tex: function (d) { S.cur.theme.texture = d.v; edited(); renderEditor(); },
-    btns: function (d) { S.cur.theme.buttons = d.v; edited(); renderEditor(); },
-    tsize: function (d) { S.cur.theme.textSize = d.v === 'grande' ? 'grande' : 'normal'; edited(); renderEditor(); },
+    tex: function (d) { S.cur.theme.texture = d.v; edited(); renderEditor(); refocus('tex', 'v', d.v); },
+    /* Campo de opciones (tipo seg): guarda el valor en su ruta y devuelve el foco al botón elegido. */
+    set: function (d) {
+      setPath(S.cur, d.p, d.v); edited(); renderEditor();
+      const bs = document.querySelectorAll('[data-a="set"]');
+      for (let i = 0; i < bs.length; i++) if (bs[i].getAttribute('data-p') === d.p && bs[i].getAttribute('data-v') === d.v) { try { bs[i].focus({ preventScroll: true }); } catch (e) { /* nada */ } break; }
+    },
+    adv: function () { S.adv = !S.adv; lsSet('break.studio.adv', S.adv); renderEditor(); refocus('adv'); },
+    sub: function (d) { S.sub = d.g; renderEditor(); refocus('sub', 'g', d.g); },
+    'style-reset': function (d) {
+      const c = findCard(d.card); if (!c) return;
+      resetKeys(cardKeys(c)); edited(); renderEditor(); renderHeader();
+      toast('«' + c.title + '» volvió a lo que trae la estética.');
+    },
+    'style-reset-all': function () {
+      const k = S.cur.theme.skin, sk = SKINS[k] || SKINS.elegante;
+      confirmBox('¿Volver a la estética ' + sk.label.toLowerCase() + '?', 'Se quitan todos los ajustes de diseño propios: colores, tipografías, formas y fondo. El contenido de la app no cambia.', 'Restablecer', function () {
+        S.cur.theme = Object.assign({ skin: k }, clone(sk.defaults));
+        edited(); renderEditor(); renderHeader(); pvUpdate(true);
+        toast('La app volvió a la estética ' + sk.label.toLowerCase() + '.');
+      });
+    },
     'mod-open': function (d) { S.openMod = S.openMod === d.mid ? null : d.mid; renderEditor(); if (S.openMod && DESKTOP.matches) pvFocus(d.mid); },
     'mod-mv': function (d) { const i = modIndex(d.mid); if (move(S.cur.modules, i, +d.d)) { edited(); renderEditor(); } },
     'mod-focus': function (d) { if (!DESKTOP.matches) setTab('vista'); setTimeout(function () { pvFocus(d.mid); }, 80); },
@@ -870,6 +971,11 @@
     'pv-full': function () { toggleFull(); },
     'confirm-yes': function () { const f = S.confirmFn; S.confirmFn = null; S.sheetOnClose = null; closeSheet(); if (f) f(); }
   };
+  /* Tras volver a pintar el editor, devuelve el foco al botón de la acción (y del valor, si se indica). */
+  function refocus(act, key, val) {
+    const bs = document.querySelectorAll('[data-a="' + act + '"]');
+    for (let i = 0; i < bs.length; i++) if (!key || bs[i].getAttribute('data-' + key) === val) { try { bs[i].focus({ preventScroll: true }); } catch (e) { /* nada */ } return; }
+  }
   function toggleFull() {
     S.full = !S.full;
     $('#stage').classList.toggle('full', S.full);
@@ -902,7 +1008,12 @@
     afterField(p, t, v);
   }
   function afterField(p, t, v) {
-    if (p === 'theme.radius') { const o = $('#radius-out'); if (o) o.textContent = v + ' px'; return; }
+    if (p.indexOf('theme.') === 0) syncResets();
+    if (t.type === 'range') {
+      const outs = document.querySelectorAll('output[data-out]'), unit = t.getAttribute('data-unit');
+      for (let i = 0; i < outs.length; i++) if (outs[i].getAttribute('data-out') === p) outs[i].textContent = v + (unit ? ' ' + unit : '');
+      return;
+    }
     if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); const tx = $('.texs'); if (tx) tx.setAttribute('style', texVars()); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') renderHeader(); return; }
     if (p === 'brand.name') { renderHeader(); renderStageTop(); return; }
     if (p === 'i18n.bilingual') { if (!v && S.pvLang === 'en') { S.pvLang = 'es'; if (PV.ready) PV.rt.setLang('es'); } renderEditor(); renderStageTop(); renderTabs(); return; }

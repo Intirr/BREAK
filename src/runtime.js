@@ -960,6 +960,9 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 .app[data-btn="contorno"] .free.hl .btn.pri{background:transparent;color:inherit;border-color:currentColor}
 `;
 
+  /* El estudio pide las constantes del motor (tipografías, estéticas…) para no repetirlas en su catálogo. */
+  if (opts.meta) return { fonts: FONTS, skins: Object.keys(CSS_SKIN), tags: TAG_ORDER };
+
   /* ---------- Estado ---------- */
   let cfg = normalize(initialCfg);
   let skin = 'elegante';
@@ -1948,6 +1951,26 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       ';--accent:' + acc + ';--accent2:' + a2 + ';--accent3:' + a3 + ';--on-accent:' + onColor(acc) + ';--on-accent2:' + onColor(a2) + ';--on-accent3:' + onColor(a3) +
       ';--r:' + r + 'px;--fd:' + fontStack(f.display) + ';--fb:' + fontStack(f.body) + ';color-scheme:' + (lum(hexOk(c.bg, '#111412')) < 0.3 ? 'dark' : 'light') + '}';
   }
+  /* ---------- Opciones de diseño ----------
+     Cada opción de theme vale «auto» (lo que trae la estética) hasta que el usuario la cambia.
+     optCSS() escribe solo las reglas de las opciones activas y les pone el prefijo #bk, el id del
+     contenedor de la app, para que le ganen a cualquier regla de estética sin tener que tocarla. */
+  function opt(path, def) {
+    let o = cfg.theme;
+    const ks = path.split('.');
+    for (let i = 0; i < ks.length; i++) { if (o == null || typeof o !== 'object') return def; o = o[ks[i]]; }
+    return (o == null || o === '' || o === 'auto') ? def : o;
+  }
+  function optCSS() {
+    const R = [];
+    /* rule('.btn,.chip', 'border-radius:0') → «#bk .btn,#bk .chip{border-radius:0}» */
+    const rule = function (sel, css) { R.push(sel.split(',').map(function (s) { return '#bk ' + s.trim(); }).join(',') + '{' + css + '}'); };
+    OPTION_RULES.forEach(function (fn) { fn(rule); });
+    return R.join('\n');
+  }
+  /* Cada etapa de personalización agrega aquí una función (rule) => { … } que lee opt() y escribe sus reglas. */
+  const OPTION_RULES = [];
+
   /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
   function texCSS() {
     const t = cfg.theme.texture, c = cfg.theme.colors;
@@ -1959,7 +1982,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function applyHead() {
     let st = doc.getElementById('bk-css');
     if (!st) { st = doc.createElement('style'); st.id = 'bk-css'; doc.head.appendChild(st); }
-    let css = CSS_BASE + (CSS_SKIN[skin] || '') + CSS_OPT + tokensCSS() + texCSS();
+    let css = CSS_BASE + (CSS_SKIN[skin] || '') + CSS_OPT + tokensCSS() + texCSS() + optCSS();
     /* Letra grande: todos los tamaños de texto en px suben un 15 %, en cualquier estética. */
     if (cfg.theme.textSize === 'grande') css = css.replace(/font-size:(\d+(?:\.\d+)?)px/g, function (m0, n) { return 'font-size:' + Math.round(n * 11.5) / 10 + 'px'; });
     if (st.textContent !== css) st.textContent = css;
@@ -2052,7 +2075,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
         Array.prototype.forEach.call(chips, function (c) {
           const on = c.getAttribute('data-c') === id;
           c.classList.toggle('on', on);
-          if (on && c.parentNode && c.parentNode.scrollTo) { try { c.parentNode.scrollTo({ left: c.offsetLeft - 20, behavior: 'smooth' }); } catch (e) { /* nada */ } }
+          if (on && c.parentNode && c.parentNode.scrollTo) { try { c.parentNode.scrollTo({ left: c.offsetLeft - 20, behavior: motion() === 'off' ? 'auto' : 'smooth' }); } catch (e) { /* nada */ } }
         });
       });
     }, { rootMargin: '-130px 0px -55% 0px' });
@@ -2156,6 +2179,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function boot() {
     root = doc.createElement('div');
     root.className = 'app';
+    root.id = 'bk';
     doc.body.appendChild(root);
     const saved = sget(key('lang'), null);
     const nav = (win.navigator && (win.navigator.language || '')) || '';
