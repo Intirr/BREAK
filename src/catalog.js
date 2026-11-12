@@ -85,7 +85,9 @@ const STYLE = [
     { id: 'skin', card: 'skins', title: 'Estética', desc: 'Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.', keys: [] }
   ] },
   { id: 'color', label: 'Color', cards: [
-    { id: 'colores', card: 'colors', title: 'Colores', keys: ['colors'] }
+    { id: 'colores', card: 'colors', title: 'Colores', keys: ['colors'] },
+    { id: 'fondoapp', card: 'bgapp', title: 'Fondo de la app', desc: 'Liso, en degradado hacia un acento o con una foto detrás y un velo del color de fondo para que todo se lea.', keys: ['bg'] },
+    { id: 'roles', card: 'roles', adv: true, title: 'Color por elemento', desc: 'Cambia el color de cada pieza sin tocar la paleta. «Auto» deja el de la estética.', keys: ['roles'] }
   ] },
   { id: 'letra', label: 'Letra', cards: [
     { id: 'tipografia', card: 'fonts', title: 'Tipografía', desc: 'Todas son de Google Fonts y cargan solas en la app.', keys: ['fonts', 'textSize'], fields: [
@@ -112,6 +114,9 @@ const STYLE = [
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
+/* Color por elemento: roles (theme.roles) y los colores de la paleta que se ofrecen para cada uno. */
+const ROLES = [['btn', 'Botones'], ['title', 'Títulos'], ['kicker', 'Antetítulos'], ['price', 'Precios'], ['sel', 'Selección'], ['tag', 'Etiquetas'], ['top', 'Encabezado'], ['foot', 'Pie de página']];
+const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['surface', 'Tarjetas'], ['bg', 'Fondo']];
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],

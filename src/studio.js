@@ -749,6 +749,21 @@
     if (!out.length) return '<p class="okline">Buen contraste: el texto se lee bien sobre el fondo y las tarjetas.</p>';
     return '<p class="warnline"><b>Poco contraste.</b> ' + esc(out.join(' · ')) + '. Lo recomendable es 4,5:1 o más.</p>';
   }
+  /* Contraste de los colores por elemento que son texto (títulos, antetítulos y precios). */
+  function roleHexOf(v, c) { return /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : (v && v !== 'auto' && /^#[0-9a-f]{6}$/i.test(String(c[v] || '')) ? c[v] : ''); }
+  function roleWarnings(cfg) {
+    const R = cfg.theme.roles || {}, c = cfg.theme.colors || {}, out = [];
+    [['title', 'Títulos'], ['kicker', 'Antetítulos'], ['price', 'Precios']].forEach(function (r) {
+      const h = roleHexOf(R[r[0]], c); if (!h) return;
+      const x = contrast(h, c.bg); if (x < 3) out.push(r[1] + ' sobre el fondo: ' + x.toFixed(1).replace('.', ',') + ':1');
+      if (r[0] === 'price') { const y = contrast(h, c.surface); if (y < 3) out.push('Precios sobre las tarjetas: ' + y.toFixed(1).replace('.', ',') + ':1'); }
+    });
+    return out;
+  }
+  function roleContrastHTML() {
+    const w = roleWarnings(S.cur);
+    return w.length ? '<p class="warnline"><b>Poco contraste.</b> ' + esc(w.join(' · ')) + '. Para títulos y precios, lo recomendable es 3:1 o más.</p>' : '';
+  }
   /* ---------- Estilo: se arma desde el esquema STYLE del catálogo ---------- */
   function skinDefaults() { return (SKINS[S.cur.theme.skin] || SKINS.elegante).defaults; }
   /* Valor por defecto que declara el esquema para cada ruta (el resto arranca vacío o en «auto»). */
@@ -829,6 +844,34 @@
         (emb.length ? '<p class="warnline">Esta app tiene ' + emb.length + (emb.length === 1 ? ' foto guardada' : ' fotos guardadas') + ' dentro de ella. Pásalas a la biblioteca para que la app pese menos.</p>' : '') +
         '<div class="lib-acts">' + (emb.length ? '<button type="button" class="btn sm pri" data-a="lib-move">Pasar a la biblioteca</button>' : '') +
         '<button type="button" class="btn sm" data-a="lib-clean"' + (n ? '' : ' disabled') + '>' + (n ? 'Borrar fotos sin usar (' + n + ')' : 'No hay fotos sin usar') + '</button></div>';
+    },
+    bgapp: function () {
+      const b = S.cur.theme.bg || {}, t = b.type === 'degradado' || b.type === 'foto' ? b.type : 'liso', col = S.cur.theme.colors || {};
+      let h = fieldHTML({ k: 'bg.type', t: 'seg', label: 'Tipo', def: 'liso', opts: [['liso', 'Liso'], ['degradado', 'Degradado'], ['foto', 'Foto con velo']] }, 'theme');
+      if (t === 'degradado') {
+        const cur = b.tint === 'accent2' || b.tint === 'accent3' ? b.tint : 'accent';
+        h += '<div class="fld"><span class="lab">Hacia el color</span><div class="swpick" role="group" aria-label="Color del degradado">' + [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3']].map(function (o) {
+          const on = cur === o[0];
+          return '<button type="button" class="' + (on ? 'on' : '') + '" data-a="set" data-p="theme.bg.tint" data-v="' + o[0] + '" aria-pressed="' + on + '"><i style="background:' + attr(col[o[0]] || '#888888') + '"></i>' + o[1] + '</button>';
+        }).join('') + '</div></div>';
+      }
+      if (t === 'foto') h += fieldHTML({ k: 'bg.img', t: 'img', label: 'Foto de fondo', max: 1400 }, 'theme') +
+        fieldHTML({ k: 'bg.veil', t: 'seg', label: 'Velo', def: '80', opts: [['40', 'Suave'], ['60', 'Medio'], ['80', 'Fuerte']], help: 'Con velo fuerte el texto se lee mejor. La foto queda quieta detrás al desplazar.' }, 'theme');
+      return h;
+    },
+    roles: function () {
+      const R = S.cur.theme.roles || {}, col = S.cur.theme.colors || {};
+      return '<div class="roles">' + ROLES.map(function (r) {
+        const v = R[r[0]] || 'auto', custom = /^#[0-9a-f]{6}$/i.test(v), p = 'theme.roles.' + r[0];
+        return '<div class="fld role"><span class="lab" id="rl-' + r[0] + '">' + esc(r[1]) + '</span><div class="rolepick" role="group" aria-labelledby="rl-' + r[0] + '">' +
+          '<button type="button" class="ra' + (v === 'auto' ? ' on' : '') + '" data-a="set" data-p="' + p + '" data-v="auto" aria-pressed="' + (v === 'auto') + '">Auto</button>' +
+          ROLE_SWATCHES.map(function (k) {
+            const on = v === k[0];
+            return '<button type="button" class="' + (on ? 'on' : '') + '" data-a="set" data-p="' + p + '" data-v="' + k[0] + '" aria-pressed="' + on + '" title="' + k[1] + '" aria-label="' + k[1] + '"><i data-sw="' + k[0] + '" style="background:' + attr(col[k[0]] || '#888888') + '"></i></button>';
+          }).join('') +
+          '<label class="rc' + (custom ? ' on' : '') + '" title="Otro color"><input type="color" value="' + attr(custom ? v.toLowerCase() : '#888888') + '" data-p="' + p + '" data-type="color" aria-label="Otro color para ' + attr(r[1].toLowerCase()) + '"></label>' +
+          '</div></div>';
+      }).join('') + '</div><div id="role-contrast">' + roleContrastHTML() + '</div>';
     },
     icons: function () {
       const mode = iconMode(), sample = [['☕', 'Café'], ['🥐', 'Croissant'], ['🍲', 'Sancocho'], ['🐟', 'Trucha'], ['🍰', 'Torta'], ['🍺', 'Cerveza']];
@@ -1017,6 +1060,8 @@
     if (!mod('carta')) out.push({ s: 'warn', t: 'La app no muestra la carta', d: 'Activa el módulo Carta.', go: 'modulos' });
     const noPrice = items.filter(function (i) { return !(+i.price > 0); }).length;
     out.push(noPrice ? { s: 'warn', t: noPrice + (noPrice === 1 ? ' plato sin precio' : ' platos sin precio'), go: 'carta' } : { s: 'ok', t: items.length + ' platos con precio' });
+    const rw = roleWarnings(c);
+    if (rw.length) out.push({ s: 'warn', t: 'Poco contraste en los colores por elemento', d: rw.join(' · ') + '.', go: 'estilo' });
     const libN = hasLibPhotos(c);
     if (libN && LIB.ready && !LIB.cap) out.push({ s: 'warn', t: libN === 1 ? 'Una foto de la biblioteca no está disponible' : libN + ' fotos de la biblioteca no están disponibles', d: 'Para exportar la app con sus fotos, ábrela desde claude.ai con permiso para editar el estudio.' });
     if (c.i18n && c.i18n.bilingual) {
@@ -1403,6 +1448,18 @@
       const outs = document.querySelectorAll('output[data-out]'), unit = t.getAttribute('data-unit');
       for (let i = 0; i < outs.length; i++) if (outs[i].getAttribute('data-out') === p) outs[i].textContent = v + (unit ? ' ' + unit : '');
       return;
+    }
+    if (p.indexOf('theme.roles.') === 0) {
+      const bs = document.querySelectorAll('[data-a="set"]');
+      for (let i = 0; i < bs.length; i++) if (bs[i].getAttribute('data-p') === p) { bs[i].classList.remove('on'); bs[i].setAttribute('aria-pressed', 'false'); }
+      if (t.parentNode && t.parentNode.classList) t.parentNode.classList.add('on');
+      const rc = $('#role-contrast'); if (rc) rc.innerHTML = roleContrastHTML();
+      return;
+    }
+    if (p.indexOf('theme.colors.') === 0) {
+      const k = p.slice(13), dots = document.querySelectorAll('[data-sw="' + k + '"]');
+      for (let i = 0; i < dots.length; i++) dots[i].style.background = v;
+      const rc = $('#role-contrast'); if (rc) rc.innerHTML = roleContrastHTML();
     }
     if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); const tx = $('.texs'); if (tx) tx.setAttribute('style', texVars()); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') renderHeader(); return; }
     if (p === 'brand.name') { renderHeader(); renderStageTop(); return; }

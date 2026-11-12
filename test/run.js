@@ -622,6 +622,28 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     A.close();
   }
 
+  /* 11l. Color por elemento y fondo de la app */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const css = cfg => { const A = mount(cfg, NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; };
+    const base = css(TPL('tpl-zocalo'));
+    ok(!/--c-(btn|title|price)[:]/.test(base) && /var\(--c-btn,var\(--accent2\)\)/.test(base), 'sin roles no se define ninguno y cada regla conserva su color');
+    const z = TPL('tpl-zocalo'); z.theme.roles = { btn: '#1F7A8C', price: 'accent3', title: 'auto', tag: 'rojo', top: '#12', foot: 'ink' };
+    const t1 = css(z);
+    ok(/--c-btn:#1F7A8C;--c-btn-on:#ffffff/.test(t1), 'un color propio para los botones, con texto legible encima');
+    ok(new RegExp('--c-price:' + z.theme.colors.accent3).test(t1), 'un rol puede usar un color de la paleta');
+    ok(!/--c-title:|--c-tag:|--c-top:/.test(t1), 'auto y los valores inválidos no cambian nada');
+    ok(new RegExp('--c-foot:' + z.theme.colors.ink + ';--c-foot-on:#ffffff').test(t1), 'el pie oscuro lleva texto claro');
+    const g = TPL('tpl-espiga'); g.theme.bg = { type: 'degradado', tint: 'accent2' };
+    ok(/html\{background:linear-gradient\(180deg,var\(--bg\) 0%,var\(--bg\) 22%,color-mix\(in srgb,var\(--accent2\) 26%/.test(css(g)) && /body\{background-color:transparent\}/.test(css(g)), 'fondo en degradado hacia el acento 2');
+    const f = TPL('tpl-neblina'); f.theme.bg = { type: 'foto', img: PX, veil: '60', imgPos: 'top' };
+    ok(/url\("data:image\/png;base64,[^"]+"\) center top\/cover fixed/.test(css(f)) && /var\(--bg\) 60%,transparent/.test(css(f)), 'fondo con foto, velo y encuadre');
+    f.theme.bg = { type: 'foto', img: 'https://x.test/a.jpg") ;}body{display:none' };
+    ok(!/html\{background/.test(css(f)) && !/x\.test/.test(css(f)), 'una foto de fondo inválida no se usa');
+    f.theme.bg = { type: 'foto', img: '' };
+    ok(!/html\{background/.test(css(f)), 'sin foto, el fondo queda liso');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -907,6 +929,34 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   await sleep(80);
   ok(deletedAssets.length === 1 && deletedAssets[0] === LB, 'borra solo la foto que nadie usa, después de confirmar');
   eq(docs.get('biblioteca-fotos').items.map(f => f.id).join(','), LA, 'el índice de la biblioteca se actualiza');
+  // Estilo: fondo de la app y color por elemento
+  ok(!!$('section[data-card="fondoapp"]') && !$('section[data-card="roles"]'), 'el fondo está en el modo sencillo y el color por elemento en el avanzado');
+  click($('[data-a="set"][data-p="theme.bg.type"][data-v="degradado"]'));
+  ok(ST.S.cur.theme.bg.type === 'degradado' && !!$('[data-a="set"][data-p="theme.bg.tint"][data-v="accent3"]'), 'el degradado ofrece hacia qué color');
+  click($('[data-a="set"][data-p="theme.bg.tint"][data-v="accent3"]'));
+  await sleep(220);
+  ok(/color-mix\(in srgb,var\(--accent3\) 26%/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa el degradado');
+  click($('[data-a="set"][data-p="theme.bg.type"][data-v="foto"]'));
+  ok(!!$('.imgf[data-imgf="theme.bg.img"]') && !!$('[data-a="set"][data-p="theme.bg.veil"]'), 'el fondo con foto pide la foto y el velo');
+  click($('[data-a="style-reset"][data-card="fondoapp"]'));
+  ok(!('bg' in ST.S.cur.theme), 'restablecer deja el fondo liso');
+  click($('[data-a="adv"]'));
+  click($('[data-a="sub"][data-g="color"]'));
+  eq($$('section[data-card="roles"] .fld.role').length, 8, 'ocho elementos con color propio');
+  click($('[data-a="set"][data-p="theme.roles.btn"][data-v="accent3"]'));
+  eq(ST.S.cur.theme.roles.btn, 'accent3', 'los botones toman el acento 3');
+  ok($('[data-a="set"][data-p="theme.roles.btn"][data-v="accent3"]').classList.contains('on'), 'la muestra elegida queda marcada');
+  await sleep(220);
+  ok(new RegExp('--c-btn:' + ST.S.cur.theme.colors.accent3).test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa pinta los botones con ese color');
+  const rc = $('input[type="color"][data-p="theme.roles.title"]');
+  setVal(rc, ST.S.cur.theme.colors.bg.toLowerCase(), 'change');
+  eq(ST.S.cur.theme.roles.title, ST.S.cur.theme.colors.bg.toUpperCase(), 'un color propio para los títulos');
+  ok(rc.parentNode.classList.contains('on') && /Títulos sobre el fondo/.test($('#role-contrast').textContent), 'avisa si el color propio no se lee');
+  ok(ST.checks(ST.S.cur).some(c => /contraste en los colores por elemento/.test(c.t)), 'la revisión de Publicar también lo avisa');
+  ok(!$('[data-a="style-reset"][data-card="roles"]').hidden, 'la tarjeta ofrece «Restablecer»');
+  click($('[data-a="style-reset"][data-card="roles"]'));
+  ok(!('roles' in ST.S.cur.theme), 'restablecer vuelve a los colores de la estética');
+  click($('[data-a="adv"]'));
   // Estilo: íconos
   ok(!!$('section[data-card="iconos"]'), 'la tarjeta «Íconos» está en el modo sencillo');
   ok($('[data-a="set"][data-p="theme.icons"][data-v="linea"]').classList.contains('on'), 'marca los íconos de línea de la estética');
