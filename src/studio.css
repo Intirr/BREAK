@@ -295,6 +295,15 @@ input[type="range"]{width:100%;accent-color:var(--carbon)}
 .img-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .img-row img{width:96px;height:64px;border-radius:9px;object-fit:cover;border:1px solid var(--rule)}
 .img-up{justify-self:start}
+.img-acts,.lib-acts{display:flex;flex-wrap:wrap;gap:8px}
+.img-row img.op-t,.logo-row img.op-t{object-position:50% 0}
+.img-row img.op-b,.logo-row img.op-b{object-position:50% 100%}
+.libg{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:4px 0 12px}
+.libi{position:relative;display:block;aspect-ratio:1;padding:0;overflow:hidden;border-radius:10px;border:1px solid var(--rule);background:var(--rule2)}
+.libi img{display:block;width:100%;height:100%;object-fit:cover}
+.libi em{position:absolute;left:6px;bottom:6px;padding:3px 5px;border-radius:4px;font:600 10px/1 var(--f-mono);font-style:normal;background:var(--sheet);color:var(--ink)}
+button.libi:hover{border-color:var(--ink2)}
+button.libi:focus-visible{outline:2px solid var(--carbon);outline-offset:2px}
 
 /* Publicar */
 .checks{list-style:none;margin:0;padding:0;display:grid;gap:8px}

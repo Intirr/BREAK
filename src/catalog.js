@@ -102,7 +102,8 @@ const STYLE = [
     { id: 'iconos', card: 'icons', title: 'Íconos', desc: 'Lo que se ve en los platos, categorías, avisos y sellos que no tienen foto.', fields: [
       { k: 'icons', t: 'seg', label: 'Dibujos', def: 'emoji', opts: [['emoji', 'Emojis'], ['linea', 'Íconos de línea'], ['ninguno', 'Sin íconos']], help: 'Los íconos de línea toman los colores de la app. El de cada plato o categoría se cambia al editarlo en Carta.' }
     ] },
-    { id: 'fondo', card: 'textures', title: 'Detalle de fondo', keys: ['texture'] }
+    { id: 'fondo', card: 'textures', title: 'Detalle de fondo', keys: ['texture'] },
+    { id: 'fotos', card: 'photos', title: 'Biblioteca de fotos', desc: 'Las fotos que subes para la portada, los platos, las categorías, la galería y el logo. Se guardan aparte, así la app no pesa.', keys: [] }
   ] },
   { id: 'movimiento', label: 'Movimiento', cards: [
     { id: 'mov', title: 'Movimiento', fields: [
@@ -321,7 +322,7 @@ const MODULES = {
       { k: 'layout', t: 'sel', label: 'Diseño', def: 'carrusel', opts: [['carrusel', 'Carrusel'], ['mosaico', 'Mosaico']] },
       { k: 'items', t: 'list', label: 'Fotos', item: 'Foto', blank: { img: '', emoji: '', caption: '' },
         fields: [{ k: 'img', t: 'img', label: 'Foto', max: 800 }, { k: 'emoji', t: 'text', label: 'Emoji si no hay foto', ph: '☕' }, { k: 'ico', t: 'icon', label: 'Ícono si no hay foto', emoji: 'emoji', fb: 'camara' }, F.text('caption', 'Pie de foto', 'Nuestro fogón de leña')] },
-      { t: 'hint', text: 'Cada foto subida pesa unos 60 KB. Para más de tres, mejor pega enlaces https de fotos publicadas en tu página web.' }]
+      { t: 'hint', text: 'Las fotos subidas quedan en la biblioteca de fotos y se pueden usar en cualquier app.' }]
   },
   servicios: {
     label: 'Servicios del local', code: 'SV', group: 'Turismo y contenido', single: true, seg: 'Turista', desc: 'Parqueadero, mascotas, terraza, zona infantil, pago con tarjeta y más, con íconos.',

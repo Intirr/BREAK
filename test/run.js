@@ -28,7 +28,8 @@ function mount(cfg, o) {
   const errors = [];
   w.addEventListener('error', e => errors.push(e.message));
   w.__cfg = cfg;
-  const rt = w.eval('(' + ctx.breakApp.toString() + ')(window, document, window.__cfg, ' + JSON.stringify({ mode: o.mode || 'app', now: o.now }) + ')');
+  w.__opts = Object.assign({ mode: o.mode || 'app', now: o.now }, o.assetURL ? { assetURL: o.assetURL } : {});
+  const rt = w.eval('(' + ctx.breakApp.toString() + ')(window, document, window.__cfg, window.__opts)');
   const d = w.document;
   const $ = s => d.querySelector(s), $$ = s => [...d.querySelectorAll(s)];
   const click = el => { if (!el) throw new Error('no existe el elemento a tocar'); el.dispatchEvent(new w.MouseEvent('click', { bubbles: true })); };
@@ -534,6 +535,34 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     al.close();
   }
 
+  /* 11i. Fotos: biblioteca del estudio, archivos del .zip, encuadre y foto de categoría */
+  {
+    const A1 = 'f'.repeat(32);
+    const cfg = TPL('tpl-alisos');
+    const hero = cfg.modules.find(m => m.type === 'hero');
+    hero.s.img = 'asset:' + A1; hero.s.imgPos = 'bottom';
+    cfg.menu.categories[0].img = 'img/' + A1 + '.webp'; cfg.menu.categories[0].imgPos = 'top';
+    cfg.menu.categories[0].items[0].img = 'asset:../../etc';
+    cfg.menu.categories[0].items[1].img = 'img/../x.webp';
+    cfg.menu.categories[1].items[0].img = 'img/' + A1 + '.jpg'; cfg.menu.categories[1].items[0].imgPos = 'bottom';
+    const A = mount(cfg, { now: '2026-11-07T16:00:00Z' });
+    ok(!A.$('.hero-ph'), 'sin quien la resuelva, una foto de la biblioteca no se muestra (app publicada)');
+    ok(A.$('.cat-ph img') && A.$('.cat-ph img').getAttribute('src') === 'img/' + A1 + '.webp' && A.$('.cat-ph img').classList.contains('op-t'), 'foto de categoría del .zip con su encuadre');
+    ok(!!A.$('.cat.has-ph') && A.$$('.cat-ph').length === 1, 'solo la categoría con foto lleva franja');
+    ok(!A.$$('img').some(i => /\.\.|etc/.test(i.getAttribute('src') || '')), 'no acepta rutas raras ni ids inválidos');
+    const it = A.$('[data-id="' + cfg.menu.categories[1].items[0].id + '"] .media img');
+    ok(it && it.getAttribute('src') === 'img/' + A1 + '.jpg' && it.classList.contains('op-b'), 'foto de plato del .zip con encuadre abajo');
+    eq(A.errors.length, 0, 'fotos sin errores de script');
+    A.close();
+    const B = mount(cfg, { mode: 'preview', now: '2026-11-07T16:00:00Z', assetURL: id => 'https://artefacto.test/_blob/' + id });
+    eq(B.$('.hero-ph img') && B.$('.hero-ph img').getAttribute('src'), 'https://artefacto.test/_blob/' + A1, 'la vista previa del estudio muestra la foto de la biblioteca');
+    ok(B.$('.hero-ph img').classList.contains('op-b') && !B.$('.hero-box .ph-note'), 'la portada usa su encuadre y no avisa de enlaces');
+    B.close();
+    const C = mount(cfg, { mode: 'preview', now: '2026-11-07T16:00:00Z', assetURL: () => 'javascript:alert(1)' });
+    ok(!C.$('.hero-ph'), 'una dirección de foto que no es https no se usa');
+    C.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -547,12 +576,22 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
       };
     }
   };
+  const LA = 'a1'.padEnd(32, '0'), LB = 'b2'.padEnd(32, '0');
+  const assetStore = new Map(), deletedAssets = []; let assetN = 0;
+  docs.set('biblioteca-fotos', { kind: 'break-fotos', items: [{ id: LA, w: 1200, h: 800, bytes: 2048, at: 1 }, { id: LB, w: 900, h: 900, bytes: 1024, at: 2 }] });
+  const fakeAssets = {
+    upload: async b => { const id = ('n' + (++assetN)).padEnd(32, '0'); assetStore.set(id, b); return { id, url: '/_blob/' + id, sizeBytes: b.size, contentType: b.type }; },
+    list: async () => ({ assets: [...assetStore.keys()].map(id => ({ id, url: '/_blob/' + id, contentType: 'image/webp', sizeBytes: 1024, createdAt: '2026-11-01T00:00:00Z' })), usage: { files: assetStore.size, bytes: assetStore.size * 1024, maxFiles: 1000, maxBytes: 500 * 1048576 } }),
+    delete: async id => { deletedAssets.push(id); return { deleted: assetStore.delete(id) }; }
+  };
   const dom = new JSDOM('<!doctype html><html><head><meta charset="utf-8"></head><body>' + html + '</body></html>', {
     pretendToBeVisual: true, runScripts: 'dangerously', url: 'https://claude.ai/artifact/test', virtualConsole: quietConsole(),
     beforeParse(w) {
       w.matchMedia = q => ({ matches: /min-width: 1000px/.test(q), addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
       w.scrollTo = () => {};
-      w.claude = { use: async n => n === 'db' ? fakeDb : n === 'user' ? { id: async () => 'u_test' } : n === 'downloads' ? { save: async r => { saved.push(r); return { status: 'saved' }; } } : null };
+      w.claude = { use: async n => n === 'db' ? fakeDb : n === 'user' ? { id: async () => 'u_test' } : n === 'downloads' ? { save: async r => { saved.push(r); return { status: 'saved' }; } } : n === 'assets' ? fakeAssets : null };
+      [LA, LB].forEach(id => assetStore.set(id, new w.Blob([new Uint8Array([82, 73, 70, 70, 1, 2, 3, 4])], { type: 'image/webp' })));
+      w.fetch = async u => { const m = /\/_blob\/([\w-]+)$/.exec(String(u)); const b = m && assetStore.get(m[1]); return b ? { ok: true, status: 200, blob: async () => b } : { ok: false, status: 404 }; };
       w.JSZip = require('jszip');
     }
   });
@@ -569,6 +608,8 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   eq(ST.S.kind, 'tpl', 'abre una plantilla de ejemplo');
   ok(/Araucaria/.test($('#sb').textContent), 'cabecera con el nombre de la app');
   eq(ST.Store.kind, 'db', 'usa la base de datos de la cuenta');
+  ok(!!ST.lib.cap && ST.lib.index.length === 2, 'la biblioteca de fotos conecta y lee su índice');
+  ok(!ST.S.apps.some(a => a.id === 'biblioteca-fotos'), 'el índice de fotos no se confunde con una app');
   eq(ST.S.store, 'ready', 'almacenamiento listo');
   ok(ST.pv.ready, 'la vista previa arrancó dentro del iframe');
   ok(ST.pv.ready && ST.pv.frame.contentDocument.querySelectorAll('section[data-mid]').length === 10, 'la vista previa muestra los 10 módulos de Araucaria');
@@ -647,6 +688,20 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(/con foto/.test($('.mod[data-mid="hero"] .mod-n small').textContent), 'el resumen de la portada dice que tiene foto');
   click($('[data-a="img-clear"]'));
   eq(ST.S.cur.modules[0].s.img, '', 'quitar la foto');
+  const pick = $('.imgf[data-imgf="modules.0.s.img"] [data-a="lib-pick"]');
+  ok(!!pick, 'el campo de foto ofrece la biblioteca');
+  click(pick);
+  eq($$('#sheet .libi').length, 2, 'la biblioteca muestra sus fotos');
+  ok($$('#sheet .libi').every(b => !!b.getAttribute('aria-label')), 'cada foto de la biblioteca tiene nombre');
+  click($('#sheet .libi[data-id="' + LA + '"]'));
+  eq(ST.S.cur.modules[0].s.img, 'asset:' + LA, 'elige una foto de la biblioteca para la portada');
+  ok($('#sheet').hidden && /Foto de la biblioteca/.test($('.imgf[data-imgf="modules.0.s.img"] .img-row').textContent), 'la hoja se cierra y el campo muestra la foto elegida');
+  await sleep(220);
+  ok(/\/_blob\/a10+$/.test(ST.pv.frame.contentDocument.querySelector('.hero-ph img').getAttribute('src')), 'la vista previa muestra la foto de la biblioteca');
+  click($('[data-a="set"][data-p="modules.0.s.imgPos"][data-v="top"]'));
+  eq(ST.S.cur.modules[0].s.imgPos, 'top', 'elige el encuadre de la foto');
+  await sleep(220);
+  ok(!!ST.pv.frame.contentDocument.querySelector('.hero-ph img.op-t'), 'la vista previa usa el encuadre');
   const heavy = JSON.parse(JSON.stringify(ST.S.cur)); heavy.modules[0].s.img = 'data:image/webp;base64,' + 'A'.repeat(230000);
   ok(ST.checks(heavy).some(c => c.s === 'warn' && /pesa/.test(c.t)), 'la revisión avisa si la app pesa demasiado para guardarla');
   ok(!ST.checks(ST.S.cur).some(c => /pesa/.test(c.t)), 'sin fotos pesadas no hay aviso de peso');
@@ -745,6 +800,15 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="confirm-yes"]'));
   ok(JSON.stringify(ST.S.cur.theme) === JSON.stringify(Object.assign({ skin: 'cultural' }, ctx.SKINS.cultural.defaults)), 'volver a la estética deja el tema como viene de fábrica');
   ok($('#style-foot').hidden && $$('[data-a="style-reset"]').every(b => b.hidden), 'sin ajustes propios no se ofrece restablecer');
+  // Estilo: biblioteca de fotos
+  ok(!!$('section[data-card="fotos"]') && /2 fotos/.test($('section[data-card="fotos"] [data-lib-meter]').textContent), 'la tarjeta de la biblioteca muestra el espacio usado');
+  const clean = $('section[data-card="fotos"] [data-a="lib-clean"]');
+  ok(!!clean && /\(1\)/.test(clean.textContent), 'cuenta las fotos que ninguna app usa');
+  click(clean);
+  click($('[data-a="confirm-yes"]'));
+  await sleep(80);
+  ok(deletedAssets.length === 1 && deletedAssets[0] === LB, 'borra solo la foto que nadie usa, después de confirmar');
+  eq(docs.get('biblioteca-fotos').items.map(f => f.id).join(','), LA, 'el índice de la biblioteca se actualiza');
   // Estilo: íconos
   ok(!!$('section[data-card="iconos"]'), 'la tarjeta «Íconos» está en el modo sencillo');
   ok($('[data-a="set"][data-p="theme.icons"][data-v="linea"]').classList.contains('on'), 'marca los íconos de línea de la estética');
@@ -774,6 +838,12 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   setVal(d.getElementById('f-' + base + '-price'), '9500');
   eq($('[data-money="menu.categories.' + nCats + '.items.0.price"]').textContent, '$9.500', 'muestra el precio formateado');
   const icoP = 'menu.categories.' + nCats + '.items.0.ico';
+  click($('#sheet .imgf [data-a="lib-pick"]'));
+  click($('#sheet .libi[data-id="' + LA + '"]'));
+  eq(ST.S.cur.menu.categories[nCats].items[0].img, 'asset:' + LA, 'el plato usa una foto de la biblioteca');
+  ok(!$('#sheet').hidden && /Editar plato/.test($('#sheet').textContent) && /Foto de la biblioteca/.test($('#sheet .imgf').textContent), 'al elegir se vuelve al plato con la foto puesta');
+  click($('#sheet [data-a="set"][data-p="menu.categories.' + nCats + '.items.0.imgPos"][data-v="bottom"]'));
+  ok(ST.S.cur.menu.categories[nCats].items[0].imgPos === 'bottom' && $('#sheet [data-a="set"][data-v="bottom"]').classList.contains('on'), 'el encuadre se marca dentro de la hoja del plato');
   ok(/Automático$/.test($('#sheet .icob').textContent.trim()) && !/·/.test($('#sheet .icob').textContent), 'sin emoji ni ícono, el plato está en automático');
   setVal(d.getElementById('f-' + base + '-emoji'), '🍰');
   ok(/Automático · Torta/.test($('#sheet .icob').textContent), 'al escribir el emoji se ve el ícono que le corresponde');
@@ -799,6 +869,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(it.name === 'Torta de choclo' && it.price === 9500 && it.tags.includes('nuevo') && it.tags.includes('sinlactosa'), 'plato guardado con precio y etiquetas');
   ok($$('.ir-n').some(n => n.textContent.includes('Torta de choclo')), 'el plato aparece en la lista');
   ok(!!$$('.ir-m').find(b => b.textContent.includes('Torta de choclo')).querySelector('.ir-e svg.ic'), 'la lista muestra el ícono de línea del plato');
+  ok(!!$('.cat-b .imgf[data-imgf="menu.categories.' + nCats + '.img"]'), 'la categoría tiene campo de foto');
   click($('.cat-b [data-a="ico-open"]'));
   click($('.cat-b [data-a="ico-pick"][data-v="torta"]'));
   eq(ST.S.cur.menu.categories[nCats].ico, 'torta', 'elige el ícono de la categoría');
@@ -814,11 +885,13 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   const h = saved.find(s => s.filename.endsWith('.html'));
   ok(h && h.filename === 'antojo-centro.html', 'descarga el .html con nombre limpio');
   ok(h && h.data.includes('window.__BREAK__=') && h.data.includes('function breakApp('), 'el .html trae motor y configuración');
+  ok(h && h.data.includes('"data:image/webp;base64,') && !/"asset:[\w-]{8,64}"/.test(h.data), 'el .html lleva incrustadas las fotos de la biblioteca');
   ok(h && !/<\/script>[\s\S]*<\/script>/.test(h.data.replace(/<script>[\s\S]*?<\/script>/, '')), 'el .html tiene un solo bloque de script');
   click($('[data-a="exp-json"]'));
   await sleep(60);
   const j = saved.find(s => s.filename.endsWith('.json'));
   ok(j && JSON.parse(j.data).format === 'break-app' && JSON.parse(j.data).app.brand.name === 'Antojo Centro', 'descarga la configuración .json');
+  ok(j && /^data:image\/webp;base64,/.test(JSON.parse(j.data).app.modules[0].s.img), 'el .json también lleva las fotos');
   click($('[data-a="exp-zip"]'));
   await sleep(900);
   const z = saved.find(s => s.filename.endsWith('.zip'));
@@ -829,6 +902,9 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const zip = await JSZip.loadAsync(buf);
     const names = Object.keys(zip.files).sort();
     ok(['LEEME.txt', '_headers', 'index.html', 'manifest.webmanifest', 'sw.js'].every(n => names.includes(n)), 'el .zip trae index, manifiesto, service worker y guía: ' + names.join(', '));
+    ok(names.includes('img/' + LA + '.webp'), 'el .zip trae las fotos de la biblioteca en img/');
+    ok((await zip.file('sw.js').async('string')).includes('"./img/' + LA + '.webp"'), 'el service worker guarda las fotos para abrir sin señal');
+    ok((await zip.file('index.html').async('string')).includes('"img/' + LA + '.webp"'), 'la app del .zip apunta a sus fotos');
     const man = JSON.parse(await zip.file('manifest.webmanifest').async('string'));
     ok(man.display === 'standalone' && man.start_url === './', 'manifiesto instalable');
     const idx = await zip.file('index.html').async('string');

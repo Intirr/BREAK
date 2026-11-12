@@ -282,6 +282,10 @@ section.m-hero:has(.hero-box.has-img:not(.ph-fail)){padding-top:0}
 .media{display:grid;place-items:center;overflow:hidden;border-radius:calc(var(--r) * .8);background:color-mix(in srgb,var(--accent) 16%,transparent);max-width:100%}
 .media span{line-height:1}
 .media img{width:100%;height:100%;object-fit:cover}
+.app img.op-t{object-position:50% 0!important}
+.app img.op-b{object-position:50% 100%!important}
+.cat-ph{aspect-ratio:16/7;margin:0 0 16px;overflow:hidden;border-radius:var(--r);background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.cat-ph img{display:block;width:100%;height:100%;object-fit:cover}
 .media.m1{background:color-mix(in srgb,var(--accent2) 20%,transparent)}
 .media.m2{background:color-mix(in srgb,var(--accent3) 20%,transparent)}
 .media.none span{font-family:var(--fd)}
@@ -1175,7 +1179,16 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function norm(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
   function splitList(s) { return String(s || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean); }
   function safeUrl(u) { u = String(u || '').trim(); return /^https?:\/\/[^\s"'<>]+$/i.test(u) ? u : ''; }
-  function safeImg(u) { u = String(u || '').trim(); return (/^https:\/\/[^\s"'<>]+$/i.test(u) || /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+\/=]+$/i.test(u)) ? u : ''; }
+  /* Fotos: enlace https, imagen incrustada, archivo img/… de la app exportada en .zip, o foto de la biblioteca
+     del estudio (asset:<id>), que solo se ve donde quien muestra la app sabe resolverla (opts.assetURL). */
+  function safeImg(u) {
+    u = String(u || '').trim();
+    if (/^asset:[\w-]{8,64}$/.test(u)) { const r = typeof opts.assetURL === 'function' ? String(opts.assetURL(u.slice(6)) || '') : ''; return /^(https?:\/\/|\/)[^\s"'<>]+$/i.test(r) ? r : ''; }
+    if (/^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(u)) return u;
+    return (/^https:\/\/[^\s"'<>]+$/i.test(u) || /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+\/=]+$/i.test(u)) ? u : '';
+  }
+  /* Encuadre de una foto recortada: arriba, centro (sin clase) o abajo. */
+  function posAttr(v) { return v === 'top' ? ' class="op-t"' : v === 'bottom' ? ' class="op-b"' : ''; }
   function handle(s) { s = String(s || '').trim().replace(/\/+$/, ''); if (/^https?:/i.test(s)) s = s.split('/').pop(); return s.replace(/^@/, '').replace(/[^\w.\-]/g, ''); }
   function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
   function money(n, style) {
@@ -1297,7 +1310,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function logoHTML(size) {
     const l = cfg.brand.logo || {}, name = cfg.brand.name || '';
     const img = l.type === 'img' ? safeImg(l.value) : '';
-    if (img) return '<span class="logo img ' + size + '"><img src="' + attr(img) + '" alt=""></span>';
+    if (img) return '<span class="logo img ' + size + '"><img src="' + attr(img) + '" alt=""' + posAttr(l.imgPos) + '></span>';
     if (l.type === 'emoji' && l.value) {
       const g = glyph(l.value, l.ico);
       if (g) return '<span class="logo emo ' + size + (isSvg(g) ? ' ln' : '') + '">' + g + '</span>';
@@ -1313,7 +1326,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function mediaHTML(it, i) {
     const img = safeImg(it.img);
     const n = 'm' + (i % 3);
-    if (img) return '<div class="media ' + n + '"><img src="' + attr(img) + '" alt="" loading="lazy"></div>';
+    if (img) return '<div class="media ' + n + '"><img src="' + attr(img) + '" alt="" loading="lazy"' + posAttr(it.imgPos) + '></div>';
     const g = glyph(it.emoji, it.ico);
     if (g) return '<div class="media ' + n + (isSvg(g) ? ' ln' : '') + '"><span>' + g + '</span></div>';
     return '<div class="media none ' + n + '"><span>' + esc(String(tx(it, 'name')).charAt(0)) + '</span></div>';
@@ -1395,7 +1408,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   function galMedia(g, i, lazy) {
     const img = safeImg(g.img), cap = tx(g, 'caption');
     const gg = img ? '' : (glyph(g.emoji, g.ico, 'camara') || ico('camara'));
-    return '<span class="media m' + (i % 3) + (img ? ' ph' : (isSvg(gg) ? ' ln' : '')) + '">' + (img ? '<img src="' + attr(img) + '" alt="' + attr(cap) + '"' + (lazy ? ' loading="lazy"' : '') + '>' : '<span>' + gg + '</span>') + '</span>';
+    return '<span class="media m' + (i % 3) + (img ? ' ph' : (isSvg(gg) ? ' ln' : '')) + '">' + (img ? '<img src="' + attr(img) + '" alt="' + attr(cap) + '"' + (lazy ? ' loading="lazy"' : '') + posAttr(g.imgPos) + '>' : '<span>' + gg + '</span>') + '</span>';
   }
 
   /* ---------- Módulos ---------- */
@@ -1423,8 +1436,8 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       /* En la minimalista el título cierra con un punto del color de acento, salvo que ya termine en un signo. */
       const dot = skin === 'minimalista' && /[\p{L}\p{N}]$/u.test(title) ? '<span class="dot" aria-hidden="true">.</span>' : '';
       const ribbon = splitList(tx(s, 'ribbon'));
-      const photo = img ? '<div class="hero-ph" aria-hidden="true"><img src="' + attr(img) + '" alt="" fetchpriority="high"><i style="--veil:' + veil + '%"></i></div>' +
-        (PREVIEW && !/^data:/.test(img) ? '<p class="pv-empty ph-note">No se pudo cargar la foto. En la vista previa de claude.ai solo se ven las fotos subidas desde el estudio; los enlaces https sí se ven en la app publicada.</p>' : '') : '';
+      const photo = img ? '<div class="hero-ph" aria-hidden="true"><img src="' + attr(img) + '" alt="" fetchpriority="high"' + posAttr(s.imgPos) + '><i style="--veil:' + veil + '%"></i></div>' +
+        (PREVIEW && !/^data:/.test(img) && !/^asset:/.test(String(s.img).trim()) ? '<p class="pv-empty ph-note">No se pudo cargar la foto. En la vista previa de claude.ai solo se ven las fotos subidas desde el estudio; los enlaces https sí se ven en la app publicada.</p>' : '') : '';
       /* Largo de la palabra más larga: el CSS limita el tamaño del título para que no se parta a la mitad. */
       const wl = Math.max(5, Math.max.apply(null, String(title).split(/\s+/).map(function (w) { return w.length; }))) + (dot ? 1 : 0);
       return '<div class="hero-box' + (img ? ' has-img' : '') + (align ? ' al-' + align : '') + (size ? ' hs-' + size : '') + '" style="--wl:' + wl + '">' + photo +
@@ -1743,7 +1756,9 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       });
       if (!items.length) return;
       count += items.length;
-      html += '<div class="cat" id="c-' + attr(c.id) + '" data-cat="' + attr(c.id) + '"><div class="cat-h"><h3>' + (lay !== 'lista' && glyph(c.icon, c.ico) ? '<span class="ci" aria-hidden="true">' + glyph(c.icon, c.ico) + '</span>' : '') + esc(tx(c, 'name')) + '</h3>' +
+      const cph = safeImg(c.img);
+      html += '<div class="cat' + (cph ? ' has-ph' : '') + '" id="c-' + attr(c.id) + '" data-cat="' + attr(c.id) + '">' +
+        (cph ? '<div class="cat-ph"><img src="' + attr(cph) + '" alt="" loading="lazy"' + posAttr(c.imgPos) + '></div>' : '') + '<div class="cat-h"><h3>' + (lay !== 'lista' && glyph(c.icon, c.ico) ? '<span class="ci" aria-hidden="true">' + glyph(c.icon, c.ico) + '</span>' : '') + esc(tx(c, 'name')) + '</h3>' +
         (tx(c, 'note') ? '<p>' + esc(tx(c, 'note')) + '</p>' : '') + '</div><div class="items">' + items.map(function (it, i) { return itemHTML(it, lay, ps, i); }).join('') + '</div></div>';
     });
     return count ? html : '<p class="empty">' + esc(ui('noResults')) + '</p>';

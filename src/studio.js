@@ -86,7 +86,7 @@
       d.open();
       d.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vista previa</title></head><body></body></html>');
       d.close();
-      PV.rt = breakApp(PV.frame.contentWindow, d, clone(S.cur), { mode: 'preview' });
+      PV.rt = breakApp(PV.frame.contentWindow, d, clone(S.cur), { mode: 'preview', assetURL: assetURL });
       PV.ready = true; PV.cfgId = S.cur.id;
     } catch (e) { toast('La vista previa no pudo arrancar: ' + e.message); }
   }
@@ -121,7 +121,10 @@
     const timer = setTimeout(function () { if (!fresh) { S.storeNote = 'Tus apps guardadas todavía no cargan. Revisa la conexión.'; renderChrome(); } }, 10000);
     Store.unsub = Store.col.onSnapshot(function (snap) {
       if (!snap.metadata.fromCache) { fresh = true; clearTimeout(timer); S.storeNote = ''; }
-      onRemoteList(snap.docs.map(function (d) { return d.data(); }));
+      const all = snap.docs.map(function (d) { return d.data(); });
+      const lib = all.filter(function (x) { return x && x.kind === 'break-fotos'; })[0];
+      if (lib) libFromDoc(lib);
+      onRemoteList(all);
     }, function (err) {
       clearTimeout(timer);
       Store.kind = 'down';
@@ -213,6 +216,169 @@
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; if (S.kind === 'app') persist(S.cur); }
   }
   function setSave(st) { S.save = st; updateSaveChip(); }
+
+  /* ---------- Biblioteca de fotos (capacidad assets de claude.ai) ---------- */
+  /* Las fotos subidas se guardan aparte de la app (hasta 20 MB cada una) y la app guarda solo «asset:<id>», así
+     no choca con el límite de cada documento. El índice de la biblioteca es un documento propio de la cuenta
+     (LIB_DOC); assets.list() solo da el espacio usado y las fotos que nadie apunta. Sin la capacidad (fuera de
+     claude.ai, o para quien no puede editar) las fotos se incrustan en la app, como antes. */
+  const LIB_DOC = 'biblioteca-fotos';
+  const LIB = { cap: null, ready: false, index: [], usage: null, listed: null, loading: false, wq: Promise.resolve() };
+  /* Dirección de una foto de la biblioteca: «/_blob/<id>» en el sitio del Artifact, completa para que también
+     la resuelva el iframe de la vista previa. */
+  function assetURL(id) {
+    try { if (/^https?:$/.test(location.protocol)) return new URL('/_blob/' + id, location.href).href; } catch (e) { /* abajo */ }
+    return '/_blob/' + id;
+  }
+  function isAssetRef(v) { return typeof v === 'string' && /^asset:[\w-]{8,64}$/.test(v); }
+  function imgSrc(v) { v = String(v || ''); return isAssetRef(v) ? assetURL(v.slice(6)) : v; }
+  function fmtBytes(n) { n = +n || 0; return n >= 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  function libFromDoc(doc) {
+    LIB.index = (Array.isArray(doc.items) ? doc.items : []).filter(function (f) { return f && /^[\w-]{8,64}$/.test(f.id); });
+  }
+  function libSave() {
+    if (Store.kind !== 'db' || !Store.col) return;
+    const body = { kind: 'break-fotos', items: LIB.index.slice(-1500) };
+    LIB.wq = LIB.wq.then(function () { return Store.col.doc(LIB_DOC).set(body); }).catch(function () { /* se vuelve a guardar con la próxima foto */ });
+  }
+  function libInit() {
+    useCap('assets').then(function (cap) { LIB.cap = cap; LIB.ready = true; if (cap) libRefresh(); renderEditor(); });
+  }
+  /* Espacio usado y fotos guardadas, para el medidor y para «Borrar fotos sin usar». */
+  function libRefresh() {
+    if (!LIB.cap || LIB.loading) return;
+    LIB.loading = true;
+    LIB.cap.list().then(function (r) {
+      LIB.usage = r && r.usage || null;
+      LIB.listed = (r && Array.isArray(r.assets) ? r.assets : []).map(function (a) { return a.id; });
+    }, function () { LIB.usage = null; }).then(function () { LIB.loading = false; libPaint(); });
+  }
+  function libMeter() {
+    const u = LIB.usage;
+    if (!u) return 'Calculando el espacio…';
+    return u.files + (u.files === 1 ? ' foto' : ' fotos') + ' · ' + fmtBytes(u.bytes) + (u.maxBytes ? ' de ' + fmtBytes(u.maxBytes) : '');
+  }
+  /* Fotos de la biblioteca que usan las apps guardadas, la que está abierta y las plantillas en edición. */
+  function usedAssets() {
+    const used = {};
+    const scan = function (o) {
+      if (typeof o === 'string') { if (isAssetRef(o)) used[o.slice(6)] = true; return; }
+      if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { scan(o[k]); });
+    };
+    S.apps.forEach(scan); scan(S.cur);
+    Object.keys(S.tpl).forEach(function (k) { if (S.tpl[k]) scan(S.tpl[k].cfg); });
+    return used;
+  }
+  function unusedAssets() {
+    const used = usedAssets(), seen = {}, out = [];
+    LIB.index.map(function (f) { return f.id; }).concat(LIB.listed || []).forEach(function (id) { if (!used[id] && !seen[id]) { seen[id] = true; out.push(id); } });
+    return out;
+  }
+  /* Actualiza el medidor y el botón de limpieza sin volver a pintar el editor. */
+  function libPaint() {
+    const ms = document.querySelectorAll('[data-lib-meter]');
+    for (let i = 0; i < ms.length; i++) ms[i].textContent = libMeter();
+    const n = unusedAssets().length, bs = document.querySelectorAll('[data-a="lib-clean"]');
+    for (let i = 0; i < bs.length; i++) { bs[i].disabled = !n; bs[i].textContent = n ? 'Borrar fotos sin usar (' + n + ')' : 'No hay fotos sin usar'; }
+  }
+  function canvasBlob(cv, type, q) { return new Promise(function (res) { try { cv.toBlob(function (b) { res(b); }, type, q); } catch (e) { res(null); } }); }
+  /* Reduce la foto (cuadrada y centrada para el logo) y la pasa a WebP, o a JPG si el navegador no sabe. */
+  async function encodePhoto(im, side, square) {
+    let sx = 0, sy = 0, sw = im.width, sh = im.height, w, h;
+    if (square) { const m = Math.min(im.width, im.height); sx = (im.width - m) / 2; sy = (im.height - m) / 2; sw = sh = m; w = h = Math.max(1, Math.min(side, m)); }
+    else { const r = Math.min(1, side / Math.max(im.width, im.height)); w = Math.max(1, Math.round(im.width * r)); h = Math.max(1, Math.round(im.height * r)); }
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    cv.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+    let b = await canvasBlob(cv, 'image/webp', 0.82);
+    if (!b || b.type !== 'image/webp') b = await canvasBlob(cv, 'image/jpeg', 0.85);
+    return { blob: b, w: w, h: h };
+  }
+  /* Sube una foto a la biblioteca y la anota en el índice. Devuelve su id, o null con un aviso. */
+  async function libUpload(blob, w, h) {
+    if (!LIB.cap || !blob) return null;
+    for (let tries = 0; ; tries++) {
+      try {
+        const r = await LIB.cap.upload(blob);
+        LIB.index.push({ id: r.id, w: w || 0, h: h || 0, bytes: r.sizeBytes || blob.size, at: Date.now() });
+        libSave(); LIB.usage = null; libRefresh();
+        return r.id;
+      } catch (e) {
+        const code = e && e.code;
+        if (code === 'store_unavailable' && tries < 1) { await sleep(900); continue; }
+        toast(code === 'too_large' ? 'La foto es demasiado grande.' : code === 'quota_or_state' ? 'La biblioteca de fotos está llena. Borra las fotos que no uses.'
+          : code === 'rate_limited' ? 'Espera un momento antes de subir otra foto.' : code === 'unsupported_type' ? 'Ese formato de imagen no se puede guardar.'
+          : code === 'upstream_auth' ? 'Vuelve a cargar la página para subir fotos.' : 'No se pudo subir la foto. Revisa la conexión.');
+        return null;
+      }
+    }
+  }
+  function dataURLBlob(url) {
+    const m = /^data:([^;,]+)(;base64)?,(.*)$/.exec(String(url)); if (!m) return null;
+    const bin = m[2] ? atob(m[3]) : decodeURIComponent(m[3]), arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: m[1] });
+  }
+  function blobToDataURL(b) { return new Promise(function (res, rej) { const r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = rej; r.readAsDataURL(b); }); }
+  function walkStrings(o, fn) {
+    Object.keys(o).forEach(function (k) {
+      const v = o[k];
+      if (typeof v === 'string') { const r = fn(v); if (r !== undefined) o[k] = r; } else if (v && typeof v === 'object') walkStrings(v, fn);
+    });
+  }
+  /* Fotos incrustadas de una app (sin las ilustraciones SVG), para pasarlas a la biblioteca. */
+  function embeddedPhotos(c) {
+    const out = {};
+    walkStrings(clone(c), function (v) { if (/^data:image\/(png|jpe?g|webp|gif);base64,/.test(v)) out[v] = true; });
+    return Object.keys(out);
+  }
+  async function internalize(c) {
+    let n = 0;
+    for (const url of embeddedPhotos(c)) {
+      const b = dataURLBlob(url); if (!b) continue;
+      const id = await libUpload(b, 0, 0); if (!id) break;
+      walkStrings(c, function (v) { return v === url ? 'asset:' + id : undefined; });
+      n++;
+    }
+    return n;
+  }
+  const IMG_EXT = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif' };
+  /* Copia de la app lista para salir de claude.ai: las fotos de la biblioteca se incrustan (.html y .json) o
+     se vuelven archivos img/… (.zip). Las que no se puedan traer se quitan y se cuentan en `missing`. */
+  async function materialize(c, asFiles) {
+    const x = clone(c), ids = {};
+    walkStrings(x, function (v) { if (isAssetRef(v)) ids[v.slice(6)] = true; });
+    const map = {}, files = []; let missing = 0;
+    for (const id of Object.keys(ids)) {
+      try {
+        const r = await fetch(assetURL(id));
+        if (!r.ok) throw new Error(String(r.status));
+        const b = await r.blob(), ext = IMG_EXT[b.type] || 'webp';
+        if (asFiles) { const path = 'img/' + id + '.' + ext; files.push({ path: path, blob: b }); map[id] = path; }
+        else map[id] = await blobToDataURL(b);
+      } catch (e) { missing++; map[id] = ''; }
+    }
+    walkStrings(x, function (v) { return isAssetRef(v) ? map[v.slice(6)] : undefined; });
+    return { cfg: x, files: files, missing: missing };
+  }
+  function missingNote(n) { if (n) toast(n === 1 ? 'Una foto de la biblioteca no se pudo incluir. Ábrela en claude.ai y vuelve a exportar.' : n + ' fotos de la biblioteca no se pudieron incluir. Ábrelas en claude.ai y vuelve a exportar.'); }
+  /* Galería de la biblioteca: para elegir una foto (path) o solo para ver y limpiar. */
+  function libGrid(path) {
+    const used = usedAssets(), list = LIB.index.slice().reverse();
+    if (!list.length) return '<p class="empty">Todavía no hay fotos. Súbelas desde la portada, los platos, las categorías o la galería.</p>';
+    return '<div class="libg">' + list.map(function (f, i) {
+      const inUse = !!used[f.id], label = 'Foto ' + (list.length - i) + (f.w ? ' · ' + f.w + ' × ' + f.h : '') + (inUse ? ' · en uso' : '');
+      const inner = '<img src="' + attr(assetURL(f.id)) + '" alt="" loading="lazy">' + (inUse ? '<em>En uso</em>' : '');
+      return path ? '<button type="button" class="libi" data-a="lib-use" data-id="' + attr(f.id) + '" data-ip="' + attr(path) + '" aria-label="' + attr(label) + '">' + inner + '</button>'
+        : '<span class="libi" role="img" aria-label="' + attr(label) + '">' + inner + '</span>';
+    }).join('') + '</div>';
+  }
+  function openLibrary(path) {
+    const back = S.edit ? { ci: S.edit.ci, ii: S.edit.ii } : null;
+    openSheet(sheetHead(path ? 'Elegir foto' : 'Biblioteca de fotos') + '<p class="help" data-lib-meter>' + esc(libMeter()) + '</p>' + libGrid(path) +
+      (path ? '<label class="btn filebtn">Subir una foto nueva<input type="file" accept="image/*" data-a="img-file" data-ip="' + attr(path) + '" data-max="1100" hidden></label>' : ''),
+      'lib', function () { if (back) openItemSheet(back.ci, back.ii); else { renderEditor(); renderTabs(); } });
+    libRefresh();
+  }
 
   /* ---------- Edición ---------- */
   function edited() {
@@ -334,14 +500,7 @@
           (f.min != null ? ' min="' + f.min + '"' : '') + (f.max != null ? ' max="' + f.max + '"' : '') + ' step="' + (f.step || 1) + '">' +
           (f.money ? '<output class="money" data-money="' + attr(path) + '">' + esc(money(val)) + '</output>' : '') + '</div>';
         break;
-      case 'img': {
-        /* Enlace https o foto subida (se guarda comprimida dentro de la app). */
-        const v = String(val || ''), isData = /^data:image\//.test(v);
-        ctl = (isData ? '<div class="img-row"><img src="' + attr(v) + '" alt="Foto actual" width="96" height="64"><span class="help">Foto subida · ' + Math.round(v.length * 0.75 / 1024) + ' KB</span><button type="button" class="btn sm" data-a="img-clear" data-ip="' + attr(path) + '">Quitar</button></div>'
-          : inputCtl({ t: 'text', ph: 'https://…' }, path, v, id)) +
-          '<label class="btn sm filebtn img-up">' + (isData ? 'Cambiar foto' : 'Subir foto') + '<input type="file" accept="image/*" data-a="img-file" data-ip="' + attr(path) + '" data-max="' + (+f.max || 1100) + '" hidden></label>';
-        break;
-      }
+      case 'img': return imgFieldHTML(f, path, base);
       case 'seg': {
         /* Botones de opción. Sin valor guardado se marca `def`. */
         const cur = (val == null || val === '') ? f.def : val;
@@ -401,6 +560,34 @@
     }
     return html;
   }
+  /* ---------- Fotos ---------- */
+  const POS_OPTS = [['top', 'Arriba'], ['center', 'Centro'], ['bottom', 'Abajo']];
+  function posClass(v) { return v === 'top' ? ' class="op-t"' : v === 'bottom' ? ' class="op-b"' : ''; }
+  /* Campo de foto: enlace https, foto de la biblioteca o foto incrustada, con su encuadre. Se puede volver a
+     pintar en su sitio (repaintImg) porque guarda su definición en atributos. */
+  function imgFieldHTML(f, path, base) {
+    const v = String(getPath(S.cur, path) || ''), isData = /^data:image\//.test(v), isAsset = isAssetRef(v), id = fid(path), has = !!v;
+    const posP = base + '.' + f.k + 'Pos', pos = getPath(S.cur, posP);
+    let h = '<div class="fld imgf" data-imgf="' + attr(path) + '" data-base="' + attr(base) + '" data-k="' + attr(f.k) + '" data-label="' + attr(f.label) + '" data-max="' + (+f.max || 1100) + '" data-help="' + attr(f.help || '') + '">';
+    if (isData || isAsset) {
+      h += '<span class="lab">' + esc(f.label) + '</span><div class="img-row"><img src="' + attr(imgSrc(v)) + '" alt="Foto actual" width="96" height="64"' + posClass(pos) + '>' +
+        '<span class="help">' + (isAsset ? 'Foto de la biblioteca' : 'Foto subida · ' + Math.round(v.length * 0.75 / 1024) + ' KB') + '</span>' +
+        '<button type="button" class="btn sm" data-a="img-clear" data-ip="' + attr(path) + '">Quitar</button></div>';
+    } else h += '<label class="lab" for="' + id + '">' + esc(f.label) + '</label>' + inputCtl({ t: 'text', ph: 'https://…' }, path, v, id);
+    h += '<div class="img-acts"><label class="btn sm filebtn img-up">' + (isData || isAsset ? 'Cambiar foto' : 'Subir foto') + '<input type="file" accept="image/*" data-a="img-file" data-ip="' + attr(path) + '" data-max="' + (+f.max || 1100) + '" hidden></label>' +
+      (LIB.cap && LIB.index.length ? '<button type="button" class="btn sm" data-a="lib-pick" data-ip="' + attr(path) + '">Elegir de la biblioteca</button>' : '') + '</div>';
+    if (has) h += fieldHTML({ k: f.k + 'Pos', t: 'seg', label: 'Encuadre', def: 'center', opts: POS_OPTS }, base);
+    return h + (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
+  }
+  function repaintImg(path) {
+    const bs = document.querySelectorAll('.imgf');
+    for (let i = 0; i < bs.length; i++) {
+      const b = bs[i]; if (b.getAttribute('data-imgf') !== path) continue;
+      b.outerHTML = imgFieldHTML({ k: b.getAttribute('data-k'), label: b.getAttribute('data-label'), max: +b.getAttribute('data-max'), help: b.getAttribute('data-help') }, path, b.getAttribute('data-base'));
+    }
+  }
+  function photoChanged(path) { edited(); renderEditor(); repaintImg(path); }
+
   /* ---------- Íconos ---------- */
   function iconMode() { const m = S.cur && S.cur.theme.icons; return m === 'linea' || m === 'ninguno' ? m : 'emoji'; }
   /* Lo mismo que muestra la app para un emoji y un ícono elegido (HTML seguro hecho por el motor). */
@@ -555,6 +742,15 @@
         }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div>';
     },
     fonts: function () { return '<div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>'; },
+    photos: function () {
+      if (!LIB.ready) return '<p class="help">Conectando con la biblioteca de fotos…</p>';
+      if (!LIB.cap) return '<p class="help">La biblioteca funciona en claude.ai para quien puede editar el estudio. Mientras tanto, cada foto subida se guarda dentro de la app y pesa unos 100 KB.</p>';
+      const emb = embeddedPhotos(S.cur), n = unusedAssets().length;
+      return '<p class="help" data-lib-meter>' + esc(libMeter()) + '</p>' + libGrid('') +
+        (emb.length ? '<p class="warnline">Esta app tiene ' + emb.length + (emb.length === 1 ? ' foto guardada' : ' fotos guardadas') + ' dentro de ella. Pásalas a la biblioteca para que la app pese menos.</p>' : '') +
+        '<div class="lib-acts">' + (emb.length ? '<button type="button" class="btn sm pri" data-a="lib-move">Pasar a la biblioteca</button>' : '') +
+        '<button type="button" class="btn sm" data-a="lib-clean"' + (n ? '' : ' disabled') + '>' + (n ? 'Borrar fotos sin usar (' + n + ')' : 'No hay fotos sin usar') + '</button></div>';
+    },
     icons: function () {
       const mode = iconMode(), sample = [['☕', 'Café'], ['🥐', 'Croissant'], ['🍲', 'Sancocho'], ['🐟', 'Trucha'], ['🍰', 'Torta'], ['🍺', 'Cerveza']];
       return '<div class="icosample" aria-hidden="true" style="' + attr(texVars()) + '">' + sample.map(function (x) {
@@ -614,10 +810,12 @@
       const fields = BRAND_FIELDS.map(function (f) {
         if (f.k === 'logo.value') {
           if (lt === 'img') {
-            const isData = /^data:image\//.test(lv);
-            return (isData ? '<div class="fld"><span class="lab">Imagen del logo</span><div class="logo-row"><img src="' + attr(lv) + '" alt="Logo actual" width="56" height="56"><span class="help">Imagen subida · ' + Math.round(lv.length * 0.75 / 1024) + ' KB</span><button type="button" class="btn sm" data-a="logo-clear">Quitar</button></div></div>'
+            const isData = /^data:image\//.test(lv), isAsset = isAssetRef(lv);
+            return (isData || isAsset ? '<div class="fld"><span class="lab">Imagen del logo</span><div class="logo-row"><img src="' + attr(imgSrc(lv)) + '" alt="Logo actual" width="56" height="56"' + posClass(b.logo.imgPos) + '><span class="help">' + (isAsset ? 'Imagen de la biblioteca' : 'Imagen subida · ' + Math.round(lv.length * 0.75 / 1024) + ' KB') + '</span><button type="button" class="btn sm" data-a="logo-clear">Quitar</button></div></div>'
               : fieldHTML({ k: 'logo.value', t: 'text', label: 'Enlace https de la imagen', ph: 'https://…' }, 'brand')) +
-              '<label class="btn sm filebtn">Subir imagen<input type="file" accept="image/*" data-a="logo-file" hidden></label>';
+              '<div class="img-acts"><label class="btn sm filebtn">Subir imagen<input type="file" accept="image/*" data-a="logo-file" hidden></label>' +
+              (LIB.cap && LIB.index.length ? '<button type="button" class="btn sm" data-a="lib-pick" data-ip="brand.logo.value">Elegir de la biblioteca</button>' : '') + '</div>' +
+              (lv ? fieldHTML({ k: 'logo.imgPos', t: 'seg', label: 'Encuadre', def: 'center', opts: POS_OPTS }, 'brand') : '');
           }
           return fieldHTML({ k: 'logo.value', t: 'text', label: lt === 'emoji' ? 'Emoji del logo' : 'Iniciales (vacío = las del nombre)', ph: lt === 'emoji' ? '☕' : 'CZ' }, 'brand') +
             (lt === 'emoji' ? fieldHTML({ k: 'logo.ico', t: 'icon', label: 'Ícono del logo', emoji: 'logo.value' }, 'brand') : '');
@@ -714,6 +912,7 @@
       '<button type="button" class="ib" data-a="cat-mv" data-ci="' + ci + '" data-d="1" aria-label="Bajar categoría"' + (ci === last ? ' disabled' : '') + '>↓</button></div></div>' +
       (open ? '<div class="cat-b"><div class="grid2">' + fieldHTML({ k: 'name', t: 'text', label: 'Nombre de la categoría', i18n: true }, 'menu.categories.' + ci) + fieldHTML({ k: 'icon', t: 'text', label: 'Emoji', ph: '🍲' }, 'menu.categories.' + ci) + '</div>' +
         fieldHTML({ k: 'ico', t: 'icon', label: 'Ícono', emoji: 'icon' }, 'menu.categories.' + ci) +
+        fieldHTML({ k: 'img', t: 'img', label: 'Foto de la categoría (opcional)', max: 1100, help: 'Sale como franja arriba del título de la categoría.' }, 'menu.categories.' + ci) +
         fieldHTML({ k: 'note', t: 'text', label: 'Nota', i18n: true, ph: 'Hasta las 11:00 a. m.' }, 'menu.categories.' + ci) +
         '<ul class="items-e">' + c.items.map(function (it, ii) {
           return '<li class="ir' + (it.on === false ? ' off' : '') + '"><button type="button" class="ir-m" data-a="item-edit" data-ci="' + ci + '" data-ii="' + ii + '"><span class="ir-e" aria-hidden="true">' + (glyphHTML(it.emoji, it.ico) || '·') + '</span>' +
@@ -735,6 +934,8 @@
     if (!mod('carta')) out.push({ s: 'warn', t: 'La app no muestra la carta', d: 'Activa el módulo Carta.', go: 'modulos' });
     const noPrice = items.filter(function (i) { return !(+i.price > 0); }).length;
     out.push(noPrice ? { s: 'warn', t: noPrice + (noPrice === 1 ? ' plato sin precio' : ' platos sin precio'), go: 'carta' } : { s: 'ok', t: items.length + ' platos con precio' });
+    const libN = hasLibPhotos(c);
+    if (libN && LIB.ready && !LIB.cap) out.push({ s: 'warn', t: libN === 1 ? 'Una foto de la biblioteca no está disponible' : libN + ' fotos de la biblioteca no están disponibles', d: 'Para exportar la app con sus fotos, ábrela desde claude.ai con permiso para editar el estudio.' });
     if (c.i18n && c.i18n.bilingual) {
       const miss = items.filter(function (i) { return !String(i.name_en || '').trim(); }).length;
       out.push(miss ? { s: 'warn', t: miss + (miss === 1 ? ' plato sin nombre en inglés' : ' platos sin nombre en inglés'), go: 'carta' } : { s: 'ok', t: 'Carta traducida al inglés' });
@@ -900,7 +1101,7 @@
       fieldHTML({ k: 'desc', t: 'area', label: 'Descripción', i18n: true, rows: 2 }, base) +
       '<div class="grid2">' + fieldHTML({ k: 'price', t: 'num', label: 'Precio en pesos', min: 0, step: 100, money: true }, base) + fieldHTML({ k: 'emoji', t: 'text', label: 'Emoji', ph: '🍲' }, base) + '</div>' +
       fieldHTML({ k: 'ico', t: 'icon', label: 'Ícono', emoji: 'emoji' }, base) +
-      fieldHTML({ k: 'img', t: 'text', label: 'Foto (enlace https, opcional)', ph: 'https://…' }, base) +
+      fieldHTML({ k: 'img', t: 'img', label: 'Foto (opcional)', max: 900 }, base) +
       '<div class="fld"><span class="lab">Etiquetas</span><div class="tagpick">' + TAGS.map(function (t) {
         const on = it.tags.indexOf(t[0]) >= 0;
         return '<button type="button" class="tg' + (on ? ' on' : '') + '" data-a="item-tag" data-tag="' + t[0] + '" aria-pressed="' + on + '">' + t[1] + '</button>';
@@ -935,6 +1136,10 @@
     /* Campo de opciones (tipo seg): guarda el valor en su ruta y devuelve el foco al botón elegido. */
     set: function (d) {
       setPath(S.cur, d.p, d.v); edited(); renderEditor();
+      /* En una hoja (por ejemplo, el plato) el editor de atrás no la vuelve a pintar: se marca aquí. */
+      const sg = document.querySelectorAll('[data-a="set"]');
+      for (let i = 0; i < sg.length; i++) if (sg[i].getAttribute('data-p') === d.p) { const on = sg[i].getAttribute('data-v') === d.v; sg[i].classList.toggle('on', on); sg[i].setAttribute('aria-pressed', String(on)); }
+      if (/Pos$/.test(d.p)) repaintImg(d.p.replace(/Pos$/, ''));
       const bs = document.querySelectorAll('[data-a="set"]');
       for (let i = 0; i < bs.length; i++) if (bs[i].getAttribute('data-p') === d.p && bs[i].getAttribute('data-v') === d.v) { try { bs[i].focus({ preventScroll: true }); } catch (e) { /* nada */ } break; }
     },
@@ -1034,7 +1239,34 @@
     },
     'hours-copy': function () { copyMonday(); },
     'logo-clear': function () { S.cur.brand.logo = { type: 'mono', value: '' }; edited(); renderEditor(); },
-    'img-clear': function (d) { if (d.ip) { setPath(S.cur, d.ip, ''); edited(); renderEditor(); } },
+    'img-clear': function (d) { if (d.ip) { setPath(S.cur, d.ip, ''); delPath(S.cur, d.ip + 'Pos'); photoChanged(d.ip); const inp = document.getElementById(fid(d.ip)); if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { /* nada */ } } } },
+    'lib-pick': function (d) { if (d.ip) openLibrary(d.ip); },
+    'lib-use': function (d) {
+      if (!d.ip || !/^[\w-]{8,64}$/.test(d.id || '')) return;
+      if (d.ip === 'brand.logo.value') S.cur.brand.logo = { type: 'img', value: 'asset:' + d.id };
+      else setPath(S.cur, d.ip, 'asset:' + d.id);
+      closeSheet(); photoChanged(d.ip); toast('Foto elegida.');
+    },
+    'lib-clean': function () {
+      const ids = unusedAssets();
+      if (!LIB.cap || !ids.length) { toast('No hay fotos sin usar.'); return; }
+      confirmBox(ids.length === 1 ? '¿Borrar 1 foto sin usar?' : '¿Borrar ' + ids.length + ' fotos sin usar?', 'Ninguna de tus apps ni de las plantillas abiertas las usa. Se borran para siempre; las apps que ya exportaste no cambian.', 'Borrar', async function () {
+        const gone = [];
+        for (const id of ids) {
+          try { await LIB.cap.delete(id); gone.push(id); } catch (e) { if (e && (e.code === 'rate_limited' || e.code === 'not_granted')) break; }
+        }
+        LIB.index = LIB.index.filter(function (f) { return gone.indexOf(f.id) < 0; });
+        if (LIB.listed) LIB.listed = LIB.listed.filter(function (id) { return gone.indexOf(id) < 0; });
+        libSave(); LIB.usage = null; renderEditor(); libRefresh();
+        toast(gone.length === ids.length ? (gone.length === 1 ? 'Borré la foto sin usar.' : 'Borré ' + gone.length + ' fotos sin usar.') : 'Borré ' + gone.length + ' de ' + ids.length + ' fotos. Intenta de nuevo en un momento.');
+      });
+    },
+    'lib-move': async function () {
+      if (!LIB.cap) return;
+      toast('Pasando las fotos a la biblioteca…');
+      const n = await internalize(S.cur);
+      if (n) { edited(); renderEditor(); renderHeader(); toast(n === 1 ? 'Pasé 1 foto a la biblioteca.' : 'Pasé ' + n + ' fotos a la biblioteca.'); }
+    },
     'exp-html': function () { exportHTML(); },
     'exp-zip': function () { exportZip(); },
     'exp-json': function () { exportJSON(); },
@@ -1129,7 +1361,15 @@
     rd.readAsDataURL(file);
   }
   function onLogoFile(file) {
-    readImage(file, function (im) {
+    readImage(file, async function (im) {
+      if (LIB.cap) {
+        toast('Subiendo el logo…');
+        const e = await encodePhoto(im, 512, true), id = await libUpload(e.blob, e.w, e.h);
+        if (!id) return;
+        S.cur.brand.logo = { type: 'img', value: 'asset:' + id };
+        edited(); renderEditor(); renderHeader(); toast('Logo guardado en la biblioteca.');
+        return;
+      }
       const N = 256, cv = document.createElement('canvas'); cv.width = cv.height = N;
       const x = cv.getContext('2d'), r = Math.max(N / im.width, N / im.height), w = im.width * r, h = im.height * r;
       x.drawImage(im, (N - w) / 2, (N - h) / 2, w, h);
@@ -1140,10 +1380,20 @@
       edited(); renderEditor(); renderHeader(); toast('Logo cargado.');
     });
   }
-  /* Fotos de portada y galería: se reducen y comprimen hasta unos 100 KB para que la app se pueda guardar. */
+  /* Fotos: con la biblioteca se guardan aparte y con buena calidad. Sin ella se reducen y comprimen hasta
+     unos 100 KB para que la app se pueda guardar. */
   function onPhotoFile(file, path, max) {
     if (!path) return;
-    readImage(file, function (im) {
+    readImage(file, async function (im) {
+      if (LIB.cap) {
+        toast('Subiendo la foto…');
+        const e = await encodePhoto(im, Math.min(2000, Math.round(max * 1.6))), id = await libUpload(e.blob, e.w, e.h);
+        if (!id) return;
+        setPath(S.cur, path, 'asset:' + id);
+        if (S.sheetKind === 'lib') closeSheet();
+        photoChanged(path); toast('Foto guardada en la biblioteca · ' + fmtBytes(e.blob.size) + '.');
+        return;
+      }
       const enc = function (side, q) {
         const r = Math.min(1, side / Math.max(im.width, im.height)), w = Math.max(1, Math.round(im.width * r)), h = Math.max(1, Math.round(im.height * r));
         const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
@@ -1156,18 +1406,20 @@
       if (url.length > lim) url = enc(Math.round(max * 0.8), 0.6);
       if (url.length > lim) url = enc(Math.round(max * 0.6), 0.55);
       setPath(S.cur, path, url);
-      edited(); renderEditor(); toast('Foto cargada · ' + Math.round(url.length * 0.75 / 1024) + ' KB.');
+      if (S.sheetKind === 'lib') closeSheet();
+      photoChanged(path); toast('Foto cargada · ' + Math.round(url.length * 0.75 / 1024) + ' KB.');
     });
   }
   function importJSON(file) {
     const rd = new FileReader();
-    rd.onload = function () {
+    rd.onload = async function () {
       let data = null;
       try { data = JSON.parse(rd.result); } catch (e) { data = null; }
       const app = data && data.app ? data.app : data;
       if (!validApp(app)) { toast('Ese archivo no es una configuración de Break.'); return; }
       if (!storeReady()) { toast('Espera a que conecte el guardado e intenta de nuevo.'); return; }
       const tmpId = 'import-' + Date.now();
+      if (LIB.cap && embeddedPhotos(app).length) { toast('Pasando las fotos a la biblioteca…'); await internalize(app); }
       S.tpl[tmpId] = { cfg: clone(app), dirty: false };
       createApp(tmpId, (app.brand.name || 'App') + ' (importada)');
       delete S.tpl[tmpId];
@@ -1208,11 +1460,11 @@
       (o.pwa ? 'if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}\n' : '') +
       '<\/script>\n</body>\n</html>\n';
   }
-  function swSource(c) {
+  function swSource(c, extra) {
     const cache = 'break-' + slug(c.brand.name) + '-' + Date.now().toString(36);
     return '/* Service worker de Break: la carta abre sin señal y se actualiza cuando hay internet. */\n' +
       'const CACHE = ' + JSON.stringify(cache) + ';\n' +
-      'const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];\n' +
+      'const CORE = ' + JSON.stringify(['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'].concat(extra || [])) + ';\n' +
       'self.addEventListener("install", function (e) { e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); })); });\n' +
       'self.addEventListener("activate", function (e) { e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf("break-") === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); })); });\n' +
       'self.addEventListener("fetch", function (e) {\n' +
@@ -1268,35 +1520,51 @@
       return false;
     }
   }
-  function exportHTML() { saveFile(slug(S.cur.brand.name) + '.html', buildAppHTML(S.cur, { pwa: false })); }
-  function exportJSON() { saveFile(slug(S.cur.brand.name) + '-break.json', JSON.stringify({ format: 'break-app', version: 1, app: exportCfg(S.cur) }, null, 2)); }
+  function hasLibPhotos(c) { let n = 0; walkStrings(clone(c), function (v) { if (isAssetRef(v)) n++; }); return n; }
+  async function exportHTML() {
+    if (hasLibPhotos(S.cur)) toast('Preparando las fotos…');
+    const m = await materialize(S.cur, false);
+    if (await saveFile(slug(S.cur.brand.name) + '.html', buildAppHTML(m.cfg, { pwa: false }))) missingNote(m.missing);
+  }
+  async function exportJSON() {
+    if (hasLibPhotos(S.cur)) toast('Preparando las fotos…');
+    const m = await materialize(S.cur, false);
+    if (await saveFile(slug(S.cur.brand.name) + '-break.json', JSON.stringify({ format: 'break-app', version: 1, app: exportCfg(m.cfg) }, null, 2))) missingNote(m.missing);
+  }
   async function exportZip() {
     const c = clone(S.cur);
     let Z;
     try { Z = await loadScript(JSZIP_SRC, 'JSZip'); } catch (e) { toast('No se pudo cargar el compresor. Revisa la conexión.'); return; }
     toast('Armando el paquete…');
+    const m = await materialize(c, true);
     const zip = new Z(), name = c.brand.name || 'Carta', bg = c.theme.colors.bg || '#ffffff';
-    zip.file('index.html', buildAppHTML(c, { pwa: true }));
+    zip.file('index.html', buildAppHTML(m.cfg, { pwa: true }));
+    for (const f of m.files) zip.file(f.path, String(await blobToDataURL(f.blob)).split(',')[1] || '', { base64: true });
     zip.file('manifest.webmanifest', JSON.stringify({
       name: name + (c.brand.tagline ? ' · ' + c.brand.tagline : ''), short_name: name.slice(0, 12), description: [c.brand.tagline, c.brand.city].filter(Boolean).join(' · '),
       start_url: './', scope: './', display: 'standalone', background_color: bg, theme_color: bg, lang: 'es-CO',
       icons: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' }, { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }]
     }, null, 2));
-    zip.file('sw.js', swSource(c));
+    zip.file('sw.js', swSource(c, m.files.map(function (f) { return './' + f.path; })));
     zip.file('_headers', '/sw.js\n  Cache-Control: no-cache\n/index.html\n  Cache-Control: no-cache\n');
     zip.file('LEEME.txt', name + ' · app de carta hecha con Break\n\n' +
-      'Qué hay en esta carpeta\n  index.html            La app completa (motor + configuración).\n  manifest.webmanifest  Permite instalarla en el celular.\n  sw.js                 Guarda la app para que abra sin señal.\n  icon-192.png, icon-512.png\n  _headers              Reglas de caché para Cloudflare Pages.\n\n' +
+      'Qué hay en esta carpeta\n  index.html            La app completa (motor + configuración).\n  manifest.webmanifest  Permite instalarla en el celular.\n  sw.js                 Guarda la app para que abra sin señal.\n  icon-192.png, icon-512.png\n' +
+      (m.files.length ? '  img/                  Las fotos de la carta.\n' : '') + '  _headers              Reglas de caché para Cloudflare Pages.\n\n' +
       'Publicar en Cloudflare Pages\n  1. En el panel de Cloudflare abre Workers & Pages y crea un proyecto de Pages con la opción de subir archivos.\n  2. Ponle nombre y arrastra este .zip (o la carpeta descomprimida).\n  3. Cloudflare te da una dirección que termina en .pages.dev. Pégala en Break Studio › Publicar para generar el QR de las mesas.\n\n' +
       'Para cambiar precios o platos: edita la app en Break Studio, descarga el .zip otra vez y súbelo como nueva versión del mismo proyecto.\n');
-    const icons = await Promise.all([iconBlob(c, 192), iconBlob(c, 512)]);
+    /* El ícono de la app usa el logo: si está en la biblioteca, se pasa como imagen incrustada. */
+    const ic = clone(m.cfg), lf = m.files.filter(function (f) { return ic.brand.logo && f.path === ic.brand.logo.value; })[0];
+    if (lf) { try { ic.brand.logo.value = await blobToDataURL(lf.blob); } catch (e) { /* ícono con iniciales */ } }
+    const icons = await Promise.all([iconBlob(ic, 192), iconBlob(ic, 512)]);
     if (icons[0]) zip.file('icon-192.png', icons[0]);
     if (icons[1]) zip.file('icon-512.png', icons[1]);
     let blob;
     try { blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' }); } catch (e) { toast('No se pudo armar el paquete.'); return; }
-    saveFile(slug(name) + '-cloudflare.zip', blob);
+    if (await saveFile(slug(name) + '-cloudflare.zip', blob)) missingNote(m.missing);
   }
-  function copyHTML() {
-    const html = buildAppHTML(S.cur, { pwa: false });
+  async function copyHTML() {
+    const m = await materialize(S.cur, false), html = buildAppHTML(m.cfg, { pwa: false });
+    missingNote(m.missing);
     const fallback = function () {
       openSheet(sheetHead('Código de la app') + '<p class="help">Selecciona todo el texto y cópialo. Pégalo en un archivo llamado index.html.</p><textarea class="in code" id="code-out" rows="10" readonly>' + esc(html) + '</textarea>', 'code');
       const ta = $('#code-out'); if (ta) { ta.focus(); ta.select(); }
@@ -1375,6 +1643,7 @@
     pvBoot();
     renderAll();
     storeInit();
+    libInit();
     const H = window.claude && window.claude.hot;
     if (H && typeof H.snapshot === 'function') {
       try {
@@ -1394,5 +1663,5 @@
     setTimeout(function () { startOnce((HOT && HOT.data) || {}); }, 400);
   } else startOnce((HOT && HOT.data) || {});
 
-  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META };
+  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META, lib: LIB, materialize: materialize };
 })();
