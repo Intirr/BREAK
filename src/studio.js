@@ -11,6 +11,8 @@
   const DESKTOP = window.matchMedia ? window.matchMedia('(min-width: 1000px)') : { matches: false };
   const JSZIP_SRC = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
   const QR_SRC = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+  /* Constantes del motor: íconos de línea, sus grupos y la función que decide qué dibujo se ve. */
+  const META = breakApp(null, null, null, { meta: true });
   const DAYS = [[1, 'L', 'Lunes'], [2, 'M', 'Martes'], [3, 'X', 'Miércoles'], [4, 'J', 'Jueves'], [5, 'V', 'Viernes'], [6, 'S', 'Sábado'], [0, 'D', 'Domingo']];
 
   function getPath(o, p) { return p.split('.').reduce(function (a, k) { return a == null ? undefined : a[k]; }, o); }
@@ -268,7 +270,7 @@
   function applySkin(k) {
     const sk = SKINS[k]; if (!sk) return;
     const th = S.cur.theme, d = clone(sk.defaults);
-    th.skin = k; th.colors = d.colors; th.fonts = d.fonts; th.radius = d.radius; th.motion = d.motion; th.texture = d.texture;
+    th.skin = k; th.colors = d.colors; th.fonts = d.fonts; th.radius = d.radius; th.motion = d.motion; th.texture = d.texture; th.icons = d.icons;
     const carta = S.cur.modules.filter(function (m) { return m.type === 'carta'; })[0];
     if (carta) carta.s.layout = sk.layout;
     edited(); renderEditor(); renderHeader(); pvUpdate(true);
@@ -389,6 +391,7 @@
         return '<div class="fld"><span class="lab">' + esc(f.label) + '</span>' + ctl + '</div>';
       }
       case 'list': return listHTML(f, Array.isArray(val) ? val : [], path);
+      case 'icon': return icoFieldHTML({ p: path, em: f.emoji ? base + '.' + f.emoji : '', fb: f.fb || '', label: f.label });
       default: ctl = '';
     }
     let html = '<div class="fld"><label class="lab" for="' + id + '">' + esc(f.label) + '</label>' + ctl + (f.help ? '<p class="help">' + esc(f.help) + '</p>' : '') + '</div>';
@@ -397,6 +400,53 @@
       html += '<div class="fld en"><label class="lab" for="' + id2 + '">' + esc(f.label) + ' <b>EN</b></label>' + inputCtl({ t: f.t, rows: f.rows, ph: 'English' }, p2, getPath(S.cur, p2), id2) + '</div>';
     }
     return html;
+  }
+  /* ---------- Íconos ---------- */
+  function iconMode() { const m = S.cur && S.cur.theme.icons; return m === 'linea' || m === 'ninguno' ? m : 'emoji'; }
+  /* Lo mismo que muestra la app para un emoji y un ícono elegido (HTML seguro hecho por el motor). */
+  function glyphHTML(emoji, key, fb) { return META.glyph(iconMode(), emoji, key, fb); }
+  function icoSVG(k) { return META.glyph('linea', '', k, ''); }
+  function icoName(k) { return ICON_NAMES[k] || k; }
+  function delPath(o, p) {
+    const ks = p.split('.'), last = ks.pop(), parent = ks.length ? getPath(o, ks.join('.')) : o;
+    if (parent && typeof parent === 'object') delete parent[last];
+  }
+  /* Campo de ícono: muestra lo que se verá y abre la cuadrícula con los íconos del motor.
+     o = { p: ruta del ícono, em: ruta del emoji del mismo elemento, fb: ícono de respaldo, label }. */
+  function icoFieldHTML(o) {
+    const key = String(getPath(S.cur, o.p) || ''), own = META.icons[key] ? key : '';
+    const em = o.em ? String(getPath(S.cur, o.em) || '') : '';
+    const auto = META.iconOf(em) || (em ? (o.fb || 'cubiertos') : o.fb);
+    const name = own ? icoName(own) : 'Automático' + (auto ? ' · ' + icoName(auto) : '');
+    const k = own || auto, id = fid(o.p), mode = iconMode();
+    const help = mode === 'ninguno' ? 'La app está en «Sin íconos» (Estilo › Íconos).'
+      : mode === 'emoji' ? 'La app muestra emojis: este ícono se ve si no hay emoji o si eliges íconos de línea en Estilo.'
+      : (own ? '' : 'En automático se usa el ícono que corresponde al emoji.');
+    return '<div class="fld icof" data-icof="' + attr(o.p) + '" data-em="' + attr(o.em || '') + '" data-fb="' + attr(o.fb || '') + '" data-label="' + attr(o.label) + '">' +
+      '<span class="lab" id="' + id + '-l">' + esc(o.label) + '</span>' +
+      '<button type="button" class="icob" id="' + id + '" data-a="ico-open" data-p="' + attr(o.p) + '" aria-expanded="false" aria-labelledby="' + id + '-l ' + id + '-v">' +
+      '<span class="icov" aria-hidden="true">' + (k ? icoSVG(k) : '—') + '</span><span id="' + id + '-v">' + esc(name) + '</span><span class="icoc" aria-hidden="true"></span></button>' +
+      (help ? '<p class="help">' + esc(help) + '</p>' : '') + '</div>';
+  }
+  function icoGridHTML(p) {
+    const cur = String(getPath(S.cur, p) || '');
+    return '<div class="icog" role="group" aria-label="Elegir ícono">' +
+      '<button type="button" class="tg' + (cur ? '' : ' on') + '" data-a="ico-pick" data-p="' + attr(p) + '" data-v="" aria-pressed="' + !cur + '">Automático</button>' +
+      META.iconSets.map(function (g) {
+        return '<div class="icos"><h5 class="lab">' + esc(g[0]) + '</h5><div class="icol">' + g[1].map(function (k) {
+          const on = k === cur;
+          return '<button type="button" data-a="ico-pick" data-p="' + attr(p) + '" data-v="' + k + '" aria-pressed="' + on + '" aria-label="' + attr(icoName(k)) + '" title="' + attr(icoName(k)) + '">' + icoSVG(k) + '</button>';
+        }).join('') + '</div></div>';
+      }).join('') + '</div>';
+  }
+  /* Vuelve a pintar los campos de ícono de una ruta o del emoji que los acompaña. */
+  function repaintIco(path) {
+    const bs = document.querySelectorAll('.icof');
+    for (let i = 0; i < bs.length; i++) {
+      const b = bs[i];
+      if (b.getAttribute('data-icof') !== path && b.getAttribute('data-em') !== path) continue;
+      b.outerHTML = icoFieldHTML({ p: b.getAttribute('data-icof'), em: b.getAttribute('data-em'), fb: b.getAttribute('data-fb'), label: b.getAttribute('data-label') });
+    }
   }
   function listHTML(f, arr, path) {
     return '<div class="fld list"><div class="list-h"><span class="lab">' + esc(f.label) + '</span><span class="cnt">' + arr.length + '</span></div>' +
@@ -505,6 +555,12 @@
         }).join('') + '</div><div id="contrast">' + contrastHTML() + '</div>';
     },
     fonts: function () { return '<div class="grid2">' + fontSel('display', 'Títulos', DISPLAY_FONTS) + fontSel('body', 'Texto', BODY_FONTS) + '</div>'; },
+    icons: function () {
+      const mode = iconMode(), sample = [['☕', 'Café'], ['🥐', 'Croissant'], ['🍲', 'Sancocho'], ['🐟', 'Trucha'], ['🍰', 'Torta'], ['🍺', 'Cerveza']];
+      return '<div class="icosample" aria-hidden="true" style="' + attr(texVars()) + '">' + sample.map(function (x) {
+        return '<span>' + (META.glyph(mode, x[0], '', '') || '<em>' + x[1].charAt(0) + '</em>') + '</span>';
+      }).join('') + '</div>';
+    },
     textures: function () {
       const th = S.cur.theme;
       return '<div class="texs" role="group" aria-label="Detalle de fondo" style="' + attr(texVars()) + '">' + TEXTURES.map(function (t) {
@@ -563,7 +619,8 @@
               : fieldHTML({ k: 'logo.value', t: 'text', label: 'Enlace https de la imagen', ph: 'https://…' }, 'brand')) +
               '<label class="btn sm filebtn">Subir imagen<input type="file" accept="image/*" data-a="logo-file" hidden></label>';
           }
-          return fieldHTML({ k: 'logo.value', t: 'text', label: lt === 'emoji' ? 'Emoji del logo' : 'Iniciales (vacío = las del nombre)', ph: lt === 'emoji' ? '☕' : 'CZ' }, 'brand');
+          return fieldHTML({ k: 'logo.value', t: 'text', label: lt === 'emoji' ? 'Emoji del logo' : 'Iniciales (vacío = las del nombre)', ph: lt === 'emoji' ? '☕' : 'CZ' }, 'brand') +
+            (lt === 'emoji' ? fieldHTML({ k: 'logo.ico', t: 'icon', label: 'Ícono del logo', emoji: 'logo.value' }, 'brand') : '');
         }
         return fieldHTML(f, 'brand');
       }).join('');
@@ -652,13 +709,14 @@
   function catHTML(c, ci) {
     const open = S.openCat === c.id, last = S.cur.menu.categories.length - 1, bi = bilingual();
     return '<div class="cat-e' + (open ? ' open' : '') + '"><div class="cat-r"><button type="button" class="cat-n" data-a="cat-open" data-cid="' + attr(c.id) + '" aria-expanded="' + open + '">' +
-      '<span class="ci" aria-hidden="true">' + esc(c.icon || '·') + '</span><b data-cat-label="' + ci + '">' + esc(c.name || 'Sin nombre') + '</b><small>' + c.items.length + (c.items.length === 1 ? ' plato' : ' platos') + '</small></button>' +
+      '<span class="ci" aria-hidden="true">' + (glyphHTML(c.icon, c.ico) || '·') + '</span><b data-cat-label="' + ci + '">' + esc(c.name || 'Sin nombre') + '</b><small>' + c.items.length + (c.items.length === 1 ? ' plato' : ' platos') + '</small></button>' +
       '<div class="ctl"><button type="button" class="ib" data-a="cat-mv" data-ci="' + ci + '" data-d="-1" aria-label="Subir categoría"' + (ci === 0 ? ' disabled' : '') + '>↑</button>' +
       '<button type="button" class="ib" data-a="cat-mv" data-ci="' + ci + '" data-d="1" aria-label="Bajar categoría"' + (ci === last ? ' disabled' : '') + '>↓</button></div></div>' +
       (open ? '<div class="cat-b"><div class="grid2">' + fieldHTML({ k: 'name', t: 'text', label: 'Nombre de la categoría', i18n: true }, 'menu.categories.' + ci) + fieldHTML({ k: 'icon', t: 'text', label: 'Emoji', ph: '🍲' }, 'menu.categories.' + ci) + '</div>' +
+        fieldHTML({ k: 'ico', t: 'icon', label: 'Ícono', emoji: 'icon' }, 'menu.categories.' + ci) +
         fieldHTML({ k: 'note', t: 'text', label: 'Nota', i18n: true, ph: 'Hasta las 11:00 a. m.' }, 'menu.categories.' + ci) +
         '<ul class="items-e">' + c.items.map(function (it, ii) {
-          return '<li class="ir' + (it.on === false ? ' off' : '') + '"><button type="button" class="ir-m" data-a="item-edit" data-ci="' + ci + '" data-ii="' + ii + '"><span class="ir-e" aria-hidden="true">' + esc(it.emoji || '·') + '</span>' +
+          return '<li class="ir' + (it.on === false ? ' off' : '') + '"><button type="button" class="ir-m" data-a="item-edit" data-ci="' + ci + '" data-ii="' + ii + '"><span class="ir-e" aria-hidden="true">' + (glyphHTML(it.emoji, it.ico) || '·') + '</span>' +
             '<span class="ir-n">' + esc(it.name || 'Sin nombre') + (bi && !String(it.name_en || '').trim() ? '<em class="miss">sin EN</em>' : '') + (it.on === false ? '<em class="miss">agotado</em>' : '') + '</span>' +
             '<span class="ir-p">' + (+it.price > 0 ? esc(money(it.price)) : '<em class="miss">sin precio</em>') + '</span></button>' +
             '<div class="ctl"><button type="button" class="ib" data-a="item-mv" data-ci="' + ci + '" data-ii="' + ii + '" data-d="-1" aria-label="Subir plato"' + (ii === 0 ? ' disabled' : '') + '>↑</button>' +
@@ -841,6 +899,7 @@
       fieldHTML({ k: 'name', t: 'text', label: 'Nombre', i18n: true }, base) +
       fieldHTML({ k: 'desc', t: 'area', label: 'Descripción', i18n: true, rows: 2 }, base) +
       '<div class="grid2">' + fieldHTML({ k: 'price', t: 'num', label: 'Precio en pesos', min: 0, step: 100, money: true }, base) + fieldHTML({ k: 'emoji', t: 'text', label: 'Emoji', ph: '🍲' }, base) + '</div>' +
+      fieldHTML({ k: 'ico', t: 'icon', label: 'Ícono', emoji: 'emoji' }, base) +
       fieldHTML({ k: 'img', t: 'text', label: 'Foto (enlace https, opcional)', ph: 'https://…' }, base) +
       '<div class="fld"><span class="lab">Etiquetas</span><div class="tagpick">' + TAGS.map(function (t) {
         const on = it.tags.indexOf(t[0]) >= 0;
@@ -958,6 +1017,21 @@
         c.items.splice(ed.ii, 1); S.edit = null; edited(); renderEditor(); renderTabs();
       });
     },
+    /* Selector de ícono: abre y cierra la cuadrícula en su sitio, sin volver a pintar el editor. */
+    'ico-open': function (d, el) {
+      const box = el.closest('.icof'); if (!box) return;
+      const g = box.querySelector('.icog');
+      if (g) { g.parentNode.removeChild(g); el.setAttribute('aria-expanded', 'false'); return; }
+      el.insertAdjacentHTML('afterend', icoGridHTML(d.p));
+      el.setAttribute('aria-expanded', 'true');
+    },
+    'ico-pick': function (d, el) {
+      if (d.v && !META.icons[d.v]) return;
+      if (d.v) setPath(S.cur, d.p, d.v); else delPath(S.cur, d.p);
+      edited();
+      if (el.closest('#sheet')) repaintIco(d.p); else renderEditor();
+      refocus('ico-open', 'p', d.p);
+    },
     'hours-copy': function () { copyMonday(); },
     'logo-clear': function () { S.cur.brand.logo = { type: 'mono', value: '' }; edited(); renderEditor(); },
     'img-clear': function (d) { if (d.ip) { setPath(S.cur, d.ip, ''); edited(); renderEditor(); } },
@@ -1009,6 +1083,7 @@
   }
   function afterField(p, t, v) {
     if (p.indexOf('theme.') === 0) syncResets();
+    repaintIco(p);
     if (t.type === 'range') {
       const outs = document.querySelectorAll('output[data-out]'), unit = t.getAttribute('data-unit');
       for (let i = 0; i < outs.length; i++) if (outs[i].getAttribute('data-out') === p) outs[i].textContent = v + (unit ? ' ' + unit : '');
@@ -1319,5 +1394,5 @@
     setTimeout(function () { startOnce((HOT && HOT.data) || {}); }, 400);
   } else startOnce((HOT && HOT.data) || {});
 
-  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV };
+  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META };
 })();

@@ -14,7 +14,7 @@ function quietConsole() { const vc = new VirtualConsole(); vc.on('jsdomError', e
 
 const SRC = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
 const ctx = {}; vm.createContext(ctx);
-vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;this.STYLE=STYLE;', ctx);
+vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;this.STYLE=STYLE;this.ICON_NAMES=ICON_NAMES;', ctx);
 const TPL = id => JSON.parse(JSON.stringify(ctx.TEMPLATES.find(t => t.id === id)));
 
 /* Monta una app con el motor serializado (prueba que es autocontenido). */
@@ -463,6 +463,77 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     E.close();
   }
 
+  /* 11h. Íconos de línea, sin íconos y controles con dibujos */
+  {
+    const M = ctx.breakApp(null, null, null, { meta: true });
+    const firstD = k => (M.icons[k].match(/ d="([^"]+)"/) || [])[1];
+    const dOf = el => { const pth = el && el.querySelector('svg.ic path'); return pth ? pth.getAttribute('d') : null; };
+    const EMO = /\p{Extended_Pictographic}/u;
+    ok(Object.keys(M.icons).length >= 80 && M.iconSets.length === 3, 'el motor entrega sus íconos y grupos al estudio');
+    ok(M.iconSets.every(g => g[1].every(k => !!M.icons[k] && !!ctx.ICON_NAMES[k])), 'cada ícono de los grupos existe y tiene nombre en el estudio');
+    ok(Object.keys(M.emoIcon).every(e => !!M.icons[M.emoIcon[e]]), 'cada emoji apunta a un ícono que existe');
+    eq(M.iconOf('🐟'), 'pescado', 'el emoji de pescado tiene su ícono');
+    eq(M.iconOf('☕️'), 'cafe', 'el emoji con variante también se reconoce');
+    eq(M.glyph('linea', '', 'x"><script>', ''), '', 'un ícono desconocido no se inyecta');
+    eq(M.glyph('emoji', '<b>', '', ''), '&lt;b&gt;', 'el emoji se escapa');
+    eq(M.glyph('ninguno', '☕', 'cafe', ''), '', 'sin íconos no se dibuja nada');
+    ok(ctx.TEMPLATES.every(t => t.theme.icons === ctx.SKINS[t.theme.skin].defaults.icons), 'cada app de ejemplo usa los íconos de su estética');
+    ok(ctx.TEMPLATES.every(t => t.menu.categories.every(c => c.items.every(it => !it.ico || !!M.icons[it.ico]))), 'los íconos elegidos en las apps de ejemplo existen');
+    ok(ctx.TEMPLATES.filter(t => t.theme.icons === 'linea').every(t => t.menu.categories.every(c => c.items.every(it => !it.emoji || it.ico || M.iconOf(it.emoji)))), 'en las apps con íconos de línea cada emoji tiene su ícono');
+
+    // Apps guardadas antes de los íconos: sin valor se ven los emojis de siempre
+    const old = TPL('tpl-alisos'); delete old.theme.icons;
+    const O = mount(old, { now: '2026-11-07T16:00:00Z' });
+    ok(!O.$('.m-carta .media.ln') && O.$$('.m-carta .media span').some(x => EMO.test(x.textContent)), 'sin modo de íconos la carta sigue con emojis');
+    O.close();
+
+    // Íconos de línea
+    const cfg = TPL('tpl-alisos');
+    const it0 = cfg.menu.categories[0].items[1];
+    it0.ico = 'x"><img src=x onerror="window.__pwn=1">';
+    cfg.modules.unshift({ id: 'av', type: 'aviso', on: true, s: { text: 'Festivo abierto', icon: '📣', style: 'acento', until: '', cta: 'none' } });
+    const A = mount(cfg, { now: '2026-11-07T16:00:00Z' });
+    const media = A.$$('.m-carta .media');
+    ok(media.length > 0 && media.every(m => m.classList.contains('ln') || m.classList.contains('none')), 'línea: cada plato con ícono o con su inicial');
+    ok(!media.some(m => EMO.test(m.textContent)), 'línea: ningún emoji en la carta');
+    eq(dOf(A.$('.m-carta [data-id="ajillo"] .media')), firstD('pescado'), 'línea: la trucha al ajillo lleva el pescado elegido a mano');
+    eq(dOf(A.$('.m-carta [data-id="' + it0.id + '"] .media')), firstD(M.iconOf(it0.emoji) || 'cubiertos'), 'línea: un ícono desconocido cae al que corresponde al emoji');
+    ok(A.w.__pwn === undefined && !A.$('img[src="x"]'), 'línea: el campo de ícono no inyecta código');
+    ok(!!A.$('.cat-h .ci svg.ic') && !!A.$('.chips .ci svg.ic'), 'línea: títulos y pestañas de categoría con ícono');
+    eq(dOf(A.$('section[data-mid="av"] .aviso')), firstD('megafono'), 'línea: el aviso lleva su megáfono');
+    ok(!!A.$('section[data-mid="galeria"] .gal-i .media.ln svg.ic'), 'línea: la galería sin foto usa ícono');
+    const cl = A.$$('section[data-mid="contacto"] .cl');
+    ok(cl.length >= 2 && cl.every(x => !!x.querySelector('svg.ic')), 'Contacto: cada fila con su ícono');
+    eq(A.errors.length, 0, 'íconos de línea sin errores de script');
+    A.close();
+
+    // Sin íconos
+    const none = TPL('tpl-alisos'); none.theme.icons = 'ninguno';
+    const N = mount(none, { now: '2026-11-07T16:00:00Z' });
+    ok(N.$$('.m-carta .media').length > 0 && N.$$('.m-carta .media').every(m => m.classList.contains('none')), 'sin íconos: los platos muestran su inicial');
+    ok(!N.$('.cat-h .ci') && !N.$('.m-carta svg.ic:not(.add svg)'), 'sin íconos: categorías sin dibujo');
+    N.close();
+
+    // Sellos con ícono de línea y controles con dibujo y nombre en palabras
+    const an = TPL('tpl-antojo'); an.theme.icons = 'linea';
+    const S1 = mount(an, { now: '2026-11-06T15:30:00Z' });
+    S1.click(S1.$('[data-act="stamp"]'));
+    ok(!!S1.$('.keypad svg.ic'), 'el teclado del código borra con un ícono');
+    '2468'.split('').forEach(k => S1.click(S1.$('.keypad [data-k="' + k + '"]')));
+    ok(!!S1.$('.stamp.on svg.ic') && !EMO.test(S1.$('.stamp.on').textContent), 'sellos: el sello puesto lleva ícono de línea');
+    S1.click(S1.$('.add'));
+    ok(!!S1.$('.add svg.ic'), 'el botón de agregar es un ícono');
+    S1.click(S1.$('.fab'));
+    eq(S1.$('.lines [data-act="ln"][data-d="-1"]').getAttribute('aria-label'), 'Quitar uno', 'pedido: el botón de menos dice qué hace');
+    eq(S1.$('.lines [data-act="ln"][data-d="1"]').getAttribute('aria-label'), 'Agregar uno', 'pedido: el botón de más dice qué hace');
+    ok(!!S1.$('.sheet .x svg.ic') && S1.$('.sheet .x').getAttribute('aria-label') === 'Cerrar', 'cerrar con ícono y nombre');
+    S1.close();
+    const al = mount(TPL('tpl-alisos'), { now: '2026-11-07T16:00:00Z', lang: 'en-US' });
+    eq(al.$('[data-act="res-ppl"][data-d="-1"]').getAttribute('aria-label'), 'One less', 'reservas en inglés: botón de menos');
+    eq(al.$('[data-act="res-ppl"][data-d="1"]').getAttribute('aria-label'), 'One more', 'reservas en inglés: botón de más');
+    al.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -584,6 +655,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('.mc[data-type="aviso"]'));
   eq(ST.S.cur.modules[0].type, 'aviso', 'el aviso se agrega arriba de todo');
   setVal(d.getElementById('f-modules-0-s-text'), 'Hoy cerramos a las 6');
+  ok(!!$('.icof[data-icof="modules.0.s.ico"]') && /Megáfono|Anuncio/.test($('.icof[data-icof="modules.0.s.ico"] .icob').textContent), 'el aviso ofrece elegir su ícono');
   setVal(d.getElementById('f-modules-0-s-until'), '2026-01-01');
   eq(ST.S.cur.modules[0].s.until, '2026-01-01', 'fecha de vencimiento del aviso');
   ok(ST.checks(ST.S.cur).some(c => c.s === 'warn' && /ya venció/.test(c.t)), 'la revisión avisa que el aviso venció');
@@ -604,11 +676,13 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="tab"][data-t="estilo"]'));
   click($('[data-a="skin"][data-s="nocturna"]'));
   eq(ST.S.cur.theme.fonts.display, 'Tilt Neon', 'estética nocturna: tipografía de neón');
+  eq(ST.S.cur.theme.icons, 'emoji', 'la nocturna conserva los emojis');
   eq(ST.pv.frame.contentDocument.querySelector('.app').getAttribute('data-skin'), 'nocturna', 'la vista previa cambia a la nocturna');
   ok(/Neón/.test($('.skin[aria-pressed="true"]').textContent), 'la tarjeta de la nocturna queda marcada');
   click($('[data-a="skin"][data-s="cultural"]'));
   eq(ST.S.cur.theme.skin, 'cultural', 'cambia la estética');
   eq(ST.S.cur.theme.fonts.display, 'Alfa Slab One', 'aplica la tipografía de la estética');
+  eq(ST.S.cur.theme.icons, 'linea', 'la cultural trae íconos de línea');
   eq(ST.S.cur.modules.find(m => m.type === 'carta').s.layout, 'tarjetas', 'aplica el diseño de carta de la estética');
   eq($$('.pal').length, 5, 'cinco paletas para la estética');
   click($('[data-a="pal"][data-i="2"]'));
@@ -671,6 +745,22 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="confirm-yes"]'));
   ok(JSON.stringify(ST.S.cur.theme) === JSON.stringify(Object.assign({ skin: 'cultural' }, ctx.SKINS.cultural.defaults)), 'volver a la estética deja el tema como viene de fábrica');
   ok($('#style-foot').hidden && $$('[data-a="style-reset"]').every(b => b.hidden), 'sin ajustes propios no se ofrece restablecer');
+  // Estilo: íconos
+  ok(!!$('section[data-card="iconos"]'), 'la tarjeta «Íconos» está en el modo sencillo');
+  ok($('[data-a="set"][data-p="theme.icons"][data-v="linea"]').classList.contains('on'), 'marca los íconos de línea de la estética');
+  eq($$('.icosample svg.ic').length, 6, 'la muestra dibuja los íconos de línea');
+  click($('[data-a="set"][data-p="theme.icons"][data-v="emoji"]'));
+  eq(ST.S.cur.theme.icons, 'emoji', 'elige emojis');
+  ok(!$('.icosample svg') && /☕/.test($('.icosample').textContent), 'la muestra cambia a emojis');
+  ok(!$('[data-a="style-reset"][data-card="iconos"]').hidden, '«Restablecer» aparece en la tarjeta de íconos');
+  await sleep(220);
+  ok(!ST.pv.frame.contentDocument.querySelector('.m-carta .media.ln'), 'la vista previa vuelve a los emojis');
+  click($('[data-a="set"][data-p="theme.icons"][data-v="ninguno"]'));
+  ok(!$('.icosample svg') && !/☕/.test($('.icosample').textContent), 'sin íconos: la muestra usa iniciales');
+  click($('[data-a="style-reset"][data-card="iconos"]'));
+  eq(ST.S.cur.theme.icons, 'linea', 'restablecer vuelve a los íconos de la estética');
+  await sleep(220);
+  ok(!!ST.pv.frame.contentDocument.querySelector('.m-carta .media.ln svg.ic'), 'la vista previa muestra los íconos de línea');
 
   // Carta: categoría, plato, etiquetas
   click($('[data-a="tab"][data-t="carta"]'));
@@ -683,6 +773,24 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   setVal(d.getElementById('f-' + base + '-name'), 'Torta de choclo');
   setVal(d.getElementById('f-' + base + '-price'), '9500');
   eq($('[data-money="menu.categories.' + nCats + '.items.0.price"]').textContent, '$9.500', 'muestra el precio formateado');
+  const icoP = 'menu.categories.' + nCats + '.items.0.ico';
+  ok(/Automático$/.test($('#sheet .icob').textContent.trim()) && !/·/.test($('#sheet .icob').textContent), 'sin emoji ni ícono, el plato está en automático');
+  setVal(d.getElementById('f-' + base + '-emoji'), '🍰');
+  ok(/Automático · Torta/.test($('#sheet .icob').textContent), 'al escribir el emoji se ve el ícono que le corresponde');
+  click($('#sheet [data-a="ico-open"]'));
+  const total = ST.meta.iconSets.reduce((a, g) => a + g[1].length, 0);
+  eq($$('#sheet .icog [data-a="ico-pick"]').length, total + 1, 'el selector ofrece todos los íconos y «Automático»');
+  eq($('#sheet [data-a="ico-open"]').getAttribute('aria-expanded'), 'true', 'el selector abierto se anuncia');
+  ok(!!$('#sheet [data-a="ico-pick"][data-v="maiz"]').getAttribute('aria-label'), 'cada ícono tiene nombre');
+  click($('#sheet [data-a="ico-pick"][data-v="maiz"]'));
+  eq(ST.S.cur.menu.categories[nCats].items[0].ico, 'maiz', 'elige un ícono para el plato');
+  ok(!$('#sheet .icog') && /Maíz/.test($('#sheet .icob').textContent), 'el selector se cierra y muestra el elegido');
+  click($('#sheet [data-a="ico-open"]'));
+  ok($('#sheet [data-a="ico-pick"][data-v="maiz"]').getAttribute('aria-pressed') === 'true', 'el ícono elegido queda marcado');
+  click($('#sheet [data-a="ico-pick"][data-v=""]'));
+  ok(!('ico' in ST.S.cur.menu.categories[nCats].items[0]), '«Automático» quita el ícono elegido');
+  click($('#sheet [data-a="ico-open"]'));
+  click($('#sheet [data-a="ico-pick"][data-v="maiz"]'));
   eq($$('.tg').length, 12, 'doce etiquetas para los platos');
   click($('[data-a="item-tag"][data-tag="nuevo"]'));
   click($('[data-a="item-tag"][data-tag="sinlactosa"]'));
@@ -690,6 +798,11 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   const it = ST.S.cur.menu.categories[nCats].items[0];
   ok(it.name === 'Torta de choclo' && it.price === 9500 && it.tags.includes('nuevo') && it.tags.includes('sinlactosa'), 'plato guardado con precio y etiquetas');
   ok($$('.ir-n').some(n => n.textContent.includes('Torta de choclo')), 'el plato aparece en la lista');
+  ok(!!$$('.ir-m').find(b => b.textContent.includes('Torta de choclo')).querySelector('.ir-e svg.ic'), 'la lista muestra el ícono de línea del plato');
+  click($('.cat-b [data-a="ico-open"]'));
+  click($('.cat-b [data-a="ico-pick"][data-v="torta"]'));
+  eq(ST.S.cur.menu.categories[nCats].ico, 'torta', 'elige el ícono de la categoría');
+  ok(!!$$('.cat-e.open .ci svg.ic').length, 'la categoría muestra su ícono en la lista');
 
   // Publicar: revisión y exportaciones
   click($('[data-a="tab"][data-t="publicar"]'));

@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (319 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (376 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -16,30 +16,39 @@ Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no 
 - `npm run shots` — capturas del estudio y de las apps de ejemplo en `dist/shots/`.
 - `npm run visual:base` — guarda la línea base de píxeles de las apps de ejemplo. Córrelo antes de refactorizar CSS que no debe cambiar el aspecto.
 - `npm run visual:compare` — compara contra la línea base y falla si cambia algún píxel.
-- `npm run overflow` — busca desbordes horizontales del estudio a 390 px, en cada pestaña y con cada módulo abierto.
+- `npm run overflow` — busca desbordes horizontales a 390 px: en el estudio (cada pestaña, cada módulo abierto y los selectores de íconos) y en las siete apps de ejemplo. En las apps no basta el ancho del documento, porque `.app` recorta lo que se sale: revisa cada bloque.
 
 ## Arquitectura
 
 Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
-- `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas; `opts.meta` no arranca nada y devuelve las constantes del motor (tipografías, estéticas, etiquetas) para que el estudio no las repita.
+- `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas; `opts.meta` no arranca nada y devuelve las constantes del motor (tipografías, estéticas, etiquetas, íconos y la función `glyph`) para que el estudio no las repita.
+  Íconos de línea: `ICONS` (dibujos de 24 × 24 con trazos que toman el color del texto), `ICON_SETS` (los que ofrece el estudio, por grupos) y `EMO_ICON` (emoji → ícono). `ico(clave)` dibuja uno; `glyph(emoji, ico, respaldo)` decide qué ve el cliente según `theme.icons`.
 - `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo, La Espiga, Neblina, Los Alisos, La Esquina) y `blankApp()`. Solo datos; la portada de Neblina es una ilustración SVG en base64 (`NEBLINA_IMG`), no una foto.
-- `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `STYLE` (grupos, tarjetas y campos de la pestaña Estilo), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`) y etiquetas. Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
+- `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `STYLE` (grupos, tarjetas y campos de la pestaña Estilo), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`), etiquetas y los nombres de los íconos en el selector (`ICON_NAMES`). Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
 - `src/studio.js` — el estudio: estado `S`, editor por pestañas (Estilo, Módulos, Carta, Datos, Publicar), vista previa en un iframe escrito con `document.write`, guardado, exportación (.html, .zip para Cloudflare Pages con manifiesto, service worker e íconos, .json, QR).
 - `src/studio.css`, `src/page.html` — estilos y esqueleto del estudio. `build.js` reemplaza `/*__CSS__*/` y `/*__JS__*/`.
 
 ### Configuración de una app
 
-`{ v, id, brand{name, tagline, logo, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize}, menu{categories[{id,name,icon,note,items[{id,name,desc,price,emoji,img,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
+`{ v, id, brand{name, tagline, logo, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons}, menu{categories[{id,name,icon,ico,note,items[{id,name,desc,price,emoji,ico,img,tags[],on}]}]}, modules[{id,type,on,s{…}}], meta{credit,url} }`
+
+`theme.icons` es `emoji`, `linea` o `ninguno`; sin valor se ven emojis, como en las apps guardadas antes de los íconos. `ico` (en platos, categorías, aviso, sellos, fotos de galería y logo) es un ícono de `ICONS` elegido a mano; vacío, en modo línea se usa el que corresponde al emoji.
 
 Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está activo. Los días van con 0 = domingo. La hora siempre se calcula en `brand.tz` (America/Bogota).
 
 ### Añadir un módulo
 
 1. Función en `RENDER` dentro de `runtime.js` (devuelve HTML; usa `esc()`/`attr()` en todo texto del usuario; en modo preview devuelve `emptyNote()` si falta contenido).
-2. Entrada en `MODULES` de `catalog.js` con `label`, `code` (2 letras), `group`, `defaults` y `fields`. Tipos de campo: `text`, `area`, `num`, `sel` (con `def` opcional), `bool`, `days`, `time`, `date`, `tag`, `cat`, `img` (enlace https o foto subida y comprimida), `checks` (varias opciones), `list`, `hint` y `sep`.
+2. Entrada en `MODULES` de `catalog.js` con `label`, `code` (2 letras), `group`, `defaults` y `fields`. Tipos de campo: `text`, `area`, `num`, `sel` (con `def` opcional), `bool`, `days`, `time`, `date`, `tag`, `cat`, `img` (enlace https o foto subida y comprimida), `icon` (selector de ícono de línea; `emoji` es la clave del emoji del mismo elemento y `fb` el ícono de respaldo), `checks` (varias opciones), `list`, `hint` y `sep`.
 3. Resumen en `summary()` de `studio.js` y, si aplica, una revisión en `checks()`.
 4. Pruebas en `test/run.js`.
+
+### Añadir un ícono
+
+1. Dibujo en `ICONS` de `runtime.js`: trazos en una cuadrícula de 24 × 24, sin relleno ni colores propios.
+2. Si se ofrece para platos o avisos, su clave en `ICON_SETS`, su nombre en `ICON_NAMES` de `catalog.js` y, si hay emojis equivalentes, en el mapa de `EMO_ICON`.
+3. Revísalo en grande y a 22 px en Chromium antes de usarlo; las pruebas verifican que cada ícono ofrecido exista y tenga nombre.
 
 ### Añadir una estética
 

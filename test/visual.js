@@ -3,7 +3,7 @@
    node test/visual.js shots [carpeta]     capturas del estudio y de las apps de ejemplo
    node test/visual.js base [carpeta]      guarda la línea base de las apps de ejemplo
    node test/visual.js compare [carpeta]   compara con la línea base; termina en error si cambia algún píxel
-   node test/visual.js overflow            busca desbordes horizontales del estudio a 390 px
+   node test/visual.js overflow            busca desbordes horizontales a 390 px en el estudio y en las apps de ejemplo
 
    Antes hay que generar las apps con `npm run demos`. La carpeta por defecto es dist/shots
    (los .png no se suben al repositorio). La hora queda fija y el movimiento reducido para que
@@ -71,6 +71,33 @@ async function overflowOf(page, scope) {
     });
     return { extra: document.documentElement.scrollWidth - W, out: out.slice(0, 5) };
   }, scope);
+}
+
+/* Bloques de una app que se salen de la pantalla. La app recorta lo que se sale (.app tiene overflow-x:clip),
+   así que el ancho del documento no lo delata: se mira cada bloque, salvo los que están dentro de un carrusel
+   u otro contenedor que recorta y sí cabe en la pantalla. Se informa solo el bloque más externo. */
+async function appOverflow(page) {
+  return page.evaluate(() => {
+    const W = document.documentElement.clientWidth, hits = [];
+    const top = el => el === document.body || el === document.documentElement || el.id === 'bk' || el.classList.contains('app');
+    const contained = el => {
+      for (let p = el.parentElement; p && !top(p); p = p.parentElement) {
+        if (getComputedStyle(p).overflowX === 'visible') continue;
+        const b = p.getBoundingClientRect();
+        if (b.left >= -0.5 && b.right <= W + 0.5) return true;
+      }
+      return false;
+    };
+    document.querySelectorAll('.app *').forEach(el => {
+      const b = el.getBoundingClientRect(), cs = getComputedStyle(el);
+      if (!b.width || !b.height || cs.visibility === 'hidden' || cs.position === 'fixed') return;
+      if ((b.right > W + 0.5 || b.left < -0.5) && !contained(el)) hits.push(el);
+    });
+    return hits.filter(el => !hits.some(o => o !== el && o.contains(el))).slice(0, 5).map(el => {
+      const b = el.getBoundingClientRect();
+      return el.tagName.toLowerCase() + '.' + String(el.className.baseVal != null ? el.className.baseVal : el.className).trim().split(/\s+/).join('.') + ' (' + Math.round(b.left) + '…' + Math.round(b.right) + ' px)';
+    });
+  });
 }
 
 /* Diferencia de píxeles entre dos PNG, calculada en un lienzo del navegador. */
@@ -145,8 +172,21 @@ async function pixelDiff(browser, a, b) {
       }
     }
     await page.click('[data-a="mod-add"]'); await page.waitForTimeout(250); await report('catálogo de módulos');
+    await page.keyboard.press('Escape'); await page.waitForSelector('#sheet', { state: 'hidden' });
+    await page.click('[data-a="tab"][data-t="carta"]'); await page.waitForTimeout(200);
+    await page.click('[data-a="cat-open"]'); await page.waitForTimeout(150);
+    await page.click('.cat-b [data-a="ico-open"]'); await page.waitForTimeout(150); await report('selector de íconos de la categoría');
+    await page.click('[data-a="item-edit"]'); await page.waitForTimeout(300);
+    await page.click('#sheet [data-a="ico-open"]'); await page.waitForTimeout(150); await report('selector de íconos del plato');
     if (errors.length) { failed = true; console.log('✗ errores de script: ' + errors.join(' | ')); }
     await ctx.close();
+    for (const d of demos()) {
+      const app = await open(browser, d.url);
+      const out = await appOverflow(app.page);
+      if (out.length) { failed = true; console.log('✗ ' + d.name + ': ' + out.join(' | ')); } else console.log('✓ ' + d.name);
+      if (app.errors.length) { failed = true; console.log('✗ ' + d.name + ': ' + app.errors.join(' | ')); }
+      await app.ctx.close();
+    }
   } else {
     fs.mkdirSync(dir, { recursive: true });
     const save = (name, buf) => { fs.writeFileSync(path.join(dir, name + '.png'), buf); console.log(name + '.png'); };
@@ -164,8 +204,8 @@ async function pixelDiff(browser, a, b) {
     for (const d of demos()) {
       const { ctx, page, errors } = await open(browser, d.url);
       save(d.name, await fullShot(page));
-      const r = await overflowOf(page, 'body *');
-      if (r.extra > 0) { failed = true; console.log('✗ ' + d.name + ': desborde horizontal de ' + r.extra + ' px'); }
+      const out = await appOverflow(page);
+      if (out.length) { failed = true; console.log('✗ ' + d.name + ': se sale de la pantalla: ' + out.join(' | ')); }
       if (errors.length) { failed = true; console.log('✗ ' + d.name + ': ' + errors.join(' | ')); }
       await ctx.close();
     }

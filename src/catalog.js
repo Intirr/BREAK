@@ -2,7 +2,7 @@
 const SKINS = {
   elegante: {
     label: 'Elegante', art: 'Cena', desc: 'Serif de alto contraste, filetes finos y mucho aire. Para cocina de autor y cenas.', layout: 'lista',
-    defaults: { colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' }, fonts: { display: 'Bodoni Moda', body: 'Jost' }, radius: 2, motion: 'suave', texture: 'grano' },
+    defaults: { colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' }, fonts: { display: 'Bodoni Moda', body: 'Jost' }, radius: 2, motion: 'suave', texture: 'grano', icons: 'linea' },
     palettes: [
       { name: 'Noche de pino', colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' } },
       { name: 'Vino', colors: { bg: '#1A0F12', surface: '#26161B', ink: '#F1E6E2', muted: '#B39A9F', accent: '#D9A56B', accent2: '#C26B7C', accent3: '#6E3B47' } },
@@ -13,7 +13,7 @@ const SKINS = {
   },
   animado: {
     label: 'Animado', art: '¡Antojo!', desc: 'Colores vivos, bordes gruesos y movimiento. Para cafés, brunch y comida rápida.', layout: 'cuadricula',
-    defaults: { colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' }, fonts: { display: 'Lilita One', body: 'Nunito' }, radius: 18, motion: 'vivo', texture: 'puntos' },
+    defaults: { colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' }, fonts: { display: 'Lilita One', body: 'Nunito' }, radius: 18, motion: 'vivo', texture: 'puntos', icons: 'emoji' },
     palettes: [
       { name: 'Mango', colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' } },
       { name: 'Hierbabuena', colors: { bg: '#B9F0DB', surface: '#FFFFFF', ink: '#13201B', muted: '#3E5A50', accent: '#FF6B4A', accent2: '#6D6BFF', accent3: '#FFD23F' } },
@@ -24,7 +24,7 @@ const SKINS = {
   },
   cultural: {
     label: 'Cultural', art: 'Fonda', desc: 'Fachada de bahareque, zócalos pintados y letrero de fonda. Para cocina típica y turismo.', layout: 'tarjetas',
-    defaults: { colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' }, fonts: { display: 'Alfa Slab One', body: 'Alegreya Sans' }, radius: 6, motion: 'suave', texture: 'none' },
+    defaults: { colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' }, fonts: { display: 'Alfa Slab One', body: 'Alegreya Sans' }, radius: 6, motion: 'suave', texture: 'none', icons: 'linea' },
     palettes: [
       { name: 'Zócalo', colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' } },
       { name: 'Cafetal', colors: { bg: '#F3F6F0', surface: '#FFFFFF', ink: '#1F2A22', muted: '#5C6B60', accent: '#B5462E', accent2: '#2F5E3A', accent3: '#C98A1B' } },
@@ -35,7 +35,7 @@ const SKINS = {
   },
   natural: {
     label: 'Natural', art: 'Cosecha', desc: 'Papel kraft, hojas de café y lomas sembradas; esquinas suaves y una serif cálida. Para cafés, panaderías y restaurantes campestres.', layout: 'tarjetas',
-    defaults: { colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' }, fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel' },
+    defaults: { colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' }, fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel', icons: 'linea' },
     palettes: [
       { name: 'Kraft', colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' } },
       { name: 'Huerta', colors: { bg: '#E6EBDD', surface: '#FAFBF5', ink: '#1D2618', muted: '#56624C', accent: '#9E3426', accent2: '#3F6A35', accent3: '#D6A23A' } },
@@ -46,7 +46,7 @@ const SKINS = {
   },
   nocturna: {
     label: 'Nocturna', art: 'Neón', desc: 'Fondo de noche, letrero de neón que dice si está abierto y brillos de color. Para bares, gastrobares y comida rápida hasta tarde.', layout: 'tarjetas',
-    defaults: { colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' }, fonts: { display: 'Tilt Neon', body: 'Barlow' }, radius: 12, motion: 'vivo', texture: 'none' },
+    defaults: { colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' }, fonts: { display: 'Tilt Neon', body: 'Barlow' }, radius: 12, motion: 'vivo', texture: 'none', icons: 'emoji' },
     palettes: [
       { name: 'Neón', colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' } },
       { name: 'Ámbar', colors: { bg: '#120E0A', surface: '#1F1912', ink: '#FFF4E2', muted: '#C4AE8F', accent: '#FFB238', accent2: '#FF6A3D', accent3: '#7EE0D2' } },
@@ -57,7 +57,7 @@ const SKINS = {
   },
   minimalista: {
     label: 'Minimalista', art: 'Menú', desc: 'Líneas finas, letra grotesca grande y un solo color de acento. Para cafés de especialidad y cocinas modernas.', layout: 'lista',
-    defaults: { colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' }, fonts: { display: 'Schibsted Grotesk', body: 'Instrument Sans' }, radius: 2, motion: 'suave', texture: 'none' },
+    defaults: { colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' }, fonts: { display: 'Schibsted Grotesk', body: 'Instrument Sans' }, radius: 2, motion: 'suave', texture: 'none', icons: 'linea' },
     palettes: [
       { name: 'Blanco', colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' } },
       { name: 'Hueso', colors: { bg: '#F2EEE6', surface: '#FFFFFF', ink: '#1A1917', muted: '#6A665D', accent: '#B23A1E', accent2: '#1A1917', accent3: '#CFC8BA' } },
@@ -99,6 +99,9 @@ const STYLE = [
     ] }
   ] },
   { id: 'imagenes', label: 'Imágenes', cards: [
+    { id: 'iconos', card: 'icons', title: 'Íconos', desc: 'Lo que se ve en los platos, categorías, avisos y sellos que no tienen foto.', fields: [
+      { k: 'icons', t: 'seg', label: 'Dibujos', def: 'emoji', opts: [['emoji', 'Emojis'], ['linea', 'Íconos de línea'], ['ninguno', 'Sin íconos']], help: 'Los íconos de línea toman los colores de la app. El de cada plato o categoría se cambia al editarlo en Carta.' }
+    ] },
     { id: 'fondo', card: 'textures', title: 'Detalle de fondo', keys: ['texture'] }
   ] },
   { id: 'movimiento', label: 'Movimiento', cards: [
@@ -108,6 +111,17 @@ const STYLE = [
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
+/* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
+const ICON_NAMES = {
+  cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',
+  waffle: 'Waffle', sandwich: 'Sándwich', hamburguesa: 'Hamburguesa', perro: 'Perro caliente', pizza: 'Pizza', papas: 'Papas fritas', pollo: 'Pollo', carne: 'Carne',
+  chorizo: 'Chorizo', pescado: 'Pescado o trucha', sopa: 'Sopa', olla: 'Olla o sancocho', huevo: 'Huevo', queso: 'Queso', maiz: 'Maíz', hongo: 'Hongo', hoja: 'Ensalada o verdura',
+  aji: 'Ají', fruta: 'Fruta', trigo: 'Trigo', torta: 'Torta', postre: 'Postre', helado: 'Helado', galleta: 'Galleta', chocolate: 'Chocolate', miel: 'Miel o mermelada',
+  cafe: 'Café o bebida caliente', grano: 'Grano de café', te: 'Té o aromática', vaso: 'Jugo o gaseosa', botella: 'Botella', cerveza: 'Cerveza', vino: 'Vino', coctel: 'Cóctel', frio: 'Frío',
+  estrella: 'Estrella', corazon: 'Corazón', fuego: 'Fuego o asado', sol: 'Sol o desayuno', regalo: 'Regalo', trofeo: 'Trofeo', megafono: 'Anuncio', calendario: 'Calendario',
+  reloj: 'Reloj', mapa: 'Ubicación', casa: 'Casa', arbol: 'Árbol', camara: 'Cámara', grupo: 'Grupo', chef: 'Chef', info: 'Información', domicilios: 'Domicilio', musica: 'Música',
+  wifi: 'Wi-Fi', mascotas: 'Mascotas', infantil: 'Niños', terraza: 'Terraza', parqueadero: 'Parqueadero'
+};
 /* Servicios del local: [clave, nombre en el estudio]. Los textos de la app (es/en) y los íconos están en el motor. */
 const SERVICES = [['parqueadero', 'Parqueadero'], ['mascotas', 'Se admiten mascotas'], ['terraza', 'Terraza o zona al aire libre'], ['infantil', 'Zona infantil'], ['wifi', 'Wi-Fi gratis'], ['tarjeta', 'Pago con tarjeta'], ['transferencia', 'Nequi y Daviplata'], ['accesible', 'Acceso para silla de ruedas'], ['domicilios', 'Domicilios'], ['musica', 'Música en vivo'], ['enchufes', 'Enchufes para trabajar'], ['ingles', 'Atención en inglés']];
 
@@ -204,7 +218,8 @@ const MODULES = {
     defaults: { title: 'Tarjeta de sellos', goal: 8, reward: 'El siguiente va por la casa', icon: '☕', pin: '', note: '' },
     fields: [
       F.title('Tarjeta de sellos'), { k: 'goal', t: 'num', label: 'Sellos para el premio', min: 3, max: 20 }, F.text('reward', 'Premio'),
-      { k: 'icon', t: 'text', label: 'Ícono del sello', ph: '☕' }, { k: 'pin', t: 'text', label: 'Código del personal (4 a 6 dígitos)', ph: '4826' },
+      { k: 'icon', t: 'text', label: 'Emoji del sello', ph: '☕' }, { k: 'ico', t: 'icon', label: 'Ícono del sello', emoji: 'icon', fb: 'estrella' },
+      { k: 'pin', t: 'text', label: 'Código del personal (4 a 6 dígitos)', ph: '4826' },
       F.text('note', 'Nota'),
       { t: 'hint', text: 'Los sellos quedan guardados en el celular del cliente. Cambia el código de vez en cuando.' }
     ]
@@ -292,7 +307,7 @@ const MODULES = {
     defaults: { text: '', icon: '📣', style: 'acento', until: '', cta: 'none' },
     fields: [
       F.text('text', 'Aviso', 'Este festivo abrimos de 8:00 a. m. a 8:00 p. m.'),
-      { k: 'icon', t: 'text', label: 'Emoji', ph: '📣' },
+      { k: 'icon', t: 'text', label: 'Emoji', ph: '📣' }, { k: 'ico', t: 'icon', label: 'Ícono', emoji: 'icon', fb: 'megafono' },
       { k: 'style', t: 'sel', label: 'Estilo', def: 'acento', opts: [['acento', 'Color de acento'], ['suave', 'Suave'], ['alerta', 'Alerta']] },
       { k: 'until', t: 'date', label: 'Mostrar hasta (incluido)', help: 'Vacío = siempre. Después de esa fecha el aviso deja de verse en la app.' },
       { k: 'cta', t: 'sel', label: 'Al tocarlo lleva a', def: 'none', opts: CTA_OPTS },
@@ -305,7 +320,7 @@ const MODULES = {
     fields: [F.title('Galería'),
       { k: 'layout', t: 'sel', label: 'Diseño', def: 'carrusel', opts: [['carrusel', 'Carrusel'], ['mosaico', 'Mosaico']] },
       { k: 'items', t: 'list', label: 'Fotos', item: 'Foto', blank: { img: '', emoji: '', caption: '' },
-        fields: [{ k: 'img', t: 'img', label: 'Foto', max: 800 }, { k: 'emoji', t: 'text', label: 'Emoji si no hay foto', ph: '☕' }, F.text('caption', 'Pie de foto', 'Nuestro fogón de leña')] },
+        fields: [{ k: 'img', t: 'img', label: 'Foto', max: 800 }, { k: 'emoji', t: 'text', label: 'Emoji si no hay foto', ph: '☕' }, { k: 'ico', t: 'icon', label: 'Ícono si no hay foto', emoji: 'emoji', fb: 'camara' }, F.text('caption', 'Pie de foto', 'Nuestro fogón de leña')] },
       { t: 'hint', text: 'Cada foto subida pesa unos 60 KB. Para más de tres, mejor pega enlaces https de fotos publicadas en tu página web.' }]
   },
   servicios: {

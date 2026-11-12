@@ -29,7 +29,7 @@ const TEMPLATES = [
     theme: {
       skin: 'elegante',
       colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' },
-      fonts: { display: 'Bodoni Moda', body: 'Jost' }, radius: 2, motion: 'suave', texture: 'grano'
+      fonts: { display: 'Bodoni Moda', body: 'Jost' }, radius: 2, motion: 'suave', texture: 'grano', icons: 'linea'
     },
     menu: {
       categories: [
@@ -98,7 +98,7 @@ const TEMPLATES = [
     theme: {
       skin: 'animado',
       colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' },
-      fonts: { display: 'Lilita One', body: 'Nunito' }, radius: 18, motion: 'vivo', texture: 'puntos'
+      fonts: { display: 'Lilita One', body: 'Nunito' }, radius: 18, motion: 'vivo', texture: 'puntos', icons: 'emoji'
     },
     menu: {
       categories: [
@@ -170,7 +170,7 @@ const TEMPLATES = [
     theme: {
       skin: 'cultural',
       colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' },
-      fonts: { display: 'Alfa Slab One', body: 'Alegreya Sans' }, radius: 6, motion: 'suave', texture: 'none'
+      fonts: { display: 'Alfa Slab One', body: 'Alegreya Sans' }, radius: 6, motion: 'suave', texture: 'none', icons: 'linea'
     },
     menu: {
       categories: [
@@ -286,7 +286,7 @@ const TEMPLATES = [
     theme: {
       skin: 'natural',
       colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' },
-      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel', textSize: 'grande'
+      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel', icons: 'linea', textSize: 'grande'
     },
     menu: {
       categories: [
@@ -375,7 +375,7 @@ const TEMPLATES = [
     theme: {
       skin: 'minimalista',
       colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' },
-      fonts: { display: 'Schibsted Grotesk', body: 'Instrument Sans' }, radius: 2, motion: 'suave', texture: 'none'
+      fonts: { display: 'Schibsted Grotesk', body: 'Instrument Sans' }, radius: 2, motion: 'suave', texture: 'none', icons: 'linea'
     },
     menu: {
       categories: [
@@ -469,7 +469,7 @@ const TEMPLATES = [
     theme: {
       skin: 'natural',
       colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4E6E4D', accent2: '#9A4E2A', accent3: '#C9A04A' },
-      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'hojas'
+      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'hojas', icons: 'linea'
     },
     menu: {
       categories: [
@@ -553,7 +553,7 @@ const TEMPLATES = [
     theme: {
       skin: 'nocturna',
       colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' },
-      fonts: { display: 'Tilt Neon', body: 'Barlow' }, radius: 12, motion: 'vivo', texture: 'none'
+      fonts: { display: 'Tilt Neon', body: 'Barlow' }, radius: 12, motion: 'vivo', texture: 'none', icons: 'emoji'
     },
     menu: {
       categories: [
@@ -612,6 +612,23 @@ const TEMPLATES = [
   }
 ];
 
+/* Íconos de línea elegidos a mano, donde el plato no lleva emoji o su emoji no tiene un equivalente claro
+   (la trucha al ajillo lleva un ajo; en modo íconos debe verse un pescado). */
+const ICO = {
+  'tpl-araucaria': { 'chorizo-curado': 'chorizo', 'tartar-trucha': 'pescado', hongos: 'hongo', arracacha: 'sopa', lomo: 'carne', costilla: 'carne', pollo: 'pollo', risotto: 'maiz',
+    trucha: 'pescado', 'pesca-cafe': 'pescado', brevas: 'miel', esfera: 'postre', natilla: 'postre', 'vino-tinto': 'vino', 'vino-blanco': 'vino', sour: 'coctel', 'gin-uchuva': 'coctel',
+    'sin-alcohol': 'vaso', espresso: 'cafe', filtrado: 'cafe', carajillo: 'cafe' },
+  'tpl-zocalo': { 'chorizo-arepa': 'chorizo', 'chocolate-queso': 'cafe', patacon: 'arepa', aguapanela: 'vaso' },
+  'tpl-espiga': { 'pan-bono': 'pan', almojabana: 'pan', parfait: 'postre', 'torta-naranja': 'torta', natas: 'postre', zanahoria: 'torta' },
+  'tpl-neblina': { latte: 'cafe', sifon: 'cafe', 'pan-banano': 'pan', 'torta-zanahoria': 'torta', tostada: 'pan', limonada: 'vaso' },
+  'tpl-alisos': { ajillo: 'pescado', gratinada: 'pescado', ceviche: 'pescado', chorizo: 'chorizo', patacones: 'arepa', ahuyama: 'sopa', limonada: 'vaso', mora: 'vaso', aguapanela: 'vaso',
+    natas: 'postre', 'arroz-leche': 'postre' }
+};
+TEMPLATES.forEach(function (t) {
+  const map = ICO[t.id]; if (!map) return;
+  t.menu.categories.forEach(function (c) { c.items.forEach(function (it) { if (map[it.id]) it.ico = map[it.id]; }); });
+});
+
 function blankApp(name) {
   return {
     v: 1, id: 'nueva', template: false,
@@ -625,7 +642,7 @@ function blankApp(name) {
     theme: {
       skin: 'elegante',
       colors: { bg: '#FFFFFF', surface: '#F4F5F2', ink: '#1C1C1A', muted: '#66675F', accent: '#2F5D50', accent2: '#B4874A', accent3: '#7A7B72' },
-      fonts: { display: 'Playfair Display', body: 'Work Sans' }, radius: 8, motion: 'suave', texture: 'none'
+      fonts: { display: 'Playfair Display', body: 'Work Sans' }, radius: 8, motion: 'suave', texture: 'none', icons: 'linea'
     },
     menu: { categories: [{ id: 'cat-1', name: 'Entradas', icon: '', note: '', items: [IT('plato-1', 'Primer plato', 'Describe el plato en una línea.', 15000)] }] },
     modules: [

@@ -9,7 +9,7 @@
     "shots": "node build.js && node test/make-demos.js && node test/visual.js shots",
     "visual:base": "node build.js && node test/make-demos.js && node test/visual.js base",
     "visual:compare": "node build.js && node test/make-demos.js && node test/visual.js compare",
-    "overflow": "node build.js && node test/visual.js overflow"
+    "overflow": "node build.js && node test/make-demos.js && node test/visual.js overflow"
   },
   "license": "UNLICENSED",
   "private": true,
