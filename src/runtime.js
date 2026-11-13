@@ -398,6 +398,8 @@ section.m-hero:has(.hero-box.v-arriba:not(.ph-fail)){padding-top:0}
 .lay-cuadricula .it-p{margin-top:auto;padding-top:8px}
 .lay-cuadricula .add{position:absolute;right:8px;top:8px;width:38px;height:38px}
 .lay-cuadricula .it-tags{margin-top:6px}
+.lay-cuadricula .it-d{display:none}
+.lay-lista .cat-h .ci{display:none}
 .lay-fotos .items{gap:16px}
 .lay-fotos .it{display:block;background:var(--surface);border-radius:var(--r);overflow:hidden}
 .lay-fotos .media{aspect-ratio:16/10;width:100%;border-radius:0;font-size:80px}
@@ -736,6 +738,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="elegante"] .chip{border-width:1px;font-weight:400;letter-spacing:.08em;font-size:13px;border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
 [data-skin="elegante"] .chip.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent));border-color:var(--c-sel,var(--accent))}
 [data-skin="elegante"] .cat-tabs{border-bottom:1px solid color-mix(in srgb,var(--accent) 16%,transparent)}
+[data-skin="elegante"] .cat-tabs .ci{display:none}
 [data-skin="elegante"] .cat{padding-top:36px}
 [data-skin="elegante"] .cat-h{text-align:center;margin-bottom:4px}
 [data-skin="elegante"] .cat-h h3{justify-content:center;font-style:italic;font-size:30px}
@@ -1757,7 +1760,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       }).join('') + '</div>' : '';
       const search = s.showSearch ? '<label class="search"><span class="vh">' + esc(ui('search')) + '</span><input type="search" data-in="q" placeholder="' + attr(ui('search')) + '" value="' + attr(state.q) + '" autocomplete="off" enterkeyhint="search"></label>' : '';
       const tabs = cats.length > 1 ? '<nav class="cat-tabs" aria-label="' + attr(modTitle(m)) + '"><div class="chips">' + cats.map(function (c) {
-        return '<button class="chip" data-act="cat" data-c="' + attr(c.id) + '">' + (skin !== 'elegante' && glyph(c.icon, c.ico) ? '<span class="ci" aria-hidden="true">' + glyph(c.icon, c.ico) + '</span>' : '') + esc(tx(c, 'name')) + '</button>';
+        return '<button class="chip" data-act="cat" data-c="' + attr(c.id) + '">' + (glyph(c.icon, c.ico) ? '<span class="ci" aria-hidden="true">' + glyph(c.icon, c.ico) + '</span>' : '') + esc(tx(c, 'name')) + '</button>';
       }).join('') + '</div></nav>' : '';
       return '<div class="wrap">' + sh(m) + (tx(s, 'intro') ? '<p class="lead-p">' + esc(tx(s, 'intro')) + '</p>' : '') + search + filters + '</div>' + tabs +
         '<div class="wrap carta-body lay-' + attr(s.layout || 'lista') + '" data-carta-body="' + attr(m.id) + '">' + cartaBody(m) + '</div>' +
@@ -2060,7 +2063,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       count += items.length;
       const cph = safeImg(c.img);
       html += '<div class="cat' + (cph ? ' has-ph' : '') + '" id="c-' + attr(c.id) + '" data-cat="' + attr(c.id) + '">' +
-        (cph ? '<div class="cat-ph"><img src="' + attr(cph) + '" alt="" loading="lazy"' + posAttr(c.imgPos) + '></div>' : '') + '<div class="cat-h"><h3>' + (lay !== 'lista' && glyph(c.icon, c.ico) ? '<span class="ci" aria-hidden="true">' + glyph(c.icon, c.ico) + '</span>' : '') + esc(tx(c, 'name')) + '</h3>' +
+        (cph ? '<div class="cat-ph"><img src="' + attr(cph) + '" alt="" loading="lazy"' + posAttr(c.imgPos) + '></div>' : '') + '<div class="cat-h"><h3>' + (glyph(c.icon, c.ico) ? '<span class="ci" aria-hidden="true">' + glyph(c.icon, c.ico) + '</span>' : '') + esc(tx(c, 'name')) + '</h3>' +
         (tx(c, 'note') ? '<p>' + esc(tx(c, 'note')) + '</p>' : '') + '</div><div class="items">' + items.map(function (it, i) { return itemHTML(it, lay, ps, i); }).join('') + '</div></div>';
     });
     return count ? html : '<p class="empty">' + esc(ui('noResults')) + '</p>';
@@ -2084,7 +2087,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
         (desc ? '<p class="it-d">' + esc(desc) + '</p>' : '') + (tags ? '<div class="it-tags">' + tags + '</div>' : '') + '</div>' + addBtn(it) + '</article>';
     }
     return '<article class="it ' + (off ? 'off' : '') + '" data-act="item" data-id="' + attr(it.id) + '">' + mediaHTML(it, i) + '<div class="it-b"><h4>' + esc(name) + '</h4>' +
-      (desc && lay === 'tarjetas' ? '<p class="it-d">' + esc(desc) + '</p>' : '') + (tags ? '<div class="it-tags">' + tags + '</div>' : '') +
+      (desc ? '<p class="it-d">' + esc(desc) + '</p>' : '') + (tags ? '<div class="it-tags">' + tags + '</div>' : '') +
       '<div class="it-p">' + price + '</div></div>' + addBtn(it) + '</article>';
   }
 
@@ -2582,6 +2585,130 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       if (sh === 'circulo') rule('.logo:not(.hz)', 'border-radius:50%');
       else if (sh === 'cuadrado') rule('.logo:not(.hz)', 'border-radius:max(6px,calc(var(--r) * .7))');
       if (wideLogo()) rule('.brand-mini .logo.hz', 'display:inline-grid;border:0;box-shadow:none');
+    },
+    /* Carta (theme.carta): fotos de los platos, descripción, precios, etiquetas, guía, categorías, pestañas y columnas.
+       Las reglas llevan .carta-body delante para ganarle a las formas generales (theme.shape). */
+    function (rule) {
+      const o = function (k) { return String(opt('carta.' + k, '')); };
+      const shp = o('shape'), sz = o('size'), pos = o('pos'), ds = o('desc'), pr = o('price'), tg = o('tags'), ld = o('lead');
+      const ct = o('cat'), ci = o('catIcon'), cp = o('catPhoto'), tb = o('tabs'), n = { '1': 1, '2': 2, '3': 3 }[o('cols')];
+      const B = '.carta-body', T = B + '.lay-tarjetas', G = B + '.lay-cuadricula', P = B + '.lay-fotos';
+      const c = cfg.theme.colors, bg = hexOk(c.bg, '#ffffff'), sf = hexOk(c.surface, bg), ink = hexOk(c.ink, '#111111');
+      // Tamaño y posición de la foto en las tarjetas
+      const W = { s: 56, l: 96 }[sz] || 72;
+      if (W !== 72 || pos === 'der') {
+        rule(T + ' .media', 'width:' + W + 'px;height:' + W + 'px;font-size:' + W / 2 + 'px');
+        rule(T + ' .it', 'grid-template-columns:' + (pos === 'der' ? 'minmax(0,1fr) ' + W + 'px' : W + 'px minmax(0,1fr) auto'));
+      }
+      if (pos === 'der') {
+        rule(T + ' .media', 'grid-column:2;grid-row:1');
+        rule(T + ' .it-b', 'grid-column:1;grid-row:1');
+        rule(T + ' .add', 'position:absolute;right:8px;bottom:8px;width:36px;height:36px;font-size:20px');
+      }
+      // Forma y tamaño de las fotos en la cuadrícula y en fotos grandes
+      const GA = { s: '4/3', l: '4/5' }[sz], PA = { s: '2/1', l: '4/3' }[sz];
+      if (shp === 'circulo') {
+        rule(T + ' .media', 'border-radius:50%');
+        rule(G + ' .media', 'width:' + ({ s: '64%', l: '100%' }[sz] || '84%') + ';aspect-ratio:1;margin:2px auto 12px;border-radius:50%');
+        rule(P + ' .media', 'width:' + ({ s: '46%', l: '82%' }[sz] || '64%') + ';aspect-ratio:1;margin:18px auto 2px;border-radius:50%');
+      } else {
+        if (GA) rule(G + ' .media', 'aspect-ratio:' + GA);
+        if (shp === 'arco') {
+          rule(T + ' .media,' + G + ' .media', 'border-radius:999px 999px 6px 6px');
+          rule(P + ' .media', 'width:calc(100% - 32px);aspect-ratio:' + ({ s: '16/10', l: '1/1' }[sz] || '4/3') + ';margin:16px 16px 0;border-radius:999px 999px 6px 6px');
+        } else if (shp === 'hoja') {
+          rule(T + ' .media,' + G + ' .media', 'border-radius:50% 6px');
+          rule(P + ' .media', 'width:calc(100% - 32px);margin:16px 16px 0;border-radius:56px 6px' + (PA ? ';aspect-ratio:' + PA : ''));
+        } else if (PA) rule(P + ' .media', 'aspect-ratio:' + PA);
+      }
+      // Descripción (al tocar el plato siempre se ve completa)
+      if (ds === 'ocultar') rule(B + ' .it-d', 'display:none');
+      else if (ds === '1' || ds === '2') rule(B + ' .it-d', 'display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:' + ds + ';line-clamp:' + ds + ';overflow:hidden');
+      else if (ds === 'completa') rule(G + ' .it-d', 'display:block');
+      if (ds === '1' || ds === '2' || ds === 'completa') rule(G + ' .it-d', 'margin-top:4px;font-size:13px;line-height:1.4');
+      // Precio en la carta y en los destacados; «en color» y «contorno» se ajustan para leerse sobre el fondo y las tarjetas
+      const PRC = B + ' .price,.feat .price', pc = 'var(--c-price,' + legible(hexOk(c.accent, '#888888'), [bg, sf], ink) + ')';
+      const PLAIN = 'background:none;padding:0;border:0;border-radius:0;box-shadow:none;text-shadow:none;color:';
+      if (pr === 'texto') rule(PRC, PLAIN + 'var(--c-price,var(--ink))');
+      else if (pr === 'color') rule(PRC, PLAIN + pc);
+      else if (pr === 'pildora') rule(PRC, 'background:var(--c-price,var(--accent));color:var(--c-price-on,var(--on-accent));padding:3px 10px;border:0;border-radius:999px;box-shadow:none;text-shadow:none');
+      else if (pr === 'contorno') rule(PRC, 'background:none;color:' + pc + ';border:1.5px solid currentColor;padding:2px 9px;border-radius:999px;box-shadow:none;text-shadow:none');
+      // Etiquetas
+      const tc = 'var(--c-tag,' + legible(hexOk(c.accent2, '#888888'), [bg, sf], ink) + ')', TG = '.tag:not(.sold)', SD = '.tag.sold';
+      if (tg === 'relleno') {
+        rule('.tag', 'border:0;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;font-size:11px;font-weight:700');
+        rule(TG, 'background:var(--c-tag,var(--accent2));color:var(--c-tag-on,var(--on-accent2))');
+        rule(SD, 'background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink)');
+        rule('.tag+.tag::before', 'content:none');
+      } else if (tg === 'contorno') {
+        rule('.tag', 'background:transparent;border:1.5px solid currentColor;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;font-size:11px;font-weight:700');
+        rule(TG, 'color:' + tc); rule(SD, 'color:var(--muted)');
+        rule('.tag+.tag::before', 'content:none');
+      } else if (tg === 'texto') {
+        rule('.tag', 'background:none;border:0;padding:0;border-radius:0;text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;font-weight:700');
+        rule(TG, 'color:' + tc); rule(SD, 'color:var(--muted)');
+        rule('.tag+.tag::before', 'content:none'); rule('.it-tags,.it-f', 'column-gap:14px');
+      } else if (tg === 'punto') {
+        rule('.tag', 'display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;border-radius:0;color:var(--ink);text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:600');
+        rule('.tag::before,.tag+.tag::before', 'content:"";flex:none;width:7px;height:7px;margin:0;border-radius:50%;background:var(--c-tag,var(--accent2))');
+        rule(SD, 'color:var(--muted)'); rule(SD + '::before', 'background:var(--muted)');
+      }
+      // Guía entre el plato y el precio
+      if (ld === 'linea') rule(B + ' .lead', 'border-bottom-style:solid;border-bottom-width:1px');
+      else if (ld === 'ninguno') rule(B + ' .lead', 'border-bottom-color:transparent');
+      // Títulos de categoría
+      const H = B + ' .cat-h', H3 = H + ' h3';
+      if (ct === 'linea' || ct === 'centrado' || ct === 'mayus' || ct === 'banda') {
+        rule(H, 'display:block;position:static;background:none;color:inherit;padding:0;border:0;border-radius:0;margin-bottom:12px;text-align:' + (ct === 'centrado' ? 'center' : 'left'));
+        rule(H + '::after', 'display:none');
+        rule(H3, 'justify-content:' + (ct === 'centrado' ? 'center' : 'flex-start') + ';font-style:normal');
+        rule(H3 + '::before,' + H3 + '::after', 'content:none');
+        rule(H + ' p', 'margin:4px 0 0;color:var(--muted);opacity:1;font-size:14px;letter-spacing:0;text-transform:none');
+      }
+      if (ct === 'linea') rule(H3 + '::after', 'content:"";display:block;flex:1;min-width:24px;height:1px;background:currentColor;opacity:.28;-webkit-mask:none;mask:none');
+      else if (ct === 'centrado') rule(H3 + '::before,' + H3 + '::after', 'content:"";display:block;flex:0 0 28px;min-width:0;height:1px;background:currentColor;opacity:.4;-webkit-mask:none;mask:none');
+      else if (ct === 'mayus') rule(H3, 'font-family:var(--fb);font-size:13px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;text-shadow:none;padding-bottom:10px;border-bottom:1.5px solid color-mix(in srgb,currentColor 30%,transparent)');
+      else if (ct === 'banda') {
+        rule(H, 'background:var(--accent);color:var(--on-accent);padding:12px 16px;border-radius:var(--r);margin-bottom:14px');
+        rule(H3, 'color:inherit;text-shadow:none'); rule(H + ' p', 'color:inherit;opacity:.85');
+      }
+      // Ícono de la categoría (títulos y pestañas)
+      if (ci === 'mostrar') rule('.cat-h .ci,.cat-tabs .ci', 'display:inline-flex');
+      else if (ci === 'ocultar') rule('.cat-h .ci,.cat-tabs .ci', 'display:none');
+      // Foto de la categoría: franja (la de siempre), detrás del título o sin foto
+      if (cp === 'ocultar') rule('.cat-ph', 'display:none');
+      else if (cp === 'fondo') {
+        const C = B + ' .cat.has-ph';
+        rule(C, 'display:grid;grid-template-columns:minmax(0,1fr)');
+        rule(C + '>.cat-ph', 'grid-area:1/1;position:relative;margin:0;aspect-ratio:16/8');
+        rule(C + '>.cat-ph::after', 'content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 28%,rgba(0,0,0,.68))');
+        rule(C + '>.cat-h', 'grid-area:1/1;align-self:end;position:relative;z-index:1;margin:0;padding:0 16px 14px;background:none;color:#fff;border:0;border-radius:0');
+        rule(C + '>.cat-h::after', 'display:none');
+        rule(C + '>.cat-h h3', 'color:#fff;text-shadow:0 1px 14px rgba(0,0,0,.4);border-bottom-color:rgba(255,255,255,.4)');
+        rule(C + '>.cat-h p', 'color:rgba(255,255,255,.88);opacity:1');
+        rule(C + '>.items', 'margin-top:16px');
+      }
+      // Pestañas de categorías
+      if (tb === 'ocultar') rule('.cat-tabs', 'display:none');
+      else if (tb === 'subrayado') {
+        rule('.cat-tabs .chips', 'gap:20px');
+        rule('.cat-tabs .chip', 'min-height:40px;padding:6px 1px 4px;border:0;border-bottom:2.5px solid transparent;border-radius:0;background:none;color:var(--muted);box-shadow:none;font-weight:600');
+        rule('.cat-tabs .chip.on', 'background:none;color:var(--ink);border-bottom-color:var(--c-sel,var(--accent));box-shadow:none');
+      }
+      // Columnas: hasta tres en la cuadrícula y dos en fotos grandes
+      if (n) {
+        rule(G + ' .items', 'grid-template-columns:repeat(' + n + ',minmax(0,1fr))');
+        rule(P + ' .items', 'grid-template-columns:repeat(' + Math.min(n, 2) + ',minmax(0,1fr))');
+        if (n === 1) { rule(G + ' .it h4', 'font-size:17px'); rule(G + ' .media', 'font-size:110px'); }
+        if (n === 3) {
+          rule(G + ' .it', 'padding:9px'); rule(G + ' .it h4', 'font-size:14px'); rule(G + ' .media', 'font-size:38px;margin-bottom:8px');
+          rule(G + ' .add', 'width:30px;height:30px;font-size:17px;right:5px;top:5px');
+        }
+        if (n >= 2) {
+          rule(P + ' .it-b', 'padding:12px 12px 14px'); rule(P + ' .it-l', 'flex-wrap:wrap;gap:4px 8px'); rule(P + ' .it-l h4', 'font-size:15.5px;flex-basis:100%');
+          rule(P + ' .lead', 'display:none'); rule(P + ' .media', 'font-size:52px'); rule(P + ' .add', 'width:34px;height:34px;font-size:19px;right:8px;top:8px');
+        }
+      }
     }
   ];
 
@@ -2697,9 +2824,10 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   function mixHex(a, b, t) { const x = hexRGB(a), y = hexRGB(b); return '#' + x.map(function (v, i) { return ('0' + Math.round(v + (y[i] - v) * t).toString(16)).slice(-2); }).join(''); }
   function ratio(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
-  /* Acerca un color hacia «to» hasta que se lea sobre «bg» (4,5:1); si no alcanza, usa «to». */
+  /* Acerca un color hacia «to» hasta que se lea (4,5:1) sobre «bg», que puede ser uno o varios fondos; si no alcanza, usa «to». */
   function legible(c, bg, to) {
-    for (let t = 0; t <= 10; t++) { const m = mixHex(c, to, t / 10); if (ratio(m, bg) >= 4.5) return m; }
+    const bgs = [].concat(bg);
+    for (let t = 0; t <= 10; t++) { const m = mixHex(c, to, t / 10); if (bgs.every(function (b) { return ratio(m, b) >= 4.5; })) return m; }
     return to;
   }
   function secVars(bg) {

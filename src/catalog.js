@@ -120,6 +120,27 @@ const STYLE = [
       { k: 'shape.border', t: 'range', label: 'Grosor del borde', min: 1, max: 4, step: .5, unit: 'px', def: 1.5, help: 'Para los estilos con borde y sombra dura.' }
     ] }
   ] },
+  { id: 'carta', label: 'Carta', cards: [
+    { id: 'cartadis', title: 'Diseño de la carta', card: 'cartaLayout', desc: 'Cómo se ven los platos. También se cambia en Módulos › Carta.' },
+    { id: 'platos', title: 'Platos', fields: [
+      { k: 'carta.shape', t: 'seg', label: 'Forma de las fotos', def: 'auto', opts: [['auto', 'Según las esquinas'], ['circulo', 'Círculo'], ['arco', 'Arco'], ['hoja', 'Hoja']], help: 'En tarjetas, cuadrícula y fotos grandes.' },
+      { k: 'carta.desc', t: 'seg', label: 'Descripción', def: 'auto', opts: [['auto', 'Según el diseño'], ['completa', 'Completa'], ['2', 'Dos líneas'], ['1', 'Una línea'], ['ocultar', 'Sin descripción']], help: 'Al tocar el plato siempre se ve completa.' },
+      { k: 'carta.size', adv: true, t: 'seg', label: 'Tamaño de las fotos', def: 'auto', opts: [['s', 'Pequeñas'], ['auto', 'Normales'], ['l', 'Grandes']] },
+      { k: 'carta.pos', adv: true, t: 'seg', label: 'Foto en las tarjetas', def: 'auto', opts: [['auto', 'A la izquierda'], ['der', 'A la derecha']] },
+      { k: 'carta.cols', adv: true, t: 'seg', label: 'Columnas', def: 'auto', opts: [['auto', 'Según el diseño'], ['1', 'Una'], ['2', 'Dos'], ['3', 'Tres']], help: 'En la cuadrícula (hasta tres) y en fotos grandes (hasta dos).' },
+      { k: 'carta.lead', adv: true, t: 'seg', label: 'Guía entre el plato y el precio', def: 'auto', opts: [['auto', 'Puntos'], ['linea', 'Línea'], ['ninguno', 'Sin guía']] }
+    ] },
+    { id: 'precios', adv: true, title: 'Precios y etiquetas', fields: [
+      { k: 'carta.price', t: 'seg', label: 'Precio', def: 'auto', opts: [['auto', 'Según la estética'], ['texto', 'Texto'], ['color', 'En color'], ['pildora', 'Píldora'], ['contorno', 'Contorno']], help: 'En la carta y en los destacados. El color se ajusta solo para que se lea.' },
+      { k: 'carta.tags', t: 'seg', label: 'Etiquetas', def: 'auto', opts: [['auto', 'Según la estética'], ['relleno', 'Rellenas'], ['contorno', 'Contorno'], ['texto', 'Solo texto'], ['punto', 'Con punto']] }
+    ] },
+    { id: 'categorias', title: 'Categorías', fields: [
+      { k: 'carta.cat', t: 'seg', label: 'Títulos de categoría', def: 'auto', opts: [['auto', 'Según la estética'], ['linea', 'Con línea'], ['centrado', 'Centrados'], ['mayus', 'Mayúsculas pequeñas'], ['banda', 'Sobre una franja']] },
+      { k: 'carta.catPhoto', adv: true, t: 'seg', label: 'Foto de la categoría', def: 'auto', opts: [['auto', 'Franja arriba del título'], ['fondo', 'Detrás del título'], ['ocultar', 'Sin foto']], help: 'La foto de cada categoría se elige en la pestaña Carta.' },
+      { k: 'carta.catIcon', adv: true, t: 'seg', label: 'Ícono de la categoría', def: 'auto', opts: [['auto', 'Según el diseño'], ['mostrar', 'Siempre'], ['ocultar', 'Nunca']] },
+      { k: 'carta.tabs', adv: true, t: 'seg', label: 'Pestañas de categorías', def: 'auto', opts: [['auto', 'Botones'], ['subrayado', 'Subrayadas'], ['ocultar', 'Ocultar']] }
+    ] }
+  ] },
   { id: 'estructura', label: 'Estructura', cards: [
     { id: 'navegacion', title: 'Navegación', fields: [
       { k: 'nav', t: 'seg', label: 'Cómo se recorre la app', def: 'menu', opts: [['menu', 'Menú en el encabezado'], ['barra', 'Barra abajo con íconos'], ['pestanas', 'Pestañas arriba']],
@@ -163,6 +184,8 @@ const STYLE = [
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
+/* Diseños de la carta con miniatura en Estilo › Carta (el mismo valor que el campo del módulo). */
+const CARTA_LAYOUTS = [['lista', 'Lista'], ['tarjetas', 'Tarjetas'], ['cuadricula', 'Cuadrícula'], ['fotos', 'Fotos grandes'], ['compacta', 'Compacta']];
 const SECTION_FIELDS = [
   { t: 'sep', label: 'Diseño de esta sección' },
   { k: '_bg', t: 'sel', label: 'Fondo', def: 'auto', opts: [['auto', 'El de la app'], ['superficie', 'Color de las tarjetas'], ['tinte', 'Tinte del acento'], ['acento', 'Color de acento'], ['invertido', 'Invertido (claro sobre oscuro)']] },

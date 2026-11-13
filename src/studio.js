@@ -577,7 +577,28 @@
     const x = { bg: hx(c.bg, '#ffffff'), surface: hx(c.surface, '#ffffff'), ink: hx(c.ink, '#111111'), accent: hx(c.accent, '#888888'), accent2: hx(c.accent2, '#888888'), accent3: hx(c.accent3, '#888888') };
     return '--bg:' + x.bg + ';--surface:' + x.surface + ';--ink:' + x.ink + ';--accent:' + x.accent + ';--accent2:' + x.accent2 + ';--accent3:' + x.accent3 + ';' + META.artVars(x);
   }
+  /* Esquema de cada diseño de la carta, en los colores de la app. */
+  function cartaThumb(v) {
+    const R = function (x, y, w, h, cl, rx) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (rx || 1.5) + '" class="' + cl + '"/>'; };
+    let s = '';
+    if (v === 'lista' || v === 'compacta') {
+      const li = v === 'lista', n = li ? 3 : 6, step = li ? 24 : 11.5, y0 = li ? 10 : 8;
+      for (let i = 0; i < n; i++) {
+        const y = y0 + i * step, w = [42, 34, 48, 30, 40, 36][i];
+        s += R(10, y, w, 5, 't') + '<line x1="' + (14 + w) + '" y1="' + (y + 4) + '" x2="93" y2="' + (y + 4) + '" class="d"/>' + R(97, y, 13, 5, 'r');
+        if (li) s += R(10, y + 9, 64, 3, 'm');
+      }
+    } else if (v === 'tarjetas') {
+      for (let i = 0; i < 3; i++) { const y = 5 + i * 23.5; s += R(8, y, 104, 20, 's', 3) + R(11, y + 3, 14, 14, 'p', 2) + R(30, y + 4, 40, 4, 't') + R(30, y + 11, 50, 3, 'm') + R(94, y + 12, 14, 4, 'r'); }
+    } else if (v === 'cuadricula') {
+      [[8, 4], [62, 4], [8, 41], [62, 41]].forEach(function (q) { s += R(q[0], q[1], 50, 33, 's', 3) + R(q[0] + 3, q[1] + 3, 44, 17, 'p', 2) + R(q[0] + 3, q[1] + 23, 30, 3.5, 't') + R(q[0] + 3, q[1] + 28.5, 12, 3, 'r'); });
+    } else if (v === 'fotos') {
+      s += R(8, 4, 104, 70, 's', 3) + R(8, 4, 104, 42, 'p', 3) + R(14, 52, 50, 5, 't') + R(94, 52, 12, 5, 'r') + R(14, 62, 74, 3, 'm');
+    }
+    return '<svg class="cth" viewBox="0 0 120 78" aria-hidden="true">' + s + '</svg>';
+  }
   function thumbArt(kind, v) {
+    if (kind === 'carta') return cartaThumb(v);
     if (kind !== 'heroDeco') return '';
     if (v === 'ninguna') return '<span class="dth-none">Sin decoración</span>';
     if (v === 'auto') {
@@ -923,6 +944,11 @@
         return '<span>' + (META.glyph(mode, x[0], '', '') || '<em>' + x[1].charAt(0) + '</em>') + '</span>';
       }).join('') + '</div>';
     },
+    cartaLayout: function () {
+      const i = S.cur.modules.findIndex(function (m) { return m.type === 'carta'; });
+      if (i < 0) return '<p class="help">Agrega el módulo Carta (en Módulos) para elegir su diseño.</p>';
+      return fieldHTML({ k: 'layout', t: 'thumbs', label: 'Diseño', art: 'carta', def: 'lista', opts: CARTA_LAYOUTS, help: '«Compacta» sirve para cartas largas: la descripción se ve al tocar el plato.' }, 'modules.' + i + '.s');
+    },
     textures: function () {
       const th = S.cur.theme;
       return '<div class="texs" role="group" aria-label="Detalle de fondo" style="' + attr(texVars()) + '">' + TEXTURES.map(function (t) {
@@ -968,7 +994,7 @@
       return tplBanner() + '<section class="card"><div class="card-h row"><div><h2>Carta</h2><p>' + cats.length + ' categorías · ' + n + ' platos' + (noPrice ? ' · <span class="warntxt">' + noPrice + ' sin precio</span>' : '') + '</p></div>' +
         '<button class="btn pri" data-a="cat-add">Nueva categoría</button></div>' +
         (cats.length ? '<div class="cats">' + cats.map(catHTML).join('') + '</div>' : '<p class="empty">La carta está vacía. Crea la primera categoría para empezar a agregar platos.</p>') +
-        '<p class="help">Toca un plato para editar nombre, precio, foto y etiquetas. El diseño de la carta (lista, tarjetas, cuadrícula, fotos grandes o compacta) se cambia en Módulos › Carta.</p></section>';
+        '<p class="help">Toca un plato para editar nombre, precio, foto y etiquetas. El diseño de la carta (lista, tarjetas, cuadrícula, fotos grandes o compacta), la forma de las fotos y los títulos de categoría se cambian en Estilo › Carta.</p></section>';
     },
     datos: function () {
       ensureHours();

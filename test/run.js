@@ -796,6 +796,62 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     A.close();
   }
 
+  /* 11q. Carta a fondo */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const css = cfg => { const A = mount(cfg, NOW); const x = A.d.getElementById('bk-css').textContent; A.close(); return x; };
+    const L = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const R = (a, z) => { const p = L(a), q = L(z); return (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05); };
+    const lay = (cfg, l) => { cfg.modules.find(m => m.type === 'carta').s.layout = l; return cfg; };
+    // En «auto» nada cambia
+    const base = css(TPL('tpl-zocalo'));
+    const z0 = TPL('tpl-zocalo'); z0.theme.carta = { shape: 'auto', size: 'auto', pos: 'auto', desc: 'auto', price: 'auto', tags: 'auto', lead: 'auto', cat: 'auto', catPhoto: 'auto', catIcon: 'auto', tabs: 'auto', cols: 'auto' };
+    ok(css(z0) === base, 'carta en «auto»: nada cambia');
+    const zx = TPL('tpl-zocalo'); zx.theme.carta = { shape: 'x;}body{color:red', cols: '9', price: '"><b>', desc: '7' };
+    ok(css(zx) === base, 'valores desconocidos en la carta no escriben nada');
+    // Fotos: tamaño, posición, forma y columnas
+    const a = TPL('tpl-zocalo'); a.theme.carta = { shape: 'circulo', size: 'l', pos: 'der', desc: '2', cols: '3' };
+    let x = css(a);
+    ok(x.includes('#bk .carta-body.lay-tarjetas .media{width:96px;height:96px;font-size:48px}') && x.includes('#bk .carta-body.lay-tarjetas .it{grid-template-columns:minmax(0,1fr) 96px}'), 'fotos grandes a la derecha en las tarjetas');
+    ok(x.includes('#bk .carta-body.lay-cuadricula .media{width:100%;aspect-ratio:1;margin:2px auto 12px;border-radius:50%}'), 'fotos en círculo en la cuadrícula');
+    ok(/#bk \.carta-body \.it-d\{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2/.test(x), 'descripción en dos líneas');
+    ok(x.includes('#bk .carta-body.lay-cuadricula .items{grid-template-columns:repeat(3,minmax(0,1fr))}') && x.includes('#bk .carta-body.lay-fotos .items{grid-template-columns:repeat(2,minmax(0,1fr))}'), 'tres columnas en la cuadrícula y dos en fotos grandes');
+    const ar = TPL('tpl-zocalo'); ar.theme.carta = { shape: 'arco' };
+    ok(css(ar).includes('#bk .carta-body.lay-fotos .media{width:calc(100% - 32px);aspect-ratio:4/3;margin:16px 16px 0;border-radius:999px 999px 6px 6px}'), 'fotos grandes en arco');
+    // La cuadrícula trae la descripción oculta, y se ve cuando se pide
+    let A = mount(lay(TPL('tpl-zocalo'), 'cuadricula'), NOW);
+    ok(A.$$('.lay-cuadricula .it-d').length > 0 && /\n\.lay-cuadricula \.it-d\{display:none\}/.test(A.d.getElementById('bk-css').textContent), 'la cuadrícula trae la descripción oculta');
+    A.close();
+    const gd = lay(TPL('tpl-zocalo'), 'cuadricula'); gd.theme.carta = { desc: 'completa' };
+    ok(css(gd).includes('#bk .carta-body.lay-cuadricula .it-d{display:block}'), 'descripción completa en la cuadrícula');
+    // Precio y etiquetas legibles
+    const pz = TPL('tpl-antojo'); pz.theme.carta = { price: 'color', tags: 'contorno' };
+    x = css(pz);
+    const pcol = (x.match(/#bk \.carta-body \.price,#bk \.feat \.price\{[^}]*color:var\(--c-price,(#[0-9a-f]{6})\)/) || [])[1];
+    const tcol = (x.match(/#bk \.tag:not\(\.sold\)\{color:var\(--c-tag,(#[0-9a-f]{6})\)/) || [])[1];
+    ok(!!pcol && R(pcol, pz.theme.colors.bg) >= 4.5 && R(pcol, pz.theme.colors.surface) >= 4.5, 'precio en color que se lee sobre el fondo y las tarjetas: ' + pcol);
+    ok(!!tcol && R(tcol, pz.theme.colors.bg) >= 4.5, 'etiquetas de contorno que se leen: ' + tcol);
+    const pp = TPL('tpl-zocalo'); pp.theme.carta = { price: 'pildora', tags: 'punto', lead: 'linea' };
+    x = css(pp);
+    ok(x.includes('#bk .carta-body .price,#bk .feat .price{background:var(--c-price,var(--accent));color:var(--c-price-on,var(--on-accent));padding:3px 10px'), 'precio en píldora');
+    ok(x.includes('#bk .tag::before,#bk .tag+.tag::before{content:"";flex:none;width:7px;height:7px') && x.includes('#bk .carta-body .lead{border-bottom-style:solid;border-bottom-width:1px}'), 'etiquetas con punto y guía de línea');
+    // Categorías: títulos, íconos, foto y pestañas
+    const k = TPL('tpl-zocalo'); k.theme.carta = { cat: 'banda', catIcon: 'mostrar', catPhoto: 'fondo', tabs: 'subrayado' };
+    k.menu.categories[0].img = 'https://example.com/cat.jpg';
+    x = css(k);
+    ok(x.includes('#bk .carta-body .cat-h{background:var(--accent);color:var(--on-accent);padding:12px 16px'), 'títulos de categoría sobre una franja');
+    ok(x.includes('#bk .cat-h .ci,#bk .cat-tabs .ci{display:inline-flex}') && x.includes('#bk .carta-body .cat.has-ph>.cat-h{grid-area:1/1;align-self:end'), 'íconos siempre y foto detrás del título');
+    ok(x.includes('#bk .cat-tabs .chip.on{background:none;color:var(--ink);border-bottom-color:var(--c-sel,var(--accent))'), 'pestañas subrayadas');
+    const el = lay(TPL('tpl-zocalo'), 'lista'); el.theme.skin = 'elegante';
+    A = mount(el, NOW);
+    ok(!!A.$('.lay-lista .cat-h .ci') && !!A.$('.cat-tabs .ci') && /\[data-skin="elegante"\] \.cat-tabs \.ci\{display:none\}/.test(A.d.getElementById('bk-css').textContent), 'el ícono de la categoría está en la página aunque la estética lo oculte');
+    A.close();
+    const ln = TPL('tpl-zocalo'); ln.theme.carta = { cat: 'linea', tabs: 'ocultar', catPhoto: 'ocultar' };
+    x = css(ln);
+    ok(x.includes('#bk .carta-body .cat-h h3::after{content:"";display:block;flex:1') && x.includes('#bk .cat-tabs{display:none}') && x.includes('#bk .cat-ph{display:none}'), 'títulos con línea, sin pestañas y sin foto de categoría');
+    ok(x.includes('#bk .carta-body .cat-h{display:block;position:static;background:none;color:inherit;padding:0;border:0;'), 'el estilo de título deshace el encabezado propio de la estética');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -1119,6 +1175,21 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   eq(ST.S.cur.theme.foot.style, 'simple', 'elige el pie sencillo');
   click($('[data-a="style-reset"][data-card="pie"]'));
   ok(!ST.S.cur.theme.foot || !ST.S.cur.theme.foot.style, 'restablecer el pie');
+  // Estilo: carta
+  const cIdx = ST.S.cur.modules.findIndex(m => m.type === 'carta'), cLay0 = ST.S.cur.modules[cIdx].s.layout || 'lista';
+  ok(!!$('section[data-card="cartadis"] .dths') && !!$('section[data-card="platos"]') && !!$('section[data-card="categorias"]') && !$('section[data-card="precios"]'), 'carta: diseño, platos y categorías en el modo sencillo');
+  eq($$('section[data-card="cartadis"] .dth svg.cth').length, 5, 'los cinco diseños de la carta con miniatura');
+  click($('[data-a="set"][data-p="modules.' + cIdx + '.s.layout"][data-v="fotos"]'));
+  eq(ST.S.cur.modules[cIdx].s.layout, 'fotos', 'elige fotos grandes desde Estilo');
+  eq($('[data-a="set"][data-p="modules.' + cIdx + '.s.layout"][data-v="fotos"]').getAttribute('aria-pressed'), 'true', 'la miniatura elegida queda marcada');
+  click($('[data-a="set"][data-p="theme.carta.shape"][data-v="arco"]'));
+  eq(ST.S.cur.theme.carta.shape, 'arco', 'elige fotos en arco');
+  await sleep(220);
+  ok(!!ST.pv.frame.contentDocument.querySelector('.carta-body.lay-fotos') && /\.carta-body\.lay-fotos \.media\{width:calc\(100% - 32px\)/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa fotos grandes en arco');
+  click($('[data-a="style-reset"][data-card="platos"]'));
+  ok(!ST.S.cur.theme.carta || !ST.S.cur.theme.carta.shape, 'restablecer los platos');
+  click($('[data-a="set"][data-p="modules.' + cIdx + '.s.layout"][data-v="' + cLay0 + '"]'));
+  eq(ST.S.cur.modules[cIdx].s.layout, cLay0, 'vuelve al diseño de antes');
   // Estilo: formas avanzadas
   click($('[data-a="adv"]'));
   click($('[data-a="sub"][data-g="formas"]'));
