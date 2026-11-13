@@ -308,6 +308,8 @@ input[type="range"]{width:100%;accent-color:var(--carbon)}
 .dths .dth-a .neon{position:absolute;left:50%;top:50%;margin:0;translate:-50% -50%;font-size:15px;padding:6px 10px;border-width:2px;border-radius:10px;white-space:nowrap}
 .dths .dth-a .hero-in{position:absolute;inset:0}
 .dths .dth-a .cth{position:absolute;inset:0;width:100%;height:100%}
+.fx-rp{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:14px}
+.fx-rp .help{margin:0}
 .cth .s{fill:var(--surface)}
 .cth .p{fill:color-mix(in srgb,var(--accent) 45%,var(--bg))}
 .cth .t{fill:var(--ink);opacity:.8}

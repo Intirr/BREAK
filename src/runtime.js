@@ -697,6 +697,9 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 .intro .m:nth-child(2){animation-delay:.08s}.intro .m:nth-child(3){animation-delay:.16s}.intro .m:nth-child(4){animation-delay:.24s}
 @keyframes rise{from{transform:translateY(16px);opacity:0}}
 @keyframes pop{from{transform:translateY(22px) scale(.96);opacity:0}}
+@keyframes fadein{from{opacity:0}}
+@keyframes zoomin{from{transform:scale(.92);opacity:0}}
+@keyframes slidein{from{transform:translateX(-26px);opacity:0}}
 @keyframes wiggle{25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
 @keyframes float{50%{translate:0 -10px}}
 @keyframes flick{0%,6%,8.5%,62%,64%,100%{opacity:1}7%,63%{opacity:.5}}
@@ -1259,7 +1262,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   let cfg = normalize(initialCfg);
   let skin = 'elegante';
   let root = null, sheetEl = null, sheetC = null, toastEl = null;
-  let firstRender = true, spy = null;
+  let firstRender = true, spy = null, rvObs = null;
   const timers = [];
   const memStore = {};
   const state = freshState();
@@ -1666,7 +1669,8 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   function ribbonHTML(list) {
     const one = list.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
-    const marquee = skin === 'animado' || skin === 'nocturna';
+    const mq = String(opt('fx.marquee', ''));
+    const marquee = mq === 'quieta' ? false : (FX_MARQ[mq] ? true : skin === 'animado' || skin === 'nocturna');
     return '<div class="ribbon" aria-hidden="true"><div class="ribbon-track">' + one + (marquee ? one : '') + '</div></div>';
   }
 
@@ -2346,7 +2350,8 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     toastT = later(function () { toastEl.classList.remove('show'); }, 2200);
   }
   function celebrate() {
-    if (motion() !== 'vivo') return;
+    const cf = String(opt('fx.confetti', ''));
+    if (motion() === 'off' || cf === 'nunca' || (motion() !== 'vivo' && cf !== 'siempre')) return;
     const layer = doc.createElement('div'); layer.className = 'confetti'; layer.setAttribute('aria-hidden', 'true');
     const colors = ['var(--accent)', 'var(--accent2)', 'var(--accent3)', 'var(--ink)'];
     let h = '';
@@ -2709,8 +2714,47 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
           rule(P + ' .lead', 'display:none'); rule(P + ' .media', 'font-size:52px'); rule(P + ' .add', 'width:34px;height:34px;font-size:19px;right:8px;top:8px');
         }
       }
+    },
+    /* Movimiento (theme.fx): entrada, aparición al bajar, efecto al tocar, cinta de palabras, decoraciones y velocidad.
+       Con el movimiento en «Quieto» o con «reducir movimiento» del sistema no se escribe nada. */
+    function (rule) {
+      if (motion() === 'off') return;
+      const o = function (k) { return String(opt('fx.' + k, '')); };
+      const en = o('entry'), rv = o('reveal'), tp = o('tap'), mq = o('marquee'), dc = o('deco');
+      const f = { lenta: 1.5, rapida: 0.6 }[o('speed')] || 1, sec = function (n) { return +(n * f).toFixed(2) + 's'; };
+      const anim = function (a) { return a[0] + ' ' + sec(a[1]) + ' ' + a[2] + ' both'; };
+      // Entrada al abrir la app (la de siempre depende del movimiento: suave sube, vivo rebota)
+      if (en === 'ninguna') R2.push('#bk.intro .m{animation:none}');
+      else if (FX_KF[en] || f !== 1) {
+        const a = FX_KF[en] || (motion() === 'vivo' ? ['pop', 0.6, 'cubic-bezier(.2,1.4,.4,1)'] : ['rise', 0.8, 'cubic-bezier(.2,.7,.2,1)']);
+        R2.push('#bk.intro .m{animation:' + anim(a) + '}' + [2, 3, 4].map(function (i) { return '#bk.intro .m:nth-child(' + i + '){animation-delay:' + sec((i - 1) * 0.08) + '}'; }).join(''));
+      }
+      // Aparición al bajar (la clase .rv la pone setupReveal())
+      if (FX_KF[rv]) R2.push('#bk[data-rv] .rv:not(.rv-in){opacity:0}#bk[data-rv] .rv.rv-in:not(.rv-now){animation:' + anim(FX_KF[rv]) + ';animation-delay:var(--rvd,0s)}');
+      // Efecto al tocar
+      const TAP = '.btn,.add,.chip,.it,.feat,.cl,.promo,.navi,.bnav button', ACT = TAP.split(',').map(function (x) { return x + ':active'; }).join(',');
+      if (tp === 'ninguno') rule(ACT, 'transform:none');
+      else if (tp === 'hundir') { rule(TAP, 'transition:transform ' + sec(0.14) + ' ease,background-color .2s'); rule(ACT, 'transform:scale(.96)'); rule('.add:active', 'transform:scale(.88)'); }
+      else if (tp === 'rebote') { rule(TAP, 'transition:transform ' + sec(0.45) + ' cubic-bezier(.3,1.8,.5,1),background-color .2s'); rule(ACT, 'transform:scale(.92);transition-duration:.08s'); }
+      else if (tp === 'brillo') { rule(TAP, 'transition:box-shadow ' + sec(0.3) + ' ease,transform .15s ease,background-color .2s'); rule(ACT, 'box-shadow:0 0 0 5px color-mix(in srgb,var(--c-btn,var(--accent)) 32%,transparent)'); }
+      // Cinta de palabras de la portada
+      if (mq === 'quieta') rule('.ribbon-track', 'animation:none');
+      else if (FX_MARQ[mq]) {
+        rule('.ribbon', 'white-space:nowrap;text-align:left');
+        rule('.ribbon-track', 'display:inline-flex;flex-wrap:nowrap;gap:0;animation:marq ' + FX_MARQ[mq] + 's linear infinite');
+        rule('.ribbon-track span', 'padding:0 26px 0 0;white-space:nowrap');
+      }
+      // Decoraciones de la portada: stickers que flotan y letrero de neón que titila
+      if (dc === 'quietas') rule('.stk,.neon.on', 'animation:none');
+      else if (dc === 'animadas') {
+        rule('.stk', 'animation:float 3.2s ease-in-out infinite'); rule('.stk.s2', 'animation-delay:-1.1s'); rule('.stk.s3', 'animation-delay:-2s'); rule('.stk.s4', 'animation-delay:-.6s');
+        rule('.neon.on', 'animation:flick 6s linear infinite');
+      }
     }
   ];
+  /* Animaciones de entrada y de aparición: [keyframes, segundos, curva]. Velocidades de la cinta de palabras, en segundos por vuelta. */
+  const FX_KF = { subir: ['rise', 0.8, 'cubic-bezier(.2,.7,.2,1)'], aparecer: ['fadein', 0.9, 'ease'], zoom: ['zoomin', 0.7, 'cubic-bezier(.2,1,.3,1)'], lado: ['slidein', 0.75, 'cubic-bezier(.2,.7,.2,1)'] };
+  const FX_MARQ = { lenta: 42, normal: 24, rapida: 13 };
 
   /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
   function texCSS() {
@@ -2872,12 +2916,38 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     watchPhotos(root);
     fillTabs(); setupNavSpy();
     if (wasOpen) root.classList.remove('sheet-open');
+    const first = firstRender;
     if (firstRender) {
       firstRender = false;
       if (motion() !== 'off') { root.classList.add('intro'); later(function () { root.classList.remove('intro'); }, 1800); }
     }
     setupSpy();
+    setupReveal(first);
     if (keepScroll) { try { win.scrollTo(0, y); } catch (e) { /* jsdom */ } }
+  }
+  /* Aparición al bajar (theme.fx.reveal): las secciones y los platos aparecen cuando entran en la pantalla.
+     Al volver a pintar (por ejemplo, al editar en el estudio) lo que ya está a la vista aparece sin animación. */
+  const RV_SEL = 'main>.m:not(.m-hero):not(.m-aviso):not(.m-carta),.m-carta .sh,.m-carta .cat-ph,.m-carta .cat-h,.m-carta .it';
+  function setupReveal(first) {
+    if (rvObs) { rvObs.disconnect(); rvObs = null; }
+    const k = String(opt('fx.reveal', ''));
+    if (!FX_KF[k] || motion() === 'off' || !win.IntersectionObserver) { root.removeAttribute('data-rv'); return; }
+    root.setAttribute('data-rv', k);
+    const vh = win.innerHeight || 800;
+    rvObs = new win.IntersectionObserver(function (entries) {
+      let n = 0;
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.style.setProperty('--rvd', Math.min(n++ * 0.07, 0.35).toFixed(2) + 's');
+        en.target.classList.add('rv-in');
+        if (rvObs) rvObs.unobserve(en.target);
+      });
+    }, { rootMargin: '0px 0px -6% 0px' });
+    Array.prototype.forEach.call(root.querySelectorAll(RV_SEL), function (el) {
+      el.classList.add('rv');
+      if (!first && el.getBoundingClientRect().top < vh) { el.classList.add('rv-in', 'rv-now'); return; }
+      rvObs.observe(el);
+    });
   }
   function rerenderModule(mid) {
     const m = modById(mid), sec = root.querySelector('section[data-mid="' + mid + '"]');
@@ -3100,6 +3170,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       timers.forEach(function (t) { win.clearTimeout(t); win.clearInterval(t); });
       if (spy) spy.disconnect();
       if (navSpy) navSpy.disconnect();
+      if (rvObs) rvObs.disconnect();
       win.removeEventListener('scroll', onScrollTop);
       root.removeEventListener('click', onClick); root.removeEventListener('input', onInput); root.removeEventListener('submit', onSubmit);
       doc.removeEventListener('keydown', onKey);

@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (587 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (611 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -32,7 +32,7 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
 ### Configuración de una app
 
-`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, legal, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}, type{titleWeight,titleCase,titleSpacing,titleScale,textScale,lineHeight,priceFont}, shape{btn,btnFill,photo,chip,card,border}, nav, top{align,bg,logo,name,status}, foot{style,align,tagline,hours,social}, space{density,sep}, heads{align,orn,kicker}, carta{shape,size,pos,desc,cols,lead,price,tags,cat,catPhoto,catIcon,tabs}}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…, layout, kicker, _bg, _align, _pad}}], meta{credit,url} }`
+`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, legal, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}, type{titleWeight,titleCase,titleSpacing,titleScale,textScale,lineHeight,priceFont}, shape{btn,btnFill,photo,chip,card,border}, nav, top{align,bg,logo,name,status}, foot{style,align,tagline,hours,social}, space{density,sep}, heads{align,orn,kicker}, carta{shape,size,pos,desc,cols,lead,price,tags,cat,catPhoto,catIcon,tabs}, fx{entry,reveal,tap,speed,marquee,deco,confetti}}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…, layout, kicker, _bg, _align, _pad}}], meta{credit,url} }`
 
 El logo (`brand.logo.type`) puede ser `mono` (iniciales), `emoji`, `icon` (un ícono de `ICONS`) o `img`; `shape` es `circulo`, `cuadrado` u `horizontal` (solo imágenes: se muestra completo y reemplaza el nombre en el encabezado). El ícono de la app (`brand.appIcon`) lleva el logo, las iniciales o un ícono sobre un color de la paleta; lo dibujan `svgIcon()` e `iconBlob()` en `studio.js`.
 
@@ -87,6 +87,10 @@ Variantes (`s.layout`): Destacados `cuadricula` o `lista`, Promos `carrusel`, Re
 ### Carta
 
 `theme.carta` ajusta la carta sin tocar sus diseños (`s.layout` del módulo: lista, tarjetas, cuadrícula, fotos grandes o compacta, que en Estilo › Carta se eligen con miniaturas de `cartaThumb()`). Sus reglas van en la última función de `OPTION_RULES` y llevan `.carta-body` delante para ganarle a las formas generales. La cuadrícula trae la descripción en la página, oculta salvo que se pida (`desc`); el ícono de la categoría siempre está y la estética decide si se ve (en lista y en las pestañas de Elegante, no). Los precios «en color» o «contorno» y las etiquetas de texto usan `legible()` contra el fondo y las tarjetas. La foto de la categoría puede ir detrás del título (`catPhoto: 'fondo'`).
+
+### Movimiento
+
+`theme.motion` (`off`, `suave`, `vivo`) sigue siendo el ajuste general y `theme.fx` afina cada efecto: entrada al abrir, aparición al bajar, efecto al tocar, velocidad, cinta de palabras de la portada, stickers y neón, y confeti (`celebrate()`). Con `motion: 'off'` o con «reducir movimiento» del sistema (`motion()` devuelve `off`) la función de `OPTION_RULES` no escribe nada. La aparición al bajar la arma `setupReveal()`: marca con `.rv` las secciones y los platos, los revela con un IntersectionObserver (`.rv-in`) y, al volver a pintar, lo que ya está a la vista aparece sin animación (`.rv-now`); sin IntersectionObserver no se esconde nada. Las reglas que dependen de `#bk.intro` o `#bk[data-rv]` van en `R2`. En el estudio, «Ver el movimiento» reinicia la vista previa.
 
 ### Tipografía
 

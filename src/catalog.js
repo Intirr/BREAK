@@ -178,8 +178,19 @@ const STYLE = [
     { id: 'fotos', card: 'photos', title: 'Biblioteca de fotos', desc: 'Las fotos que subes para la portada, los platos, las categorías, la galería y el logo. Se guardan aparte, así la app no pesa.', keys: [] }
   ] },
   { id: 'movimiento', label: 'Movimiento', cards: [
-    { id: 'mov', title: 'Movimiento', fields: [
-      { k: 'motion', t: 'seg', label: 'Animaciones', opts: [['off', 'Quieto'], ['suave', 'Suave'], ['vivo', 'Vivo']], help: '«Vivo» agrega rebotes, stickers flotantes y confeti al completar sellos o acertar en la trivia.' }
+    { id: 'mov', title: 'Movimiento', after: 'fxReplay', fields: [
+      { k: 'motion', t: 'seg', label: 'Animaciones', opts: [['off', 'Quieto'], ['suave', 'Suave'], ['vivo', 'Vivo']], help: '«Vivo» agrega rebotes, stickers flotantes y confeti al completar sellos o acertar en la trivia. Si el celular pide reducir el movimiento, la app no se anima.' },
+      { k: 'fx.reveal', t: 'seg', label: 'Al bajar por la app', def: 'auto', opts: [['auto', 'Todo a la vista'], ['subir', 'Suben'], ['aparecer', 'Aparecen'], ['zoom', 'Crecen'], ['lado', 'Entran de lado']], help: 'Las secciones y los platos aparecen a medida que se baja.' }
+    ] },
+    { id: 'efectos', adv: true, title: 'Efectos', fields: [
+      { k: 'fx.entry', t: 'seg', label: 'Entrada al abrir', def: 'auto', opts: [['auto', 'Según el movimiento'], ['subir', 'Sube'], ['aparecer', 'Aparece'], ['zoom', 'Crece'], ['lado', 'Entra de lado'], ['ninguna', 'Ninguna']] },
+      { k: 'fx.tap', t: 'seg', label: 'Al tocar botones y platos', def: 'auto', opts: [['auto', 'Según la estética'], ['hundir', 'Se hunden'], ['rebote', 'Rebotan'], ['brillo', 'Brillan'], ['ninguno', 'Nada']] },
+      { k: 'fx.speed', t: 'seg', label: 'Velocidad', def: 'auto', opts: [['lenta', 'Lenta'], ['auto', 'Normal'], ['rapida', 'Rápida']], help: 'De la entrada, la aparición al bajar y el efecto al tocar.' }
+    ] },
+    { id: 'animados', adv: true, title: 'Detalles animados', fields: [
+      { k: 'fx.marquee', t: 'seg', label: 'Cinta de palabras de la portada', def: 'auto', opts: [['auto', 'Según la estética'], ['quieta', 'Quieta'], ['lenta', 'Lenta'], ['normal', 'Normal'], ['rapida', 'Rápida']] },
+      { k: 'fx.deco', t: 'seg', label: 'Stickers y letrero de neón', def: 'auto', opts: [['auto', 'Según el movimiento'], ['animadas', 'Se mueven'], ['quietas', 'Quietos']] },
+      { k: 'fx.confetti', t: 'seg', label: 'Confeti al ganar', def: 'auto', opts: [['auto', 'Con movimiento vivo'], ['siempre', 'Siempre'], ['nunca', 'Nunca']], help: 'Al completar la tarjeta de sellos o acertar en la trivia.' }
     ] }
   ] }
 ];

@@ -28,6 +28,7 @@ function mount(cfg, o) {
   const errors = [];
   w.addEventListener('error', e => errors.push(e.message));
   if (o.body) w.document.body.innerHTML = o.body;
+  if (o.setup) o.setup(w);
   w.__cfg = cfg;
   w.__opts = Object.assign({ mode: o.mode || 'app', now: o.now }, o.assetURL ? { assetURL: o.assetURL } : {});
   const rt = w.eval('(' + ctx.breakApp.toString() + ')(window, document, window.__cfg, window.__opts)');
@@ -852,6 +853,66 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(x.includes('#bk .carta-body .cat-h{display:block;position:static;background:none;color:inherit;padding:0;border:0;'), 'el estilo de título deshace el encabezado propio de la estética');
   }
 
+  /* 11r. Movimiento */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const css = (cfg, o) => { const A = mount(cfg, Object.assign({}, NOW, o)); const x = A.d.getElementById('bk-css').textContent; A.close(); return x; };
+    // IntersectionObserver de mentira: guarda lo observado para «entrar» a mano
+    const io = w => { w.__ios = []; w.IntersectionObserver = class { constructor(cb) { this.cb = cb; this.els = []; w.__ios.push(this); } observe(el) { this.els.push(el); } unobserve(el) { this.els = this.els.filter(e => e !== el); } disconnect() { this.els = []; } }; };
+    const base = css(TPL('tpl-zocalo'));
+    const z0 = TPL('tpl-zocalo'); z0.theme.fx = { entry: 'auto', reveal: 'auto', tap: 'auto', speed: 'auto', marquee: 'auto', deco: 'auto', confetti: 'auto' };
+    ok(css(z0) === base, 'movimiento en «auto»: nada cambia');
+    const zx = TPL('tpl-zocalo'); zx.theme.fx = { entry: 'x}body{', reveal: '1', tap: '<b>', speed: '9', marquee: 'loca', deco: 'si' };
+    ok(css(zx) === base, 'valores desconocidos de movimiento no escriben nada');
+    // Quieto o «reducir movimiento»: nada
+    const off = TPL('tpl-zocalo'); off.theme.motion = 'off'; const offBase = css(off);
+    off.theme.fx = { entry: 'zoom', reveal: 'subir', tap: 'rebote', marquee: 'rapida', deco: 'animadas' };
+    ok(css(off) === offBase, 'con el movimiento quieto no se escribe ninguna animación');
+    const red = TPL('tpl-zocalo'); red.theme.fx = { entry: 'zoom', reveal: 'subir', tap: 'rebote' };
+    ok(!/#bk\.intro|data-rv|transform:scale\(\.92\);transition-duration/.test(css(red, { reduce: true })), '«reducir movimiento» del celular siempre gana');
+    // Entrada, toque y velocidad
+    const a = TPL('tpl-zocalo'); a.theme.fx = { entry: 'aparecer', tap: 'rebote', speed: 'lenta' };
+    let x = css(a);
+    ok(x.includes('#bk.intro .m{animation:fadein 1.35s ease both}#bk.intro .m:nth-child(2){animation-delay:0.12s}'), 'entrada que aparece, más lenta y escalonada');
+    ok(x.includes('#bk .btn:active,#bk .add:active,#bk .chip:active,#bk .it:active') && /transform:scale\(\.92\);transition-duration:\.08s/.test(x), 'efecto de rebote al tocar');
+    const sp = TPL('tpl-zocalo'); sp.theme.fx = { speed: 'rapida' };
+    ok(css(sp).includes('#bk.intro .m{animation:rise 0.48s cubic-bezier(.2,.7,.2,1) both}'), 'la velocidad también cambia la entrada de siempre');
+    // Aparición al bajar
+    const r = TPL('tpl-zocalo'); r.theme.fx = { reveal: 'zoom' };
+    let A = mount(r, Object.assign({ setup: io }, NOW));
+    ok(A.$('.app').getAttribute('data-rv') === 'zoom' && A.$$('.rv').length > 5 && !A.$('.m-hero.rv') && !A.$('section.m-carta.rv') && !!A.$('.m-carta .it.rv'), 'las secciones y los platos esperan a entrar en pantalla');
+    ok(/#bk\[data-rv\] \.rv:not\(\.rv-in\)\{opacity:0\}#bk\[data-rv\] \.rv\.rv-in:not\(\.rv-now\)\{animation:zoomin 0\.7s/.test(A.d.getElementById('bk-css').textContent), 'reglas de aparición');
+    const obs = A.w.__ios.find(o => o.els.some(e => e.classList.contains('rv')));
+    const two = obs.els.slice(0, 2);
+    obs.cb(two.map(el => ({ target: el, isIntersecting: true })));
+    ok(two.every(el => el.classList.contains('rv-in')) && two[1].style.getPropertyValue('--rvd') === '0.07s' && !obs.els.includes(two[0]), 'al entrar aparecen escalonadas y se dejan de observar');
+    A.rt.update(r);
+    ok(A.$$('.rv').every(el => el.classList.contains('rv-in') && el.classList.contains('rv-now')), 'al volver a pintar, lo que está a la vista aparece sin animación');
+    A.close();
+    A = mount(r, NOW); ok(!A.$('.app').hasAttribute('data-rv') && !A.$('.rv'), 'sin IntersectionObserver todo se ve de una vez'); A.close();
+    // Cinta de palabras y decoraciones
+    const ne = TPL('tpl-neblina'); ne.theme.fx = { marquee: 'lenta' };
+    const words = ne.modules.find(m => m.type === 'hero').s.ribbon.split(',').length;
+    A = mount(ne, NOW);
+    ok(A.$$('.ribbon-track span').length === words * 2 && /#bk \.ribbon-track\{display:inline-flex;flex-wrap:nowrap;gap:0;animation:marq 42s linear infinite\}/.test(A.d.getElementById('bk-css').textContent), 'la cinta se mueve en cualquier estética');
+    A.close();
+    const an = TPL('tpl-antojo'); an.theme.fx = { marquee: 'quieta', deco: 'quietas' };
+    const wa = an.modules.find(m => m.type === 'hero').s.ribbon.split(',').length;
+    A = mount(an, NOW);
+    ok(A.$$('.ribbon-track span').length === wa && A.d.getElementById('bk-css').textContent.includes('#bk .stk,#bk .neon.on{animation:none}'), 'cinta quieta y stickers quietos en la estética animada');
+    A.close();
+    const de = TPL('tpl-zocalo'); de.theme.fx = { deco: 'animadas' };
+    ok(css(de).includes('#bk .stk{animation:float 3.2s ease-in-out infinite}'), 'stickers que flotan con movimiento suave');
+    // Confeti
+    const tz = TPL('tpl-zocalo'), tm = tz.modules.find(m => m.type === 'trivia'), q0 = tm.s.questions.find(q => q && q.q);
+    const hit = cfg => { const B = mount(cfg, NOW); B.click(B.$('section[data-mid="' + tm.id + '"] [data-act="tq"][data-a="' + q0.correct + '"]')); const has = !!B.$('.confetti'); B.close(); return has; };
+    ok(!hit(tz), 'con movimiento suave no hay confeti');
+    tz.theme.fx = { confetti: 'siempre' };
+    ok(hit(tz), 'confeti siempre, aunque el movimiento sea suave');
+    tz.theme.motion = 'vivo'; tz.theme.fx = { confetti: 'nunca' };
+    ok(!hit(tz), 'sin confeti aunque el movimiento sea vivo');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -1190,6 +1251,22 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(!ST.S.cur.theme.carta || !ST.S.cur.theme.carta.shape, 'restablecer los platos');
   click($('[data-a="set"][data-p="modules.' + cIdx + '.s.layout"][data-v="' + cLay0 + '"]'));
   eq(ST.S.cur.modules[cIdx].s.layout, cLay0, 'vuelve al diseño de antes');
+  // Estilo: movimiento
+  ok(!!$('section[data-card="mov"] [data-p="theme.fx.reveal"]') && !!$('section[data-card="mov"] [data-a="fx-replay"]') && !$('section[data-card="efectos"]'), 'movimiento: aparición al bajar y «Ver el movimiento» en el modo sencillo');
+  click($('[data-a="set"][data-p="theme.fx.reveal"][data-v="subir"]'));
+  eq(ST.S.cur.theme.fx.reveal, 'subir', 'elige que las secciones suban al bajar');
+  click($('[data-a="adv"]'));
+  click($('[data-a="sub"][data-g="movimiento"]'));
+  ok(!!$('section[data-card="efectos"]') && !!$('section[data-card="animados"]'), 'movimiento avanzado: efectos y detalles animados');
+  click($('[data-a="set"][data-p="theme.fx.entry"][data-v="zoom"]'));
+  await sleep(220);
+  ok(/#bk\.intro \.m\{animation:zoomin/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa la entrada que crece');
+  click($('[data-a="fx-replay"]'));
+  ok(ST.pv.frame.contentDocument.querySelector('.app').classList.contains('intro'), '«Ver el movimiento» abre la app otra vez con su entrada');
+  click($('[data-a="style-reset"][data-card="efectos"]'));
+  click($('[data-a="style-reset"][data-card="mov"]'));
+  ok(!ST.S.cur.theme.fx || (!ST.S.cur.theme.fx.entry && !ST.S.cur.theme.fx.reveal), 'restablecer el movimiento');
+  click($('[data-a="adv"]'));
   // Estilo: formas avanzadas
   click($('[data-a="adv"]'));
   click($('[data-a="sub"][data-g="formas"]'));

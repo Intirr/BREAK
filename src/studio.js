@@ -944,6 +944,9 @@
         return '<span>' + (META.glyph(mode, x[0], '', '') || '<em>' + x[1].charAt(0) + '</em>') + '</span>';
       }).join('') + '</div>';
     },
+    fxReplay: function () {
+      return '<div class="fx-rp"><button type="button" class="btn sm" data-a="fx-replay">Ver el movimiento</button><span class="help">Abre la app otra vez en la vista previa, desde arriba.</span></div>';
+    },
     cartaLayout: function () {
       const i = S.cur.modules.findIndex(function (m) { return m.type === 'carta'; });
       if (i < 0) return '<p class="help">Agrega el módulo Carta (en Módulos) para elegir su diseño.</p>';
@@ -964,7 +967,7 @@
     return '<section class="card" data-card="' + attr(c.id) + '"><div class="card-h"><div class="card-t"><h2>' + esc(c.title) + '</h2>' +
       (cardKeys(c).length ? '<button type="button" class="btn sm" data-a="style-reset" data-card="' + attr(c.id) + '"' + (cardChanged(c) ? '' : ' hidden') + '>Restablecer</button>' : '') + '</div>' +
       (desc ? '<p>' + esc(desc) + '</p>' : '') + '</div>' +
-      (c.card ? STYLE_CARDS[c.card](c) : '') + fields + '</section>';
+      (c.card ? STYLE_CARDS[c.card](c) : '') + fields + (c.after ? STYLE_CARDS[c.after](c) : '') + '</section>';
   }
   const PANELS = {
     vista: function () { return ''; },
@@ -1319,6 +1322,12 @@
   /* ---------- Acciones ---------- */
   const ACTIONS = {
     tab: function (d) { setTab(d.t); },
+    'fx-replay': function () {
+      if (!DESKTOP.matches) setTab('vista');
+      if (!PV.ready || !S.cur) return;
+      clearTimeout(PV.timer);
+      try { PV.rt.reset(clone(S.cur)); PV.cfgId = S.cur.id; if (S.pvLang === 'en') PV.rt.setLang('en'); } catch (e) { toast('Error en la vista previa: ' + e.message); }
+    },
     drawer: function () { openDrawer(); },
     'sheet-close': function () { closeSheet(); },
     'open-tpl': function (d) { closeSheet(); openTemplate(d.id); },
