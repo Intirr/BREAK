@@ -98,6 +98,17 @@ const SKINS = {
       { name: 'Pozo', colors: { bg: '#132624', surface: '#1C3330', ink: '#E8F1EE', muted: '#A3B9B4', accent: '#7FD1C3', accent2: '#E2C08F', accent3: '#E59A80' } },
       { name: 'Noche termal', colors: { bg: '#121C26', surface: '#1B2834', ink: '#E7EEF3', muted: '#A0B1BF', accent: '#8CC9E8', accent2: '#D9C49A', accent3: '#A7D7B5' } }
     ]
+  },
+  retro: {
+    label: 'Retro', art: 'Malteadas', desc: 'Fuente de soda de los sesenta: crema, rojo cereza, menta y mostaza, letra cursiva, cupones y cuadros. Para heladerías, malteadas y comidas rápidas de siempre.', layout: 'lista',
+    defaults: { colors: { bg: '#FBF1E1', surface: '#FFFAF2', ink: '#2A1C19', muted: '#6B5750', accent: '#BE1E30', accent2: '#1F7565', accent3: '#E8A92E' }, fonts: { display: 'Pacifico', body: 'Rubik' }, radius: 14, motion: 'vivo', texture: 'none', icons: 'emoji' },
+    palettes: [
+      { name: 'Malteada', colors: { bg: '#FBF1E1', surface: '#FFFAF2', ink: '#2A1C19', muted: '#6B5750', accent: '#BE1E30', accent2: '#1F7565', accent3: '#E8A92E' } },
+      { name: 'Menta', colors: { bg: '#E2F1EA', surface: '#F6FBF8', ink: '#1E2A27', muted: '#51605C', accent: '#BD2536', accent2: '#1C7465', accent3: '#F0B63C' } },
+      { name: 'Mostaza', colors: { bg: '#F7E9C4', surface: '#FFF8E6', ink: '#2B2116', muted: '#675740', accent: '#AE232C', accent2: '#2A6688', accent3: '#E07A2E' } },
+      { name: 'Azul diner', colors: { bg: '#E5EDF5', surface: '#F8FBFE', ink: '#18222E', muted: '#4E5C6B', accent: '#BD2338', accent2: '#1D669C', accent3: '#F2B632' } },
+      { name: 'Rocola', colors: { bg: '#1F1517', surface: '#2C1E21', ink: '#FBEFE3', muted: '#C7B2A8', accent: '#FF6272', accent2: '#6FD6BE', accent3: '#F5C14B' } }
+    ]
   }
 };
 
@@ -247,7 +258,7 @@ const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3'
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
-  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
+  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',

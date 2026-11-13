@@ -3,7 +3,7 @@
 <meta name="description" content="Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&family=Pacifico&display=swap">
 <style>
 /* Layout: two-pane workbench — order-ticket editor on the left, live phone on the right; tabs and one column on phones. */
 :root{
@@ -209,6 +209,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-rustico::after{content:"";position:absolute;left:calc(50% - 40px);width:80px;bottom:16px;height:10px;background:#F2862E;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 12'%3E%3Cpath d='M3 10.5L8 1.5M16 10.5L21 1.5M29 10.5L34 1.5M42 10.5L47 1.5M55 10.5L60 1.5M68 10.5L73 1.5M81 10.5L86 1.5' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/80px 10px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 12'%3E%3Cpath d='M3 10.5L8 1.5M16 10.5L21 1.5M29 10.5L34 1.5M42 10.5L47 1.5M55 10.5L60 1.5M68 10.5L73 1.5M81 10.5L86 1.5' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/80px 10px no-repeat}
 .sk-termal{background:linear-gradient(180deg,#F3F8F6,#DCEAE6);color:#1C3331;font:italic 500 40px/1 "Cormorant Garamond",Georgia,serif;padding-bottom:12px}
 .sk-termal::after{content:"";position:absolute;left:calc(50% - 28px);width:56px;bottom:16px;height:14px;background:#1F7168;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 14'%3E%3Cpath d='M2 5q6.5-4 13 0t13 0 13 0 13 0M2 11q6.5-4 13 0t13 0 13 0 13 0' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/56px 14px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 14'%3E%3Cpath d='M2 5q6.5-4 13 0t13 0 13 0 13 0M2 11q6.5-4 13 0t13 0 13 0 13 0' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/56px 14px no-repeat}
+.sk-retro{background:#FBF1E1;color:#BE1E30;font:400 34px/1.2 Pacifico,"Brush Script MT",cursive;text-shadow:2px 2px 0 #E8A92E;padding-bottom:16px}
+.sk-retro::after{content:"";position:absolute;left:16px;right:16px;bottom:12px;height:10px;border-top:3px solid #BE1E30;background:repeating-conic-gradient(#2A1C19 0 25%,#FFFAF2 0 50%) 0 0/10px 10px}
 .sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}
@@ -740,6 +742,7 @@ const ART_CSS = [
 [data-motion="vivo"] .stk.s2{animation-delay:-1.1s}
 [data-motion="vivo"] .stk.s3{animation-delay:-2s}
 [data-motion="vivo"] .stk.s4{animation-delay:-.6s}
+.damero{height:30px;margin-top:34px;border-top:6px solid var(--accent);background:repeating-conic-gradient(var(--ink) 0 25%,var(--surface) 0 50%) 0 0/30px 30px}
 .hills{display:block;width:100%;height:72px;margin-top:30px}
 .hills .hl1{fill:color-mix(in srgb,var(--accent3) 50%,var(--bg))}
 .hills .hl2{fill:color-mix(in srgb,var(--accent) 62%,var(--bg))}
@@ -1860,6 +1863,75 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="termal"] .foot.fa-izq::before{margin-left:0}
 [data-skin="termal"] .foot-n{font-weight:500;font-size:34px}
 [data-skin="termal"] .navi{font-weight:500;font-size:28px;letter-spacing:-.005em}
+`,
+    retro: `
+[data-skin="retro"]{--gw:.51}
+[data-skin="retro"] .top{background:var(--c-top,var(--accent));color:var(--c-top-on,var(--on-accent));border-bottom:4px solid var(--accent3)}
+[data-skin="retro"] .brand-mini{font-size:24px;line-height:1.3}
+[data-skin="retro"] .top .logo.emo{background:var(--surface)}
+[data-skin="retro"] .status,[data-skin="retro"] .lang{background:var(--surface);color:var(--ink);box-shadow:0 2px 0 color-mix(in srgb,var(--ink) 25%,transparent)}
+[data-skin="retro"] .lang button.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent))}
+[data-skin="retro"] .m-hero{padding-block:34px 0}
+[data-skin="retro"] .hero-k{color:var(--c-kicker,var(--accent2));letter-spacing:.2em;font-weight:700}
+[data-skin="retro"] .hero-t{font-size:min(calc(clamp(56px,16.5vw,98px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:1.12;letter-spacing:0;padding-bottom:.06em;color:var(--c-title,var(--accent));text-shadow:3px 3px 0 var(--accent3)}
+[data-skin="retro"] .hero-s{font-size:18px;color:color-mix(in srgb,var(--ink) 80%,var(--bg))}
+[data-skin="retro"] .btn{border-radius:999px;border-width:2px;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.06em}
+[data-skin="retro"] .btn.sm{font-size:13px}
+[data-skin="retro"] .btn.pri{box-shadow:0 4px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 55%,var(--ink))}
+[data-skin="retro"] .btn.pri:active{box-shadow:0 1px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 55%,var(--ink))}
+[data-skin="retro"] .btn.ghost{border-color:var(--ink);background:var(--surface)}
+[data-skin="retro"] .btn.text{text-transform:none;letter-spacing:0}
+[data-skin="retro"] .ribbon{margin-top:30px;padding-block:11px;background:var(--accent3);color:var(--on-accent3);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.12em}
+[data-skin="retro"] .ribbon-track span::after{content:"★";margin-left:26px;color:var(--accent)}
+[data-skin="retro"][data-motion="vivo"] .ribbon-track,[data-skin="retro"][data-motion="suave"] .ribbon-track{animation:marq 24s linear infinite}
+[data-skin="retro"] .sh-k{color:var(--c-kicker,var(--accent2));letter-spacing:.2em;font-weight:700}
+[data-skin="retro"] .sh-t{font-size:calc(clamp(38px,10.5vw,52px) * var(--ts,1));line-height:1.15;color:var(--c-title,var(--ink))}
+[data-skin="retro"] .sh .orn{display:block;width:84px;height:7px;margin-top:10px;border-radius:4px;background:linear-gradient(90deg,var(--accent) 0 33.3%,var(--accent3) 0 66.6%,var(--accent2) 0)}
+[data-skin="retro"] .card,[data-skin="retro"] .svc,[data-skin="retro"] .fq,[data-skin="retro"] .lay-tarjetas .it,[data-skin="retro"] .lay-cuadricula .it,[data-skin="retro"] .lay-fotos .it,[data-skin="retro"] .feat,[data-skin="retro"] .quote,[data-skin="retro"] .cl,[data-skin="retro"] .wres{background:var(--surface);border:1.5px solid color-mix(in srgb,var(--ink) 16%,transparent);box-shadow:0 3px 0 color-mix(in srgb,var(--ink) 10%,transparent)}
+[data-skin="retro"] .chip{border:2px solid color-mix(in srgb,var(--ink) 75%,transparent);background:var(--surface);font-weight:700}
+[data-skin="retro"] .chip.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent));border-color:var(--c-sel,var(--accent))}
+[data-skin="retro"] .cat-tabs{background:color-mix(in srgb,var(--bg) 94%,transparent);border-bottom:2px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+[data-skin="retro"] .cat-h h3{font-size:32px;line-height:1.25;color:var(--c-title,var(--accent))}
+[data-skin="retro"] .cat-h h3::after{content:"";flex:1;min-width:24px;height:10px;background:repeating-conic-gradient(var(--ink) 0 25%,transparent 0 50%) 0 0/10px 10px;opacity:.8}
+[data-skin="retro"] .it h4{font-weight:700}
+[data-skin="retro"] .lay-lista .it,[data-skin="retro"] .lay-compacta .it{border-bottom:1.5px dashed color-mix(in srgb,var(--ink) 18%,transparent)}
+[data-skin="retro"] .lead{border-bottom:2px dotted color-mix(in srgb,var(--ink) 35%,transparent)}
+[data-skin="retro"] .it .price,[data-skin="retro"] .feat .price,[data-skin="retro"] .promo .price,[data-skin="retro"] .price.big,[data-skin="retro"] .wres .price{display:inline-block;color:var(--c-price,var(--accent));font-weight:700;font-size:15px;line-height:1.2;padding:2px 8px;border:2px solid currentColor;border-radius:8px;box-shadow:inset 0 0 0 1.5px var(--surface),inset 0 0 0 3px color-mix(in srgb,currentColor 35%,transparent)}
+[data-skin="retro"] .price.big{font-size:20px;justify-self:start;width:fit-content}
+[data-skin="retro"] .promo.today .price{color:inherit;box-shadow:none}
+[data-skin="retro"] .lines .price{color:var(--c-price,var(--accent))}
+[data-skin="retro"] .tag{background:color-mix(in srgb,var(--c-tag,var(--accent2)) 16%,transparent);color:var(--ink);font-weight:700;letter-spacing:.06em}
+[data-skin="retro"] .add{box-shadow:0 3px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 55%,var(--ink))}
+[data-skin="retro"] .add .q{background:var(--accent3);color:var(--on-accent3)}
+[data-skin="retro"] .media{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+[data-skin="retro"] .media.m1{background:color-mix(in srgb,var(--accent2) 16%,var(--surface))}
+[data-skin="retro"] .media.m2{background:color-mix(in srgb,var(--accent3) 26%,var(--surface))}
+[data-skin="retro"] .promo{background:var(--surface);border:2px dashed color-mix(in srgb,var(--ink) 40%,transparent);border-radius:12px;padding-inline:26px;-webkit-mask:radial-gradient(circle at 0 50%,transparent 10px,black 10.5px) 0 0/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent 10px,black 10.5px) 100% 0/51% 100% no-repeat;mask:radial-gradient(circle at 0 50%,transparent 10px,black 10.5px) 0 0/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent 10px,black 10.5px) 100% 0/51% 100% no-repeat}
+[data-skin="retro"] .promo.today{background:var(--accent);color:var(--on-accent);border-color:color-mix(in srgb,var(--on-accent) 55%,transparent)}
+[data-skin="retro"] .promo-d,[data-skin="retro"] .ev-w{color:var(--accent2)!important;letter-spacing:.14em}
+[data-skin="retro"] .badge{background:var(--accent3);color:var(--on-accent3);rotate:6deg;box-shadow:0 2px 0 color-mix(in srgb,var(--ink) 30%,transparent)}
+[data-skin="retro"] .md-price{font-size:40px;line-height:1.2;color:var(--c-price,var(--accent));text-shadow:2px 2px 0 var(--accent3)}
+[data-skin="retro"] .stamp{border:2px dashed color-mix(in srgb,var(--ink) 35%,transparent);background:var(--surface)}
+[data-skin="retro"] .stamp.on{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+[data-skin="retro"] .hrow,[data-skin="retro"] .g{border-bottom:1.5px dashed color-mix(in srgb,var(--ink) 16%,transparent)}
+[data-skin="retro"] .hrow.today dt,[data-skin="retro"] .hrow.today dd{color:var(--accent)}
+[data-skin="retro"] .g dt{color:var(--accent)}
+[data-skin="retro"] .sig{font-family:var(--fd);font-style:normal;font-size:28px;color:var(--accent)}
+[data-skin="retro"] .quote blockquote{font-size:16px}
+[data-skin="retro"] .qbig blockquote{font-family:var(--fb);font-weight:500;font-size:20px;line-height:1.4}
+[data-skin="retro"] .qbig blockquote::before{font-family:var(--fd);color:var(--accent)}
+[data-skin="retro"] .svc-i{background:color-mix(in srgb,var(--accent2) 18%,transparent)}
+[data-skin="retro"] .wheel{box-shadow:0 0 0 6px var(--surface),0 0 0 10px var(--accent),0 7px 0 10px color-mix(in srgb,var(--accent) 55%,var(--ink))}
+[data-skin="retro"] .fab{box-shadow:0 4px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 55%,var(--ink)),0 14px 28px -12px color-mix(in srgb,var(--ink) 50%,transparent)}
+[data-skin="retro"] .fab-n{background:var(--accent3);color:var(--on-accent3)}
+[data-skin="retro"] .sheet{border-top:5px solid var(--accent)}
+[data-skin="retro"] .inp,[data-skin="retro"] .search input,[data-skin="retro"] .stepper,[data-skin="retro"] .tq-o{border:2px solid color-mix(in srgb,var(--ink) 22%,transparent);border-radius:12px}
+[data-skin="retro"] .seg button.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent))}
+[data-skin="retro"] .keypad button{border-radius:999px;background:var(--surface);box-shadow:0 3px 0 color-mix(in srgb,var(--ink) 15%,transparent)}
+[data-skin="retro"] .foot::before{content:"";display:block;width:132px;height:16px;margin:0 auto 24px;border-radius:2px;background:repeating-conic-gradient(var(--ink) 0 25%,transparent 0 50%) 0 0/16px 16px}
+[data-skin="retro"] .foot.fa-izq::before{margin-left:0}
+[data-skin="retro"] .foot-n{font-size:38px;line-height:1.3;color:var(--c-foot-on,var(--accent))}
+[data-skin="retro"] .navi{font-size:28px;line-height:1.35}
 `
   };
 
@@ -1992,15 +2064,16 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' } };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' } };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
-  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas'];
+  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero'];
   const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG };
   /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
   function decoPreview(k) {
     if (k === 'stickers') return '<div class="hero-in">' + ['☕', '🧁', '🍓', '🥐'].map(function (e, i) { return '<span class="stk s' + (i + 1) + '">' + e + '</span>'; }).join('') + '</div>';
     if (k === 'fachada') return facadeSVG('') + '<div class="zocalo"></div>';
     if (k === 'lomas') return hillsSVG();
+    if (k === 'damero') return '<div class="damero"></div>';
     if (k === 'neon') return '<p class="neon on">Abierto</p>';
     return ART[k] ? ART[k]() : '';
   }
@@ -2475,7 +2548,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   function ribbonHTML(list) {
     const one = list.map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('');
     const mq = String(opt('fx.marquee', ''));
-    const marquee = mq === 'quieta' ? false : (FX_MARQ[mq] ? true : skin === 'animado' || skin === 'nocturna');
+    const marquee = mq === 'quieta' ? false : (FX_MARQ[mq] ? true : skin === 'animado' || skin === 'nocturna' || skin === 'retro');
     return '<div class="ribbon" aria-hidden="true"><div class="ribbon-track">' + one + (marquee ? one : '') + '</div></div>';
   }
 
@@ -2536,6 +2609,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       else if (dk === 'fachada') { if (v === 'texto') deco += facadeSVG(ui('facade')); band = '<div class="zocalo" aria-hidden="true"></div>'; }
       else if (dk === 'neon') { if (st) deco += '<p class="neon ' + (st.open ? 'on' : 'off') + '" aria-hidden="true">' + esc(st.open ? ui('open') : ui('closed')) + '</p>'; }
       else if (dk === 'lomas') band = hillsSVG();
+      else if (dk === 'damero') band = '<div class="damero" aria-hidden="true"></div>';
       else if (dk === 'termales' || dk === 'willys') { if (v === 'texto') deco += ART[dk](); }
       else if (dk) band = ART[dk]();
       const needPh = PREVIEW && !img && (variant === 'foto' || variant === 'arriba' || variant === 'tarjeta') ? '<div class="wrap"><p class="pv-empty">Este diseño de portada necesita una foto. Súbela en «Foto de portada».</p></div>' : '';
@@ -4946,6 +5020,85 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 11. FUENTE DE SODA · RETRO ---------- */
+  {
+    v: 1, id: 'tpl-polar', template: true,
+    brand: {
+      name: 'Fuente de Soda Polar', tagline: 'Helados, malteadas, perros y hamburguesas desde 1968', kind: 'Fuente de soda',
+      logo: { type: 'emoji', value: '🍦' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Carrera 14 # 12-30', addressNote: 'Media cuadra arriba del parque principal, la del letrero rojo.',
+      mapsQuery: 'Parque principal, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: null, 2: ['11:00', '21:00'], 3: ['11:00', '21:00'], 4: ['11:00', '21:00'], 5: ['11:00', '22:00'], 6: ['11:00', '22:00'], 0: ['11:00', '21:00'] })
+    },
+    i18n: { bilingual: false, usted: false },
+    theme: {
+      skin: 'retro',
+      colors: { bg: '#FBF1E1', surface: '#FFFAF2', ink: '#2A1C19', muted: '#6B5750', accent: '#BE1E30', accent2: '#1F7565', accent3: '#E8A92E' },
+      fonts: { display: 'Pacifico', body: 'Rubik' }, radius: 14, motion: 'vivo', texture: 'none', icons: 'emoji',
+      fx: { reveal: 'zoom' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'helados', name: 'Helados', icon: '🍦', note: 'Helado de la casa, hecho aquí desde 1968', items: [
+          IT('copa-polar', 'Copa Polar', 'Tres bolas, crema chantilly, salsa de chocolate, cereza y barquillo.', 14900, '🍨', ['popular']),
+          IT('banana-split', 'Banana split', 'Banano, tres bolas, salsas de fresa y chocolate, y maní.', 16900, '🍌', ['popular']),
+          IT('cono', 'Cono de una bola', 'Vainilla, chocolate, fresa, mora o ron con pasas.', 4900, '🍦'),
+          IT('copa-brownie', 'Copa de brownie', 'Brownie tibio con helado de vainilla y arequipe.', 15900, '🍫', ['nuevo']),
+          IT('salpicon', 'Salpicón con helado', 'Frutas picadas en jugo de sandía con una bola de vainilla.', 9900, '🍓', ['local'])
+        ] },
+        { id: 'malteadas', name: 'Malteadas y sodas', icon: '🥤', note: 'En vaso de vidrio, con crema y cereza', items: [
+          IT('malteada-vainilla', 'Malteada de vainilla', 'La original de la casa.', 11900, '🥤'),
+          IT('malteada-chocolate', 'Malteada de chocolate', 'Espesa, con salsa de chocolate en el vaso.', 11900, '🥤', ['popular']),
+          IT('malteada-fresa', 'Malteada de fresa', 'Con fresas de la región.', 11900, '🍓', ['local']),
+          IT('malteada-arequipe', 'Malteada de arequipe', 'Con galleta triturada.', 12900, '🥤'),
+          IT('soda-italiana', 'Soda italiana', 'Frutos rojos, soda y un toque de crema.', 8900, '🍹', ['nuevo']),
+          IT('limonada-coco', 'Limonada de coco', 'Cremosa y bien fría.', 9900, '🥥', ['vegetariano'])
+        ] },
+        { id: 'perros', name: 'Perros calientes', icon: '🌭', note: 'Pan blandito y salsas de la casa', items: [
+          IT('perro-sencillo', 'Perro sencillo', 'Salchicha, salsas y papita triturada.', 9900, '🌭'),
+          IT('perro-polar', 'Perro Polar', 'Salchicha americana, queso derretido, tocineta y cebolla caramelizada.', 14900, '🌭', ['popular']),
+          IT('perro-ranchero', 'Perro ranchero', 'Con chorizo santarrosano, maíz tierno y salsa de piña.', 15900, '🌭', ['local'])
+        ] },
+        { id: 'hamburguesas', name: 'Hamburguesas', icon: '🍔', note: 'Con papas a la francesa', items: [
+          IT('clasica', 'Hamburguesa clásica', 'Carne de res, queso, lechuga, tomate y salsas.', 16900, '🍔'),
+          IT('doble', 'Doble queso', 'Dos carnes y doble queso cheddar.', 21900, '🍔', ['popular']),
+          IT('polar', 'Hamburguesa Polar', 'Carne, tocineta, huevo frito y tajadas de maduro.', 23900, '🍳', ['nuevo']),
+          IT('frijol', 'Hamburguesa de fríjol', 'Medallón de fríjol y maíz, aguacate y queso.', 17900, '🥑', ['vegetariano'])
+        ] },
+        { id: 'acompanar', name: 'Para acompañar', icon: '🍟', note: '', items: [
+          IT('papas', 'Papas a la francesa', 'Porción grande.', 6900, '🍟'),
+          IT('papas-queso', 'Papas con queso y tocineta', 'Para compartir.', 10900, '🍟', ['compartir']),
+          IT('aros', 'Aros de cebolla', 'Apanados y crocantes.', 8900, '🧅', ['vegetariano'])
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Desde 1968 · frente al parque', title: '', subtitle: 'Malteadas espesas, copas de helado y perros calientes como los de antes.', cta1: 'carta', cta2: 'pedido', showStatus: true, ribbon: 'Malteadas, Copas de helado, Perros calientes, Hamburguesas, Rocola' } },
+      { id: 'top', type: 'destacados', on: true, s: { title: 'Los clásicos', tag: 'popular', max: 6 } },
+      { id: 'cupones', type: 'promos', on: true, s: { title: 'Cupones de la semana', highlightToday: true, _bg: 'tinte', items: [
+        { days: [2], title: '2x1 en malteadas', desc: 'Todo el martes, en cualquier sabor.', price: 11900 },
+        { days: [3, 4], title: 'Combo Polar', desc: 'Perro Polar, papas a la francesa y gaseosa.', price: 21900 },
+        { days: [5, 6, 0], title: 'Copa familiar', desc: 'Seis bolas, tres salsas y barquillos para compartir.', price: 29900 }
+      ] } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'ruleta', type: 'ruleta', on: true, s: { title: '¿Qué copa te toca?', text: 'Gira la ruleta y que decida la suerte.', mode: 'carta', category: 'helados', options: [], oncePerDay: false } },
+      { id: 'sellos', type: 'sellos', on: true, s: { title: 'Tarjeta Polar', goal: 8, reward: 'La novena malteada va por la casa', icon: '🥤', pin: '1968', note: 'Un sello por cada malteada o copa de helado.' } },
+      { id: 'pedido', type: 'pedido', on: true, s: { title: 'Pide y te lo llevamos', showSection: true, modes: { mesa: true, llevar: true, domicilio: true }, deliveryFee: 3000, minOrder: 15000, deliveryNote: 'Domicilios en el casco urbano hasta las 8:30 p. m.', payments: 'Efectivo, Nequi, Daviplata', intro: '' } },
+      { id: 'historia', type: 'historia', on: true, s: { title: 'Nuestra historia', kicker: '', year: '1968', _bg: 'invertido',
+        text: 'Don Abelardo trajo al pueblo la primera máquina de malteadas y la puso detrás de un mostrador de fórmica roja. La rocola todavía funciona con monedas de las viejas.\n\nHoy atiende su nieta, con las mismas copas de vidrio y la receta del helado de la casa.',
+        signature: 'La familia Polar' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Qué tal la malteada?', text: 'Cuéntanos en Google o por WhatsApp. Leemos todo.', rating: '', layout: 'destacada', quotes: [
+        { text: 'La malteada de chocolate sabe igual que cuando venía con mi abuelo.', author: 'Paula G.' },
+        { text: 'El perro Polar y la rocola sonando: plan perfecto de domingo.', author: 'Julián R.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 11:00 a. m. a 9:00 p. m.' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
@@ -5093,6 +5246,17 @@ const SKINS = {
       { name: 'Arena', colors: { bg: '#F3EDE4', surface: '#FBF8F3', ink: '#2E2A24', muted: '#6B6256', accent: '#2A716B', accent2: '#9A5A37', accent3: '#62724A' } },
       { name: 'Pozo', colors: { bg: '#132624', surface: '#1C3330', ink: '#E8F1EE', muted: '#A3B9B4', accent: '#7FD1C3', accent2: '#E2C08F', accent3: '#E59A80' } },
       { name: 'Noche termal', colors: { bg: '#121C26', surface: '#1B2834', ink: '#E7EEF3', muted: '#A0B1BF', accent: '#8CC9E8', accent2: '#D9C49A', accent3: '#A7D7B5' } }
+    ]
+  },
+  retro: {
+    label: 'Retro', art: 'Malteadas', desc: 'Fuente de soda de los sesenta: crema, rojo cereza, menta y mostaza, letra cursiva, cupones y cuadros. Para heladerías, malteadas y comidas rápidas de siempre.', layout: 'lista',
+    defaults: { colors: { bg: '#FBF1E1', surface: '#FFFAF2', ink: '#2A1C19', muted: '#6B5750', accent: '#BE1E30', accent2: '#1F7565', accent3: '#E8A92E' }, fonts: { display: 'Pacifico', body: 'Rubik' }, radius: 14, motion: 'vivo', texture: 'none', icons: 'emoji' },
+    palettes: [
+      { name: 'Malteada', colors: { bg: '#FBF1E1', surface: '#FFFAF2', ink: '#2A1C19', muted: '#6B5750', accent: '#BE1E30', accent2: '#1F7565', accent3: '#E8A92E' } },
+      { name: 'Menta', colors: { bg: '#E2F1EA', surface: '#F6FBF8', ink: '#1E2A27', muted: '#51605C', accent: '#BD2536', accent2: '#1C7465', accent3: '#F0B63C' } },
+      { name: 'Mostaza', colors: { bg: '#F7E9C4', surface: '#FFF8E6', ink: '#2B2116', muted: '#675740', accent: '#AE232C', accent2: '#2A6688', accent3: '#E07A2E' } },
+      { name: 'Azul diner', colors: { bg: '#E5EDF5', surface: '#F8FBFE', ink: '#18222E', muted: '#4E5C6B', accent: '#BD2338', accent2: '#1D669C', accent3: '#F2B632' } },
+      { name: 'Rocola', colors: { bg: '#1F1517', surface: '#2C1E21', ink: '#FBEFE3', muted: '#C7B2A8', accent: '#FF6272', accent2: '#6FD6BE', accent3: '#F5C14B' } }
     ]
   }
 };
@@ -5243,7 +5407,7 @@ const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3'
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
-  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
+  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',

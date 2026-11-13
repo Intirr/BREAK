@@ -873,6 +873,85 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 11. FUENTE DE SODA · RETRO ---------- */
+  {
+    v: 1, id: 'tpl-polar', template: true,
+    brand: {
+      name: 'Fuente de Soda Polar', tagline: 'Helados, malteadas, perros y hamburguesas desde 1968', kind: 'Fuente de soda',
+      logo: { type: 'emoji', value: '🍦' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Carrera 14 # 12-30', addressNote: 'Media cuadra arriba del parque principal, la del letrero rojo.',
+      mapsQuery: 'Parque principal, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: null, 2: ['11:00', '21:00'], 3: ['11:00', '21:00'], 4: ['11:00', '21:00'], 5: ['11:00', '22:00'], 6: ['11:00', '22:00'], 0: ['11:00', '21:00'] })
+    },
+    i18n: { bilingual: false, usted: false },
+    theme: {
+      skin: 'retro',
+      colors: { bg: '#FBF1E1', surface: '#FFFAF2', ink: '#2A1C19', muted: '#6B5750', accent: '#BE1E30', accent2: '#1F7565', accent3: '#E8A92E' },
+      fonts: { display: 'Pacifico', body: 'Rubik' }, radius: 14, motion: 'vivo', texture: 'none', icons: 'emoji',
+      fx: { reveal: 'zoom' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'helados', name: 'Helados', icon: '🍦', note: 'Helado de la casa, hecho aquí desde 1968', items: [
+          IT('copa-polar', 'Copa Polar', 'Tres bolas, crema chantilly, salsa de chocolate, cereza y barquillo.', 14900, '🍨', ['popular']),
+          IT('banana-split', 'Banana split', 'Banano, tres bolas, salsas de fresa y chocolate, y maní.', 16900, '🍌', ['popular']),
+          IT('cono', 'Cono de una bola', 'Vainilla, chocolate, fresa, mora o ron con pasas.', 4900, '🍦'),
+          IT('copa-brownie', 'Copa de brownie', 'Brownie tibio con helado de vainilla y arequipe.', 15900, '🍫', ['nuevo']),
+          IT('salpicon', 'Salpicón con helado', 'Frutas picadas en jugo de sandía con una bola de vainilla.', 9900, '🍓', ['local'])
+        ] },
+        { id: 'malteadas', name: 'Malteadas y sodas', icon: '🥤', note: 'En vaso de vidrio, con crema y cereza', items: [
+          IT('malteada-vainilla', 'Malteada de vainilla', 'La original de la casa.', 11900, '🥤'),
+          IT('malteada-chocolate', 'Malteada de chocolate', 'Espesa, con salsa de chocolate en el vaso.', 11900, '🥤', ['popular']),
+          IT('malteada-fresa', 'Malteada de fresa', 'Con fresas de la región.', 11900, '🍓', ['local']),
+          IT('malteada-arequipe', 'Malteada de arequipe', 'Con galleta triturada.', 12900, '🥤'),
+          IT('soda-italiana', 'Soda italiana', 'Frutos rojos, soda y un toque de crema.', 8900, '🍹', ['nuevo']),
+          IT('limonada-coco', 'Limonada de coco', 'Cremosa y bien fría.', 9900, '🥥', ['vegetariano'])
+        ] },
+        { id: 'perros', name: 'Perros calientes', icon: '🌭', note: 'Pan blandito y salsas de la casa', items: [
+          IT('perro-sencillo', 'Perro sencillo', 'Salchicha, salsas y papita triturada.', 9900, '🌭'),
+          IT('perro-polar', 'Perro Polar', 'Salchicha americana, queso derretido, tocineta y cebolla caramelizada.', 14900, '🌭', ['popular']),
+          IT('perro-ranchero', 'Perro ranchero', 'Con chorizo santarrosano, maíz tierno y salsa de piña.', 15900, '🌭', ['local'])
+        ] },
+        { id: 'hamburguesas', name: 'Hamburguesas', icon: '🍔', note: 'Con papas a la francesa', items: [
+          IT('clasica', 'Hamburguesa clásica', 'Carne de res, queso, lechuga, tomate y salsas.', 16900, '🍔'),
+          IT('doble', 'Doble queso', 'Dos carnes y doble queso cheddar.', 21900, '🍔', ['popular']),
+          IT('polar', 'Hamburguesa Polar', 'Carne, tocineta, huevo frito y tajadas de maduro.', 23900, '🍳', ['nuevo']),
+          IT('frijol', 'Hamburguesa de fríjol', 'Medallón de fríjol y maíz, aguacate y queso.', 17900, '🥑', ['vegetariano'])
+        ] },
+        { id: 'acompanar', name: 'Para acompañar', icon: '🍟', note: '', items: [
+          IT('papas', 'Papas a la francesa', 'Porción grande.', 6900, '🍟'),
+          IT('papas-queso', 'Papas con queso y tocineta', 'Para compartir.', 10900, '🍟', ['compartir']),
+          IT('aros', 'Aros de cebolla', 'Apanados y crocantes.', 8900, '🧅', ['vegetariano'])
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Desde 1968 · frente al parque', title: '', subtitle: 'Malteadas espesas, copas de helado y perros calientes como los de antes.', cta1: 'carta', cta2: 'pedido', showStatus: true, ribbon: 'Malteadas, Copas de helado, Perros calientes, Hamburguesas, Rocola' } },
+      { id: 'top', type: 'destacados', on: true, s: { title: 'Los clásicos', tag: 'popular', max: 6 } },
+      { id: 'cupones', type: 'promos', on: true, s: { title: 'Cupones de la semana', highlightToday: true, _bg: 'tinte', items: [
+        { days: [2], title: '2x1 en malteadas', desc: 'Todo el martes, en cualquier sabor.', price: 11900 },
+        { days: [3, 4], title: 'Combo Polar', desc: 'Perro Polar, papas a la francesa y gaseosa.', price: 21900 },
+        { days: [5, 6, 0], title: 'Copa familiar', desc: 'Seis bolas, tres salsas y barquillos para compartir.', price: 29900 }
+      ] } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'ruleta', type: 'ruleta', on: true, s: { title: '¿Qué copa te toca?', text: 'Gira la ruleta y que decida la suerte.', mode: 'carta', category: 'helados', options: [], oncePerDay: false } },
+      { id: 'sellos', type: 'sellos', on: true, s: { title: 'Tarjeta Polar', goal: 8, reward: 'La novena malteada va por la casa', icon: '🥤', pin: '1968', note: 'Un sello por cada malteada o copa de helado.' } },
+      { id: 'pedido', type: 'pedido', on: true, s: { title: 'Pide y te lo llevamos', showSection: true, modes: { mesa: true, llevar: true, domicilio: true }, deliveryFee: 3000, minOrder: 15000, deliveryNote: 'Domicilios en el casco urbano hasta las 8:30 p. m.', payments: 'Efectivo, Nequi, Daviplata', intro: '' } },
+      { id: 'historia', type: 'historia', on: true, s: { title: 'Nuestra historia', kicker: '', year: '1968', _bg: 'invertido',
+        text: 'Don Abelardo trajo al pueblo la primera máquina de malteadas y la puso detrás de un mostrador de fórmica roja. La rocola todavía funciona con monedas de las viejas.\n\nHoy atiende su nieta, con las mismas copas de vidrio y la receta del helado de la casa.',
+        signature: 'La familia Polar' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Qué tal la malteada?', text: 'Cuéntanos en Google o por WhatsApp. Leemos todo.', rating: '', layout: 'destacada', quotes: [
+        { text: 'La malteada de chocolate sabe igual que cuando venía con mi abuelo.', author: 'Paula G.' },
+        { text: 'El perro Polar y la rocola sonando: plan perfecto de domingo.', author: 'Julián R.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 11:00 a. m. a 9:00 p. m.' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
