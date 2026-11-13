@@ -576,10 +576,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const hero = cfg => cfg.modules.find(m => m.type === 'hero').s;
     const NOW = { now: '2026-11-06T15:30:00Z' };
     // Lo de cada estética sigue igual sin tocar nada
-    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras', 'tpl-aguatibia': '.hero-box.d-termales svg.art-term', 'tpl-polar': '.hero-box.d-damero .damero', 'tpl-mango': '.hero-box.d-monstera svg.art-mons', 'tpl-larosa': '.hero-box.d-toldo .toldo' };
+    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras', 'tpl-aguatibia': '.hero-box.d-termales svg.art-term', 'tpl-polar': '.hero-box.d-damero .damero', 'tpl-mango': '.hero-box.d-monstera svg.art-mons', 'tpl-larosa': '.hero-box.d-toldo .toldo', 'tpl-fabrica': '.hero-box.d-obra .obra' };
     for (const id of Object.keys(auto)) { const A = mount(TPL(id), NOW); ok(!!A.$(auto[id]), id + ': la portada conserva la decoración de su estética'); A.close(); }
     ok(/--leaf:#[0-9a-f]{6}/i.test((() => { const A = mount(TPL('tpl-espiga'), NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; })()), 'el verde de la paleta queda listo para las ilustraciones');
-    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera', 'toldo'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
+    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera', 'toldo', 'obra'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
     // Sin decoración
     const z = TPL('tpl-zocalo'); hero(z).deco = 'ninguna';
     let A = mount(z, NOW); ok(!A.$('.facade') && !A.$('.zocalo') && !A.$('.hero-box[class*=" d-"]'), '«Ninguna» quita la fachada y el zócalo'); A.close();
@@ -1119,6 +1119,26 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'toldo';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-toldo .toldo') && !A.$('.hero-box.d-toldo .facade'), 'el toldo sirve en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'toldo'), 'el toldo se ofrece en el estudio');
+  }
+
+  /* 11zb. Estética Industrial y La Fábrica */
+  {
+    const NOW = { now: '2026-11-07T01:30:00Z' };
+    let A = mount(TPL('tpl-fabrica'), NOW);
+    const x = A.d.getElementById('bk-css').textContent;
+    ok(A.$('.app').getAttribute('data-skin') === 'industrial' && /\[data-skin="industrial"\] \.hero-t\{/.test(x), 'Industrial: su CSS se aplica');
+    ok(!!A.$('.hero-box.d-obra .obra') && !!A.$('.events.tl') && A.$('section[data-mid="hora"]').classList.contains('sb-acento') && A.d.documentElement.getAttribute('data-tex') === 'grano', 'La Fábrica: franja de obra, agenda en línea, hora feliz sobre el acento y grano de fondo');
+    ok(A.$('.hero-st').classList.contains('on'), 'La Fábrica: abierto el viernes a las 8:30 p. m.');
+    ok(A.d.getElementById('bk-fonts').href.includes('family=Big+Shoulders+Stencil') && A.d.getElementById('bk-fonts').href.includes('family=Work+Sans'), 'Industrial: pide sus tipografías a Google Fonts');
+    A.close();
+    const block = (SRC('runtime.js').match(/\n    industrial: `([\s\S]*?)`/) || [])[1] || '';
+    ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Industrial: su CSS solo usa colores de la paleta');
+    ok(block.split('\n').filter(l => /[;{]color:var\(--accent\)/.test(l)).every(l => /background:var\(--on-accent\)/.test(l)), 'Industrial: el amarillo de obra solo es letra sobre su color de contraste (en las paletas claras no se leería sobre el fondo)');
+    const tag = (block.match(/\.price\.big,[^{]*\{([^}]*)\}/) || [])[1] || '';
+    ok(/background:var\(--c-price,var\(--accent\)\)/.test(tag) && !/clip-path|mask|rotate/.test(tag), 'Industrial: la etiqueta del precio se puede quitar con las opciones de precio de la carta');
+    const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'obra';
+    A = mount(z, NOW); ok(!!A.$('.hero-box.d-obra .obra') && !A.$('.hero-box.d-obra .facade'), 'la franja de obra sirve en cualquier estética'); A.close();
+    ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'obra'), 'la franja de obra se ofrece en el estudio');
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */

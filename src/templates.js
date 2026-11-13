@@ -1095,6 +1095,79 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 14. CERVECERÍA ARTESANAL · INDUSTRIAL ---------- */
+  {
+    v: 1, id: 'tpl-fabrica', template: true,
+    brand: {
+      name: 'La Fábrica', tagline: 'Cervecería artesanal y hamburguesas', kind: 'Cervecería',
+      logo: { type: 'icon', value: 'cerveza' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Calle 12 # 16-55, antigua trilladora', addressNote: 'En la bodega de ladrillo; la entrada es por el parqueadero.',
+      mapsQuery: 'Santa Rosa de Cabal, Risaralda', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: null, 2: null, 3: ['16:00', '23:00'], 4: ['16:00', '23:00'], 5: ['15:00', '01:00'], 6: ['13:00', '01:00'], 0: ['13:00', '21:00'] })
+    },
+    i18n: { bilingual: false, usted: false },
+    theme: {
+      skin: 'industrial',
+      colors: { bg: '#171717', surface: '#232322', ink: '#F1EFEA', muted: '#A9A69F', accent: '#F5C400', accent2: '#FF7A3D', accent3: '#8FB3C9' },
+      fonts: { display: 'Big Shoulders Stencil', body: 'Work Sans' }, radius: 0, motion: 'suave', texture: 'grano', icons: 'linea',
+      fx: { reveal: 'subir' }
+    },
+    menu: {
+      categories: [
+        { id: 'cervezas', name: 'Cervezas de la casa', icon: '🍺', note: 'Hechas aquí mismo. Pinta de 473 ml. Solo para mayores de 18 años.', items: [
+          IT('rubia', 'Rubia Trilladora', 'Golden ale, ligera y refrescante.', 12000, '🍺', ['popular']),
+          IT('roja', 'Roja Ladrillo', 'Red ale con notas de caramelo.', 13000, '🍺'),
+          IT('negra', 'Negra Carbonera', 'Stout con café de la región.', 14000, '🍺', ['local', 'chef']),
+          IT('ipa', 'IPA Andamio', 'Lupulada y amarga, para los que saben.', 15000, '🍺', ['nuevo']),
+          IT('trigo', 'Trigo y Panela', 'Cerveza de trigo con un toque de panela.', 13000, '🍺', ['local'])
+        ] },
+        { id: 'hamburguesas', name: 'Hamburguesas', icon: '🍔', note: 'Pan brioche y papas rústicas', items: [
+          IT('la-fabrica', 'La Fábrica', 'Doble carne, cheddar, tocineta y cebolla en cerveza negra.', 28000, '🍔', ['popular', 'chef']),
+          IT('obrera', 'Obrera', 'Carne, queso, lechuga, tomate y salsa de la casa.', 22000, '🍔'),
+          IT('santarrosana', 'Santarrosana', 'Carne con chorizo santarrosano, hogao y queso campesino.', 26000, '🍔', ['local']),
+          IT('crispy', 'Pollo crispy', 'Pechuga apanada, repollo morado y mayonesa de ajo.', 24000, '🍗'),
+          IT('champinon', 'Champiñón', 'Portobello a la plancha, queso suizo y rúgula.', 23000, '🍄', ['vegetariano'])
+        ] },
+        { id: 'picar', name: 'Para picar', icon: '🍟', note: '', items: [
+          IT('papas', 'Papas rústicas', 'Con paprika y alioli.', 9000, '🍟'),
+          IT('alitas', 'Alitas BBQ', 'Doce alitas con salsa de cerveza roja.', 18000, '🍗', ['picante']),
+          IT('nachos', 'Nachos de la casa', 'Queso fundido, fríjol, guacamole y jalapeños.', 16000, '🌮', ['compartir']),
+          IT('aros', 'Aros de cebolla en cerveza', 'Apanados en masa de Rubia Trilladora.', 11000, '🧅', ['vegetariano'])
+        ] },
+        { id: 'sin-alcohol', name: 'Sin alcohol', icon: '🥤', note: '', items: [
+          IT('jengibre', 'Soda de jengibre', 'Hecha en casa, con limón.', 7000, '🥤', ['nuevo', 'vegano']),
+          IT('limonada', 'Limonada de hierbabuena', 'Bien fría.', 7000, '🍋', ['vegano']),
+          IT('gaseosa', 'Gaseosa', 'Lata de 355 ml.', 4000, '🥤')
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Cervecería artesanal · desde 2016', title: '', subtitle: 'Cerveza hecha aquí mismo, hamburguesas a la plancha y música en vivo los sábados.', cta1: 'carta', cta2: 'eventos', showStatus: true, ribbon: 'Cerveza artesanal, Hamburguesas, Música en vivo, Partidos' } },
+      { id: 'casa', type: 'destacados', on: true, s: { title: 'Las de la casa', tag: 'chef', max: 4 } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'tarjetas', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos. Prohibida la venta de bebidas alcohólicas a menores de edad.' } },
+      { id: 'hora', type: 'promos', on: true, s: { title: 'Hora feliz', highlightToday: true, _bg: 'acento', items: [
+        { days: [3, 4], title: 'Dos pintas por una', desc: 'De 4:00 a 7:00 p. m., en cualquier cerveza de la casa.', price: 12000 },
+        { days: [5, 6], title: 'Combo obrero', desc: 'Hamburguesa Obrera con papas y una pinta.', price: 32000 },
+        { days: [0], title: 'Domingo de jarra', desc: 'Jarra de dos litros de la cerveza que quieras.', price: 45000 }
+      ] } },
+      { id: 'agenda', type: 'eventos', on: true, s: { title: 'Agenda', layout: 'linea', items: [
+        { when: 'Jueves · 7:00 p. m.', title: 'Noche de trivia', desc: 'Equipos de hasta cinco. Los ganadores se llevan una jarra.', rsvp: true },
+        { when: 'Sábados · 9:00 p. m.', title: 'Música en vivo', desc: 'Bandas de rock y blues de la región. Entrada libre.', rsvp: false },
+        { when: 'Domingos · 1:00 p. m.', title: 'Visita a la cervecería', desc: 'Recorrido por los tanques y cata de cuatro cervezas.', rsvp: true }
+      ] } },
+      { id: 'servicios', type: 'servicios', on: true, s: { title: 'En la bodega', list: ['parqueadero', 'musica', 'tarjeta', 'transferencia', 'wifi'], extra: 'Pantalla para partidos, Juegos de mesa', note: '' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Qué tal la birra?', text: 'Cuéntanos en Google o por WhatsApp. Leemos todo.', rating: '', quotes: [
+        { text: 'La Negra Carbonera con café es otra cosa. Y la hamburguesa La Fábrica, brutal.', author: 'Camilo T.' },
+        { text: 'Buen ambiente los sábados, la banda sonaba durísimo y atienden rápido.', author: 'Natalia V.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 1:00 p. m. a 9:00 p. m.' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
