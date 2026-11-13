@@ -734,6 +734,68 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     A = mount(nb, NOW); ok(!A.$('.brand-mini .logo') && !A.$('.brand-mini b') && A.$('.brand-mini').getAttribute('aria-label') === nb.brand.name, 'el encabezado puede ir sin logo ni nombre'); A.close();
   }
 
+  /* 11p. Espaciado, separadores, títulos y diseño por sección; variantes de módulos */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const css = cfg => { const A = mount(cfg, NOW); const x = A.d.getElementById('bk-css').textContent; A.close(); return x; };
+    const a = TPL('tpl-zocalo'); a.theme.space = { density: 'compacta', sep: 'ornamento' }; a.theme.heads = { align: 'centro', orn: 'linea', kicker: 'ocultar' };
+    const x = css(a);
+    ok(x.includes('#bk main>.m:not(.m-hero):not(.m-aviso):not(.sp-compacto):not(.sp-amplio){padding-top:30px}'), 'menos espacio entre secciones, salvo las que eligen el suyo');
+    ok(/#bk main>\.m\+\.m\.sb:not\(\.m-aviso\)::before,[^{]*#bk main>\.m\.sb\+\.m:not\(\.m-aviso\)::after\{display:none\}/.test(x), 'sin separador junto a una sección con fondo propio');
+    ok(x.includes('#bk .m.sa-izq .sh{text-align:left}'), 'la alineación de cada sección le gana a la general');
+    ok(/#bk main>\.m\+\.m:not\(\.m-aviso\)::after\{content:"";position:absolute;left:50%;top:1px;width:7px/.test(x), 'separador con ornamento');
+    ok(x.includes('#bk .sh{text-align:center}') && /#bk \.sh \.orn\{display:block;width:56px;height:2px/.test(x) && x.includes('#bk .sh-k{display:none}'), 'títulos centrados, con línea y sin antetítulos');
+    // Diseño de una sección
+    const b = TPL('tpl-zocalo'); const ho = b.modules.find(m => m.type === 'horario');
+    Object.assign(ho.s, { _bg: 'invertido', _align: 'centro', _pad: 'amplio', kicker: 'Te esperamos' });
+    const pr = b.modules.find(m => m.type === 'contacto'); Object.assign(pr.s, { _bg: 'acento' });
+    let A = mount(b, NOW);
+    const sec = A.$('section[data-mid="' + ho.id + '"]');
+    ok(sec.classList.contains('sb-invertido') && sec.classList.contains('sa-centro') && sec.classList.contains('sp-amplio'), 'la sección lleva su fondo, alineación y espacio');
+    ok(new RegExp('--bg:' + b.theme.colors.ink + ';--ink:' + b.theme.colors.bg).test(sec.getAttribute('style')), 'el fondo invertido cambia los colores solo adentro');
+    {
+      // Los acentos se aclaran u oscurecen hasta leerse sobre el fondo nuevo
+      const L = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+      const R = (a, z) => { const p = L(a), q = L(z); return (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05); };
+      const st = sec.getAttribute('style'), get = k => (st.match(new RegExp('--' + k + ':(#[0-9a-f]{6})', 'i')) || [])[1];
+      ok(['accent', 'accent2', 'accent3'].every(k => get(k) && R(get(k), b.theme.colors.ink) >= 4.5), 'acentos legibles sobre el fondo invertido: ' + ['accent', 'accent2', 'accent3'].map(get).join(' '));
+    }
+    eq(sec.querySelector('.sh-k').textContent, 'Te esperamos', 'antetítulo propio de la sección');
+    ok(/--accent:#(ffffff|141414);--on-accent:/.test(A.$('section[data-mid="' + pr.id + '"]').getAttribute('style')), 'en una sección de acento los botones cambian de color');
+    A.close();
+    b.theme.roles = { btn: '#1F7A8C', price: 'accent3' };
+    A = mount(b, NOW);
+    ok(/--c-btn:initial;--c-btn-on:initial;--c-price:initial/.test(A.$('section[data-mid="' + ho.id + '"]').getAttribute('style')), 'adentro, los colores por elemento vuelven a los de la estética');
+    A.close();
+    const bad = TPL('tpl-zocalo'); bad.modules.find(m => m.type === 'horario').s._bg = 'x" onmouseover="alert(1)';
+    A = mount(bad, NOW); ok(!A.$('[onmouseover]') && !A.$('section.sb'), 'un fondo desconocido no se usa'); A.close();
+    // Variantes
+    const v = TPL('tpl-araucaria'), de = v.modules.find(m => m.type === 'destacados');
+    de.s.layout = 'cuadricula';
+    v.modules.find(m => m.type === 'horario').s.layout = 'compacto';
+    v.modules.find(m => m.type === 'contacto').s.layout = 'botones';
+    A = mount(v, NOW);
+    ok(!!A.$('section[data-mid="' + de.id + '"] .feat-cuadricula .feat') && !A.$('section[data-mid="' + de.id + '"] .rail'), 'destacados en cuadrícula');
+    eq(A.$$('.hours.hc dt').map(d => d.firstChild.textContent).join(' | '), 'Lunes | Martes a jueves | Viernes y sábado | Domingo', 'horario compacto con los días seguidos juntos');
+    ok(A.$('.hours.hc .hrow.today dt').textContent.indexOf('Viernes y sábado') === 0 && /Cerrado/.test(A.$$('.hours.hc dd')[0].textContent), 'marca el grupo de hoy y los días cerrados');
+    ok(!!A.$('.contact.clg .cl'), 'contacto con botones de ícono');
+    A.close();
+    const zo = TPL('tpl-zocalo');
+    zo.modules.find(m => m.type === 'eventos').s.layout = 'linea';
+    Object.assign(zo.modules.find(m => m.type === 'resenas').s, { layout: 'destacada', quotes: [{ text: 'El mejor chorizo de la vía.', author: 'Ana' }, { text: '<b>Volvemos</b>', author: 'Luis' }] });
+    A = mount(zo, NOW);
+    ok(A.$$('.events.tl .ev').length === 3, 'agenda en línea de tiempo');
+    ok(A.$$('.quotes.qbig .quote').length === 2 && !A.$('.qbig blockquote b'), 'reseñas con cita grande y texto escapado');
+    A.close();
+    const pz = TPL('tpl-antojo'); pz.modules.find(m => m.type === 'promos').s.layout = 'carrusel';
+    A = mount(pz, NOW); ok(!!A.$('.rail.promo-rail .promo') && !A.$('.promos'), 'promociones en carrusel'); A.close();
+    // En inglés el horario compacto también junta los días
+    v.i18n = Object.assign({}, v.i18n, { bilingual: true });
+    A = mount(v, { now: NOW.now, lang: 'en-US' });
+    eq(A.$$('.hours.hc dt').map(d => d.firstChild.textContent).join(' | '), 'Monday | Tuesday to Thursday | Friday and Saturday | Sunday', 'horario compacto en inglés');
+    A.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -1019,6 +1081,33 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   await sleep(80);
   ok(deletedAssets.length === 1 && deletedAssets[0] === LB, 'borra solo la foto que nadie usa, después de confirmar');
   eq(docs.get('biblioteca-fotos').items.map(f => f.id).join(','), LA, 'el índice de la biblioteca se actualiza');
+  // Módulos: diseño de esta sección
+  click($('[data-a="tab"][data-t="modulos"]'));
+  const hIdx = ST.S.cur.modules.findIndex(m => m.type === 'horario');
+  ok(hIdx >= 0, 'la app de prueba tiene horario');
+  {
+    click($('[data-a="mod-open"][data-mid="' + ST.S.cur.modules[hIdx].id + '"]'));
+    ok(!!d.getElementById('f-modules-' + hIdx + '-s-layout') && !!d.getElementById('f-modules-' + hIdx + '-s-_bg') && !!d.getElementById('f-modules-' + hIdx + '-s-kicker'), 'cada módulo trae su diseño, el fondo de la sección y un antetítulo');
+    setVal(d.getElementById('f-modules-' + hIdx + '-s-_bg'), 'tinte', 'change');
+    eq(ST.S.cur.modules[hIdx].s._bg, 'tinte', 'elige el fondo de la sección');
+    await sleep(220);
+    ok(!!ST.pv.frame.contentDocument.querySelector('section.m-horario.sb-tinte'), 'la vista previa pinta la sección');
+    setVal(d.getElementById('f-modules-' + hIdx + '-s-_bg'), 'auto', 'change');
+    setVal(d.getElementById('f-modules-' + hIdx + '-s-layout'), 'compacto', 'change');
+    click($('[data-a="mod-open"][data-mid="' + ST.S.cur.modules[hIdx].id + '"]'));
+    ok(/días abiertos · compacto/.test($('.mod[data-mid="' + ST.S.cur.modules[hIdx].id + '"] .mod-n small').textContent), 'el resumen del módulo dice el diseño elegido');
+  }
+  const hrIdx = ST.S.cur.modules.findIndex(m => m.type === 'hero'), hrId = ST.S.cur.modules[hrIdx].id;
+  click($('[data-a="mod-open"][data-mid="' + hrId + '"]'));
+  ok(!d.getElementById('f-modules-' + hrIdx + '-s-_bg') && $$('[id="f-modules-' + hrIdx + '-s-kicker"]').length === 1, 'la portada no lleva el fondo de sección ni un antetítulo repetido');
+  click($('[data-a="mod-open"][data-mid="' + hrId + '"]'));
+  const hsIdx = ST.S.cur.modules.findIndex(m => m.type === 'historia');
+  if (hsIdx >= 0) {
+    click($('[data-a="mod-open"][data-mid="' + ST.S.cur.modules[hsIdx].id + '"]'));
+    eq($$('[id="f-modules-' + hsIdx + '-s-kicker"]').length, 1, 'un módulo que ya tiene antetítulo no lo repite');
+    click($('[data-a="mod-open"][data-mid="' + ST.S.cur.modules[hsIdx].id + '"]'));
+  }
+  click($('[data-a="tab"][data-t="estilo"]'));
   // Estilo: estructura
   ok(!!$('section[data-card="navegacion"]') && !!$('section[data-card="pie"]') && !$('section[data-card="encabezado"]'), 'navegación y pie en el modo sencillo; encabezado en el avanzado');
   click($('[data-a="set"][data-p="theme.nav"][data-v="barra"]'));

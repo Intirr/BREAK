@@ -132,6 +132,15 @@ const STYLE = [
       { k: 'top.name', t: 'bool', label: 'Mostrar el nombre', def: true },
       { k: 'top.status', t: 'bool', label: 'Mostrar si está abierto', def: true }
     ] },
+    { id: 'secciones', adv: true, title: 'Secciones', desc: 'El espacio y lo que separa una sección de la siguiente.', fields: [
+      { k: 'space.density', t: 'seg', label: 'Espacio entre secciones', def: 'auto', opts: [['compacta', 'Poco'], ['auto', 'Normal'], ['amplia', 'Mucho']] },
+      { k: 'space.sep', t: 'seg', label: 'Separador', def: 'auto', opts: [['auto', 'Según la estética'], ['ninguno', 'Ninguno'], ['linea', 'Línea'], ['ornamento', 'Ornamento'], ['onda', 'Onda'], ['zocalo', 'Zócalo']] }
+    ] },
+    { id: 'titulosec', adv: true, title: 'Títulos de sección', fields: [
+      { k: 'heads.align', t: 'seg', label: 'Alineación', def: 'auto', opts: [['auto', 'Según la estética'], ['izq', 'A la izquierda'], ['centro', 'Centrados']] },
+      { k: 'heads.orn', t: 'seg', label: 'Adorno debajo', def: 'auto', opts: [['auto', 'Según la estética'], ['ninguno', 'Ninguno'], ['linea', 'Línea'], ['rombo', 'Rombo'], ['onda', 'Onda'], ['zigzag', 'Zigzag']] },
+      { k: 'heads.kicker', t: 'seg', label: 'Antetítulos', def: 'auto', opts: [['auto', 'Mostrar'], ['ocultar', 'Ocultar']] }
+    ] },
     { id: 'pie', title: 'Pie de página', fields: [
       { k: 'foot.style', t: 'seg', label: 'Contenido', def: 'completo', opts: [['completo', 'Completo'], ['simple', 'Sencillo']], help: 'Completo: eslogan, horario de hoy, dirección, redes con íconos y texto legal (se escribe en Datos).' },
       { k: 'foot.align', adv: true, t: 'seg', label: 'Alineación', def: 'auto', opts: [['auto', 'Según la estética'], ['centro', 'Centrado'], ['izq', 'A la izquierda']] },
@@ -154,6 +163,12 @@ const STYLE = [
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
+const SECTION_FIELDS = [
+  { t: 'sep', label: 'Diseño de esta sección' },
+  { k: '_bg', t: 'sel', label: 'Fondo', def: 'auto', opts: [['auto', 'El de la app'], ['superficie', 'Color de las tarjetas'], ['tinte', 'Tinte del acento'], ['acento', 'Color de acento'], ['invertido', 'Invertido (claro sobre oscuro)']] },
+  { k: '_align', t: 'seg', label: 'Título', def: 'auto', opts: [['auto', 'Según la estética'], ['izq', 'A la izquierda'], ['centro', 'Centrado']] },
+  { k: '_pad', t: 'seg', label: 'Espacio arriba', def: 'auto', opts: [['compacto', 'Poco'], ['auto', 'Normal'], ['amplio', 'Mucho']] }
+];
 /* Color por elemento: roles (theme.roles) y los colores de la paleta que se ofrecen para cada uno. */
 const ROLES = [['btn', 'Botones'], ['title', 'Títulos'], ['kicker', 'Antetítulos'], ['price', 'Precios'], ['sel', 'Selección'], ['tag', 'Etiquetas'], ['top', 'Encabezado'], ['foot', 'Pie de página']];
 const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['surface', 'Tarjetas'], ['bg', 'Fondo']];
@@ -223,13 +238,13 @@ const MODULES = {
   destacados: {
     label: 'Destacados', code: 'DE', group: 'Ventas', desc: 'Carrusel con los platos de una etiqueta: recomendados, favoritos o nuevos.',
     defaults: { title: 'Recomendados', tag: 'chef', max: 4 },
-    fields: [F.title('Recomendados'), { k: 'tag', t: 'tag', label: 'Mostrar platos con la etiqueta' }, { k: 'max', t: 'num', label: 'Máximo de platos', min: 1, max: 10 }]
+    fields: [F.title('Recomendados'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'carrusel', opts: [['carrusel', 'Carrusel'], ['cuadricula', 'Cuadrícula de dos columnas'], ['lista', 'Lista con foto pequeña']] }, { k: 'tag', t: 'tag', label: 'Mostrar platos con la etiqueta' }, { k: 'max', t: 'num', label: 'Máximo de platos', min: 1, max: 10 }]
   },
   promos: {
     label: 'Promociones', code: 'PR', group: 'Ventas', seg: 'Vecino', desc: 'Promos por día de la semana; la de hoy sale primero y resaltada.',
     defaults: { title: 'Promociones', highlightToday: true, items: [{ days: [2], title: 'Martes de 2×1', desc: '', price: 0 }] },
     fields: [
-      F.title('Promociones'), { k: 'highlightToday', t: 'bool', label: 'Resaltar la promo de hoy', def: true },
+      F.title('Promociones'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas una debajo de otra'], ['carrusel', 'Carrusel']] }, { k: 'highlightToday', t: 'bool', label: 'Resaltar la promo de hoy', def: true },
       { k: 'items', t: 'list', label: 'Promociones', item: 'Promo', blank: { days: [], title: '', desc: '', price: 0 },
         fields: [{ k: 'days', t: 'days', label: 'Días' }, F.text('title', 'Título'), F.text('desc', 'Detalle'), { k: 'price', t: 'num', label: 'Precio (opcional)', min: 0, step: 100, money: true }] }
     ]
@@ -304,7 +319,7 @@ const MODULES = {
     label: 'Reseñas', code: 'RS', group: 'Turismo y contenido', seg: 'Turista', desc: 'Lleva a los clientes a dejar su reseña en Google o a escribirle al local.',
     defaults: { title: '¿Cómo te fue?', text: '', rating: '', quotes: [] },
     fields: [
-      F.title('¿Cómo te fue?'), F.area('text', 'Texto', '', 2), { k: 'rating', t: 'text', label: 'Calificación real en Google (opcional)', ph: '4,8' },
+      F.title('¿Cómo te fue?'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas'], ['destacada', 'Cita grande que se desliza']] }, F.area('text', 'Texto', '', 2), { k: 'rating', t: 'text', label: 'Calificación real en Google (opcional)', ph: '4,8' },
       { k: 'quotes', t: 'list', label: 'Testimonios', item: 'Testimonio', blank: { text: '', author: '' }, fields: [F.area('text', 'Texto', '', 2), { k: 'author', t: 'text', label: 'Autor' }] },
       { t: 'hint', text: 'El botón de Google usa el enlace de reseñas de Datos. Publica solo opiniones reales, con permiso de quien las escribió.' }
     ]
@@ -324,7 +339,7 @@ const MODULES = {
   eventos: {
     label: 'Agenda', code: 'EV', group: 'Turismo y contenido', desc: 'Música en vivo, talleres y fechas especiales, con cupos por WhatsApp.',
     defaults: { title: 'Agenda', items: [{ when: '', title: '', desc: '', rsvp: false }] },
-    fields: [F.title('Agenda'),
+    fields: [F.title('Agenda'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas'], ['linea', 'Línea de tiempo']] },
       { k: 'items', t: 'list', label: 'Eventos', item: 'Evento', blank: { when: '', title: '', desc: '', rsvp: false },
         fields: [F.text('when', 'Cuándo', 'Viernes · 7:00 p. m.'), F.text('title', 'Título'), F.area('desc', 'Descripción', '', 2), { k: 'rsvp', t: 'bool', label: 'Botón «Apartar cupo»' }] }]
   },
@@ -336,7 +351,7 @@ const MODULES = {
   horario: {
     label: 'Horario', code: 'HO', group: 'Esenciales', single: true, desc: 'Horario semanal y si está abierto ahora, en hora de Colombia.',
     defaults: { title: '', note: '' },
-    fields: [F.title('Horario'), F.text('note', 'Nota', 'Festivos de 10 a 6'), { t: 'hint', text: 'Los días y horas se editan en Datos.' }]
+    fields: [F.title('Horario'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'lista', opts: [['lista', 'Día por día'], ['compacto', 'Compacto: días seguidos juntos']] }, F.text('note', 'Nota', 'Festivos de 10 a 6'), { t: 'hint', text: 'Los días y horas se editan en Datos.' }]
   },
   ubicacion: {
     label: 'Ubicación', code: 'UB', group: 'Esenciales', single: true, desc: 'Dirección con botones a Google Maps y Waze.',
@@ -346,7 +361,7 @@ const MODULES = {
   contacto: {
     label: 'Contacto', code: 'CO', group: 'Esenciales', single: true, desc: 'WhatsApp, teléfono, redes y botón para compartir la carta.',
     defaults: { title: '' },
-    fields: [F.title('Contacto'), { t: 'hint', text: 'WhatsApp, teléfono y redes se editan en Datos.' }]
+    fields: [F.title('Contacto'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'filas', opts: [['filas', 'Filas con el dato'], ['botones', 'Botones con ícono']] }, { t: 'hint', text: 'WhatsApp, teléfono y redes se editan en Datos.' }]
   },
   libre: {
     label: 'Bloque libre', code: 'BL', group: 'Turismo y contenido', desc: 'Título, texto y botón para lo que el local necesite contar.',

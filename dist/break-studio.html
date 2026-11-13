@@ -542,7 +542,7 @@ function breakApp(win, doc, initialCfg, opts) {
       reviewG: 'Escribir reseña en Google', reviewWa: 'Contarnos por WhatsApp', onGoogle: 'en Google',
       share: 'Compartir esta carta', shareSub: 'Envíasela a quien venga contigo', sharePreview: 'En la app publicada se comparte su enlace.',
       call: 'Llamar', writeUs: 'Escríbenos', credit: 'Hecho con Break', facade: 'Fachada de casa de bahareque',
-      todayIs: 'Hoy', sections: 'Secciones', navHome: 'Inicio', navMenu: 'Carta', navOrder: 'Pedido', navBook: 'Reservar', navStamps: 'Sellos', navMap: 'Llegar', navContact: 'Contacto', navMore: 'Más',
+      todayIs: 'Hoy', sections: 'Secciones', dayTo: 'a', navHome: 'Inicio', navMenu: 'Carta', navOrder: 'Pedido', navBook: 'Reservar', navStamps: 'Sellos', navMap: 'Llegar', navContact: 'Contacto', navMore: 'Más',
       how1: 'Elige en la carta y toca +.', how2: 'Revisa tu pedido y dinos cómo lo quieres.', how3: 'Lo envías por WhatsApp y el local te confirma.',
       cta_carta: 'Ver la carta', cta_reservas: 'Reservar mesa', cta_pedido: 'Hacer un pedido', cta_sellos: 'Mi tarjeta de sellos',
       cta_ubicacion: 'Cómo llegar', cta_whatsapp: 'Escríbenos', cta_eventos: 'Ver la agenda',
@@ -589,7 +589,7 @@ function breakApp(win, doc, initialCfg, opts) {
       reviewG: 'Review us on Google', reviewWa: 'Tell us on WhatsApp', onGoogle: 'on Google',
       share: 'Share this menu', shareSub: 'Send it to whoever is coming with you', sharePreview: 'The published app shares its link.',
       call: 'Call', writeUs: 'Message us', credit: 'Made with Break', facade: 'Front of a bahareque house',
-      todayIs: 'Today', sections: 'Sections', navHome: 'Home', navMenu: 'Menu', navOrder: 'Order', navBook: 'Book', navStamps: 'Stamps', navMap: 'Map', navContact: 'Contact', navMore: 'More',
+      todayIs: 'Today', sections: 'Sections', dayTo: 'to', navHome: 'Home', navMenu: 'Menu', navOrder: 'Order', navBook: 'Book', navStamps: 'Stamps', navMap: 'Map', navContact: 'Contact', navMore: 'More',
       how1: 'Pick from the menu and tap +.', how2: 'Check your order and tell us how you want it.', how3: 'Send it on WhatsApp and the place confirms.',
       cta_carta: 'See the menu', cta_reservas: 'Book a table', cta_pedido: 'Place an order', cta_sellos: 'My stamp card',
       cta_ubicacion: 'How to get here', cta_whatsapp: 'Message us', cta_eventos: 'See what’s on',
@@ -888,6 +888,41 @@ section.m-hero:has(.hero-box.v-arriba:not(.ph-fail)){padding-top:0}
 .feat-b h4{margin:0;font-size:18px;line-height:1.25}
 .feat-b p{margin:0;font-size:14px;color:var(--muted)}
 .promos{display:grid;gap:12px}
+main>.m.sb{padding-bottom:48px;color:var(--ink)}
+.m.sb-superficie{background:var(--surface)}
+.m.sb-tinte{background:color-mix(in srgb,var(--accent) 9%,var(--bg))}
+.m.sb-acento,.m.sb-invertido{background:var(--bg)}
+.m.sa-izq .sh{text-align:left}
+.m.sa-izq .sh .orn{margin-left:0;margin-right:auto}
+.m.sa-centro .sh{text-align:center}
+.m.sa-centro .sh .orn{margin-left:auto;margin-right:auto}
+main>.m.sp-compacto{padding-top:28px}
+main>.m.sp-amplio{padding-top:84px}
+.feat-cuadricula{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.feat-cuadricula .feat,.feat-lista .feat{flex:none;max-width:none}
+.feat-cuadricula .feat .media{aspect-ratio:1}
+.feat-cuadricula .feat-b{padding:12px 13px 14px}
+.feat-cuadricula .feat .feat-b h4{font-size:16px;line-height:1.25}
+.feat-cuadricula .feat-b p{display:none}
+.feat-lista{display:grid;gap:12px}
+.feat-lista .feat{flex-direction:row;align-items:stretch}
+.feat-lista .feat .media{width:104px;aspect-ratio:auto;flex:none;border-radius:0}
+.promo-rail .promo{flex:0 0 78%;max-width:320px;scroll-snap-align:start}
+.hc dt{min-width:0}
+.hc dd{white-space:nowrap}
+.qbig{grid-auto-flow:column;grid-auto-columns:88%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:14px;padding-bottom:6px}
+.qbig .quote{scroll-snap-align:start;text-align:center;padding:26px 22px 24px}
+.qbig blockquote{font-family:var(--fd);font-size:22px;line-height:1.35}
+.qbig blockquote::before{content:"“";display:block;margin-bottom:6px;font-size:60px;line-height:.5;color:var(--c-kicker,var(--accent))}
+.clg{grid-template-columns:repeat(auto-fill,minmax(98px,1fr))}
+.clg .cl{flex-direction:column;justify-content:center;gap:8px;min-height:98px;padding:14px 8px;text-align:center}
+.clg .cl .ic{width:28px;height:28px}
+.clg .cl-k{margin:0;font-size:14px}
+.clg .cl-v{display:none}
+.events.tl{position:relative;gap:0;padding-left:26px}
+.events.tl::before{content:"";position:absolute;left:7px;top:8px;bottom:10px;width:2px;background:color-mix(in srgb,var(--c-kicker,var(--accent)) 40%,transparent)}
+.events.tl .ev.card{position:relative;padding:0 0 24px;background:none;border:0;box-shadow:none;border-radius:0}
+.events.tl .ev.card::before{content:"";position:absolute;left:-26px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:3px solid var(--c-kicker,var(--accent));box-sizing:border-box}
 .promo{position:relative;padding:18px 20px;border-radius:var(--r);background:var(--surface)}
 .promo h4{margin:4px 0 4px;font-size:19px;line-height:1.25;padding-right:56px}
 .promo p{margin:0;color:var(--muted);font-size:14px}
@@ -1120,6 +1155,7 @@ html[data-tex="papel"] body{background-image:url("data:image/svg+xml,%3Csvg xmln
 html[data-tex="cuadros"] body{background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%),linear-gradient(color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%);background-size:28px 28px}
 html[data-tex="zocalo"] .m+.m{position:relative}
 html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;right:20px;top:0;height:10px;background:${ZZ};opacity:.9}
+html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{display:none}
 .intro[data-motion="suave"] .m{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
 .intro[data-motion="vivo"] .m{animation:pop .6s cubic-bezier(.2,1.4,.4,1) both}
 .intro .m:nth-child(2){animation-delay:.08s}.intro .m:nth-child(3){animation-delay:.16s}.intro .m:nth-child(4){animation-delay:.24s}
@@ -1185,6 +1221,8 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
 [data-skin="elegante"] .feat{background:transparent;border:1px solid color-mix(in srgb,var(--accent) 26%,transparent)}
 [data-skin="elegante"] .feat .media{font-size:76px}
 [data-skin="elegante"] .feat-b h4{font-family:var(--fd);font-weight:500;font-size:23px}
+[data-skin="elegante"] .feat-cuadricula .feat .feat-b h4{font-size:19px;line-height:1.2}
+[data-skin="elegante"] .feat-lista .feat .feat-b h4{font-size:20px}
 [data-skin="elegante"] .inp{background:transparent;border:0;border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:0;padding-inline:0}
 [data-skin="elegante"] .stepper{border-width:1px;border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
 [data-skin="elegante"] .lbl{font-weight:500;letter-spacing:.22em;font-size:10.5px}
@@ -1888,6 +1926,21 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     const mono = (l.type === 'mono' && l.value) ? l.value : name.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0); }).join('');
     return '<span class="logo mono ' + size + '">' + esc(String(mono).slice(0, 3)) + '</span>';
   }
+  /* Horario compacto: los días seguidos con el mismo horario van juntos («Lunes a viernes»). */
+  function hoursCompact(H, today) {
+    const order = [1, 2, 3, 4, 5, 6, 0], groups = [];
+    order.forEach(function (d) {
+      const h = H.filter(function (x) { return +x.d === d; })[0], closed = !h || h.closed || !h.open;
+      const k = closed ? 'x' : h.open + '-' + h.close, last = groups[groups.length - 1];
+      if (last && last.k === k) last.days.push(d); else groups.push({ k: k, days: [d], h: h, closed: closed });
+    });
+    return '<dl class="hours hc">' + groups.map(function (g) {
+      const a = g.days[0], b = g.days[g.days.length - 1], on = g.days.indexOf(today) >= 0;
+      const label = cap(dayName(a)) + (g.days.length > 2 ? ' ' + ui('dayTo') + ' ' + dayName(b) : g.days.length === 2 ? ' ' + (lang() === 'en' ? 'and' : 'y') + ' ' + dayName(b) : '');
+      return '<div class="hrow' + (on ? ' today' : '') + '"><dt>' + esc(label) + (on ? '<span class="hoy">' + esc(ui('today')) + '</span>' : '') + '</dt><span class="lead" aria-hidden="true"></span><dd>' +
+        esc(g.closed ? ui('closed') : fmtTime(g.h.open) + ' – ' + fmtTime(g.h.close)) + '</dd></div>';
+    }).join('') + '</dl>';
+  }
   function sh(m, kicker) {
     const k = tx(m.s, 'kicker') || kicker || '';
     return '<div class="sh">' + (k ? '<p class="sh-k">' + esc(k) + '</p>' : '') + '<h2 class="sh-t">' + esc(modTitle(m)) + '</h2><span class="orn" aria-hidden="true"></span></div>';
@@ -2181,10 +2234,14 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       const s = m.s, tag = s.tag || 'chef', max = clamp(+s.max || 4, 1, 10);
       const items = allItems().filter(function (it) { return (it.tags || []).indexOf(tag) >= 0 && it.on !== false; }).slice(0, max);
       if (!items.length) return emptyNote('Marca platos con la etiqueta «' + tagLabel(tag) + '» para que aparezcan aquí.');
-      return '<div class="wrap">' + sh(m) + '</div><div class="rail">' + items.map(function (it, i) {
+      /* Diseño: carrusel (el de siempre), cuadrícula de dos columnas o lista con foto pequeña. */
+      const lay = s.layout === 'cuadricula' || s.layout === 'lista' ? s.layout : '';
+      const cards = items.map(function (it, i) {
         return '<article class="feat" data-act="item" data-id="' + attr(it.id) + '">' + mediaHTML(it, i) + '<div class="feat-b"><h4>' + esc(tx(it, 'name')) + '</h4>' +
           (tx(it, 'desc') ? '<p>' + esc(tx(it, 'desc')) + '</p>' : '') + '<span class="price">' + esc(money(it.price, priceStyle())) + '</span></div></article>';
-      }).join('') + '</div>';
+      }).join('');
+      if (lay) return '<div class="wrap">' + sh(m) + '<div class="feat-' + lay + '">' + cards + '</div></div>';
+      return '<div class="wrap">' + sh(m) + '</div><div class="rail">' + cards + '</div>';
     },
 
     promos: function (m) {
@@ -2193,12 +2250,15 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       const today = nowLocal().d;
       const isToday = function (p) { return s.highlightToday !== false && (p.days || []).map(Number).indexOf(today) >= 0; };
       const sorted = list.slice().sort(function (a, b) { return isToday(b) - isToday(a); });
-      return '<div class="wrap">' + sh(m) + '<div class="promos">' + sorted.map(function (p) {
+      const cards = sorted.map(function (p) {
         const t = isToday(p);
         return '<article class="promo ' + (t ? 'today' : '') + '">' + (t ? '<span class="badge">' + esc(ui('todayBadge')) + '</span>' : '') +
           '<p class="promo-d">' + esc(fmtDays(p.days)) + '</p><h4>' + esc(tx(p, 'title')) + '</h4>' +
           (tx(p, 'desc') ? '<p>' + esc(tx(p, 'desc')) + '</p>' : '') + (+p.price ? '<span class="price">' + esc(money(p.price, 'full')) + '</span>' : '') + '</article>';
-      }).join('') + '</div></div>';
+      }).join('');
+      /* Diseño: tarjetas una debajo de otra (el de siempre) o carrusel. */
+      if (s.layout === 'carrusel') return '<div class="wrap">' + sh(m) + '</div><div class="rail promo-rail">' + cards + '</div>';
+      return '<div class="wrap">' + sh(m) + '<div class="promos">' + cards + '</div></div>';
     },
 
     menudia: function (m) {
@@ -2265,7 +2325,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       const quotes = (s.quotes || []).filter(function (q) { return q && tx(q, 'text'); });
       return '<div class="wrap">' + sh(m) + (tx(s, 'text') ? '<p class="lead-p">' + esc(tx(s, 'text')) + '</p>' : '') +
         (s.rating ? '<p class="rating"><b>' + esc(s.rating) + '</b> ★ <span class="small">' + esc(ui('onGoogle')) + '</span></p>' : '') +
-        (quotes.length ? '<div class="quotes">' + quotes.map(function (q) { return '<figure class="quote"><blockquote>' + esc(tx(q, 'text')) + '</blockquote>' + (q.author ? '<figcaption>' + esc(q.author) + '</figcaption>' : '') + '</figure>'; }).join('') + '</div>' : '') +
+        (quotes.length ? '<div class="quotes' + (s.layout === 'destacada' ? ' qbig' : '') + '">' + quotes.map(function (q) { return '<figure class="quote"><blockquote>' + esc(tx(q, 'text')) + '</blockquote>' + (q.author ? '<figcaption>' + esc(q.author) + '</figcaption>' : '') + '</figure>'; }).join('') + '</div>' : '') +
         '<div class="btns">' + (url ? '<a class="btn pri" href="' + attr(url) + '" target="_blank" rel="noopener">' + esc(ui('reviewG')) + '</a>' : '') +
         '<button class="btn ghost" data-act="review-wa">' + ico('whatsapp') + esc(ui('reviewWa')) + '</button></div>' +
         (!url && PREVIEW ? '<p class="pv-empty" style="margin-top:14px">Pega el enlace de reseñas de Google en Datos para mostrar el botón de Google.</p>' : '') + '</div>';
@@ -2275,6 +2335,8 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       const s = m.s, H = cfg.brand.hours || [];
       if (!H.length) return emptyNote('Configura el horario en la pestaña Datos.');
       const now = nowLocal(), st = statusInfo();
+      if (s.layout === 'compacto') return '<div class="wrap">' + sh(m) + (st ? '<p class="hstat ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.text) + '</p>' : '') +
+        hoursCompact(H, now.d) + (tx(s, 'note') ? '<p class="small" style="margin-top:12px">' + esc(tx(s, 'note')) + '</p>' : '') + '</div>';
       return '<div class="wrap">' + sh(m) + (st ? '<p class="hstat ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.text) + '</p>' : '') +
         '<dl class="hours">' + [1, 2, 3, 4, 5, 6, 0].map(function (d) {
           const h = H.filter(function (x) { return +x.d === d; })[0], closed = !h || h.closed || !h.open;
@@ -2319,7 +2381,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
           (e.rsvp ? '<button class="btn sm ghost" data-act="rsvp" data-mid="' + attr(m.id) + '" data-i="' + i + '">' + esc(ui('rsvp')) + '</button>' : '') + '</article>';
       }).join('');
       if (!cards) return emptyNote('Agrega al menos un evento.');
-      return '<div class="wrap">' + sh(m) + '<div class="events">' + cards + '</div></div>';
+      return '<div class="wrap">' + sh(m) + '<div class="events' + (s.layout === 'linea' ? ' tl' : '') + '">' + cards + '</div></div>';
     },
 
     wifi: function (m) {
@@ -2382,7 +2444,7 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
       if (handle(b.facebook)) links.push('<a class="cl" href="https://facebook.com/' + attr(handle(b.facebook)) + '" target="_blank" rel="noopener">' + ico('facebook') + '<span class="cl-k">Facebook</span><span class="cl-v">' + esc(handle(b.facebook)) + '</span></a>');
       if (handle(b.tiktok)) links.push('<a class="cl" href="https://www.tiktok.com/@' + attr(handle(b.tiktok)) + '" target="_blank" rel="noopener">' + ico('tiktok') + '<span class="cl-k">TikTok</span><span class="cl-v">@' + esc(handle(b.tiktok)) + '</span></a>');
       links.push('<button class="cl" data-act="share">' + ico('compartir') + '<span class="cl-k">' + esc(ui('share')) + '</span><span class="cl-v">' + esc(ui('shareSub')) + '</span></button>');
-      return '<div class="wrap">' + sh(m) + '<div class="contact">' + links.join('') + '</div></div>';
+      return '<div class="wrap">' + sh(m) + '<div class="contact' + (m.s.layout === 'botones' ? ' clg' : '') + '">' + links.join('') + '</div></div>';
     },
 
     libre: function (m) {
@@ -2885,6 +2947,48 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
   }
   /* Cada etapa de personalización agrega aquí una función (rule) => { … } que lee opt() y escribe sus reglas. */
   const OPTION_RULES = [
+    /* Espaciado (theme.space) y títulos de sección (theme.heads). */
+    function (rule) {
+      const dn = opt('space.density', ''), sp = opt('space.sep', ''), al = opt('heads.align', ''), orn = opt('heads.orn', ''), kk = opt('heads.kicker', '');
+      const S = 'main>.m:not(.m-hero):not(.m-aviso):not(.sp-compacto):not(.sp-amplio)';
+      if (dn === 'compacta') { rule(S, 'padding-top:30px'); rule('.sh', 'margin-bottom:16px'); }
+      else if (dn === 'amplia') { rule(S, 'padding-top:78px'); rule('.sh', 'margin-bottom:28px'); }
+      const SEP = 'main>.m+.m:not(.m-aviso)';
+      if (sp === 'ninguno') rule(SEP + '::before,' + SEP + '::after', 'display:none');
+      else if (sp) {
+        rule(SEP, 'position:relative');
+        const B = 'content:"";position:absolute;top:0;';
+        if (sp === 'linea') rule(SEP + '::before', B + 'left:20px;right:20px;height:1px;background:color-mix(in srgb,var(--ink) 14%,transparent);opacity:1;-webkit-mask:none;mask:none');
+        else if (sp === 'zocalo') rule(SEP + '::before', B + 'left:20px;right:20px;height:10px;background:' + ZZ + ';opacity:.9;-webkit-mask:none;mask:none');
+        else if (sp === 'onda') rule(SEP + '::before', B + 'left:50%;width:120px;height:12px;margin-left:-60px;background:var(--accent3);opacity:1;-webkit-mask:' + SQUIG + ' 0 50%/40px 12px repeat-x;mask:' + SQUIG + ' 0 50%/40px 12px repeat-x');
+        else if (sp === 'ornamento') {
+          rule(SEP + '::before', B + 'left:50%;width:132px;height:9px;margin-left:-66px;opacity:1;-webkit-mask:none;mask:none;background:linear-gradient(var(--accent),var(--accent)) left 50%/52px 1px no-repeat,linear-gradient(var(--accent),var(--accent)) right 50%/52px 1px no-repeat');
+          rule(SEP + '::after', 'content:"";position:absolute;left:50%;top:1px;width:7px;height:7px;border:1px solid var(--accent);transform:translateX(-50%) rotate(45deg)');
+        }
+        // Una sección con fondo propio ya se separa sola: sin separador en ella ni en la que sigue.
+        const NB = 'main>.m+.m.sb:not(.m-aviso),main>.m.sb+.m:not(.m-aviso)';
+        rule(NB.split(',').map(function (x) { return x + '::before,' + x + '::after'; }).join(','), 'display:none');
+      }
+      const centered = al === 'centro' || (al !== 'izq' && skin === 'elegante');
+      if (al === 'izq') rule('.sh', 'text-align:left');
+      else if (al === 'centro') rule('.sh', 'text-align:center');
+      const M = centered ? 'margin-left:auto;margin-right:auto' : 'margin-left:0;margin-right:auto';
+      if (al) rule('.sh .orn', M);
+      const O = '.sh .orn';
+      if (orn === 'ninguno') rule(O, 'display:none');
+      else if (orn === 'linea') { rule(O, 'display:block;width:56px;height:2px;margin-top:14px;background:var(--c-kicker,var(--accent));-webkit-mask:none;mask:none;border:0;' + M); rule(O + '::after', 'display:none'); }
+      else if (orn === 'rombo') {
+        rule(O, 'display:block;position:relative;width:132px;height:9px;margin-top:16px;-webkit-mask:none;mask:none;border:0;background:linear-gradient(var(--accent),var(--accent)) left 50%/52px 1px no-repeat,linear-gradient(var(--accent),var(--accent)) right 50%/52px 1px no-repeat;' + M);
+        rule(O + '::after', 'content:"";display:block;position:absolute;left:50%;top:50%;width:7px;height:7px;border:1px solid var(--accent);transform:translate(-50%,-50%) rotate(45deg)');
+      } else if (orn === 'onda') { rule(O, 'display:block;width:84px;height:11px;margin-top:12px;border:0;background:var(--accent3);-webkit-mask:' + SQUIG + ' 0 50%/42px 11px repeat-x;mask:' + SQUIG + ' 0 50%/42px 11px repeat-x;' + M); rule(O + '::after', 'display:none'); }
+      else if (orn === 'zigzag') { rule(O, 'display:block;width:86px;height:10px;margin-top:14px;border:0;-webkit-mask:none;mask:none;background:' + ZZ + ';' + M); rule(O + '::after', 'display:none'); }
+      if (kk === 'ocultar') rule('.sh-k', 'display:none');
+      // La alineación elegida en una sección le gana a la general.
+      if (al || orn) {
+        rule('.m.sa-izq .sh', 'text-align:left'); rule('.m.sa-izq .sh .orn', 'margin-left:0;margin-right:auto');
+        rule('.m.sa-centro .sh', 'text-align:center'); rule('.m.sa-centro .sh .orn', 'margin-left:auto;margin-right:auto');
+      }
+    },
     /* Encabezado (theme.top.bg): sólido, o transparente sobre la portada hasta que se baja. */
     function (rule) {
       const bg = opt('top.bg', '');
@@ -3050,11 +3154,46 @@ html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;rig
     if (handle(b.tiktok)) out.push(['https://www.tiktok.com/@' + handle(b.tiktok), 'tiktok', 'TikTok']);
     return out.length ? '<div class="foot-soc">' + out.map(function (o) { return '<a class="soc" href="' + attr(o[0]) + '" target="_blank" rel="noopener" aria-label="' + attr(o[2]) + '">' + ico(o[1]) + '</a>'; }).join('') + '</div>' : '';
   }
+  /* Fondo propio de una sección. «acento» e «invertido» cambian los colores de la paleta solo dentro de ella,
+     así todo lo de adentro (títulos, tarjetas, botones) se sigue leyendo. */
+  const SEC_BG = { superficie: 1, tinte: 1, acento: 1, invertido: 1 };
+  function hexRGB(h) {
+    h = String(h).replace('#', ''); if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    return [0, 2, 4].map(function (i) { return parseInt(h.slice(i, i + 2), 16); });
+  }
+  function mixHex(a, b, t) { const x = hexRGB(a), y = hexRGB(b); return '#' + x.map(function (v, i) { return ('0' + Math.round(v + (y[i] - v) * t).toString(16)).slice(-2); }).join(''); }
+  function ratio(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  /* Acerca un color hacia «to» hasta que se lea sobre «bg» (4,5:1); si no alcanza, usa «to». */
+  function legible(c, bg, to) {
+    for (let t = 0; t <= 10; t++) { const m = mixHex(c, to, t / 10); if (ratio(m, bg) >= 4.5) return m; }
+    return to;
+  }
+  function secVars(bg) {
+    const c = cfg.theme.colors, B = hexOk(c.bg, '#ffffff'), I = hexOk(c.ink, '#111111'), A = hexOk(c.accent, '#888888');
+    const A2 = hexOk(c.accent2, A), A3 = hexOk(c.accent3, A), acc = function (k, v) { return ';--' + k + ':' + v + ';--on-' + k + ':' + onColor(v); };
+    let v;
+    if (bg === 'acento') {
+      const OA = onColor(A);
+      v = '--bg:' + A + ';--ink:' + OA + ';--muted:color-mix(in srgb,' + OA + ' 78%,' + A + ');--surface:color-mix(in srgb,' + OA + ' 14%,' + A + ');--accent:' + OA + ';--on-accent:' + A +
+        acc('accent2', legible(A2, A, OA)) + acc('accent3', legible(A3, A, OA));
+    } else if (bg === 'invertido') {
+      v = '--bg:' + I + ';--ink:' + B + ';--muted:color-mix(in srgb,' + B + ' 72%,' + I + ');--surface:color-mix(in srgb,' + B + ' 10%,' + I + ')' +
+        acc('accent', legible(A, I, B)) + acc('accent2', legible(A2, I, B)) + acc('accent3', legible(A3, I, B));
+    } else return '';
+    // Los colores por elemento (theme.roles) se eligieron contra el fondo de la app: adentro vuelven a los de la estética.
+    const R = cfg.theme.roles || {};
+    ROLE_KEYS.forEach(function (k) { if (roleHex(R[k])) v += ';--c-' + k + ':initial;--c-' + k + '-on:initial'; });
+    return v;
+  }
   function sectionHTML(m) {
     let inner = '';
     try { inner = RENDER[m.type](m) || ''; } catch (e) { inner = PREVIEW ? '<div class="wrap"><p class="pv-empty">No se pudo mostrar el módulo «' + esc(m.type) + '»: ' + esc(e && e.message) + '</p></div>' : ''; }
     if (!inner) return '';
-    return '<section class="m m-' + attr(m.type) + '" id="' + attr(anchor(m)) + '" data-mid="' + attr(m.id) + '">' + inner + '</section>';
+    const s = m.s || {}, cls = [], bg = SEC_BG[s._bg] ? s._bg : '';
+    if (bg) cls.push('sb', 'sb-' + bg);
+    if (s._align === 'izq' || s._align === 'centro') cls.push('sa-' + s._align);
+    if (s._pad === 'compacto' || s._pad === 'amplio') cls.push('sp-' + s._pad);
+    return '<section class="m m-' + attr(m.type) + (cls.length ? ' ' + cls.join(' ') : '') + '" id="' + attr(anchor(m)) + '" data-mid="' + attr(m.id) + '"' + (bg ? ' style="' + secVars(bg) + '"' : '') + '>' + inner + '</section>';
   }
   function renderAll(keepScroll) {
     const y = win.pageYOffset || 0;
@@ -4104,6 +4243,15 @@ const STYLE = [
       { k: 'top.name', t: 'bool', label: 'Mostrar el nombre', def: true },
       { k: 'top.status', t: 'bool', label: 'Mostrar si está abierto', def: true }
     ] },
+    { id: 'secciones', adv: true, title: 'Secciones', desc: 'El espacio y lo que separa una sección de la siguiente.', fields: [
+      { k: 'space.density', t: 'seg', label: 'Espacio entre secciones', def: 'auto', opts: [['compacta', 'Poco'], ['auto', 'Normal'], ['amplia', 'Mucho']] },
+      { k: 'space.sep', t: 'seg', label: 'Separador', def: 'auto', opts: [['auto', 'Según la estética'], ['ninguno', 'Ninguno'], ['linea', 'Línea'], ['ornamento', 'Ornamento'], ['onda', 'Onda'], ['zocalo', 'Zócalo']] }
+    ] },
+    { id: 'titulosec', adv: true, title: 'Títulos de sección', fields: [
+      { k: 'heads.align', t: 'seg', label: 'Alineación', def: 'auto', opts: [['auto', 'Según la estética'], ['izq', 'A la izquierda'], ['centro', 'Centrados']] },
+      { k: 'heads.orn', t: 'seg', label: 'Adorno debajo', def: 'auto', opts: [['auto', 'Según la estética'], ['ninguno', 'Ninguno'], ['linea', 'Línea'], ['rombo', 'Rombo'], ['onda', 'Onda'], ['zigzag', 'Zigzag']] },
+      { k: 'heads.kicker', t: 'seg', label: 'Antetítulos', def: 'auto', opts: [['auto', 'Mostrar'], ['ocultar', 'Ocultar']] }
+    ] },
     { id: 'pie', title: 'Pie de página', fields: [
       { k: 'foot.style', t: 'seg', label: 'Contenido', def: 'completo', opts: [['completo', 'Completo'], ['simple', 'Sencillo']], help: 'Completo: eslogan, horario de hoy, dirección, redes con íconos y texto legal (se escribe en Datos).' },
       { k: 'foot.align', adv: true, t: 'seg', label: 'Alineación', def: 'auto', opts: [['auto', 'Según la estética'], ['centro', 'Centrado'], ['izq', 'A la izquierda']] },
@@ -4126,6 +4274,12 @@ const STYLE = [
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
+const SECTION_FIELDS = [
+  { t: 'sep', label: 'Diseño de esta sección' },
+  { k: '_bg', t: 'sel', label: 'Fondo', def: 'auto', opts: [['auto', 'El de la app'], ['superficie', 'Color de las tarjetas'], ['tinte', 'Tinte del acento'], ['acento', 'Color de acento'], ['invertido', 'Invertido (claro sobre oscuro)']] },
+  { k: '_align', t: 'seg', label: 'Título', def: 'auto', opts: [['auto', 'Según la estética'], ['izq', 'A la izquierda'], ['centro', 'Centrado']] },
+  { k: '_pad', t: 'seg', label: 'Espacio arriba', def: 'auto', opts: [['compacto', 'Poco'], ['auto', 'Normal'], ['amplio', 'Mucho']] }
+];
 /* Color por elemento: roles (theme.roles) y los colores de la paleta que se ofrecen para cada uno. */
 const ROLES = [['btn', 'Botones'], ['title', 'Títulos'], ['kicker', 'Antetítulos'], ['price', 'Precios'], ['sel', 'Selección'], ['tag', 'Etiquetas'], ['top', 'Encabezado'], ['foot', 'Pie de página']];
 const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['surface', 'Tarjetas'], ['bg', 'Fondo']];
@@ -4195,13 +4349,13 @@ const MODULES = {
   destacados: {
     label: 'Destacados', code: 'DE', group: 'Ventas', desc: 'Carrusel con los platos de una etiqueta: recomendados, favoritos o nuevos.',
     defaults: { title: 'Recomendados', tag: 'chef', max: 4 },
-    fields: [F.title('Recomendados'), { k: 'tag', t: 'tag', label: 'Mostrar platos con la etiqueta' }, { k: 'max', t: 'num', label: 'Máximo de platos', min: 1, max: 10 }]
+    fields: [F.title('Recomendados'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'carrusel', opts: [['carrusel', 'Carrusel'], ['cuadricula', 'Cuadrícula de dos columnas'], ['lista', 'Lista con foto pequeña']] }, { k: 'tag', t: 'tag', label: 'Mostrar platos con la etiqueta' }, { k: 'max', t: 'num', label: 'Máximo de platos', min: 1, max: 10 }]
   },
   promos: {
     label: 'Promociones', code: 'PR', group: 'Ventas', seg: 'Vecino', desc: 'Promos por día de la semana; la de hoy sale primero y resaltada.',
     defaults: { title: 'Promociones', highlightToday: true, items: [{ days: [2], title: 'Martes de 2×1', desc: '', price: 0 }] },
     fields: [
-      F.title('Promociones'), { k: 'highlightToday', t: 'bool', label: 'Resaltar la promo de hoy', def: true },
+      F.title('Promociones'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas una debajo de otra'], ['carrusel', 'Carrusel']] }, { k: 'highlightToday', t: 'bool', label: 'Resaltar la promo de hoy', def: true },
       { k: 'items', t: 'list', label: 'Promociones', item: 'Promo', blank: { days: [], title: '', desc: '', price: 0 },
         fields: [{ k: 'days', t: 'days', label: 'Días' }, F.text('title', 'Título'), F.text('desc', 'Detalle'), { k: 'price', t: 'num', label: 'Precio (opcional)', min: 0, step: 100, money: true }] }
     ]
@@ -4276,7 +4430,7 @@ const MODULES = {
     label: 'Reseñas', code: 'RS', group: 'Turismo y contenido', seg: 'Turista', desc: 'Lleva a los clientes a dejar su reseña en Google o a escribirle al local.',
     defaults: { title: '¿Cómo te fue?', text: '', rating: '', quotes: [] },
     fields: [
-      F.title('¿Cómo te fue?'), F.area('text', 'Texto', '', 2), { k: 'rating', t: 'text', label: 'Calificación real en Google (opcional)', ph: '4,8' },
+      F.title('¿Cómo te fue?'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas'], ['destacada', 'Cita grande que se desliza']] }, F.area('text', 'Texto', '', 2), { k: 'rating', t: 'text', label: 'Calificación real en Google (opcional)', ph: '4,8' },
       { k: 'quotes', t: 'list', label: 'Testimonios', item: 'Testimonio', blank: { text: '', author: '' }, fields: [F.area('text', 'Texto', '', 2), { k: 'author', t: 'text', label: 'Autor' }] },
       { t: 'hint', text: 'El botón de Google usa el enlace de reseñas de Datos. Publica solo opiniones reales, con permiso de quien las escribió.' }
     ]
@@ -4296,7 +4450,7 @@ const MODULES = {
   eventos: {
     label: 'Agenda', code: 'EV', group: 'Turismo y contenido', desc: 'Música en vivo, talleres y fechas especiales, con cupos por WhatsApp.',
     defaults: { title: 'Agenda', items: [{ when: '', title: '', desc: '', rsvp: false }] },
-    fields: [F.title('Agenda'),
+    fields: [F.title('Agenda'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas'], ['linea', 'Línea de tiempo']] },
       { k: 'items', t: 'list', label: 'Eventos', item: 'Evento', blank: { when: '', title: '', desc: '', rsvp: false },
         fields: [F.text('when', 'Cuándo', 'Viernes · 7:00 p. m.'), F.text('title', 'Título'), F.area('desc', 'Descripción', '', 2), { k: 'rsvp', t: 'bool', label: 'Botón «Apartar cupo»' }] }]
   },
@@ -4308,7 +4462,7 @@ const MODULES = {
   horario: {
     label: 'Horario', code: 'HO', group: 'Esenciales', single: true, desc: 'Horario semanal y si está abierto ahora, en hora de Colombia.',
     defaults: { title: '', note: '' },
-    fields: [F.title('Horario'), F.text('note', 'Nota', 'Festivos de 10 a 6'), { t: 'hint', text: 'Los días y horas se editan en Datos.' }]
+    fields: [F.title('Horario'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'lista', opts: [['lista', 'Día por día'], ['compacto', 'Compacto: días seguidos juntos']] }, F.text('note', 'Nota', 'Festivos de 10 a 6'), { t: 'hint', text: 'Los días y horas se editan en Datos.' }]
   },
   ubicacion: {
     label: 'Ubicación', code: 'UB', group: 'Esenciales', single: true, desc: 'Dirección con botones a Google Maps y Waze.',
@@ -4318,7 +4472,7 @@ const MODULES = {
   contacto: {
     label: 'Contacto', code: 'CO', group: 'Esenciales', single: true, desc: 'WhatsApp, teléfono, redes y botón para compartir la carta.',
     defaults: { title: '' },
-    fields: [F.title('Contacto'), { t: 'hint', text: 'WhatsApp, teléfono y redes se editan en Datos.' }]
+    fields: [F.title('Contacto'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'filas', opts: [['filas', 'Filas con el dato'], ['botones', 'Botones con ícono']] }, { t: 'hint', text: 'WhatsApp, teléfono y redes se editan en Datos.' }]
   },
   libre: {
     label: 'Bloque libre', code: 'BL', group: 'Turismo y contenido', desc: 'Título, texto y botón para lo que el local necesite contar.',
@@ -5421,25 +5575,26 @@ const BRAND_FIELDS = [
     const s = m.s || {}, c = S.cur;
     const tagName = function (t) { return (TAGS.filter(function (x) { return x[0] === t; })[0] || [0, t])[1]; };
     const dshort = function (days) { const v = (days || []).map(Number); return DAYS.filter(function (d) { return v.indexOf(d[0]) >= 0; }).map(function (d) { return d[1]; }).join(' ') || 'sin días'; };
+    const lay = function (o) { return o[s.layout] ? ' · ' + o[s.layout] : ''; };
     switch (m.type) {
       case 'hero': return ([s.cta1, s.cta2].filter(function (x) { return x && x !== 'none'; }).map(function (x) { return (CTA_OPTS.filter(function (o) { return o[0] === x; })[0] || [0, x])[1]; }).join(' · ') || 'Sin botones') + (s.img ? ' · con foto' : '');
       case 'carta': { const n = c.menu.categories.reduce(function (a, k) { return a + k.items.length; }, 0); return c.menu.categories.length + ' categorías · ' + n + ' platos · ' + ({ lista: 'lista', tarjetas: 'tarjetas', cuadricula: 'cuadrícula', fotos: 'fotos grandes', compacta: 'compacta' }[s.layout] || 'lista'); }
-      case 'destacados': return 'Etiqueta «' + tagName(s.tag) + '» · hasta ' + (s.max || 4);
-      case 'promos': return (s.items || []).length + ' promos por día';
+      case 'destacados': return 'Etiqueta «' + tagName(s.tag) + '» · hasta ' + (s.max || 4) + lay({ cuadricula: 'cuadrícula', lista: 'lista' });
+      case 'promos': return (s.items || []).length + ' promos por día' + lay({ carrusel: 'carrusel' });
       case 'menudia': return (s.price ? money(s.price) + ' · ' : '') + dshort(s.days);
       case 'pedido': return ['mesa', 'llevar', 'domicilio'].filter(function (k) { return !s.modes || s.modes[k] !== false; }).join(', ') + (String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? '' : ' · falta WhatsApp');
       case 'reservas': { const n = String(s.slots || '').split(',').filter(function (x) { return x.trim(); }).length; return (n ? n + ' horarios' : 'Hora libre') + ' · hasta ' + (s.maxPeople || 10) + ' personas'; }
       case 'sellos': return (s.goal || 8) + ' sellos · ' + (s.pin ? 'código listo' : 'sin código');
       case 'ruleta': return s.mode === 'premios' ? (s.options || []).length + ' premios' : 'Platos de la carta';
       case 'trivia': return (s.questions || []).length + ' preguntas';
-      case 'resenas': return c.brand.reviewUrl ? 'Enlace de Google listo' : 'Falta enlace de Google';
+      case 'resenas': return (c.brand.reviewUrl ? 'Enlace de Google listo' : 'Falta enlace de Google') + lay({ destacada: 'cita grande' });
       case 'glosario': return (s.items || []).length + ' palabras';
       case 'historia': return s.year ? 'Desde ' + s.year : 'Sin año';
-      case 'eventos': return (s.items || []).length + ' eventos';
+      case 'eventos': return (s.items || []).length + ' eventos' + lay({ linea: 'línea de tiempo' });
       case 'wifi': return s.network || 'Sin red';
-      case 'horario': return (c.brand.hours || []).filter(function (h) { return !h.closed; }).length + ' días abiertos';
+      case 'horario': return (c.brand.hours || []).filter(function (h) { return !h.closed; }).length + ' días abiertos' + lay({ compacto: 'compacto' });
       case 'ubicacion': return c.brand.address || 'Sin dirección';
-      case 'contacto': return String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? 'WhatsApp listo' : 'Falta WhatsApp';
+      case 'contacto': return (String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? 'WhatsApp listo' : 'Falta WhatsApp') + lay({ botones: 'botones' });
       case 'libre': return s.style === 'destacado' ? 'Destacado' : 'Normal';
       case 'aviso': return !s.until ? 'Sin fecha de vencimiento' : (s.until < todayISO() ? 'Venció el ' : 'Hasta el ') + fmtDay(s.until);
       case 'galeria': return (s.items || []).length + ((s.items || []).length === 1 ? ' foto' : ' fotos') + ' · ' + (s.layout === 'mosaico' ? 'mosaico' : 'carrusel');
@@ -5458,10 +5613,16 @@ const BRAND_FIELDS = [
       '<div class="ctl"><button type="button" class="ib" data-a="mod-mv" data-mid="' + attr(m.id) + '" data-d="-1" aria-label="Subir ' + attr(def.label) + '"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
       '<button type="button" class="ib" data-a="mod-mv" data-mid="' + attr(m.id) + '" data-d="1" aria-label="Bajar ' + attr(def.label) + '"' + (i === total - 1 ? ' disabled' : '') + '>↓</button>' +
       '<input type="checkbox" class="sw" data-p="modules.' + i + '.on" data-type="bool"' + (m.on !== false ? ' checked' : '') + ' aria-label="Mostrar ' + attr(def.label) + '"></div></div>' +
-      (open ? '<div class="mod-b">' + (def.desc ? '<p class="help">' + esc(def.desc) + '</p>' : '') + def.fields.map(function (f) { return fieldHTML(f, 'modules.' + i + '.s'); }).join('') +
+      (open ? '<div class="mod-b">' + (def.desc ? '<p class="help">' + esc(def.desc) + '</p>' : '') + modFields(m.type, def).map(function (f) { return fieldHTML(f, 'modules.' + i + '.s'); }).join('') +
         '<div class="mod-f"><button type="button" class="btn sm" data-a="mod-focus" data-mid="' + attr(m.id) + '">Ver en la app</button>' +
         (def.single ? '' : '<button type="button" class="btn sm" data-a="mod-dup" data-mid="' + attr(m.id) + '">Duplicar</button>') +
         '<button type="button" class="btn sm danger" data-a="mod-del" data-mid="' + attr(m.id) + '">Quitar</button></div></div>' : '') + '</li>';
+  }
+  /* Campos de un módulo más «Diseño de esta sección» (fondo, alineación, espacio y antetítulo), salvo en la portada y el aviso. */
+  function modFields(type, def) {
+    if (type === 'hero' || type === 'aviso') return def.fields;
+    const hasK = def.fields.some(function (f) { return f.k === 'kicker'; });
+    return def.fields.concat(SECTION_FIELDS.slice(0, 1), hasK ? [] : [F.text('kicker', 'Antetítulo', 'Opcional, arriba del título')], SECTION_FIELDS.slice(1));
   }
   function catHTML(c, ci) {
     const open = S.openCat === c.id, last = S.cur.menu.categories.length - 1, bi = bilingual();

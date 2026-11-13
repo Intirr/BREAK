@@ -1032,25 +1032,26 @@
     const s = m.s || {}, c = S.cur;
     const tagName = function (t) { return (TAGS.filter(function (x) { return x[0] === t; })[0] || [0, t])[1]; };
     const dshort = function (days) { const v = (days || []).map(Number); return DAYS.filter(function (d) { return v.indexOf(d[0]) >= 0; }).map(function (d) { return d[1]; }).join(' ') || 'sin días'; };
+    const lay = function (o) { return o[s.layout] ? ' · ' + o[s.layout] : ''; };
     switch (m.type) {
       case 'hero': return ([s.cta1, s.cta2].filter(function (x) { return x && x !== 'none'; }).map(function (x) { return (CTA_OPTS.filter(function (o) { return o[0] === x; })[0] || [0, x])[1]; }).join(' · ') || 'Sin botones') + (s.img ? ' · con foto' : '');
       case 'carta': { const n = c.menu.categories.reduce(function (a, k) { return a + k.items.length; }, 0); return c.menu.categories.length + ' categorías · ' + n + ' platos · ' + ({ lista: 'lista', tarjetas: 'tarjetas', cuadricula: 'cuadrícula', fotos: 'fotos grandes', compacta: 'compacta' }[s.layout] || 'lista'); }
-      case 'destacados': return 'Etiqueta «' + tagName(s.tag) + '» · hasta ' + (s.max || 4);
-      case 'promos': return (s.items || []).length + ' promos por día';
+      case 'destacados': return 'Etiqueta «' + tagName(s.tag) + '» · hasta ' + (s.max || 4) + lay({ cuadricula: 'cuadrícula', lista: 'lista' });
+      case 'promos': return (s.items || []).length + ' promos por día' + lay({ carrusel: 'carrusel' });
       case 'menudia': return (s.price ? money(s.price) + ' · ' : '') + dshort(s.days);
       case 'pedido': return ['mesa', 'llevar', 'domicilio'].filter(function (k) { return !s.modes || s.modes[k] !== false; }).join(', ') + (String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? '' : ' · falta WhatsApp');
       case 'reservas': { const n = String(s.slots || '').split(',').filter(function (x) { return x.trim(); }).length; return (n ? n + ' horarios' : 'Hora libre') + ' · hasta ' + (s.maxPeople || 10) + ' personas'; }
       case 'sellos': return (s.goal || 8) + ' sellos · ' + (s.pin ? 'código listo' : 'sin código');
       case 'ruleta': return s.mode === 'premios' ? (s.options || []).length + ' premios' : 'Platos de la carta';
       case 'trivia': return (s.questions || []).length + ' preguntas';
-      case 'resenas': return c.brand.reviewUrl ? 'Enlace de Google listo' : 'Falta enlace de Google';
+      case 'resenas': return (c.brand.reviewUrl ? 'Enlace de Google listo' : 'Falta enlace de Google') + lay({ destacada: 'cita grande' });
       case 'glosario': return (s.items || []).length + ' palabras';
       case 'historia': return s.year ? 'Desde ' + s.year : 'Sin año';
-      case 'eventos': return (s.items || []).length + ' eventos';
+      case 'eventos': return (s.items || []).length + ' eventos' + lay({ linea: 'línea de tiempo' });
       case 'wifi': return s.network || 'Sin red';
-      case 'horario': return (c.brand.hours || []).filter(function (h) { return !h.closed; }).length + ' días abiertos';
+      case 'horario': return (c.brand.hours || []).filter(function (h) { return !h.closed; }).length + ' días abiertos' + lay({ compacto: 'compacto' });
       case 'ubicacion': return c.brand.address || 'Sin dirección';
-      case 'contacto': return String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? 'WhatsApp listo' : 'Falta WhatsApp';
+      case 'contacto': return (String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? 'WhatsApp listo' : 'Falta WhatsApp') + lay({ botones: 'botones' });
       case 'libre': return s.style === 'destacado' ? 'Destacado' : 'Normal';
       case 'aviso': return !s.until ? 'Sin fecha de vencimiento' : (s.until < todayISO() ? 'Venció el ' : 'Hasta el ') + fmtDay(s.until);
       case 'galeria': return (s.items || []).length + ((s.items || []).length === 1 ? ' foto' : ' fotos') + ' · ' + (s.layout === 'mosaico' ? 'mosaico' : 'carrusel');
@@ -1069,10 +1070,16 @@
       '<div class="ctl"><button type="button" class="ib" data-a="mod-mv" data-mid="' + attr(m.id) + '" data-d="-1" aria-label="Subir ' + attr(def.label) + '"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
       '<button type="button" class="ib" data-a="mod-mv" data-mid="' + attr(m.id) + '" data-d="1" aria-label="Bajar ' + attr(def.label) + '"' + (i === total - 1 ? ' disabled' : '') + '>↓</button>' +
       '<input type="checkbox" class="sw" data-p="modules.' + i + '.on" data-type="bool"' + (m.on !== false ? ' checked' : '') + ' aria-label="Mostrar ' + attr(def.label) + '"></div></div>' +
-      (open ? '<div class="mod-b">' + (def.desc ? '<p class="help">' + esc(def.desc) + '</p>' : '') + def.fields.map(function (f) { return fieldHTML(f, 'modules.' + i + '.s'); }).join('') +
+      (open ? '<div class="mod-b">' + (def.desc ? '<p class="help">' + esc(def.desc) + '</p>' : '') + modFields(m.type, def).map(function (f) { return fieldHTML(f, 'modules.' + i + '.s'); }).join('') +
         '<div class="mod-f"><button type="button" class="btn sm" data-a="mod-focus" data-mid="' + attr(m.id) + '">Ver en la app</button>' +
         (def.single ? '' : '<button type="button" class="btn sm" data-a="mod-dup" data-mid="' + attr(m.id) + '">Duplicar</button>') +
         '<button type="button" class="btn sm danger" data-a="mod-del" data-mid="' + attr(m.id) + '">Quitar</button></div></div>' : '') + '</li>';
+  }
+  /* Campos de un módulo más «Diseño de esta sección» (fondo, alineación, espacio y antetítulo), salvo en la portada y el aviso. */
+  function modFields(type, def) {
+    if (type === 'hero' || type === 'aviso') return def.fields;
+    const hasK = def.fields.some(function (f) { return f.k === 'kicker'; });
+    return def.fields.concat(SECTION_FIELDS.slice(0, 1), hasK ? [] : [F.text('kicker', 'Antetítulo', 'Opcional, arriba del título')], SECTION_FIELDS.slice(1));
   }
   function catHTML(c, ci) {
     const open = S.openCat === c.id, last = S.cur.menu.categories.length - 1, bi = bilingual();
