@@ -65,6 +65,17 @@ const SKINS = {
       { name: 'Menta', colors: { bg: '#F3F8F6', surface: '#E6F0EC', ink: '#0F1A16', muted: '#52625B', accent: '#00785E', accent2: '#0F1A16', accent3: '#BFD3CB' } },
       { name: 'Acero', colors: { bg: '#E9ECEF', surface: '#DEE2E6', ink: '#14181C', muted: '#545B62', accent: '#C2410C', accent2: '#14181C', accent3: '#B9C0C7' } }
     ]
+  },
+  pizarra: {
+    label: 'Pizarra', art: 'Menú del día', desc: 'Tablero de tiza, letra a mano, subrayados ondulados y marcos de colores. Para cafés de barrio, bistrós y menú del día.', layout: 'lista',
+    defaults: { colors: { bg: '#1F2B25', surface: '#28362F', ink: '#F1EFE6', muted: '#B9C2B8', accent: '#F2D16B', accent2: '#F29BB2', accent3: '#8FD3F4' }, fonts: { display: 'Amatic SC', body: 'Kalam' }, radius: 6, motion: 'suave', texture: 'tiza', icons: 'linea' },
+    palettes: [
+      { name: 'Tablero', colors: { bg: '#1F2B25', surface: '#28362F', ink: '#F1EFE6', muted: '#B9C2B8', accent: '#F2D16B', accent2: '#F29BB2', accent3: '#8FD3F4' } },
+      { name: 'Tablero negro', colors: { bg: '#1C1D1C', surface: '#272827', ink: '#F2F1EC', muted: '#B5B5AE', accent: '#FFD95E', accent2: '#7FD8BE', accent3: '#FF9F7A' } },
+      { name: 'Tablero azul', colors: { bg: '#1E2A36', surface: '#283746', ink: '#EEF2F5', muted: '#B3BFCA', accent: '#F7D774', accent2: '#F49AC1', accent3: '#9EE6B8' } },
+      { name: 'Tablero café', colors: { bg: '#2A211B', surface: '#362B23', ink: '#F4EDE2', muted: '#C3B5A3', accent: '#F2C46D', accent2: '#A8D5A2', accent3: '#F2A0A0' } },
+      { name: 'Tablero blanco', colors: { bg: '#F6F6F1', surface: '#FFFFFF', ink: '#1E2A24', muted: '#5B6660', accent: '#1D64B0', accent2: '#B8352A', accent3: '#257347' } }
+    ]
   }
 };
 
@@ -214,7 +225,7 @@ const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3'
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
-  ['willys', 'Jeep Willys'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
+  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',

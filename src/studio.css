@@ -197,6 +197,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-nocturna::after{content:"";position:absolute;inset:14px;border:2px solid #2EE6C8;border-radius:10px;box-shadow:0 0 8px #2EE6C8,inset 0 0 8px rgba(46,230,200,.45);rotate:-2deg}
 .sk-minimalista{background:#FAFAF8;color:#141413;font:800 31px/1 "Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;letter-spacing:-.05em;box-shadow:inset 0 0 0 1px #E2E1DC}
 .sk-minimalista::after{content:".";color:#2445D6}
+.sk-pizarra{background:#1F2B25;color:#F1EFE6;font:700 34px/1 "Amatic SC","Comic Sans MS",cursive;letter-spacing:.03em;text-shadow:0 0 1px rgba(241,239,230,.6);padding-bottom:10px}
+.sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}
 .skin-n em{font-style:normal;font-weight:500;color:var(--carbon);font-size:13px}

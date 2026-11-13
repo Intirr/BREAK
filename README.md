@@ -1,11 +1,11 @@
 # Break Studio
 
-Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes. Incluye siete apps de ejemplo: Araucaria (elegante), Antojo (animada), Casa Zócalo (cultural), La Espiga (natural, panadería), Neblina (minimalista, café de especialidad), Los Alisos (natural, truchas camino a los termales) y La Esquina (nocturna, comida rápida hasta tarde).
+Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes. Incluye ocho apps de ejemplo: Araucaria (elegante), Antojo (animada), Casa Zócalo (cultural), La Espiga (natural, panadería), Neblina (minimalista, café de especialidad), Los Alisos (natural, truchas camino a los termales) La Esquina (nocturna, comida rápida hasta tarde) y Café del Parque (pizarra, café de barrio con menú del día).
 
 ```bash
 npm install
 npm test          # compila y corre las pruebas
-npm run demos     # genera las siete apps de ejemplo en dist/
+npm run demos     # genera las apps de ejemplo en dist/
 ```
 
 En la pestaña Estilo se personaliza todo el diseño: estética, colores (con color por elemento, fondo y modo oscuro automático), tipografías, formas, carta, estructura (navegación, encabezado, secciones y pie), imágenes e íconos, movimiento, estilos guardados y CSS propio. El modo sencillo muestra lo principal; «Opciones avanzadas» lo muestra todo, por secciones.

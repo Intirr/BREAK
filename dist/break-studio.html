@@ -3,7 +3,7 @@
 <meta name="description" content="Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&display=swap">
 <style>
 /* Layout: two-pane workbench — order-ticket editor on the left, live phone on the right; tabs and one column on phones. */
 :root{
@@ -204,6 +204,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-nocturna::after{content:"";position:absolute;inset:14px;border:2px solid #2EE6C8;border-radius:10px;box-shadow:0 0 8px #2EE6C8,inset 0 0 8px rgba(46,230,200,.45);rotate:-2deg}
 .sk-minimalista{background:#FAFAF8;color:#141413;font:800 31px/1 "Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;letter-spacing:-.05em;box-shadow:inset 0 0 0 1px #E2E1DC}
 .sk-minimalista::after{content:".";color:#2445D6}
+.sk-pizarra{background:#1F2B25;color:#F1EFE6;font:700 34px/1 "Amatic SC","Comic Sans MS",cursive;letter-spacing:.03em;text-shadow:0 0 1px rgba(241,239,230,.6);padding-bottom:10px}
+.sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}
 .skin-n em{font-style:normal;font-weight:500;color:var(--carbon);font-size:13px}
@@ -657,6 +659,11 @@ const ART_CSS = [
     '.art-band{width:100%;height:96px;margin-top:30px}',
     '.art-guad{height:112px}',
     '.art-scene{width:100%;height:auto;max-width:400px;margin:0 auto 18px}',
+    '.art .a-tz0{stroke:color-mix(in srgb,var(--ink) 86%,transparent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
+    '.art .a-tz1{stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
+    '.art .a-tz2{stroke:var(--accent2);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
+    '.art .a-tz3{stroke:var(--accent3);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
+    '.art-garab{max-width:360px}',
     '.art .a-k1{fill:color-mix(in srgb,var(--ink) 13%,var(--bg))}',
     '.art .a-k2{fill:color-mix(in srgb,var(--ink) 28%,var(--bg))}',
     '.art .a-t1{fill:color-mix(in srgb,var(--leaf) 30%,var(--bg))}',
@@ -1604,6 +1611,78 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="minimalista"] .foot .foot-tag,[data-skin="minimalista"] .foot .foot-legal{margin-inline:0}
 [data-skin="minimalista"] .foot-n{font-weight:800;font-size:30px;letter-spacing:-.03em}
 [data-skin="minimalista"] .navi{font-weight:700;letter-spacing:-.02em}
+`,
+    pizarra: `
+[data-skin="pizarra"]{font-size:17px;--gw:.32;--sk1:255px 15px 225px 15px/15px 225px 15px 255px;--sk2:22px 7px 24px 6px/7px 24px 6px 22px;--chalk:0 0 1px color-mix(in srgb,currentColor 55%,transparent),.6px .4px 0 color-mix(in srgb,currentColor 22%,transparent)}
+[data-skin="pizarra"] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 92%,transparent));border-bottom:2px dashed color-mix(in srgb,var(--c-top-on,var(--ink)) 28%,transparent)}
+[data-skin="pizarra"] .brand-mini{font-family:var(--fd);font-size:28px;font-weight:700;letter-spacing:.03em;text-shadow:var(--chalk)}
+[data-skin="pizarra"] .status,[data-skin="pizarra"] .lang,[data-skin="pizarra"] .menu-btn{background:transparent;border:1.5px solid color-mix(in srgb,var(--c-top-on,var(--ink)) 50%,transparent);border-radius:var(--sk1)}
+[data-skin="pizarra"] .lang button.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg));border-radius:var(--sk1)}
+[data-skin="pizarra"] .menu-btn{width:40px;height:40px}
+[data-skin="pizarra"] .m-hero{padding-block:30px 0}
+[data-skin="pizarra"] .hero-k{color:var(--c-kicker,var(--accent3));letter-spacing:.1em;font-weight:700}
+[data-skin="pizarra"] .hero-t{font-weight:700;font-size:min(calc(clamp(68px,22vw,124px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.86;letter-spacing:.02em;color:var(--c-title,var(--ink));text-shadow:var(--chalk)}
+[data-skin="pizarra"] .hero-s{font-size:19px;line-height:1.45;color:color-mix(in srgb,var(--ink) 86%,var(--bg))}
+[data-skin="pizarra"] .btn{border-width:2px;border-radius:var(--sk1);font-weight:700;letter-spacing:.01em}
+[data-skin="pizarra"] .btn.pri{background:var(--c-btn,var(--accent));color:var(--c-btn-on,var(--on-accent));border-color:var(--c-btn,var(--accent))}
+[data-skin="pizarra"] .btn.ghost{background:transparent;border-color:color-mix(in srgb,var(--ink) 60%,transparent);color:var(--ink)}
+[data-skin="pizarra"] .ribbon{margin-top:28px;white-space:normal;font-size:18px;color:var(--accent2)}
+[data-skin="pizarra"] .ribbon-track{display:flex;flex-wrap:wrap;gap:2px 0}
+[data-skin="pizarra"] .ribbon-track span{padding:0 10px 0 0}
+[data-skin="pizarra"] .ribbon-track span:not(:last-child)::after{content:"✱";margin-left:10px;color:var(--accent)}
+[data-skin="pizarra"] .sh-k{color:var(--c-kicker,var(--accent3));letter-spacing:.1em;font-weight:700}
+[data-skin="pizarra"] .sh-t{font-weight:700;font-size:calc(clamp(46px,13.5vw,66px) * var(--ts,1));line-height:.9;letter-spacing:.02em;color:var(--c-title,var(--ink));text-shadow:var(--chalk)}
+[data-skin="pizarra"] .sh .orn{display:block;width:110px;height:12px;margin-top:6px;background:var(--accent);-webkit-mask:${SQUIG} 0 50%/44px 12px repeat-x;mask:${SQUIG} 0 50%/44px 12px repeat-x}
+[data-skin="pizarra"] .card,[data-skin="pizarra"] .svc,[data-skin="pizarra"] .fq,[data-skin="pizarra"] .lay-tarjetas .it,[data-skin="pizarra"] .lay-cuadricula .it,[data-skin="pizarra"] .lay-fotos .it,[data-skin="pizarra"] .feat,[data-skin="pizarra"] .promo,[data-skin="pizarra"] .quote,[data-skin="pizarra"] .cl,[data-skin="pizarra"] .wres{background:color-mix(in srgb,var(--surface) 60%,transparent);border:2px solid color-mix(in srgb,var(--ink) 30%,transparent);border-radius:var(--sk2)}
+[data-skin="pizarra"] .chip{background:transparent;border:1.5px solid color-mix(in srgb,var(--ink) 40%,transparent);border-radius:var(--sk1);font-weight:700}
+[data-skin="pizarra"] .chip.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg));border-color:var(--c-sel,var(--ink))}
+[data-skin="pizarra"] .cat-tabs{border-bottom:2px dashed color-mix(in srgb,var(--ink) 20%,transparent)}
+[data-skin="pizarra"] .cat-h h3{font-weight:700;font-size:42px;line-height:.95;letter-spacing:.02em;color:var(--c-title,var(--accent));text-shadow:var(--chalk)}
+[data-skin="pizarra"] .cat-h::after{content:"";display:block;width:96px;height:10px;margin-top:4px;background:var(--accent2);-webkit-mask:${SQUIG} 0 50%/38px 10px repeat-x;mask:${SQUIG} 0 50%/38px 10px repeat-x}
+[data-skin="pizarra"] .cat-h p{font-size:15px;color:var(--muted)}
+[data-skin="pizarra"] .it h4{font-weight:700;font-size:19px;line-height:1.2}
+[data-skin="pizarra"] .it-d{font-size:15px;color:color-mix(in srgb,var(--ink) 74%,var(--bg))}
+[data-skin="pizarra"] .lay-lista .it,[data-skin="pizarra"] .lay-compacta .it{border-bottom:1.5px dashed color-mix(in srgb,var(--ink) 18%,transparent)}
+[data-skin="pizarra"] .lead{border-bottom:2px dotted color-mix(in srgb,var(--ink) 38%,transparent)}
+[data-skin="pizarra"] .price{font-weight:700;font-size:20px;color:var(--c-price,var(--accent))}
+[data-skin="pizarra"] .tag{background:transparent;border:1.5px solid color-mix(in srgb,var(--c-tag,var(--accent2)) 80%,transparent);border-radius:var(--sk1);color:var(--c-tag,var(--accent2));text-transform:none;letter-spacing:0;font-size:13px;font-weight:700;padding:1px 9px}
+[data-skin="pizarra"] .tag.sold{border-color:var(--muted);color:var(--muted)}
+[data-skin="pizarra"] .add{background:transparent;border:2px solid var(--c-btn,var(--accent));color:var(--c-btn,var(--accent));border-radius:58% 42% 55% 45%/48% 55% 45% 52%}
+[data-skin="pizarra"] .add .q{background:var(--accent2);color:var(--on-accent2)}
+[data-skin="pizarra"] .media,[data-skin="pizarra"] .media.m1,[data-skin="pizarra"] .media.m2{background:color-mix(in srgb,var(--ink) 5%,transparent);border:1.5px dashed color-mix(in srgb,var(--ink) 28%,transparent);border-radius:var(--sk2)}
+[data-skin="pizarra"] .media.ln .ic{stroke-width:1.7;color:var(--ink)}
+[data-skin="pizarra"] .media.m1.ln .ic{color:var(--accent3)}
+[data-skin="pizarra"] .media.m2.ln .ic{color:var(--accent2)}
+[data-skin="pizarra"] .media.none span{font-family:var(--fd);font-weight:700;color:var(--accent)}
+[data-skin="pizarra"] .feat .media,[data-skin="pizarra"] .lay-fotos .media{border:0;border-radius:0}
+[data-skin="pizarra"] .promo{border-style:dashed}
+[data-skin="pizarra"] .promo.today{border-style:solid;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink)}
+[data-skin="pizarra"] .badge{background:var(--accent2);color:var(--on-accent2);border-radius:var(--sk1);rotate:-4deg;font-weight:700}
+[data-skin="pizarra"] .promo-d,[data-skin="pizarra"] .ev-w{color:var(--accent3)!important}
+[data-skin="pizarra"] .md-price{font-family:var(--fd);font-weight:700;font-size:52px;line-height:1;color:var(--c-price,var(--accent));text-shadow:var(--chalk)}
+[data-skin="pizarra"] .md-today,[data-skin="pizarra"] .hrow .hoy{border-radius:var(--sk1)}
+[data-skin="pizarra"] .stamp{border:2px dashed color-mix(in srgb,var(--ink) 35%,transparent);border-radius:58% 42% 55% 45%/48% 55% 45% 52%}
+[data-skin="pizarra"] .stamp.on{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+[data-skin="pizarra"] .hrow,[data-skin="pizarra"] .g{border-bottom:1.5px dashed color-mix(in srgb,var(--ink) 16%,transparent)}
+[data-skin="pizarra"] .hrow .lead{border-bottom:2px dotted color-mix(in srgb,var(--ink) 28%,transparent)}
+[data-skin="pizarra"] .hrow.today dt,[data-skin="pizarra"] .hrow.today dd{color:var(--accent)}
+[data-skin="pizarra"] .g dt{color:var(--accent3);font-weight:700}
+[data-skin="pizarra"] .story{font-size:18px}
+[data-skin="pizarra"] .sig{font-family:var(--fd);font-style:normal;font-weight:700;font-size:30px;color:var(--accent2)}
+[data-skin="pizarra"] .free.hl{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:var(--accent)}
+[data-skin="pizarra"] .qbig blockquote{font-size:30px;font-weight:700;line-height:1.1}
+[data-skin="pizarra"] .quote blockquote{font-size:18px}
+[data-skin="pizarra"] .map-art{background:repeating-linear-gradient(0deg,color-mix(in srgb,var(--ink) 9%,transparent) 0 1.5px,transparent 1.5px 26px),repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 9%,transparent) 0 1.5px,transparent 1.5px 26px)}
+[data-skin="pizarra"] .pin{background:var(--accent2)}
+[data-skin="pizarra"] .wheel{outline:2px dashed color-mix(in srgb,var(--ink) 40%,transparent);outline-offset:6px}
+[data-skin="pizarra"] .fab{background:var(--c-btn,var(--accent));color:var(--c-btn-on,var(--on-accent));border-radius:var(--sk1)}
+[data-skin="pizarra"] .fab-n{background:var(--c-btn-on,var(--bg));color:var(--c-btn,var(--accent));border-radius:var(--sk1)}
+[data-skin="pizarra"] .sheet{border-top:2px dashed color-mix(in srgb,var(--ink) 30%,transparent)}
+[data-skin="pizarra"] .inp,[data-skin="pizarra"] .search input,[data-skin="pizarra"] .stepper,[data-skin="pizarra"] .tq-o{background:transparent;border:1.5px solid color-mix(in srgb,var(--ink) 38%,transparent);border-radius:var(--sk2)}
+[data-skin="pizarra"] .seg button.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg))}
+[data-skin="pizarra"] .foot{border-top:2px dashed color-mix(in srgb,var(--c-foot-on,var(--ink)) 22%,transparent)}
+[data-skin="pizarra"] .foot-n{font-family:var(--fd);font-weight:700;font-size:44px;line-height:1;text-shadow:var(--chalk)}
+[data-skin="pizarra"] .navi{font-family:var(--fd);font-weight:700;font-size:30px;letter-spacing:.02em}
 `
   };
 
@@ -1736,10 +1815,10 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {} };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' } };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
-  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys'];
-  const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG };
+  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos'];
+  const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG };
   /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
   function decoPreview(k) {
     if (k === 'stickers') return '<div class="hero-in">' + ['☕', '🧁', '🍓', '🥐'].map(function (e, i) { return '<span class="stk s' + (i + 1) + '">' + e + '</span>'; }).join('') + '</div>';
@@ -2108,6 +2187,20 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       '<ellipse class="a-w2" cx="160" cy="165" rx="70" ry="6"/>' +
       '<path class="a-k2" d="M50 170c6-8 16-9 22-2 3-5 10-6 14 0H50ZM262 168c5-9 15-10 22-3 4-4 11-4 14 3H262Z"/>' +
       '<path class="a-st" d="M96 152c-8-9 8-15 0-25s8-15 0-24M136 148c-9-10 9-16 0-28s9-18 0-32M176 146c-9-10 9-17 0-30s9-18 0-34M214 150c-9-10 9-16 0-28s9-16 0-26"/></svg>';
+  }
+
+  /* Dibujos de tiza: taza humeante, grano de café, croissant, una ramita y estrellitas. Escena arriba del título. */
+  function garabatosSVG() {
+    return '<svg class="art art-scene art-garab" viewBox="0 0 360 170" aria-hidden="true" focusable="false">' +
+      '<path class="a-tz0" d="M54 140c30 9 106 9 134-1M60 139c34-7 92-8 122 0"/>' +
+      '<path class="a-tz0" d="M80 92c28-3 56-3 84 1l-7 37c-2 8-8 12-17 12h-38c-9 0-15-4-17-12Z"/>' +
+      '<path class="a-tz0" d="M163 101c15-3 24 5 22 16-2 10-13 15-24 10"/>' +
+      '<path class="a-tz1" d="M100 80c-9-9 7-14-1-24s7-14 0-23M122 78c-9-10 7-16-1-26s7-15 0-25M144 80c-8-9 7-14 0-23"/>' +
+      '<path class="a-tz2" d="M238 52c9-12 29-11 34 2 5 14-6 27-20 26-15-1-22-16-14-28ZM246 50c7 8 9 19 6 31"/>' +
+      '<path class="a-tz3" d="M214 132c8-21 42-31 66-19 9 4 13 12 9 18-7-8-17-10-27-8-18 3-30 12-48 9ZM240 114l5 15M260 109l2 17M276 112l-3 13"/>' +
+      '<path class="a-tz2" d="M300 154c10-18 24-27 42-31-5 13-17 26-42 31ZM300 154c13-11 24-18 38-27"/>' +
+      '<path class="a-tz1" d="M314 44v18M305 53h18M36 44l9 9M45 44l-9 9M196 30l4 7 8 1-6 5 2 8-8-4-7 4 2-8-6-5 8-1Z"/>' +
+      '<path class="a-tz0" d="M28 98h0M332 92h0M208 76h0"/></svg>';
   }
 
   /* Jeep Willys cargado con bultos de café y racimos de plátano. Escena arriba del título. */
@@ -4393,6 +4486,85 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Síguenos', layout: 'botones' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 8. CAFÉ DE BARRIO · PIZARRA ---------- */
+  {
+    v: 1, id: 'tpl-parque', template: true,
+    brand: {
+      name: 'Café del Parque', tagline: 'Tinto, pandebono y almuerzo casero frente al parque', kind: 'Café',
+      logo: { type: 'icon', value: 'cafe' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Esquina del parque Las Araucarias', addressNote: 'Al frente de la iglesia, en la esquina de las bancas.',
+      mapsQuery: 'Parque Las Araucarias, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['06:30', '19:00'], 2: ['06:30', '19:00'], 3: ['06:30', '19:00'], 4: ['06:30', '19:00'], 5: ['06:30', '19:00'], 6: ['07:00', '19:00'], 0: ['07:00', '13:00'] })
+    },
+    i18n: { bilingual: false, usted: true },
+    theme: {
+      skin: 'pizarra',
+      colors: { bg: '#1F2B25', surface: '#28362F', ink: '#F1EFE6', muted: '#B9C2B8', accent: '#F2D16B', accent2: '#F29BB2', accent3: '#8FD3F4' },
+      fonts: { display: 'Amatic SC', body: 'Kalam' }, radius: 6, motion: 'suave', texture: 'tiza', icons: 'linea',
+      fx: { reveal: 'subir' }
+    },
+    menu: {
+      categories: [
+        { id: 'tintos', name: 'Tintos y cafés', icon: '☕', note: 'Café de fincas de Risaralda, molido cada mañana', items: [
+          IT('tinto', 'Tinto', 'En pocillo de peltre, como en la casa.', 1500, '☕', ['popular', 'local']),
+          IT('perico', 'Perico', 'Tinto con un chorrito de leche.', 2000, '☕'),
+          IT('cafe-leche', 'Café con leche', 'En taza grande, con espuma.', 3500, '☕'),
+          IT('capuchino', 'Capuchino', 'Espresso, leche espumada y canela.', 5000, '☕', ['popular']),
+          IT('aromatica', 'Aromática de frutas', 'Con frutas picadas y un toque de panela.', 3000, '🍵', ['vegano']),
+          IT('chocolate', 'Chocolate con queso', 'Batido con molinillo, con queso y almojábana.', 7500, '🍫', ['local'])
+        ] },
+        { id: 'desayunos', name: 'Desayunos', icon: '🍳', note: 'Hasta las 11:00 a. m.', items: [
+          IT('calentado', 'Calentado paisa', 'Fríjoles, arroz, huevo frito, arepa y chocolate.', 14000, '🍳', ['popular', 'local']),
+          IT('pericos', 'Huevos pericos', 'Con tomate y cebolla, arepa y quesito.', 9500, '🍳'),
+          IT('arepa-queso', 'Arepa con quesito', 'Arepa de maíz blanco asada en el budare.', 5000, '🌽'),
+          IT('caldo', 'Caldo de costilla', 'Con papa, cilantro y arepa.', 11000, '🍲'),
+          IT('tostadas', 'Tostadas francesas', 'Con miel de panela y fruta picada.', 9000, '🍞', ['nuevo'])
+        ] },
+        { id: 'horno', name: 'Pandebonos y algo', icon: '🥐', note: 'Calientes toda la mañana', items: [
+          IT('pandebono', 'Pandebono', 'Recién salido del horno.', 2000, '🧀', ['popular']),
+          IT('almojabana', 'Almojábana', 'Esponjosa, de cuajada.', 2000, '🧀'),
+          IT('empanada', 'Empanada de pipián', 'Con ají de la casa.', 2500, '🥟', ['local']),
+          IT('bunuelo', 'Buñuelo', 'Redondo, dorado y caliente.', 1800, '🧆'),
+          IT('croissant', 'Croissant de jamón y queso', 'Hojaldre de mantequilla.', 6500, '🥐')
+        ] },
+        { id: 'almuerzo-carta', name: 'Para el almuerzo', icon: '🍲', note: 'Si no quiere el menú del día', items: [
+          IT('sopa', 'Sopa del día', 'Pregunte cuál hay hoy.', 7000, '🍲'),
+          IT('pechuga', 'Pechuga a la plancha', 'Con arroz, ensalada y papas a la francesa.', 18000, '🍗'),
+          IT('chuleta', 'Chuleta de cerdo', 'Apanada, con arroz, patacón y ensalada.', 19000, '🥩', ['popular']),
+          IT('vegetariano', 'Plato vegetariano', 'Lentejas, arroz, ensalada y maduro.', 15000, '🥗', ['vegetariano'])
+        ] },
+        { id: 'dulce', name: 'Algo dulce', icon: '🍰', note: '', items: [
+          IT('torta-dia', 'Torta del día', 'Pregunte por la de hoy.', 5000, '🍰'),
+          IT('arroz-leche', 'Arroz con leche', 'Con canela y uvas pasas.', 4500, '🍮', ['popular']),
+          IT('obleas', 'Obleas con arequipe', 'Con queso y mermelada de mora, si quiere.', 4000, '🍪', ['local'])
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Frente al parque · desde 1994', title: '', subtitle: 'El tinto de siempre, pandebono caliente y almuerzo casero. Pase y siéntese.', cta1: 'carta', cta2: 'ubicacion', showStatus: true, ribbon: 'Tinto, Pandebono, Menú del día, Postres caseros' } },
+      { id: 'almuerzo', type: 'menudia', on: true, s: { title: 'Menú del día', days: [1, 2, 3, 4, 5, 6], from: '12:00', to: '15:00', price: 15000, note: 'De lunes a sábado, mientras haya.', parts: [
+        { label: 'Sopa', value: 'Sopa de arroz con cilantro' },
+        { label: 'Principio', value: 'Fríjoles o lentejas' },
+        { label: 'Proteína', value: 'Carne en bistec o pollo sudado' },
+        { label: 'Acompañantes', value: 'Arroz, ensalada y tajada de maduro' },
+        { label: 'Bebida', value: 'Limonada de panela' },
+        { label: 'Postre', value: 'Dulce de papaya' }
+      ] } },
+      { id: 'promos', type: 'promos', on: true, s: { title: 'Para hoy', highlightToday: true, layout: 'carrusel', items: [
+        { days: [1, 2, 3, 4, 5], title: 'Tinto y pandebono', desc: 'De 6:30 a 9:00 a. m.', price: 3000 },
+        { days: [3], title: 'Miércoles de chocolate', desc: 'Chocolate con queso y almojábana a mitad de precio después de las 4:00 p. m.', price: 3800 },
+        { days: [6, 0], title: 'Desayuno en familia', desc: 'Cuatro calentados y cuatro chocolates.', price: 52000 }
+      ] } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'sellos', type: 'sellos', on: true, s: { title: 'Tarjeta del tinto', goal: 10, reward: 'El tinto número 11 va por la casa', icon: '☕', pin: '4826', note: 'Un sello por cada tinto o café.' } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 7:00 a. m. a 1:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
@@ -4507,6 +4679,17 @@ const SKINS = {
       { name: 'Carbón', colors: { bg: '#121212', surface: '#1C1C1B', ink: '#F1F0EC', muted: '#A3A29B', accent: '#E8C547', accent2: '#F1F0EC', accent3: '#3A3A38' } },
       { name: 'Menta', colors: { bg: '#F3F8F6', surface: '#E6F0EC', ink: '#0F1A16', muted: '#52625B', accent: '#00785E', accent2: '#0F1A16', accent3: '#BFD3CB' } },
       { name: 'Acero', colors: { bg: '#E9ECEF', surface: '#DEE2E6', ink: '#14181C', muted: '#545B62', accent: '#C2410C', accent2: '#14181C', accent3: '#B9C0C7' } }
+    ]
+  },
+  pizarra: {
+    label: 'Pizarra', art: 'Menú del día', desc: 'Tablero de tiza, letra a mano, subrayados ondulados y marcos de colores. Para cafés de barrio, bistrós y menú del día.', layout: 'lista',
+    defaults: { colors: { bg: '#1F2B25', surface: '#28362F', ink: '#F1EFE6', muted: '#B9C2B8', accent: '#F2D16B', accent2: '#F29BB2', accent3: '#8FD3F4' }, fonts: { display: 'Amatic SC', body: 'Kalam' }, radius: 6, motion: 'suave', texture: 'tiza', icons: 'linea' },
+    palettes: [
+      { name: 'Tablero', colors: { bg: '#1F2B25', surface: '#28362F', ink: '#F1EFE6', muted: '#B9C2B8', accent: '#F2D16B', accent2: '#F29BB2', accent3: '#8FD3F4' } },
+      { name: 'Tablero negro', colors: { bg: '#1C1D1C', surface: '#272827', ink: '#F2F1EC', muted: '#B5B5AE', accent: '#FFD95E', accent2: '#7FD8BE', accent3: '#FF9F7A' } },
+      { name: 'Tablero azul', colors: { bg: '#1E2A36', surface: '#283746', ink: '#EEF2F5', muted: '#B3BFCA', accent: '#F7D774', accent2: '#F49AC1', accent3: '#9EE6B8' } },
+      { name: 'Tablero café', colors: { bg: '#2A211B', surface: '#362B23', ink: '#F4EDE2', muted: '#C3B5A3', accent: '#F2C46D', accent2: '#A8D5A2', accent3: '#F2A0A0' } },
+      { name: 'Tablero blanco', colors: { bg: '#F6F6F1', surface: '#FFFFFF', ink: '#1E2A24', muted: '#5B6660', accent: '#1D64B0', accent2: '#B8352A', accent3: '#257347' } }
     ]
   }
 };
@@ -4657,7 +4840,7 @@ const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3'
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
-  ['willys', 'Jeep Willys'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
+  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',

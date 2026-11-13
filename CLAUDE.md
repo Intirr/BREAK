@@ -8,24 +8,24 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (683 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
-- `npm run demos` — genera `dist/demo-*.html`, las siete apps de ejemplo exportadas.
+- `npm test` — compila y corre `test/run.js` (699 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
 
 - `npm run shots` — capturas del estudio y de las apps de ejemplo en `dist/shots/`.
 - `npm run visual:base` — guarda la línea base de píxeles de las apps de ejemplo. Córrelo antes de refactorizar CSS que no debe cambiar el aspecto.
 - `npm run visual:compare` — compara contra la línea base y falla si cambia algún píxel.
-- `npm run overflow` — busca desbordes horizontales a 390 px: en el estudio (cada pestaña, cada módulo abierto y los selectores de íconos) y en las siete apps de ejemplo. En las apps no basta el ancho del documento, porque `.app` recorta lo que se sale: revisa cada bloque.
+- `npm run overflow` — busca desbordes horizontales a 390 px: en el estudio (cada pestaña, cada módulo abierto y los selectores de íconos) y en todas las apps de ejemplo. En las apps no basta el ancho del documento, porque `.app` recorta lo que se sale: revisa cada bloque.
 
 ## Arquitectura
 
 Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
-- `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas; `opts.assetURL(id)` (solo lo pasa el estudio) da la dirección de una foto de la biblioteca; `opts.meta` no arranca nada y devuelve las constantes del motor (tipografías, estéticas, etiquetas, íconos y la función `glyph`) para que el estudio no las repita.
+- `src/runtime.js` — `breakApp(win, doc, cfg, opts)`. El motor completo de la app del cliente: CSS base + CSS por estética (elegante, animado, cultural, natural, nocturna, minimalista y pizarra), 23 módulos en `RENDER`, carrito y mensajes de WhatsApp, reservas, sellos con PIN, ruleta, trivia, i18n ES/EN y trato de usted (`ES_USTED`). **Debe ser autocontenido**: el estudio lo incrusta en cada app exportada con `breakApp.toString()`, así que no puede usar nada fuera de la función. `opts.mode` es `'preview'` (muestra avisos de ayuda) o `'app'`; `opts.now` fija la hora en pruebas; `opts.assetURL(id)` (solo lo pasa el estudio) da la dirección de una foto de la biblioteca; `opts.meta` no arranca nada y devuelve las constantes del motor (tipografías, estéticas, etiquetas, íconos y la función `glyph`) para que el estudio no las repita.
   Íconos de línea: `ICONS` (dibujos de 24 × 24 con trazos que toman el color del texto), `ICON_SETS` (los que ofrece el estudio, por grupos) y `EMO_ICON` (emoji → ícono). `ico(clave)` dibuja uno; `glyph(emoji, ico, respaldo)` decide qué ve el cliente según `theme.icons`.
-  Portada: `RENDER.hero` arma la portada por piezas (`variant`, `height`, `logo`, `deco`); en «auto» usa `HERO_AUTO` de cada estética. Las decoraciones (`DECO_CSS`: fachada, zócalo, lomas, neón, stickers y las ilustraciones de `ART`) están en la base para que cualquier estética las use; sus colores salen de la paleta, y `artVars()` elige el acento más verde, más azul y más rojo (`--leaf`, `--water`, `--earth`).
-- `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo, La Espiga, Neblina, Los Alisos, La Esquina) y `blankApp()`. Solo datos; la portada de Neblina es una ilustración SVG en base64 (`NEBLINA_IMG`), no una foto. Las apps de ejemplo muestran las opciones de las etapas 9 a 12 sin perder su estilo: secciones con fondo propio, variantes de módulos, reseñas con citas, opciones de carta, aparición al bajar y, las de paleta clara, modo oscuro automático. No cambian navegación, colores por elemento, formas ni letra. En `test/run.js`, `bare(id, …claves)` da una copia sin algunas de esas opciones para las pruebas que comparan contra «auto».
+  Portada: `RENDER.hero` arma la portada por piezas (`variant`, `height`, `logo`, `deco`); en «auto» usa `HERO_AUTO` de cada estética. Las decoraciones (`DECO_CSS`: fachada, zócalo, lomas, neón, stickers y las ilustraciones de `ART`, como los dibujos de tiza `garabatos`) están en la base para que cualquier estética las use; sus colores salen de la paleta, y `artVars()` elige el acento más verde, más azul y más rojo (`--leaf`, `--water`, `--earth`).
+- `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo, La Espiga, Neblina, Los Alisos, La Esquina y Café del Parque; cada estética tiene al menos una, y las pruebas lo exigen) y `blankApp()`. Solo datos; la portada de Neblina es una ilustración SVG en base64 (`NEBLINA_IMG`), no una foto. Las apps de ejemplo muestran las opciones de las etapas 9 a 12 sin perder su estilo: secciones con fondo propio, variantes de módulos, reseñas con citas, opciones de carta, aparición al bajar y, las de paleta clara, modo oscuro automático. No cambian navegación, colores por elemento, formas ni letra. En `test/run.js`, `bare(id, …claves)` da una copia sin algunas de esas opciones para las pruebas que comparan contra «auto».
 - `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `STYLE` (grupos, tarjetas y campos de la pestaña Estilo), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`), etiquetas y los nombres de los íconos en el selector (`ICON_NAMES`). Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
 - `src/studio.js` — el estudio: estado `S`, editor por pestañas (Estilo, Módulos, Carta, Datos, Publicar), vista previa en un iframe escrito con `document.write`, guardado, exportación (.html, .zip para Cloudflare Pages con manifiesto, service worker e íconos, .json, QR).
 - `src/studio.css`, `src/page.html` — estilos y esqueleto del estudio. `build.js` reemplaza `/*__CSS__*/` y `/*__JS__*/`.
@@ -61,7 +61,7 @@ El estudio agrega solo, al final de cada módulo menos portada y aviso, «Diseñ
 
 1. Función que devuelve el SVG en `runtime.js` (junto a `araucariasSVG()`), con clases `art art-band` (franja de abajo) o `art art-scene` (escena arriba del título, se oculta con foto) y colores solo por variables en `ART_CSS`.
 2. Su clave en `ART`, `HERO_DECOS` y `decoPreview()`; su nombre en `HERO_DECO_OPTS` de `catalog.js`.
-3. Revísala con la paleta de las seis estéticas antes de usarla, y pruebas en `test/run.js`.
+3. Revísala con la paleta de todas las estéticas antes de usarla, y pruebas en `test/run.js`.
 
 ### Añadir una estética
 
@@ -127,4 +127,4 @@ Los estilos guardados van en el documento `mis-estilos` de la misma colección (
 - Los mensajes de WhatsApp al local siempre van en español, aunque el cliente use la app en inglés.
 - Precios en pesos colombianos, formato `$15.900` (`money()`).
 - Corre `npm test` antes de dar un cambio por terminado.
-- Antes de mover CSS que no debe cambiar el aspecto, `npm run visual:compare` debe dar las siete apps idénticas.
+- Antes de mover CSS que no debe cambiar el aspecto, `npm run visual:compare` debe dar idénticas todas las apps con línea base (una app nueva sale «sin línea base» hasta correr `npm run visual:base`).

@@ -14,7 +14,7 @@ function quietConsole() { const vc = new VirtualConsole(); vc.on('jsdomError', e
 
 const SRC = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
 const ctx = {}; vm.createContext(ctx);
-vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;this.STYLE=STYLE;this.ICON_NAMES=ICON_NAMES;', ctx);
+vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;this.STYLE=STYLE;this.ICON_NAMES=ICON_NAMES;this.HERO_DECO_OPTS=HERO_DECO_OPTS;', ctx);
 const TPL = id => JSON.parse(JSON.stringify(ctx.TEMPLATES.find(t => t.id === id)));
 // Copia de una plantilla sin algunas de sus opciones: claves de theme (carta, fx, dark…) o '_bg' (fondos de sección)
 const bare = (id, ...keys) => { const c = TPL(id); keys.forEach(k => { if (k === '_bg') c.modules.forEach(m => { if (m.s) delete m.s._bg; }); else delete c.theme[k]; }); return c; };
@@ -45,7 +45,8 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
 
 (async function () {
   /* 1. Todas las apps de ejemplo renderizan completas */
-  eq(ctx.TEMPLATES.length, 7, 'siete apps de ejemplo');
+  ok(Object.keys(ctx.SKINS).every(k => ctx.TEMPLATES.some(t => t.theme.skin === k)), 'cada estética tiene al menos una app de ejemplo');
+  eq(new Set(ctx.TEMPLATES.map(t => t.id)).size, ctx.TEMPLATES.length, 'cada app de ejemplo tiene su propia clave');
   for (const id of ctx.TEMPLATES.map(t => t.id)) {
     const cfg = TPL(id);
     const A = mount(cfg, { now: '2026-11-06T15:30:00Z' });
@@ -575,10 +576,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const hero = cfg => cfg.modules.find(m => m.type === 'hero').s;
     const NOW = { now: '2026-11-06T15:30:00Z' };
     // Lo de cada estética sigue igual sin tocar nada
-    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon' };
+    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab' };
     for (const id of Object.keys(auto)) { const A = mount(TPL(id), NOW); ok(!!A.$(auto[id]), id + ': la portada conserva la decoración de su estética'); A.close(); }
     ok(/--leaf:#[0-9a-f]{6}/i.test((() => { const A = mount(TPL('tpl-espiga'), NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; })()), 'el verde de la paleta queda listo para las ilustraciones');
-    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
+    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
     // Sin decoración
     const z = TPL('tpl-zocalo'); hero(z).deco = 'ninguna';
     let A = mount(z, NOW); ok(!A.$('.facade') && !A.$('.zocalo') && !A.$('.hero-box[class*=" d-"]'), '«Ninguna» quita la fachada y el zócalo'); A.close();
@@ -1010,6 +1011,21 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(ctx.TEMPLATES.every(t => !t.theme.nav && !t.theme.css && !t.theme.roles && !t.theme.shape && !t.theme.type), 'las apps de ejemplo no cambian navegación, colores por elemento, formas, letra ni CSS propio');
   }
 
+  /* 11v. Estética Pizarra y Café del Parque */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    let A = mount(TPL('tpl-parque'), NOW);
+    ok(A.$('.app').getAttribute('data-skin') === 'pizarra' && /\[data-skin="pizarra"\] \.hero-t\{/.test(A.d.getElementById('bk-css').textContent), 'Pizarra: su CSS se aplica');
+    ok(!!A.$('.hero-box.d-garabatos svg.art-garab') && !!A.$('section.m-menudia .md-price') && A.d.documentElement.getAttribute('data-tex') === 'tiza', 'Café del Parque: dibujos de tiza, menú del día y textura de tiza');
+    ok(A.d.getElementById('bk-fonts').href.includes('family=Amatic+SC:wght@400;700') && A.d.getElementById('bk-fonts').href.includes('family=Kalam'), 'Pizarra: pide sus tipografías a Google Fonts');
+    A.close();
+    const block = (SRC('runtime.js').match(/\n    pizarra: `([\s\S]*?)`/) || [])[1] || '';
+    ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Pizarra: su CSS solo usa colores de la paleta');
+    const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'garabatos';
+    A = mount(z, NOW); ok(!!A.$('.hero-box.d-garabatos svg.art-garab') && !A.$('.hero-box.d-garabatos .facade'), 'los dibujos de tiza sirven en cualquier estética'); A.close();
+    ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'garabatos'), 'los dibujos de tiza se ofrecen en el estudio');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -1170,7 +1186,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   await sleep(220);
   ok(!!ST.pv.frame.contentDocument.querySelector('.hero-ph img.op-t'), 'la vista previa usa el encuadre');
   // Portada por piezas
-  eq($$('.mod[data-mid="hero"] .dths .dth').length, 11, 'once opciones de decoración con miniatura');
+  eq($$('.mod[data-mid="hero"] .dths .dth').length, ctx.HERO_DECO_OPTS.length, 'cada decoración se ofrece con miniatura');
   ok($('.dth[data-v="auto"]').getAttribute('aria-pressed') === 'true' && /--leaf:/.test($('.dth .dth-a').getAttribute('style')), 'arranca en la de la estética y las miniaturas usan la paleta');
   ok(!!$('.dth[data-v="willys"] .dth-a svg.art-will') && !!$('#deco-css'), 'la miniatura del Willys se dibuja con el CSS del motor');
   click($('[data-a="set"][data-p="modules.0.s.deco"][data-v="araucarias"]'));

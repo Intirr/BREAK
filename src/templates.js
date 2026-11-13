@@ -631,6 +631,85 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Síguenos', layout: 'botones' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 8. CAFÉ DE BARRIO · PIZARRA ---------- */
+  {
+    v: 1, id: 'tpl-parque', template: true,
+    brand: {
+      name: 'Café del Parque', tagline: 'Tinto, pandebono y almuerzo casero frente al parque', kind: 'Café',
+      logo: { type: 'icon', value: 'cafe' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Esquina del parque Las Araucarias', addressNote: 'Al frente de la iglesia, en la esquina de las bancas.',
+      mapsQuery: 'Parque Las Araucarias, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['06:30', '19:00'], 2: ['06:30', '19:00'], 3: ['06:30', '19:00'], 4: ['06:30', '19:00'], 5: ['06:30', '19:00'], 6: ['07:00', '19:00'], 0: ['07:00', '13:00'] })
+    },
+    i18n: { bilingual: false, usted: true },
+    theme: {
+      skin: 'pizarra',
+      colors: { bg: '#1F2B25', surface: '#28362F', ink: '#F1EFE6', muted: '#B9C2B8', accent: '#F2D16B', accent2: '#F29BB2', accent3: '#8FD3F4' },
+      fonts: { display: 'Amatic SC', body: 'Kalam' }, radius: 6, motion: 'suave', texture: 'tiza', icons: 'linea',
+      fx: { reveal: 'subir' }
+    },
+    menu: {
+      categories: [
+        { id: 'tintos', name: 'Tintos y cafés', icon: '☕', note: 'Café de fincas de Risaralda, molido cada mañana', items: [
+          IT('tinto', 'Tinto', 'En pocillo de peltre, como en la casa.', 1500, '☕', ['popular', 'local']),
+          IT('perico', 'Perico', 'Tinto con un chorrito de leche.', 2000, '☕'),
+          IT('cafe-leche', 'Café con leche', 'En taza grande, con espuma.', 3500, '☕'),
+          IT('capuchino', 'Capuchino', 'Espresso, leche espumada y canela.', 5000, '☕', ['popular']),
+          IT('aromatica', 'Aromática de frutas', 'Con frutas picadas y un toque de panela.', 3000, '🍵', ['vegano']),
+          IT('chocolate', 'Chocolate con queso', 'Batido con molinillo, con queso y almojábana.', 7500, '🍫', ['local'])
+        ] },
+        { id: 'desayunos', name: 'Desayunos', icon: '🍳', note: 'Hasta las 11:00 a. m.', items: [
+          IT('calentado', 'Calentado paisa', 'Fríjoles, arroz, huevo frito, arepa y chocolate.', 14000, '🍳', ['popular', 'local']),
+          IT('pericos', 'Huevos pericos', 'Con tomate y cebolla, arepa y quesito.', 9500, '🍳'),
+          IT('arepa-queso', 'Arepa con quesito', 'Arepa de maíz blanco asada en el budare.', 5000, '🌽'),
+          IT('caldo', 'Caldo de costilla', 'Con papa, cilantro y arepa.', 11000, '🍲'),
+          IT('tostadas', 'Tostadas francesas', 'Con miel de panela y fruta picada.', 9000, '🍞', ['nuevo'])
+        ] },
+        { id: 'horno', name: 'Pandebonos y algo', icon: '🥐', note: 'Calientes toda la mañana', items: [
+          IT('pandebono', 'Pandebono', 'Recién salido del horno.', 2000, '🧀', ['popular']),
+          IT('almojabana', 'Almojábana', 'Esponjosa, de cuajada.', 2000, '🧀'),
+          IT('empanada', 'Empanada de pipián', 'Con ají de la casa.', 2500, '🥟', ['local']),
+          IT('bunuelo', 'Buñuelo', 'Redondo, dorado y caliente.', 1800, '🧆'),
+          IT('croissant', 'Croissant de jamón y queso', 'Hojaldre de mantequilla.', 6500, '🥐')
+        ] },
+        { id: 'almuerzo-carta', name: 'Para el almuerzo', icon: '🍲', note: 'Si no quiere el menú del día', items: [
+          IT('sopa', 'Sopa del día', 'Pregunte cuál hay hoy.', 7000, '🍲'),
+          IT('pechuga', 'Pechuga a la plancha', 'Con arroz, ensalada y papas a la francesa.', 18000, '🍗'),
+          IT('chuleta', 'Chuleta de cerdo', 'Apanada, con arroz, patacón y ensalada.', 19000, '🥩', ['popular']),
+          IT('vegetariano', 'Plato vegetariano', 'Lentejas, arroz, ensalada y maduro.', 15000, '🥗', ['vegetariano'])
+        ] },
+        { id: 'dulce', name: 'Algo dulce', icon: '🍰', note: '', items: [
+          IT('torta-dia', 'Torta del día', 'Pregunte por la de hoy.', 5000, '🍰'),
+          IT('arroz-leche', 'Arroz con leche', 'Con canela y uvas pasas.', 4500, '🍮', ['popular']),
+          IT('obleas', 'Obleas con arequipe', 'Con queso y mermelada de mora, si quiere.', 4000, '🍪', ['local'])
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Frente al parque · desde 1994', title: '', subtitle: 'El tinto de siempre, pandebono caliente y almuerzo casero. Pase y siéntese.', cta1: 'carta', cta2: 'ubicacion', showStatus: true, ribbon: 'Tinto, Pandebono, Menú del día, Postres caseros' } },
+      { id: 'almuerzo', type: 'menudia', on: true, s: { title: 'Menú del día', days: [1, 2, 3, 4, 5, 6], from: '12:00', to: '15:00', price: 15000, note: 'De lunes a sábado, mientras haya.', parts: [
+        { label: 'Sopa', value: 'Sopa de arroz con cilantro' },
+        { label: 'Principio', value: 'Fríjoles o lentejas' },
+        { label: 'Proteína', value: 'Carne en bistec o pollo sudado' },
+        { label: 'Acompañantes', value: 'Arroz, ensalada y tajada de maduro' },
+        { label: 'Bebida', value: 'Limonada de panela' },
+        { label: 'Postre', value: 'Dulce de papaya' }
+      ] } },
+      { id: 'promos', type: 'promos', on: true, s: { title: 'Para hoy', highlightToday: true, layout: 'carrusel', items: [
+        { days: [1, 2, 3, 4, 5], title: 'Tinto y pandebono', desc: 'De 6:30 a 9:00 a. m.', price: 3000 },
+        { days: [3], title: 'Miércoles de chocolate', desc: 'Chocolate con queso y almojábana a mitad de precio después de las 4:00 p. m.', price: 3800 },
+        { days: [6, 0], title: 'Desayuno en familia', desc: 'Cuatro calentados y cuatro chocolates.', price: 52000 }
+      ] } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'sellos', type: 'sellos', on: true, s: { title: 'Tarjeta del tinto', goal: 10, reward: 'El tinto número 11 va por la casa', icon: '☕', pin: '4826', note: 'Un sello por cada tinto o café.' } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 7:00 a. m. a 1:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
