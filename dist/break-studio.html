@@ -401,10 +401,10 @@ button.libi:focus-visible{outline:2px solid var(--carbon);outline-offset:2px}
 
 /* Vista previa */
 .stage-top{display:grid;gap:10px;margin-bottom:12px}
-.st-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.st-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px}
 .st-k{font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:9px}
 .st-k::before{content:"";width:8px;height:8px;border-radius:50%;background:#2fbf71;box-shadow:0 0 0 3px color-mix(in srgb,#2fbf71 25%,transparent)}
-.st-tools{display:flex;align-items:center;gap:6px}
+.st-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px;margin-left:auto}
 .tpls{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
 .tpls::-webkit-scrollbar{display:none}
 .tpl{flex:none;display:flex;align-items:center;gap:9px;padding:5px 14px 5px 5px;border:1px solid var(--rule);border-radius:999px;background:var(--sheet);text-align:left}
@@ -5085,6 +5085,18 @@ const BRAND_FIELDS = [
     if (x.bg && /^data:/.test(String(x.bg.img || ''))) { delete x.bg.img; if (x.bg.type === 'foto') x.bg.type = 'liso'; }
     return x;
   }
+  /* Un tema que llega de afuera (un estilo importado o guardado, una app importada) puede venir incompleto: la estética,
+     los colores y las tipografías se completan con los de su estética y solo se aceptan colores #RGB o #RRGGBB.
+     Lo demás queda como viene: el motor ignora lo que no entiende. */
+  function fullTheme(th) {
+    const x = clone(th && typeof th === 'object' ? th : {}), skin = SKINS[x.skin] ? x.skin : 'elegante', d = SKINS[skin].defaults;
+    const src = x.colors && typeof x.colors === 'object' ? x.colors : {}, cols = {};
+    Object.keys(src).forEach(function (k) { if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(src[k]))) cols[k] = src[k]; });
+    const fsrc = x.fonts && typeof x.fonts === 'object' ? x.fonts : {}, fonts = {};
+    ['display', 'body'].forEach(function (k) { if (typeof fsrc[k] === 'string' && fsrc[k].trim()) fonts[k] = fsrc[k]; });
+    x.skin = skin; x.colors = Object.assign(clone(d.colors), cols); x.fonts = Object.assign(clone(d.fonts), fonts);
+    return x;
+  }
   function cartaLayoutOf(app) { const m = (app.modules || []).filter(function (x) { return x && x.type === 'carta'; })[0]; return m && m.s && m.s.layout ? m.s.layout : ''; }
   function myWrite() {
     if (Store.kind === 'db') {
@@ -5109,7 +5121,7 @@ const BRAND_FIELDS = [
   }
   /* Aplicar un estilo: cambia el tema completo y, si lo trae, el diseño de la carta. */
   function applyStyle(theme, carta, msg) {
-    S.cur.theme = clone(theme);
+    S.cur.theme = fullTheme(theme);
     const m = S.cur.modules.filter(function (x) { return x.type === 'carta'; })[0];
     if (m && carta && CARTA_LAYOUTS.some(function (l) { return l[0] === carta; })) m.s.layout = carta;
     S.pvScheme = 'auto';
@@ -5120,8 +5132,7 @@ const BRAND_FIELDS = [
     let data = null;
     try { data = JSON.parse(txt); } catch (e) { data = null; }
     if (!data || data.format !== 'break-estilo' || !data.theme || typeof data.theme !== 'object' || !SKINS[data.theme.skin]) { toast('Ese archivo no es un estilo de Break.'); return false; }
-    const th = clone(data.theme);
-    if (th.colors && typeof th.colors === 'object') Object.keys(th.colors).forEach(function (k) { if (!/^#[0-9a-f]{6}$/i.test(String(th.colors[k]))) delete th.colors[k]; });
+    const th = fullTheme(data.theme);
     const name = String(data.name || 'Estilo importado').slice(0, 40);
     myAdd(name, th, CARTA_LAYOUTS.some(function (l) { return l[0] === data.carta; }) ? data.carta : '');
     mySave('Estilo «' + name + '» importado. Aplícalo desde Mis estilos.');
@@ -6737,6 +6748,7 @@ const BRAND_FIELDS = [
       try { data = JSON.parse(rd.result); } catch (e) { data = null; }
       const app = data && data.app ? data.app : data;
       if (!validApp(app)) { toast('Ese archivo no es una configuración de Break.'); return; }
+      app.theme = fullTheme(app.theme);
       if (!storeReady()) { toast('Espera a que conecte el guardado e intenta de nuevo.'); return; }
       const tmpId = 'import-' + Date.now();
       if (LIB.cap && embeddedPhotos(app).length) { toast('Pasando las fotos a la biblioteca…'); await internalize(app); }
@@ -7090,7 +7102,7 @@ const BRAND_FIELDS = [
     setTimeout(function () { startOnce((HOT && HOT.data) || {}); }, 400);
   } else startOnce((HOT && HOT.data) || {});
 
-  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META, lib: LIB, materialize: materialize, my: MY, importStyle: importStyleText };
+  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META, lib: LIB, materialize: materialize, my: MY, importStyle: importStyleText, fullTheme: fullTheme };
 })();
 
 </script>

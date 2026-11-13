@@ -1383,6 +1383,22 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="confirm-yes"]'));
   await sleep(40);
   eq(docs.get('mis-estilos').items.map(x => x.name).join(','), 'Fonda roja', 'borra un estilo guardado');
+  // Un estilo incompleto (importado o guardado) se completa con su estética al aplicarlo
+  ok(ST.importStyle(JSON.stringify({ format: 'break-estilo', name: 'Incompleto', theme: { skin: 'natural', colors: { bg: 'rojo', accent: '#123456' }, fonts: { display: 7 } } })), 'importa un estilo incompleto');
+  const inc = ST.my.items[0].theme;
+  ok(inc.colors.bg === ctx.SKINS.natural.defaults.colors.bg && inc.colors.accent === '#123456' && inc.fonts.display === ctx.SKINS.natural.defaults.fonts.display, 'se guarda completo: colores y tipografías de su estética, sin valores inválidos');
+  ST.my.items.unshift({ id: 'st-parcial', name: 'Parcial', theme: { skin: 'nocturna' } });
+  ST.ACTIONS['my-apply']({ id: 'st-parcial' });
+  click($('[data-a="confirm-yes"]'));
+  ok(ST.S.cur.theme.skin === 'nocturna' && ST.S.cur.theme.colors.bg === ctx.SKINS.nocturna.defaults.colors.bg && !!d.getElementById('h-bg'), 'aplicar un estilo guardado incompleto no rompe el estudio');
+  ST.my.items.shift();
+  ST.ACTIONS['my-apply']({ id: ST.my.items.find(x => x.name === 'Fonda roja').id });
+  click($('[data-a="confirm-yes"]'));
+  eq(JSON.stringify(ST.S.cur.theme), myTheme, 'vuelve al estilo guardado');
+  ST.ACTIONS['my-del']({ id: ST.my.items.find(x => x.name === 'Incompleto').id });
+  click($('[data-a="confirm-yes"]'));
+  await sleep(40);
+  eq(ST.fullTheme({ skin: 'nada', colors: 5 }).skin + ',' + typeof ST.fullTheme(null).colors.bg, 'elegante,string', 'un tema sin forma se vuelve el de la estética elegante');
   // Estilo: CSS propio
   click($('[data-a="adv"]'));
   click($('[data-a="sub"][data-g="avanzado"]'));
