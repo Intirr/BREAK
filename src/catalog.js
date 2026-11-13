@@ -142,6 +142,17 @@ const SKINS = {
       { name: 'Ladrillo', colors: { bg: '#2A1714', surface: '#38201B', ink: '#F6ECE6', muted: '#C4AFA6', accent: '#F2B705', accent2: '#F08A5D', accent3: '#9CC3A8' } },
       { name: 'Plano', colors: { bg: '#E8EDF2', surface: '#F7F9FB', ink: '#14212C', muted: '#4C5C6A', accent: '#F2C200', accent2: '#1C5A8A', accent3: '#A8381A' } }
     ]
+  },
+  editorial: {
+    label: 'Editorial', art: 'Revista', desc: 'Como una revista: titulares enormes, filetes negros, secciones numeradas, letra capital y un solo color. Para cocina de autor, brunch y lugares con historia.', layout: 'lista',
+    defaults: { colors: { bg: '#F4F1EA', surface: '#FBFAF6', ink: '#121212', muted: '#5D5B56', accent: '#C23A1E', accent2: '#8F2A15', accent3: '#3D3B37' }, fonts: { display: 'Instrument Serif', body: 'Instrument Sans' }, radius: 0, motion: 'suave', texture: 'none', icons: 'ninguno' },
+    palettes: [
+      { name: 'Diario', colors: { bg: '#F4F1EA', surface: '#FBFAF6', ink: '#121212', muted: '#5D5B56', accent: '#C23A1E', accent2: '#8F2A15', accent3: '#3D3B37' } },
+      { name: 'Tinta', colors: { bg: '#111111', surface: '#1B1B1B', ink: '#F2EFE8', muted: '#A6A39C', accent: '#FF6B4A', accent2: '#FF9A80', accent3: '#D9D5CC' } },
+      { name: 'Azul', colors: { bg: '#F3F3EF', surface: '#FFFFFF', ink: '#0F1520', muted: '#575D66', accent: '#2348C4', accent2: '#1A3590', accent3: '#3A3F47' } },
+      { name: 'Verde', colors: { bg: '#EEF0EA', surface: '#FAFBF7', ink: '#141A14', muted: '#565E55', accent: '#2E6B3A', accent2: '#20502A', accent3: '#3B423A' } },
+      { name: 'Revista', colors: { bg: '#FFF4F0', surface: '#FFFFFF', ink: '#1A1112', muted: '#665557', accent: '#C9204F', accent2: '#9C1742', accent3: '#3F3335' } }
+    ]
   }
 };
 

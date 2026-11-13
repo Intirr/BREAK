@@ -1141,6 +1141,22 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'obra'), 'la franja de obra se ofrece en el estudio');
   }
 
+  /* 11zc. Estética Editorial y Mesa Larga */
+  {
+    const NOW = { now: '2026-11-07T15:30:00Z' };
+    let A = mount(TPL('tpl-mesalarga'), NOW);
+    const x = A.d.getElementById('bk-css').textContent;
+    ok(A.$('.app').getAttribute('data-skin') === 'editorial' && /\[data-skin="editorial"\] \.hero-t\{/.test(x), 'Editorial: su CSS se aplica');
+    ok(!/ d-/.test(A.$('.hero-box').className) && !A.$('.hero-box svg') && !A.$('.hero-mono'), 'Editorial: la portada es solo tipografía');
+    ok(!A.$$('.carta-body .it').some(it => /\p{Extended_Pictographic}/u.test(it.textContent)) && !A.$('.carta-body .ic'), 'Mesa Larga: la carta va sin íconos ni emojis');
+    ok(/counter-increment:sec/.test(x) && /\.story p:first-child::first-letter\{float:left/.test(x) && !!A.$('section.m-reservas'), 'Editorial: secciones numeradas, letra capital y reservas');
+    ok(A.d.getElementById('bk-fonts').href.includes('family=Instrument+Serif') && A.d.getElementById('bk-fonts').href.includes('family=Instrument+Sans'), 'Editorial: pide sus tipografías a Google Fonts');
+    ok(x.includes('@media (prefers-color-scheme:dark){:root:not([data-scheme="light"]){--bg:'), 'Mesa Larga: modo oscuro automático');
+    A.close();
+    const block = (SRC('runtime.js').match(/\n    editorial: `([\s\S]*?)`/) || [])[1] || '';
+    ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Editorial: su CSS solo usa colores de la paleta');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];

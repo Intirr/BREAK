@@ -210,6 +210,9 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-bistro::before{content:"";position:absolute;left:0;right:0;top:0;height:18px;background:repeating-linear-gradient(90deg,#7B1E2D 0 14px,#FFFCF4 14px 28px);-webkit-mask:linear-gradient(black,black) 0 0/100% 11px no-repeat,radial-gradient(circle at 7px 0,black 7px,transparent 7.5px) 0 100%/14px 7px repeat-x;mask:linear-gradient(black,black) 0 0/100% 11px no-repeat,radial-gradient(circle at 7px 0,black 7px,transparent 7.5px) 0 100%/14px 7px repeat-x}
 .sk-industrial{background:#171717;color:#F1EFEA;font:800 42px/1 "Big Shoulders Stencil",Impact,"Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.02em;padding-bottom:14px}
 .sk-industrial::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:repeating-linear-gradient(-45deg,#F5C400 0 9px,#171717 9px 18px)}
+.sk-editorial{background:#F4F1EA;color:#121212;font:400 48px/1 "Instrument Serif",Georgia,serif;letter-spacing:-.02em;padding-top:10px}
+.sk-editorial::before{content:"";position:absolute;left:16px;right:16px;top:12px;border-top:5px double #121212}
+.sk-editorial::after{content:"N.º 14";position:absolute;left:16px;bottom:12px;font:600 10px/1 system-ui,sans-serif;letter-spacing:.14em;color:#C23A1E}
 .sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}

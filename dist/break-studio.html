@@ -3,7 +3,7 @@
 <meta name="description" content="Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&family=Pacifico&family=Fredoka:wght@700&family=Playfair+Display:ital@1&family=Big+Shoulders+Stencil:wght@800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&family=Pacifico&family=Fredoka:wght@700&family=Playfair+Display:ital@1&family=Big+Shoulders+Stencil:wght@800&family=Instrument+Serif&display=swap">
 <style>
 /* Layout: two-pane workbench — order-ticket editor on the left, live phone on the right; tabs and one column on phones. */
 :root{
@@ -217,6 +217,9 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-bistro::before{content:"";position:absolute;left:0;right:0;top:0;height:18px;background:repeating-linear-gradient(90deg,#7B1E2D 0 14px,#FFFCF4 14px 28px);-webkit-mask:linear-gradient(black,black) 0 0/100% 11px no-repeat,radial-gradient(circle at 7px 0,black 7px,transparent 7.5px) 0 100%/14px 7px repeat-x;mask:linear-gradient(black,black) 0 0/100% 11px no-repeat,radial-gradient(circle at 7px 0,black 7px,transparent 7.5px) 0 100%/14px 7px repeat-x}
 .sk-industrial{background:#171717;color:#F1EFEA;font:800 42px/1 "Big Shoulders Stencil",Impact,"Arial Narrow",sans-serif;text-transform:uppercase;letter-spacing:.02em;padding-bottom:14px}
 .sk-industrial::after{content:"";position:absolute;left:0;right:0;bottom:0;height:12px;background:repeating-linear-gradient(-45deg,#F5C400 0 9px,#171717 9px 18px)}
+.sk-editorial{background:#F4F1EA;color:#121212;font:400 48px/1 "Instrument Serif",Georgia,serif;letter-spacing:-.02em;padding-top:10px}
+.sk-editorial::before{content:"";position:absolute;left:16px;right:16px;top:12px;border-top:5px double #121212}
+.sk-editorial::after{content:"N.º 14";position:absolute;left:16px;bottom:12px;font:600 10px/1 system-ui,sans-serif;letter-spacing:.14em;color:#C23A1E}
 .sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}
@@ -2199,6 +2202,95 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="industrial"] .foot::before{content:"";display:block;height:10px;margin:0 0 52px;background:repeating-linear-gradient(-45deg,var(--accent) 0 10px,var(--on-accent) 10px 20px)}
 [data-skin="industrial"] .foot-n{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:44px;line-height:1;letter-spacing:.02em}
 [data-skin="industrial"] .navi{font-family:var(--fd);font-weight:800;text-transform:uppercase;font-weight:700;font-size:30px;letter-spacing:.03em}
+`,
+    editorial: `
+[data-skin="editorial"]{--gw:.4}
+[data-skin="editorial"] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 94%,transparent));border-bottom:1px solid var(--c-top-on,var(--ink))}
+[data-skin="editorial"] .brand-mini{font-size:26px;letter-spacing:-.01em}
+[data-skin="editorial"] .logo{border-radius:0}
+[data-skin="editorial"] .status,[data-skin="editorial"] .lang,[data-skin="editorial"] .menu-btn{background:transparent;border:1px solid color-mix(in srgb,var(--c-top-on,var(--ink)) 40%,transparent);border-radius:0}
+[data-skin="editorial"] .lang button{border-radius:0}
+[data-skin="editorial"] .lang button.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg))}
+[data-skin="editorial"] .m-hero{padding-block:26px 0}
+[data-skin="editorial"] .hero-in{border-top:5px double var(--ink);padding-top:16px}
+[data-skin="editorial"] .hero-k{font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--c-kicker,var(--accent))}
+[data-skin="editorial"] .hero-t{font-size:min(calc(clamp(72px,25vw,140px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.86;letter-spacing:-.025em;color:var(--c-title,var(--ink))}
+[data-skin="editorial"] .hero-s{font-family:var(--fd);font-style:italic;font-size:23px;line-height:1.3;color:var(--ink);max-width:28ch}
+[data-skin="editorial"] .btn{border-radius:0;border-width:1px;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:600}
+[data-skin="editorial"] .btn.pri{background:var(--c-btn,var(--ink));border-color:var(--c-btn,var(--ink));color:var(--c-btn-on,var(--bg))}
+[data-skin="editorial"] .btn.ghost{border-color:var(--ink)}
+[data-skin="editorial"] .btn.text{text-transform:none;letter-spacing:0;font-size:15px}
+[data-skin="editorial"] .ribbon{margin-top:28px;padding-block:10px;border-block:1px solid var(--ink);white-space:normal;font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+[data-skin="editorial"] .ribbon-track{display:flex;flex-wrap:wrap;gap:4px 0}
+[data-skin="editorial"] .ribbon-track span{padding:0 10px 0 0}
+[data-skin="editorial"] .ribbon-track span:not(:last-child)::after{content:"/";margin-left:10px;color:var(--accent)}
+[data-skin="editorial"] main{counter-reset:sec}
+[data-skin="editorial"] .sh{counter-increment:sec;border-top:3px solid var(--ink);padding-top:12px}
+[data-skin="editorial"] .sh::before{content:counter(sec,decimal-leading-zero) " —";display:block;margin-bottom:14px;font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+[data-skin="editorial"] .sh-k{font-family:var(--fd);font-style:italic;font-weight:400;font-size:20px;letter-spacing:0;text-transform:none;color:var(--c-kicker,var(--accent))}
+[data-skin="editorial"] .sh-t{font-size:calc(clamp(44px,13vw,64px) * var(--ts,1));line-height:.95;letter-spacing:-.02em}
+[data-skin="editorial"] .lead-p{font-family:var(--fd);font-style:italic;font-size:20px;line-height:1.35;color:var(--ink)}
+[data-skin="editorial"] .card,[data-skin="editorial"] .svc,[data-skin="editorial"] .fq,[data-skin="editorial"] .lay-tarjetas .it,[data-skin="editorial"] .lay-cuadricula .it,[data-skin="editorial"] .lay-fotos .it,[data-skin="editorial"] .feat,[data-skin="editorial"] .promo,[data-skin="editorial"] .cl,[data-skin="editorial"] .wres,[data-skin="editorial"] .free{background:var(--surface);border:1px solid var(--ink);border-radius:0;box-shadow:none}
+[data-skin="editorial"] .free.hl{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+[data-skin="editorial"] .quote{background:none;border:0;border-left:3px solid var(--accent);border-radius:0;padding:2px 0 2px 18px}
+[data-skin="editorial"] .quote blockquote{font-family:var(--fd);font-style:italic;font-size:24px;line-height:1.2}
+[data-skin="editorial"] .quote figcaption{font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+[data-skin="editorial"] .qbig .quote{border-left:0;border-block:1px solid var(--ink);padding:22px 8px}
+[data-skin="editorial"] .qbig blockquote{font-size:30px;line-height:1.15}
+[data-skin="editorial"] .qbig blockquote::before{font-size:72px;color:var(--accent)}
+[data-skin="editorial"] .chip{background:none;border:0;border-bottom:2px solid transparent;border-radius:0;padding:6px 4px;min-height:36px;font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+[data-skin="editorial"] .chip.on{background:none;color:var(--ink);border-bottom-color:var(--c-sel,var(--accent))}
+[data-skin="editorial"] .cat-tabs{background:color-mix(in srgb,var(--bg) 95%,transparent);border-block:1px solid var(--ink)}
+[data-skin="editorial"] .carta-body{counter-reset:cat}
+[data-skin="editorial"] .cat-h{border-bottom:1px solid var(--ink);padding-bottom:6px}
+[data-skin="editorial"] .cat-h h3{font-style:italic;font-size:36px;line-height:1.05;letter-spacing:-.01em;align-items:baseline}
+[data-skin="editorial"] .cat-h h3::before{counter-increment:cat;content:counter(cat,upper-roman) ".";font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+[data-skin="editorial"] .cat-h p{font-family:var(--fd);font-style:italic;font-size:17px}
+[data-skin="editorial"] .it h4{font-weight:600;font-size:16.5px}
+[data-skin="editorial"] .it-d{font-size:14.5px}
+[data-skin="editorial"] .lay-lista .it,[data-skin="editorial"] .lay-compacta .it{border-bottom:1px solid color-mix(in srgb,var(--ink) 22%,transparent)}
+[data-skin="editorial"] .lead{border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent);transform:translateY(-5px)}
+[data-skin="editorial"] .price{font-family:var(--fd);font-weight:400;font-size:21px;color:var(--c-price,var(--ink))}
+[data-skin="editorial"] .tag{background:none;padding:0;border-radius:0;color:var(--c-tag,var(--accent));font-family:var(--fd);font-style:italic;font-size:16px;font-weight:400;text-transform:none;letter-spacing:0}
+[data-skin="editorial"] .tag+.tag::before{content:"·";margin-right:6px}
+[data-skin="editorial"] .add{background:transparent;border:1px solid var(--ink);color:var(--ink);border-radius:0}
+[data-skin="editorial"] .add .q{background:var(--accent);color:var(--on-accent);border-radius:0}
+[data-skin="editorial"] .media,[data-skin="editorial"] .media.m1,[data-skin="editorial"] .media.m2{border-radius:0;background:color-mix(in srgb,var(--ink) 6%,var(--surface))}
+[data-skin="editorial"] .media.none span{font-style:italic;color:var(--accent)}
+[data-skin="editorial"] .feat-b h4{font-family:var(--fd);font-weight:400;font-size:24px;line-height:1.1}
+[data-skin="editorial"] .promo h4,[data-skin="editorial"] .ev h4{font-family:var(--fd);font-weight:400;font-size:26px;line-height:1.1}
+[data-skin="editorial"] .promo-d,[data-skin="editorial"] .ev-w{font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:11px!important}
+[data-skin="editorial"] .promo.today{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+[data-skin="editorial"] .promo.today .price{color:inherit}
+[data-skin="editorial"] .badge{border-radius:0;background:var(--accent);color:var(--on-accent)}
+[data-skin="editorial"] .md-when{font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+[data-skin="editorial"] .md-price{font-size:52px;line-height:.9;letter-spacing:-.02em}
+[data-skin="editorial"] .md-today,[data-skin="editorial"] .hrow .hoy{border-radius:0}
+[data-skin="editorial"] .stamp{border:1px solid var(--ink)}
+[data-skin="editorial"] .stamp.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+[data-skin="editorial"] .stamp.on em{color:inherit}
+[data-skin="editorial"] .hrow,[data-skin="editorial"] .g{border-bottom:1px solid color-mix(in srgb,var(--ink) 22%,transparent)}
+[data-skin="editorial"] .hrow.today dt,[data-skin="editorial"] .hrow.today dd{color:var(--accent)}
+[data-skin="editorial"] .g dt{font-style:italic;color:var(--ink)}
+[data-skin="editorial"] .story{font-size:18px;line-height:1.6}
+[data-skin="editorial"] .story p:first-child::first-letter{float:left;font-family:var(--fd);font-size:4.6em;line-height:.8;margin:.06em .1em 0 0;color:var(--accent)}
+[data-skin="editorial"] .sig{font-family:var(--fd);font-style:italic;font-size:26px;color:var(--ink)}
+[data-skin="editorial"] .svc-i{border-radius:0;background:none;border:1px solid var(--ink);color:var(--ink)}
+[data-skin="editorial"] .cl .ic{color:var(--ink)}
+[data-skin="editorial"] .map-art{border-bottom:1px solid var(--ink)}
+[data-skin="editorial"] .wheel{box-shadow:0 0 0 6px var(--surface),0 0 0 7px var(--ink)}
+[data-skin="editorial"] .fab{border-radius:0;background:var(--c-btn,var(--ink));color:var(--c-btn-on,var(--bg))}
+[data-skin="editorial"] .fab-n{border-radius:0;background:var(--accent);color:var(--on-accent)}
+[data-skin="editorial"] .sheet{border-radius:0;border-top:3px solid var(--ink)}
+[data-skin="editorial"] .sheet h3{font-size:30px}
+[data-skin="editorial"] .inp,[data-skin="editorial"] .search input,[data-skin="editorial"] .stepper,[data-skin="editorial"] .tq-o{border-radius:0;border:1px solid color-mix(in srgb,var(--ink) 45%,transparent)}
+[data-skin="editorial"] .seg{border-radius:0}
+[data-skin="editorial"] .seg button{border-radius:0}
+[data-skin="editorial"] .seg button.on{background:var(--c-sel,var(--ink));color:var(--c-sel-on,var(--bg));box-shadow:none}
+[data-skin="editorial"] .keypad button{border-radius:0}
+[data-skin="editorial"] .foot{border-top:5px double var(--c-foot-on,var(--ink))}
+[data-skin="editorial"] .foot-n{font-size:52px;line-height:1;letter-spacing:-.02em}
+[data-skin="editorial"] .navi{font-size:34px;letter-spacing:-.01em;border-bottom-color:color-mix(in srgb,var(--ink) 30%,transparent)}
 `
   };
 
@@ -2331,7 +2423,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' }, tropical: { deco: 'monstera' }, bistro: { deco: 'toldo' }, industrial: { deco: 'obra' } };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' }, tropical: { deco: 'monstera' }, bistro: { deco: 'toldo' }, industrial: { deco: 'obra' }, editorial: {} };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
   const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera', 'toldo', 'obra'];
   const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG, monstera: monsteraSVG };
@@ -5608,6 +5700,78 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 15. COCINA DE AUTOR Y BRUNCH · EDITORIAL ---------- */
+  {
+    v: 1, id: 'tpl-mesalarga', template: true,
+    brand: {
+      name: 'Mesa Larga', tagline: 'Cocina de autor y brunch de fin de semana', kind: 'Restaurante de autor',
+      logo: { type: 'mono', value: 'ML' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Carrera 16 # 11-20, segundo piso', addressNote: 'Sobre la panadería; se sube por la escalera de madera.',
+      mapsQuery: 'Santa Rosa de Cabal, Risaralda', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: null, 2: null, 3: ['12:00', '22:00'], 4: ['12:00', '22:00'], 5: ['12:00', '23:00'], 6: ['09:00', '23:00'], 0: ['09:00', '16:00'] })
+    },
+    i18n: { bilingual: false, usted: true },
+    theme: {
+      skin: 'editorial',
+      colors: { bg: '#F4F1EA', surface: '#FBFAF6', ink: '#121212', muted: '#5D5B56', accent: '#C23A1E', accent2: '#8F2A15', accent3: '#3D3B37' },
+      fonts: { display: 'Instrument Serif', body: 'Instrument Sans' }, radius: 0, motion: 'suave', texture: 'none', icons: 'ninguno',
+      fx: { reveal: 'aparecer' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'brunch', name: 'Brunch', icon: '🍳', note: 'Sábados y domingos, de 9:00 a. m. a 1:00 p. m.', items: [
+          IT('benedictinos', 'Huevos benedictinos con pernil', 'Pan brioche, pernil de cerdo y salsa holandesa de mantequilla tostada.', 32000, '🍳', ['popular']),
+          IT('arepa-choclo', 'Arepa de choclo, hogao y huevo poché', 'Con quesillo y cilantro de la huerta.', 26000, '🌽', ['local']),
+          IT('tostada', 'Tostada francesa', 'Brioche, frutos rojos y miel de panela.', 24000, '🍞'),
+          IT('shakshuka', 'Shakshuka de la casa', 'Huevos en salsa de tomate y pimentón asado, con pan de masa madre.', 27000, '🍳', ['vegetariano']),
+          IT('yogur', 'Yogur, granola y fruta', 'Yogur de la finca, granola tostada y fruta de temporada.', 18000, '🥣', ['vegetariano'])
+        ] },
+        { id: 'empezar', name: 'Para empezar', icon: '🥗', note: '', items: [
+          IT('tiradito', 'Tiradito de trucha', 'Leche de tigre de lulo, ají amarillo y maíz tostado.', 29000, '🐟', ['chef', 'local']),
+          IT('croquetas', 'Croquetas de yuca y queso', 'Con alioli de ajo negro.', 18000, '🧀', ['vegetariano']),
+          IT('remolacha', 'Remolacha asada', 'Con labneh de la casa, avellanas y hierbas.', 22000, '🥗', ['vegetariano']),
+          IT('chicharron', 'Chicharrón con ají de uchuva', 'Panceta crocante y encurtidos.', 24000, '🥓')
+        ] },
+        { id: 'fuertes', name: 'Fuertes', icon: '🍽️', note: 'Cambian con la temporada', items: [
+          IT('bondiola', 'Bondiola de cerdo, siete horas', 'Puré de arracacha y jugo de la cocción.', 48000, '🍖', ['chef', 'popular']),
+          IT('trucha', 'Trucha en mantequilla de hierbas', 'Papas criollas y alcaparras fritas.', 46000, '🐟', ['local', 'singluten']),
+          IT('risotto', 'Risotto de hongos de pino', 'Hongos de los bosques de la vereda y queso madurado.', 42000, '🍄', ['vegetariano']),
+          IT('pesca', 'Pesca del día', 'Pregunte por la de hoy.', 52000, '🐟', ['temporada']),
+          IT('pollo', 'Pollo de campo y maracuyá', 'Muslo dorado, salsa de maracuyá y vegetales asados.', 44000, '🍗')
+        ] },
+        { id: 'postres', name: 'Postres', icon: '🍰', note: '', items: [
+          IT('tarta', 'Tarta de queso con mora', 'Horneada, con compota de mora de Castilla.', 16000, '🍰', ['popular']),
+          IT('mousse', 'Mousse de chocolate y café', 'Chocolate de la región y café de especialidad.', 15000, '🍫'),
+          IT('helado', 'Helado de panela y queso', 'Hecho en casa.', 14000, '🍨', ['local'])
+        ] },
+        { id: 'bebidas', name: 'Bebidas', icon: '🍷', note: '', items: [
+          IT('cafe', 'Café de especialidad', 'Filtrado o espresso.', 7000, '☕', ['local']),
+          IT('mimosa', 'Mimosa', 'Espumoso y jugo de naranja. Solo para mayores de 18 años.', 22000, '🥂'),
+          IT('limonada', 'Limonada de jengibre', 'Endulzada con panela.', 9000, '🍋', ['vegano']),
+          IT('vino', 'Copa de vino de la casa', 'Pregunte por el de esta semana. Solo para mayores de 18 años.', 24000, '🍷')
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Cocina de autor · brunch', title: '', subtitle: 'Una sola mesa larga, platos de temporada y productores de la región.', cta1: 'reservas', cta2: 'carta', showStatus: true, ribbon: 'Brunch sábados y domingos, Menú de temporada, Vinos de la semana, Mesa compartida' } },
+      { id: 'mesa', type: 'historia', on: true, s: { title: 'La mesa', kicker: '', year: '2021',
+        text: 'Somos dos cocineros que volvimos al pueblo. Pusimos una sola mesa de dieciséis puestos, de madera de nogal, y cocinamos lo que nos traen las fincas cada semana.\n\nAquí uno se sienta al lado de desconocidos y sale con amigos.',
+        signature: 'Laura y Mateo' } },
+      { id: 'temporada', type: 'destacados', on: true, s: { title: 'De temporada', tag: 'chef', max: 3, layout: 'lista' } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: 'La carta cambia con la temporada.', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos. La propina es voluntaria.' } },
+      { id: 'reservas', type: 'reservas', on: true, s: { title: 'Reserve un puesto', text: 'Para grupos de más de ocho personas, escríbanos.', slots: '12:30, 13:30, 19:00, 20:30', maxPeople: 16, occasions: 'Cumpleaños, Aniversario, Cena de trabajo', note: 'Le confirmamos su reserva por WhatsApp.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: 'Dicen de la mesa', text: 'Su reseña ayuda a que más gente se siente con nosotros.', rating: '', layout: 'destacada', _bg: 'invertido', quotes: [
+        { text: 'Llegamos sin conocer a nadie y terminamos compartiendo el postre con la mesa entera.', author: 'Mariana L.' },
+        { text: 'La bondiola de siete horas es de las mejores cosas que he comido en el Eje Cafetero.', author: 'Felipe A.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Brunch sábados y domingos de 9:00 a. m. a 1:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
@@ -5799,6 +5963,17 @@ const SKINS = {
       { name: 'Acero', colors: { bg: '#1B2229', surface: '#25303A', ink: '#EEF1F4', muted: '#A3AFBA', accent: '#FFB300', accent2: '#6FD3C8', accent3: '#FF8A65' } },
       { name: 'Ladrillo', colors: { bg: '#2A1714', surface: '#38201B', ink: '#F6ECE6', muted: '#C4AFA6', accent: '#F2B705', accent2: '#F08A5D', accent3: '#9CC3A8' } },
       { name: 'Plano', colors: { bg: '#E8EDF2', surface: '#F7F9FB', ink: '#14212C', muted: '#4C5C6A', accent: '#F2C200', accent2: '#1C5A8A', accent3: '#A8381A' } }
+    ]
+  },
+  editorial: {
+    label: 'Editorial', art: 'Revista', desc: 'Como una revista: titulares enormes, filetes negros, secciones numeradas, letra capital y un solo color. Para cocina de autor, brunch y lugares con historia.', layout: 'lista',
+    defaults: { colors: { bg: '#F4F1EA', surface: '#FBFAF6', ink: '#121212', muted: '#5D5B56', accent: '#C23A1E', accent2: '#8F2A15', accent3: '#3D3B37' }, fonts: { display: 'Instrument Serif', body: 'Instrument Sans' }, radius: 0, motion: 'suave', texture: 'none', icons: 'ninguno' },
+    palettes: [
+      { name: 'Diario', colors: { bg: '#F4F1EA', surface: '#FBFAF6', ink: '#121212', muted: '#5D5B56', accent: '#C23A1E', accent2: '#8F2A15', accent3: '#3D3B37' } },
+      { name: 'Tinta', colors: { bg: '#111111', surface: '#1B1B1B', ink: '#F2EFE8', muted: '#A6A39C', accent: '#FF6B4A', accent2: '#FF9A80', accent3: '#D9D5CC' } },
+      { name: 'Azul', colors: { bg: '#F3F3EF', surface: '#FFFFFF', ink: '#0F1520', muted: '#575D66', accent: '#2348C4', accent2: '#1A3590', accent3: '#3A3F47' } },
+      { name: 'Verde', colors: { bg: '#EEF0EA', surface: '#FAFBF7', ink: '#141A14', muted: '#565E55', accent: '#2E6B3A', accent2: '#20502A', accent3: '#3B423A' } },
+      { name: 'Revista', colors: { bg: '#FFF4F0', surface: '#FFFFFF', ink: '#1A1112', muted: '#665557', accent: '#C9204F', accent2: '#9C1742', accent3: '#3F3335' } }
     ]
   }
 };

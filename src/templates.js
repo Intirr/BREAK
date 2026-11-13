@@ -1168,6 +1168,78 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 15. COCINA DE AUTOR Y BRUNCH · EDITORIAL ---------- */
+  {
+    v: 1, id: 'tpl-mesalarga', template: true,
+    brand: {
+      name: 'Mesa Larga', tagline: 'Cocina de autor y brunch de fin de semana', kind: 'Restaurante de autor',
+      logo: { type: 'mono', value: 'ML' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Carrera 16 # 11-20, segundo piso', addressNote: 'Sobre la panadería; se sube por la escalera de madera.',
+      mapsQuery: 'Santa Rosa de Cabal, Risaralda', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: null, 2: null, 3: ['12:00', '22:00'], 4: ['12:00', '22:00'], 5: ['12:00', '23:00'], 6: ['09:00', '23:00'], 0: ['09:00', '16:00'] })
+    },
+    i18n: { bilingual: false, usted: true },
+    theme: {
+      skin: 'editorial',
+      colors: { bg: '#F4F1EA', surface: '#FBFAF6', ink: '#121212', muted: '#5D5B56', accent: '#C23A1E', accent2: '#8F2A15', accent3: '#3D3B37' },
+      fonts: { display: 'Instrument Serif', body: 'Instrument Sans' }, radius: 0, motion: 'suave', texture: 'none', icons: 'ninguno',
+      fx: { reveal: 'aparecer' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'brunch', name: 'Brunch', icon: '🍳', note: 'Sábados y domingos, de 9:00 a. m. a 1:00 p. m.', items: [
+          IT('benedictinos', 'Huevos benedictinos con pernil', 'Pan brioche, pernil de cerdo y salsa holandesa de mantequilla tostada.', 32000, '🍳', ['popular']),
+          IT('arepa-choclo', 'Arepa de choclo, hogao y huevo poché', 'Con quesillo y cilantro de la huerta.', 26000, '🌽', ['local']),
+          IT('tostada', 'Tostada francesa', 'Brioche, frutos rojos y miel de panela.', 24000, '🍞'),
+          IT('shakshuka', 'Shakshuka de la casa', 'Huevos en salsa de tomate y pimentón asado, con pan de masa madre.', 27000, '🍳', ['vegetariano']),
+          IT('yogur', 'Yogur, granola y fruta', 'Yogur de la finca, granola tostada y fruta de temporada.', 18000, '🥣', ['vegetariano'])
+        ] },
+        { id: 'empezar', name: 'Para empezar', icon: '🥗', note: '', items: [
+          IT('tiradito', 'Tiradito de trucha', 'Leche de tigre de lulo, ají amarillo y maíz tostado.', 29000, '🐟', ['chef', 'local']),
+          IT('croquetas', 'Croquetas de yuca y queso', 'Con alioli de ajo negro.', 18000, '🧀', ['vegetariano']),
+          IT('remolacha', 'Remolacha asada', 'Con labneh de la casa, avellanas y hierbas.', 22000, '🥗', ['vegetariano']),
+          IT('chicharron', 'Chicharrón con ají de uchuva', 'Panceta crocante y encurtidos.', 24000, '🥓')
+        ] },
+        { id: 'fuertes', name: 'Fuertes', icon: '🍽️', note: 'Cambian con la temporada', items: [
+          IT('bondiola', 'Bondiola de cerdo, siete horas', 'Puré de arracacha y jugo de la cocción.', 48000, '🍖', ['chef', 'popular']),
+          IT('trucha', 'Trucha en mantequilla de hierbas', 'Papas criollas y alcaparras fritas.', 46000, '🐟', ['local', 'singluten']),
+          IT('risotto', 'Risotto de hongos de pino', 'Hongos de los bosques de la vereda y queso madurado.', 42000, '🍄', ['vegetariano']),
+          IT('pesca', 'Pesca del día', 'Pregunte por la de hoy.', 52000, '🐟', ['temporada']),
+          IT('pollo', 'Pollo de campo y maracuyá', 'Muslo dorado, salsa de maracuyá y vegetales asados.', 44000, '🍗')
+        ] },
+        { id: 'postres', name: 'Postres', icon: '🍰', note: '', items: [
+          IT('tarta', 'Tarta de queso con mora', 'Horneada, con compota de mora de Castilla.', 16000, '🍰', ['popular']),
+          IT('mousse', 'Mousse de chocolate y café', 'Chocolate de la región y café de especialidad.', 15000, '🍫'),
+          IT('helado', 'Helado de panela y queso', 'Hecho en casa.', 14000, '🍨', ['local'])
+        ] },
+        { id: 'bebidas', name: 'Bebidas', icon: '🍷', note: '', items: [
+          IT('cafe', 'Café de especialidad', 'Filtrado o espresso.', 7000, '☕', ['local']),
+          IT('mimosa', 'Mimosa', 'Espumoso y jugo de naranja. Solo para mayores de 18 años.', 22000, '🥂'),
+          IT('limonada', 'Limonada de jengibre', 'Endulzada con panela.', 9000, '🍋', ['vegano']),
+          IT('vino', 'Copa de vino de la casa', 'Pregunte por el de esta semana. Solo para mayores de 18 años.', 24000, '🍷')
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Cocina de autor · brunch', title: '', subtitle: 'Una sola mesa larga, platos de temporada y productores de la región.', cta1: 'reservas', cta2: 'carta', showStatus: true, ribbon: 'Brunch sábados y domingos, Menú de temporada, Vinos de la semana, Mesa compartida' } },
+      { id: 'mesa', type: 'historia', on: true, s: { title: 'La mesa', kicker: '', year: '2021',
+        text: 'Somos dos cocineros que volvimos al pueblo. Pusimos una sola mesa de dieciséis puestos, de madera de nogal, y cocinamos lo que nos traen las fincas cada semana.\n\nAquí uno se sienta al lado de desconocidos y sale con amigos.',
+        signature: 'Laura y Mateo' } },
+      { id: 'temporada', type: 'destacados', on: true, s: { title: 'De temporada', tag: 'chef', max: 3, layout: 'lista' } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: 'La carta cambia con la temporada.', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos. La propina es voluntaria.' } },
+      { id: 'reservas', type: 'reservas', on: true, s: { title: 'Reserve un puesto', text: 'Para grupos de más de ocho personas, escríbanos.', slots: '12:30, 13:30, 19:00, 20:30', maxPeople: 16, occasions: 'Cumpleaños, Aniversario, Cena de trabajo', note: 'Le confirmamos su reserva por WhatsApp.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: 'Dicen de la mesa', text: 'Su reseña ayuda a que más gente se siente con nosotros.', rating: '', layout: 'destacada', _bg: 'invertido', quotes: [
+        { text: 'Llegamos sin conocer a nadie y terminamos compartiendo el postre con la mesa entera.', author: 'Mariana L.' },
+        { text: 'La bondiola de siete horas es de las mejores cosas que he comido en el Eje Cafetero.', author: 'Felipe A.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Brunch sábados y domingos de 9:00 a. m. a 1:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
