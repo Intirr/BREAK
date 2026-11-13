@@ -1021,6 +1021,80 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 13. PASTELERÍA Y CAFÉ CLÁSICO · BISTRÓ ---------- */
+  {
+    v: 1, id: 'tpl-larosa', template: true,
+    brand: {
+      name: 'Pastelería La Rosa', tagline: 'Pastelería y café desde 1972', kind: 'Pastelería y café',
+      logo: { type: 'icon', value: 'torta' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Carrera 15 # 13-42', addressNote: 'En la esquina del parque, junto a la notaría.',
+      mapsQuery: 'Parque principal, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['07:00', '20:00'], 2: ['07:00', '20:00'], 3: ['07:00', '20:00'], 4: ['07:00', '20:00'], 5: ['07:00', '20:00'], 6: ['07:00', '20:00'], 0: ['08:00', '18:00'] })
+    },
+    i18n: { bilingual: false, usted: true },
+    theme: {
+      skin: 'bistro',
+      colors: { bg: '#F7F1E4', surface: '#FFFCF4', ink: '#1A2340', muted: '#5B6177', accent: '#7B1E2D', accent2: '#1F2E57', accent3: '#B08A44' },
+      fonts: { display: 'Playfair Display', body: 'Lora' }, radius: 4, motion: 'suave', texture: 'papel', icons: 'linea',
+      fx: { reveal: 'aparecer' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'tortas', name: 'Tortas y pasteles', icon: '🍰', note: 'Por porción; enteras, por encargo', items: [
+          IT('tres-leches', 'Torta de tres leches', 'Bizcocho empapado y merengue tostado.', 7500, '🍰', ['popular']),
+          IT('milhoja', 'Milhoja de arequipe', 'Hojaldre de mantequilla y arequipe de la casa.', 6500, '🍰', ['popular', 'chef']),
+          IT('torta-negra', 'Torta negra', 'De frutas maceradas en vino, la de los matrimonios.', 8500, '🍰', ['local']),
+          IT('pie-limon', 'Pie de limón', 'Masa quebrada, crema de limón y merengue.', 7000, '🍋'),
+          IT('brazo-reina', 'Brazo de reina', 'Relleno de arequipe y coco.', 5500, '🍰'),
+          IT('zanahoria', 'Torta de zanahoria', 'Con nueces y crema de queso.', 7000, '🥕', ['nuevo'])
+        ] },
+        { id: 'hojaldres', name: 'Hojaldres y panes', icon: '🥐', note: 'Salen del horno a las 7:00 a. m. y a las 4:00 p. m.', items: [
+          IT('gloria', 'Pastel gloria', 'Hojaldre con bocadillo y arequipe.', 3500, '🥐', ['local', 'popular']),
+          IT('croissant', 'Croissant de mantequilla', 'Hojaldrado a mano.', 4500, '🥐'),
+          IT('pastel-pollo', 'Pastel de pollo', 'Hojaldre relleno de pollo en salsa.', 5000, '🥐'),
+          IT('roscon', 'Roscón de bocadillo', 'Con azúcar por encima.', 3000, '🍩', ['local'])
+        ] },
+        { id: 'cafe', name: 'Café y chocolate', icon: '☕', note: '', items: [
+          IT('tinto', 'Tinto', 'Café de la región.', 2500, '☕', ['local']),
+          IT('cafe-leche', 'Café con leche', 'En taza grande.', 4000, '☕'),
+          IT('capuchino', 'Capuchino', 'Con canela o cacao.', 6000, '☕', ['popular']),
+          IT('chocolate', 'Chocolate santafereño', 'Con queso y almojábana.', 9500, '🍫', ['local']),
+          IT('te', 'Té de la tarde', 'Tetera para dos con galletas de mantequilla.', 8000, '🍵')
+        ] },
+        { id: 'salados', name: 'Salados', icon: '🥪', note: '', items: [
+          IT('pernil', 'Sándwich de pernil', 'Pernil horneado, queso y encurtidos.', 14000, '🥪', ['popular']),
+          IT('quiche', 'Quiche de espinaca', 'Con queso campesino.', 12000, '🥧', ['vegetariano']),
+          IT('empanadas', 'Empanadas de horno', 'De carne o de queso.', 4000, '🥟')
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Desde 1972 · frente al parque', title: '', subtitle: 'Tortas de la casa, hojaldres recién horneados y almuerzo ejecutivo entre semana.', cta1: 'carta', cta2: 'ubicacion', showStatus: true, ribbon: 'Tortas de la casa, Hojaldres, Café de la región, Almuerzo ejecutivo' } },
+      { id: 'vitrina', type: 'destacados', on: true, s: { title: 'De la vitrina', tag: 'popular', max: 4, layout: 'cuadricula', _bg: 'superficie' } },
+      { id: 'almuerzo', type: 'menudia', on: true, s: { title: 'Almuerzo ejecutivo', days: [1, 2, 3, 4, 5], from: '12:00', to: '15:00', price: 22000, note: 'Incluye bebida y postre.', parts: [
+        { label: 'Entrada', value: 'Crema de ahuyama' },
+        { label: 'Plato fuerte', value: 'Pollo en salsa de champiñones o lomo de cerdo en salsa de mora' },
+        { label: 'Acompañantes', value: 'Arroz con almendras y ensalada de la casa' },
+        { label: 'Bebida', value: 'Limonada o jugo del día' },
+        { label: 'Postre', value: 'Porción de la torta del día' }
+      ] } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'encargos', type: 'libre', on: true, s: { kicker: 'Por encargo', title: 'Tortas para celebrar', text: 'Cumpleaños, primeras comuniones y matrimonios. Encárguela con tres días de anticipación y la decoramos a su gusto.', style: 'destacado', btnLabel: 'Encargar por WhatsApp', btnTarget: 'whatsapp', url: '', waText: 'Hola, quiero encargar una torta.' } },
+      { id: 'casa', type: 'historia', on: true, s: { title: 'La casa', kicker: '', year: '1972',
+        text: 'Doña Rosa empezó vendiendo pasteles gloria en la ventana de su casa. Hoy la pastelería ocupa la esquina entera y sus nietos siguen amasando con su libreta de recetas.\n\nLas vitrinas de madera y el reloj de la pared son los mismos del primer día.',
+        signature: 'La familia de doña Rosa' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Nos visitó?', text: 'Su reseña ayuda a que más personas conozcan la casa.', rating: '', _bg: 'invertido', quotes: [
+        { text: 'La milhoja de arequipe es la de mi infancia. No ha cambiado nada, y eso es lo mejor.', author: 'Gloria P.' },
+        { text: 'El almuerzo ejecutivo, bien servido y con postre. Volvemos cada semana.', author: 'Andrés F.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 8:00 a. m. a 6:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
+    ],
+    meta: { credit: true }
   }
 ];
 

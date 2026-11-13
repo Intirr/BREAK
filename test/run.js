@@ -576,10 +576,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const hero = cfg => cfg.modules.find(m => m.type === 'hero').s;
     const NOW = { now: '2026-11-06T15:30:00Z' };
     // Lo de cada estética sigue igual sin tocar nada
-    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras', 'tpl-aguatibia': '.hero-box.d-termales svg.art-term', 'tpl-polar': '.hero-box.d-damero .damero', 'tpl-mango': '.hero-box.d-monstera svg.art-mons' };
+    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras', 'tpl-aguatibia': '.hero-box.d-termales svg.art-term', 'tpl-polar': '.hero-box.d-damero .damero', 'tpl-mango': '.hero-box.d-monstera svg.art-mons', 'tpl-larosa': '.hero-box.d-toldo .toldo' };
     for (const id of Object.keys(auto)) { const A = mount(TPL(id), NOW); ok(!!A.$(auto[id]), id + ': la portada conserva la decoración de su estética'); A.close(); }
     ok(/--leaf:#[0-9a-f]{6}/i.test((() => { const A = mount(TPL('tpl-espiga'), NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; })()), 'el verde de la paleta queda listo para las ilustraciones');
-    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
+    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera', 'toldo'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
     // Sin decoración
     const z = TPL('tpl-zocalo'); hero(z).deco = 'ninguna';
     let A = mount(z, NOW); ok(!A.$('.facade') && !A.$('.zocalo') && !A.$('.hero-box[class*=" d-"]'), '«Ninguna» quita la fachada y el zócalo'); A.close();
@@ -1099,6 +1099,26 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'monstera';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-monstera svg.art-mons') && !A.$('.hero-box.d-monstera .facade'), 'las monsteras sirven en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'monstera'), 'las monsteras se ofrecen en el estudio');
+  }
+
+  /* 11za. Estética Bistró y Pastelería La Rosa */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    let A = mount(TPL('tpl-larosa'), NOW);
+    const x = A.d.getElementById('bk-css').textContent;
+    ok(A.$('.app').getAttribute('data-skin') === 'bistro' && /\[data-skin="bistro"\] \.hero-t\{/.test(x), 'Bistró: su CSS se aplica');
+    ok(!!A.$('.hero-box.d-toldo .hero-in > .toldo:first-child') && !!A.$('section.m-menudia .md-price') && A.d.documentElement.getAttribute('data-tex') === 'papel' && !!A.$('section.m-libre .free.hl'), 'Pastelería La Rosa: toldo, almuerzo ejecutivo, papel de fondo y encargos');
+    ok(A.d.getElementById('bk-fonts').href.includes('family=Playfair+Display') && A.d.getElementById('bk-fonts').href.includes('family=Lora'), 'Bistró: pide sus tipografías a Google Fonts');
+    ok(x.includes('@media (prefers-color-scheme:dark){:root:not([data-scheme="light"]){--bg:'), 'Pastelería La Rosa: modo oscuro automático');
+    A.close();
+    const block = (SRC('runtime.js').match(/\n    bistro: `([\s\S]*?)`/) || [])[1] || '';
+    ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Bistró: su CSS solo usa colores de la paleta');
+    ok(/\.hero-box:not\(\.al-izq\) \.hero-in\{text-align:center\}/.test(block), 'Bistró: la portada va centrada salvo que se elija a la izquierda');
+    const f = TPL('tpl-larosa'); f.modules.find(m => m.type === 'hero').s.img = 'https://example.com/portada.jpg';
+    A = mount(f, NOW); ok(!A.$('.toldo') && !!A.$('.hero-box.has-img'), 'con foto de portada no se pone el toldo'); A.close();
+    const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'toldo';
+    A = mount(z, NOW); ok(!!A.$('.hero-box.d-toldo .toldo') && !A.$('.hero-box.d-toldo .facade'), 'el toldo sirve en cualquier estética'); A.close();
+    ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'toldo'), 'el toldo se ofrece en el estudio');
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */

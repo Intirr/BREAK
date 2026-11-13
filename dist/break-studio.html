@@ -3,7 +3,7 @@
 <meta name="description" content="Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&family=Pacifico&family=Fredoka:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&family=Pacifico&family=Fredoka:wght@700&family=Playfair+Display:ital@1&display=swap">
 <style>
 /* Layout: two-pane workbench — order-ticket editor on the left, live phone on the right; tabs and one column on phones. */
 :root{
@@ -213,6 +213,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-retro::after{content:"";position:absolute;left:16px;right:16px;bottom:12px;height:10px;border-top:3px solid #BE1E30;background:repeating-conic-gradient(#2A1C19 0 25%,#FFFAF2 0 50%) 0 0/10px 10px}
 .sk-tropical{background:radial-gradient(circle at 88% 18%,#F6A21E 0 13px,transparent 14px),radial-gradient(circle at 12% 84%,#C8175F 0 9px,transparent 10px),#FFF5E6;color:#123D2E;font:700 38px/1 Fredoka,"Arial Rounded MT Bold",system-ui,sans-serif;letter-spacing:-.01em}
 .sk-tropical::after{content:"";position:absolute;right:-8px;bottom:-10px;width:58px;height:46px;border-radius:40px 6px;background:#0D7347;rotate:-24deg}
+.sk-bistro{background:#F7F1E4;color:#1A2340;font:italic 400 34px/1 "Playfair Display",Georgia,serif;padding-top:20px;box-shadow:inset 0 0 0 6px #F7F1E4,inset 0 0 0 7px #B08A44}
+.sk-bistro::before{content:"";position:absolute;left:0;right:0;top:0;height:18px;background:repeating-linear-gradient(90deg,#7B1E2D 0 14px,#FFFCF4 14px 28px);-webkit-mask:linear-gradient(black,black) 0 0/100% 11px no-repeat,radial-gradient(circle at 7px 0,black 7px,transparent 7.5px) 0 100%/14px 7px repeat-x;mask:linear-gradient(black,black) 0 0/100% 11px no-repeat,radial-gradient(circle at 7px 0,black 7px,transparent 7.5px) 0 100%/14px 7px repeat-x}
 .sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}
@@ -751,6 +753,8 @@ const ART_CSS = [
 [data-motion="vivo"] .stk.s2{animation-delay:-1.1s}
 [data-motion="vivo"] .stk.s3{animation-delay:-2s}
 [data-motion="vivo"] .stk.s4{animation-delay:-.6s}
+.toldo{display:block;height:48px;margin:0 calc(-1 * max(20px,env(safe-area-inset-left,0px))) 30px;border-top:5px solid var(--ink);background:repeating-linear-gradient(90deg,var(--accent) 0 28px,var(--surface) 28px 56px);-webkit-mask:linear-gradient(black,black) 0 0/100% calc(100% - 14px) no-repeat,radial-gradient(circle at 14px 0,black 14px,transparent 14.5px) 0 100%/28px 14px repeat-x;mask:linear-gradient(black,black) 0 0/100% calc(100% - 14px) no-repeat,radial-gradient(circle at 14px 0,black 14px,transparent 14.5px) 0 100%/28px 14px repeat-x}
+section.m-hero:has(.toldo){padding-top:0}
 .damero{height:30px;margin-top:34px;border-top:6px solid var(--accent);background:repeating-conic-gradient(var(--ink) 0 25%,var(--surface) 0 50%) 0 0/30px 30px}
 .hills{display:block;width:100%;height:72px;margin-top:30px}
 .hills .hl1{fill:color-mix(in srgb,var(--accent3) 50%,var(--bg))}
@@ -2012,6 +2016,94 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="tropical"] .foot.fa-izq::before{margin-left:0}
 [data-skin="tropical"] .foot-n{font-weight:700;font-size:34px}
 [data-skin="tropical"] .navi{font-weight:600;font-size:26px}
+`,
+    bistro: `
+[data-skin="bistro"]{--gw:.54}
+[data-skin="bistro"] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 92%,transparent));border-bottom:3px double color-mix(in srgb,var(--c-top-on,var(--accent3)) 75%,transparent)}
+[data-skin="bistro"] .brand-mini{font-style:italic;font-size:22px}
+[data-skin="bistro"] .status,[data-skin="bistro"] .lang,[data-skin="bistro"] .menu-btn{background:transparent;border:1px solid color-mix(in srgb,var(--c-top-on,var(--ink)) 25%,transparent);border-radius:2px}
+[data-skin="bistro"] .lang button{border-radius:1px}
+[data-skin="bistro"] .lang button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="bistro"] .m-hero{padding-block:40px 0}
+[data-skin="bistro"] .hero-box:not(.al-izq) .hero-in{text-align:center}
+[data-skin="bistro"] .hero-box:not(.al-izq) .btns,[data-skin="bistro"] .hero-box:not(.al-izq) .ribbon-track{justify-content:center}
+[data-skin="bistro"] .hero-box:not(.al-izq) .hero-s,[data-skin="bistro"] .hero-box:not(.al-izq) .orn{margin-inline:auto}
+[data-skin="bistro"] .hero-k{font-variant-caps:all-small-caps;text-transform:none;font-size:16px;letter-spacing:.2em;font-weight:600;color:var(--c-kicker,var(--accent))}
+[data-skin="bistro"] .hero-t{font-weight:700;font-size:min(calc(clamp(50px,14.5vw,88px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:1;letter-spacing:-.01em;color:var(--c-title,var(--ink))}
+[data-skin="bistro"] .hero-s{font-style:italic;font-size:18.5px;color:color-mix(in srgb,var(--ink) 78%,var(--bg))}
+[data-skin="bistro"] .hero-box .orn,[data-skin="bistro"] .sh .orn{display:block;position:relative;width:132px;height:7px;margin-top:16px;background:linear-gradient(var(--accent3),var(--accent3)) 0 0/100% 1px no-repeat,linear-gradient(var(--accent3),var(--accent3)) 0 100%/100% 1px no-repeat}
+[data-skin="bistro"] .hero-box .orn::after,[data-skin="bistro"] .sh .orn::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;background:var(--accent3);transform:translate(-50%,-50%) rotate(45deg)}
+[data-skin="bistro"] .btn{border-radius:2px;border-width:1.5px;font-variant-caps:all-small-caps;text-transform:none;font-size:17px;letter-spacing:.12em;font-weight:600}
+[data-skin="bistro"] .btn.sm{font-size:15px}
+[data-skin="bistro"] .btn.pri{background:var(--c-btn,var(--accent2));border-color:var(--c-btn,var(--accent2));color:var(--c-btn-on,var(--on-accent2))}
+[data-skin="bistro"] .btn.ghost{border-color:color-mix(in srgb,var(--ink) 70%,transparent)}
+[data-skin="bistro"] .ribbon{margin-top:30px;padding-block:10px;border-block:3px double color-mix(in srgb,var(--accent3) 70%,transparent);white-space:normal;font-family:var(--fd);font-style:italic;font-size:18px;color:var(--ink)}
+[data-skin="bistro"] .ribbon-track{display:flex;flex-wrap:wrap;gap:2px 0}
+[data-skin="bistro"] .ribbon-track span{padding:0 10px}
+[data-skin="bistro"] .ribbon-track span:not(:last-child)::after{content:"·";margin-left:20px;color:var(--accent)}
+[data-skin="bistro"] .sh{text-align:center}
+[data-skin="bistro"] .sh .orn{margin-inline:auto}
+[data-skin="bistro"] .sh-k{font-variant-caps:all-small-caps;text-transform:none;font-size:16px;letter-spacing:.2em;font-weight:600;color:var(--c-kicker,var(--accent))}
+[data-skin="bistro"] .sh-t{font-weight:600;font-size:calc(clamp(34px,9.6vw,46px) * var(--ts,1));line-height:1.08}
+[data-skin="bistro"] .lead-p{font-style:italic}
+[data-skin="bistro"] .card,[data-skin="bistro"] .svc,[data-skin="bistro"] .fq,[data-skin="bistro"] .lay-tarjetas .it,[data-skin="bistro"] .lay-cuadricula .it,[data-skin="bistro"] .lay-fotos .it,[data-skin="bistro"] .feat,[data-skin="bistro"] .promo,[data-skin="bistro"] .quote,[data-skin="bistro"] .cl,[data-skin="bistro"] .wres{background:var(--surface);border-radius:calc(var(--r) * .5);border:1px solid color-mix(in srgb,var(--accent3) 70%,transparent);box-shadow:inset 0 0 0 4px var(--surface),inset 0 0 0 5px color-mix(in srgb,var(--accent3) 38%,transparent)}
+[data-skin="bistro"] .chip{border:1px solid color-mix(in srgb,var(--ink) 35%,transparent);border-radius:2px;font-variant-caps:all-small-caps;text-transform:none;font-size:16px;letter-spacing:.08em;font-weight:600}
+[data-skin="bistro"] .chip.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2));border-color:var(--c-sel,var(--accent2))}
+[data-skin="bistro"] .cat-tabs{background:color-mix(in srgb,var(--bg) 94%,transparent);border-bottom:3px double color-mix(in srgb,var(--accent3) 60%,transparent)}
+[data-skin="bistro"] .carta-body{margin:22px max(12px,env(safe-area-inset-left,0px)) 0;padding-top:8px;padding-bottom:26px;background:var(--surface);border:3px double color-mix(in srgb,var(--accent3) 80%,transparent)}
+[data-skin="bistro"] .carta-body .card,[data-skin="bistro"] .carta-body .lay-tarjetas .it{box-shadow:none}
+[data-skin="bistro"] .cat-h{text-align:center}
+[data-skin="bistro"] .cat-h h3{justify-content:center;font-style:italic;font-weight:400;font-size:30px;color:var(--c-title,var(--accent))}
+[data-skin="bistro"] .cat-h h3::before,[data-skin="bistro"] .cat-h h3::after{content:"";flex:1;max-width:52px;height:1px;background:var(--accent3)}
+[data-skin="bistro"] .cat-h p{font-style:italic}
+[data-skin="bistro"] .it h4{font-family:var(--fd);font-weight:600;font-size:18px}
+[data-skin="bistro"] .it-d{font-style:italic;font-size:14.5px;color:var(--muted)}
+[data-skin="bistro"] .lay-lista .it,[data-skin="bistro"] .lay-compacta .it{border-bottom:1px solid color-mix(in srgb,var(--accent3) 30%,transparent)}
+[data-skin="bistro"] .lead{border-bottom:1.5px dotted color-mix(in srgb,var(--accent3) 75%,transparent)}
+[data-skin="bistro"] .price{font-weight:600;color:var(--c-price,var(--accent))}
+[data-skin="bistro"] .tag{background:none;padding:0;color:var(--c-tag,var(--accent));font-variant-caps:all-small-caps;text-transform:none;font-size:14px;letter-spacing:.1em;font-weight:600}
+[data-skin="bistro"] .tag+.tag::before{content:"·";margin-right:8px;color:var(--accent3)}
+[data-skin="bistro"] .add{background:var(--c-btn,var(--accent2));color:var(--c-btn-on,var(--on-accent2))}
+[data-skin="bistro"] .add .q{background:var(--accent);color:var(--on-accent)}
+[data-skin="bistro"] .media{border-radius:2px;background:color-mix(in srgb,var(--accent3) 16%,var(--surface))}
+[data-skin="bistro"] .media.m1{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+[data-skin="bistro"] .media.m2{background:color-mix(in srgb,var(--accent2) 10%,var(--surface))}
+[data-skin="bistro"] .promo-d,[data-skin="bistro"] .ev-w{font-variant-caps:all-small-caps;text-transform:none;font-size:15px!important;letter-spacing:.14em;color:var(--accent)!important}
+[data-skin="bistro"] .promo h4,[data-skin="bistro"] .feat-b h4,[data-skin="bistro"] .ev h4{font-family:var(--fd);font-weight:600}
+[data-skin="bistro"] .promo.today{background:var(--accent);color:var(--on-accent);box-shadow:inset 0 0 0 4px var(--accent),inset 0 0 0 5px color-mix(in srgb,var(--on-accent) 45%,transparent)}
+[data-skin="bistro"] .promo.today .price{color:inherit}
+[data-skin="bistro"] .badge{border-radius:1px;background:var(--accent3);color:var(--on-accent3);font-variant-caps:all-small-caps;text-transform:none;font-size:14px;letter-spacing:.12em}
+[data-skin="bistro"] .md-when{font-style:italic;text-transform:none;letter-spacing:0;font-size:15px;font-weight:600}
+[data-skin="bistro"] .md-price{font-weight:700;font-size:38px;color:var(--c-price,var(--accent))}
+[data-skin="bistro"] .md-row dt{font-variant-caps:all-small-caps;text-transform:none;font-size:14px;letter-spacing:.12em}
+[data-skin="bistro"] .stamp{border:1.5px dashed color-mix(in srgb,var(--accent3) 70%,transparent)}
+[data-skin="bistro"] .stamp.on{border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+[data-skin="bistro"] .hrow,[data-skin="bistro"] .g{border-bottom:1px solid color-mix(in srgb,var(--accent3) 30%,transparent)}
+[data-skin="bistro"] .hrow dt{font-variant-caps:all-small-caps;text-transform:none;font-size:17px;letter-spacing:.08em;font-weight:600}
+[data-skin="bistro"] .hrow .lead{border-bottom:1.5px dotted color-mix(in srgb,var(--accent3) 70%,transparent)}
+[data-skin="bistro"] .hrow.today dt,[data-skin="bistro"] .hrow.today dd{color:var(--accent)}
+[data-skin="bistro"] .hrow .hoy{border-radius:1px}
+[data-skin="bistro"] .g dt{font-style:italic;color:var(--accent)}
+[data-skin="bistro"] .story{font-size:17.5px}
+[data-skin="bistro"] .sig{font-family:var(--fd);font-style:italic;font-size:24px;color:var(--accent)}
+[data-skin="bistro"] .quote blockquote{font-family:var(--fd);font-style:italic;font-size:19px;line-height:1.4}
+[data-skin="bistro"] .qbig blockquote{font-size:24px}
+[data-skin="bistro"] .svc-i{border-radius:2px;background:color-mix(in srgb,var(--accent3) 18%,var(--surface));color:var(--accent2)}
+[data-skin="bistro"] .cl .ic{color:var(--accent)}
+[data-skin="bistro"] .wheel{box-shadow:0 0 0 6px var(--surface),0 0 0 7px var(--accent3),0 0 0 11px var(--accent2)}
+[data-skin="bistro"] .fab{border-radius:4px;background:var(--c-btn,var(--accent2));color:var(--c-btn-on,var(--on-accent2))}
+[data-skin="bistro"] .fab-n{border-radius:2px;background:var(--c-btn-on,var(--on-accent2));color:var(--c-btn,var(--accent2))}
+[data-skin="bistro"] .sheet{border-top:3px double var(--accent3);border-radius:6px 6px 0 0}
+[data-skin="bistro"] .sheet h3{font-style:italic}
+[data-skin="bistro"] .inp,[data-skin="bistro"] .search input,[data-skin="bistro"] .stepper,[data-skin="bistro"] .tq-o{border-radius:2px;border-color:color-mix(in srgb,var(--ink) 25%,transparent)}
+[data-skin="bistro"] .seg{border-radius:3px}
+[data-skin="bistro"] .seg button{border-radius:2px}
+[data-skin="bistro"] .seg button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="bistro"] .keypad button{border-radius:3px}
+[data-skin="bistro"] .foot::before{content:"";display:block;position:relative;width:132px;height:7px;margin-top:16px;background:linear-gradient(var(--accent3),var(--accent3)) 0 0/100% 1px no-repeat,linear-gradient(var(--accent3),var(--accent3)) 0 100%/100% 1px no-repeat;margin:0 auto 22px}
+[data-skin="bistro"] .foot.fa-izq::before{margin-left:0}
+[data-skin="bistro"] .foot-n{font-style:italic;font-size:34px}
+[data-skin="bistro"] .navi{font-size:26px}
 `
   };
 
@@ -2144,9 +2236,9 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' }, tropical: { deco: 'monstera' } };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' }, tropical: { deco: 'monstera' }, bistro: { deco: 'toldo' } };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
-  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera'];
+  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera', 'toldo'];
   const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG, monstera: monsteraSVG };
   /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
   function decoPreview(k) {
@@ -2154,6 +2246,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     if (k === 'fachada') return facadeSVG('') + '<div class="zocalo"></div>';
     if (k === 'lomas') return hillsSVG();
     if (k === 'damero') return '<div class="damero"></div>';
+    if (k === 'toldo') return '<div class="toldo"></div>';
     if (k === 'neon') return '<p class="neon on">Abierto</p>';
     return ART[k] ? ART[k]() : '';
   }
@@ -2712,6 +2805,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       else if (dk === 'neon') { if (st) deco += '<p class="neon ' + (st.open ? 'on' : 'off') + '" aria-hidden="true">' + esc(st.open ? ui('open') : ui('closed')) + '</p>'; }
       else if (dk === 'lomas') band = hillsSVG();
       else if (dk === 'damero') band = '<div class="damero" aria-hidden="true"></div>';
+      else if (dk === 'toldo') { if (v === 'texto') deco = '<div class="toldo" aria-hidden="true"></div>' + deco; }
       else if (dk === 'termales' || dk === 'willys') { if (v === 'texto') deco += ART[dk](); }
       else if (dk) band = ART[dk]();
       const needPh = PREVIEW && !img && (variant === 'foto' || variant === 'arriba' || variant === 'tarjeta') ? '<div class="wrap"><p class="pv-empty">Este diseño de portada necesita una foto. Súbela en «Foto de portada».</p></div>' : '';
@@ -5270,6 +5364,80 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 13. PASTELERÍA Y CAFÉ CLÁSICO · BISTRÓ ---------- */
+  {
+    v: 1, id: 'tpl-larosa', template: true,
+    brand: {
+      name: 'Pastelería La Rosa', tagline: 'Pastelería y café desde 1972', kind: 'Pastelería y café',
+      logo: { type: 'icon', value: 'torta' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Carrera 15 # 13-42', addressNote: 'En la esquina del parque, junto a la notaría.',
+      mapsQuery: 'Parque principal, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['07:00', '20:00'], 2: ['07:00', '20:00'], 3: ['07:00', '20:00'], 4: ['07:00', '20:00'], 5: ['07:00', '20:00'], 6: ['07:00', '20:00'], 0: ['08:00', '18:00'] })
+    },
+    i18n: { bilingual: false, usted: true },
+    theme: {
+      skin: 'bistro',
+      colors: { bg: '#F7F1E4', surface: '#FFFCF4', ink: '#1A2340', muted: '#5B6177', accent: '#7B1E2D', accent2: '#1F2E57', accent3: '#B08A44' },
+      fonts: { display: 'Playfair Display', body: 'Lora' }, radius: 4, motion: 'suave', texture: 'papel', icons: 'linea',
+      fx: { reveal: 'aparecer' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'tortas', name: 'Tortas y pasteles', icon: '🍰', note: 'Por porción; enteras, por encargo', items: [
+          IT('tres-leches', 'Torta de tres leches', 'Bizcocho empapado y merengue tostado.', 7500, '🍰', ['popular']),
+          IT('milhoja', 'Milhoja de arequipe', 'Hojaldre de mantequilla y arequipe de la casa.', 6500, '🍰', ['popular', 'chef']),
+          IT('torta-negra', 'Torta negra', 'De frutas maceradas en vino, la de los matrimonios.', 8500, '🍰', ['local']),
+          IT('pie-limon', 'Pie de limón', 'Masa quebrada, crema de limón y merengue.', 7000, '🍋'),
+          IT('brazo-reina', 'Brazo de reina', 'Relleno de arequipe y coco.', 5500, '🍰'),
+          IT('zanahoria', 'Torta de zanahoria', 'Con nueces y crema de queso.', 7000, '🥕', ['nuevo'])
+        ] },
+        { id: 'hojaldres', name: 'Hojaldres y panes', icon: '🥐', note: 'Salen del horno a las 7:00 a. m. y a las 4:00 p. m.', items: [
+          IT('gloria', 'Pastel gloria', 'Hojaldre con bocadillo y arequipe.', 3500, '🥐', ['local', 'popular']),
+          IT('croissant', 'Croissant de mantequilla', 'Hojaldrado a mano.', 4500, '🥐'),
+          IT('pastel-pollo', 'Pastel de pollo', 'Hojaldre relleno de pollo en salsa.', 5000, '🥐'),
+          IT('roscon', 'Roscón de bocadillo', 'Con azúcar por encima.', 3000, '🍩', ['local'])
+        ] },
+        { id: 'cafe', name: 'Café y chocolate', icon: '☕', note: '', items: [
+          IT('tinto', 'Tinto', 'Café de la región.', 2500, '☕', ['local']),
+          IT('cafe-leche', 'Café con leche', 'En taza grande.', 4000, '☕'),
+          IT('capuchino', 'Capuchino', 'Con canela o cacao.', 6000, '☕', ['popular']),
+          IT('chocolate', 'Chocolate santafereño', 'Con queso y almojábana.', 9500, '🍫', ['local']),
+          IT('te', 'Té de la tarde', 'Tetera para dos con galletas de mantequilla.', 8000, '🍵')
+        ] },
+        { id: 'salados', name: 'Salados', icon: '🥪', note: '', items: [
+          IT('pernil', 'Sándwich de pernil', 'Pernil horneado, queso y encurtidos.', 14000, '🥪', ['popular']),
+          IT('quiche', 'Quiche de espinaca', 'Con queso campesino.', 12000, '🥧', ['vegetariano']),
+          IT('empanadas', 'Empanadas de horno', 'De carne o de queso.', 4000, '🥟')
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Desde 1972 · frente al parque', title: '', subtitle: 'Tortas de la casa, hojaldres recién horneados y almuerzo ejecutivo entre semana.', cta1: 'carta', cta2: 'ubicacion', showStatus: true, ribbon: 'Tortas de la casa, Hojaldres, Café de la región, Almuerzo ejecutivo' } },
+      { id: 'vitrina', type: 'destacados', on: true, s: { title: 'De la vitrina', tag: 'popular', max: 4, layout: 'cuadricula', _bg: 'superficie' } },
+      { id: 'almuerzo', type: 'menudia', on: true, s: { title: 'Almuerzo ejecutivo', days: [1, 2, 3, 4, 5], from: '12:00', to: '15:00', price: 22000, note: 'Incluye bebida y postre.', parts: [
+        { label: 'Entrada', value: 'Crema de ahuyama' },
+        { label: 'Plato fuerte', value: 'Pollo en salsa de champiñones o lomo de cerdo en salsa de mora' },
+        { label: 'Acompañantes', value: 'Arroz con almendras y ensalada de la casa' },
+        { label: 'Bebida', value: 'Limonada o jugo del día' },
+        { label: 'Postre', value: 'Porción de la torta del día' }
+      ] } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'encargos', type: 'libre', on: true, s: { kicker: 'Por encargo', title: 'Tortas para celebrar', text: 'Cumpleaños, primeras comuniones y matrimonios. Encárguela con tres días de anticipación y la decoramos a su gusto.', style: 'destacado', btnLabel: 'Encargar por WhatsApp', btnTarget: 'whatsapp', url: '', waText: 'Hola, quiero encargar una torta.' } },
+      { id: 'casa', type: 'historia', on: true, s: { title: 'La casa', kicker: '', year: '1972',
+        text: 'Doña Rosa empezó vendiendo pasteles gloria en la ventana de su casa. Hoy la pastelería ocupa la esquina entera y sus nietos siguen amasando con su libreta de recetas.\n\nLas vitrinas de madera y el reloj de la pared son los mismos del primer día.',
+        signature: 'La familia de doña Rosa' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Nos visitó?', text: 'Su reseña ayuda a que más personas conozcan la casa.', rating: '', _bg: 'invertido', quotes: [
+        { text: 'La milhoja de arequipe es la de mi infancia. No ha cambiado nada, y eso es lo mejor.', author: 'Gloria P.' },
+        { text: 'El almuerzo ejecutivo, bien servido y con postre. Volvemos cada semana.', author: 'Andrés F.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 8:00 a. m. a 6:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
@@ -5440,6 +5608,17 @@ const SKINS = {
       { name: 'Coco', colors: { bg: '#F6F1E7', surface: '#FFFFFF', ink: '#1F2B24', muted: '#58645D', accent: '#B5411A', accent2: '#18704E', accent3: '#F2C14E' } },
       { name: 'Maracuyá', colors: { bg: '#24123A', surface: '#33204B', ink: '#FFF3E8', muted: '#C8B6D6', accent: '#FFC94A', accent2: '#7EE3B0', accent3: '#FF7AB6' } }
     ]
+  },
+  bistro: {
+    label: 'Bistró', art: 'Pâtisserie', desc: 'Crema, azul marino, vino y latón, serif clásica, doble filete, versalitas y carta enmarcada. Para pastelerías, cafés clásicos y bistrós.', layout: 'lista',
+    defaults: { colors: { bg: '#F7F1E4', surface: '#FFFCF4', ink: '#1A2340', muted: '#5B6177', accent: '#7B1E2D', accent2: '#1F2E57', accent3: '#B08A44' }, fonts: { display: 'Playfair Display', body: 'Lora' }, radius: 4, motion: 'suave', texture: 'papel', icons: 'linea' },
+    palettes: [
+      { name: 'Crema', colors: { bg: '#F7F1E4', surface: '#FFFCF4', ink: '#1A2340', muted: '#5B6177', accent: '#7B1E2D', accent2: '#1F2E57', accent3: '#B08A44' } },
+      { name: 'Marino', colors: { bg: '#131B33', surface: '#1C2644', ink: '#F4EEDF', muted: '#B6B9C8', accent: '#E8A9B3', accent2: '#E9D3A1', accent3: '#C9A35A' } },
+      { name: 'Rosa', colors: { bg: '#FBEFEF', surface: '#FFFAF9', ink: '#2A1C26', muted: '#6E5A66', accent: '#8E2442', accent2: '#2B355E', accent3: '#C2995A' } },
+      { name: 'Verde inglés', colors: { bg: '#F3F1E6', surface: '#FFFDF6', ink: '#1E2B24', muted: '#58645D', accent: '#7A2430', accent2: '#1F4D3A', accent3: '#A88A4A' } },
+      { name: 'Vino', colors: { bg: '#2A1418', surface: '#381D22', ink: '#F7EBE1', muted: '#CDB7AF', accent: '#F0B9A5', accent2: '#E2C788', accent3: '#B88E58' } }
+    ]
   }
 };
 
@@ -5589,7 +5768,7 @@ const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3'
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
-  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['monstera', 'Hojas de monstera'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
+  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['monstera', 'Hojas de monstera'], ['toldo', 'Toldo de rayas'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',

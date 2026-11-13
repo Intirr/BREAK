@@ -256,6 +256,8 @@ const ART_CSS = [
 [data-motion="vivo"] .stk.s2{animation-delay:-1.1s}
 [data-motion="vivo"] .stk.s3{animation-delay:-2s}
 [data-motion="vivo"] .stk.s4{animation-delay:-.6s}
+.toldo{display:block;height:48px;margin:0 calc(-1 * max(20px,env(safe-area-inset-left,0px))) 30px;border-top:5px solid var(--ink);background:repeating-linear-gradient(90deg,var(--accent) 0 28px,var(--surface) 28px 56px);-webkit-mask:linear-gradient(black,black) 0 0/100% calc(100% - 14px) no-repeat,radial-gradient(circle at 14px 0,black 14px,transparent 14.5px) 0 100%/28px 14px repeat-x;mask:linear-gradient(black,black) 0 0/100% calc(100% - 14px) no-repeat,radial-gradient(circle at 14px 0,black 14px,transparent 14.5px) 0 100%/28px 14px repeat-x}
+section.m-hero:has(.toldo){padding-top:0}
 .damero{height:30px;margin-top:34px;border-top:6px solid var(--accent);background:repeating-conic-gradient(var(--ink) 0 25%,var(--surface) 0 50%) 0 0/30px 30px}
 .hills{display:block;width:100%;height:72px;margin-top:30px}
 .hills .hl1{fill:color-mix(in srgb,var(--accent3) 50%,var(--bg))}
@@ -1517,6 +1519,94 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="tropical"] .foot.fa-izq::before{margin-left:0}
 [data-skin="tropical"] .foot-n{font-weight:700;font-size:34px}
 [data-skin="tropical"] .navi{font-weight:600;font-size:26px}
+`,
+    bistro: `
+[data-skin="bistro"]{--gw:.54}
+[data-skin="bistro"] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 92%,transparent));border-bottom:3px double color-mix(in srgb,var(--c-top-on,var(--accent3)) 75%,transparent)}
+[data-skin="bistro"] .brand-mini{font-style:italic;font-size:22px}
+[data-skin="bistro"] .status,[data-skin="bistro"] .lang,[data-skin="bistro"] .menu-btn{background:transparent;border:1px solid color-mix(in srgb,var(--c-top-on,var(--ink)) 25%,transparent);border-radius:2px}
+[data-skin="bistro"] .lang button{border-radius:1px}
+[data-skin="bistro"] .lang button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="bistro"] .m-hero{padding-block:40px 0}
+[data-skin="bistro"] .hero-box:not(.al-izq) .hero-in{text-align:center}
+[data-skin="bistro"] .hero-box:not(.al-izq) .btns,[data-skin="bistro"] .hero-box:not(.al-izq) .ribbon-track{justify-content:center}
+[data-skin="bistro"] .hero-box:not(.al-izq) .hero-s,[data-skin="bistro"] .hero-box:not(.al-izq) .orn{margin-inline:auto}
+[data-skin="bistro"] .hero-k{font-variant-caps:all-small-caps;text-transform:none;font-size:16px;letter-spacing:.2em;font-weight:600;color:var(--c-kicker,var(--accent))}
+[data-skin="bistro"] .hero-t{font-weight:700;font-size:min(calc(clamp(50px,14.5vw,88px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:1;letter-spacing:-.01em;color:var(--c-title,var(--ink))}
+[data-skin="bistro"] .hero-s{font-style:italic;font-size:18.5px;color:color-mix(in srgb,var(--ink) 78%,var(--bg))}
+[data-skin="bistro"] .hero-box .orn,[data-skin="bistro"] .sh .orn{display:block;position:relative;width:132px;height:7px;margin-top:16px;background:linear-gradient(var(--accent3),var(--accent3)) 0 0/100% 1px no-repeat,linear-gradient(var(--accent3),var(--accent3)) 0 100%/100% 1px no-repeat}
+[data-skin="bistro"] .hero-box .orn::after,[data-skin="bistro"] .sh .orn::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;background:var(--accent3);transform:translate(-50%,-50%) rotate(45deg)}
+[data-skin="bistro"] .btn{border-radius:2px;border-width:1.5px;font-variant-caps:all-small-caps;text-transform:none;font-size:17px;letter-spacing:.12em;font-weight:600}
+[data-skin="bistro"] .btn.sm{font-size:15px}
+[data-skin="bistro"] .btn.pri{background:var(--c-btn,var(--accent2));border-color:var(--c-btn,var(--accent2));color:var(--c-btn-on,var(--on-accent2))}
+[data-skin="bistro"] .btn.ghost{border-color:color-mix(in srgb,var(--ink) 70%,transparent)}
+[data-skin="bistro"] .ribbon{margin-top:30px;padding-block:10px;border-block:3px double color-mix(in srgb,var(--accent3) 70%,transparent);white-space:normal;font-family:var(--fd);font-style:italic;font-size:18px;color:var(--ink)}
+[data-skin="bistro"] .ribbon-track{display:flex;flex-wrap:wrap;gap:2px 0}
+[data-skin="bistro"] .ribbon-track span{padding:0 10px}
+[data-skin="bistro"] .ribbon-track span:not(:last-child)::after{content:"·";margin-left:20px;color:var(--accent)}
+[data-skin="bistro"] .sh{text-align:center}
+[data-skin="bistro"] .sh .orn{margin-inline:auto}
+[data-skin="bistro"] .sh-k{font-variant-caps:all-small-caps;text-transform:none;font-size:16px;letter-spacing:.2em;font-weight:600;color:var(--c-kicker,var(--accent))}
+[data-skin="bistro"] .sh-t{font-weight:600;font-size:calc(clamp(34px,9.6vw,46px) * var(--ts,1));line-height:1.08}
+[data-skin="bistro"] .lead-p{font-style:italic}
+[data-skin="bistro"] .card,[data-skin="bistro"] .svc,[data-skin="bistro"] .fq,[data-skin="bistro"] .lay-tarjetas .it,[data-skin="bistro"] .lay-cuadricula .it,[data-skin="bistro"] .lay-fotos .it,[data-skin="bistro"] .feat,[data-skin="bistro"] .promo,[data-skin="bistro"] .quote,[data-skin="bistro"] .cl,[data-skin="bistro"] .wres{background:var(--surface);border-radius:calc(var(--r) * .5);border:1px solid color-mix(in srgb,var(--accent3) 70%,transparent);box-shadow:inset 0 0 0 4px var(--surface),inset 0 0 0 5px color-mix(in srgb,var(--accent3) 38%,transparent)}
+[data-skin="bistro"] .chip{border:1px solid color-mix(in srgb,var(--ink) 35%,transparent);border-radius:2px;font-variant-caps:all-small-caps;text-transform:none;font-size:16px;letter-spacing:.08em;font-weight:600}
+[data-skin="bistro"] .chip.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2));border-color:var(--c-sel,var(--accent2))}
+[data-skin="bistro"] .cat-tabs{background:color-mix(in srgb,var(--bg) 94%,transparent);border-bottom:3px double color-mix(in srgb,var(--accent3) 60%,transparent)}
+[data-skin="bistro"] .carta-body{margin:22px max(12px,env(safe-area-inset-left,0px)) 0;padding-top:8px;padding-bottom:26px;background:var(--surface);border:3px double color-mix(in srgb,var(--accent3) 80%,transparent)}
+[data-skin="bistro"] .carta-body .card,[data-skin="bistro"] .carta-body .lay-tarjetas .it{box-shadow:none}
+[data-skin="bistro"] .cat-h{text-align:center}
+[data-skin="bistro"] .cat-h h3{justify-content:center;font-style:italic;font-weight:400;font-size:30px;color:var(--c-title,var(--accent))}
+[data-skin="bistro"] .cat-h h3::before,[data-skin="bistro"] .cat-h h3::after{content:"";flex:1;max-width:52px;height:1px;background:var(--accent3)}
+[data-skin="bistro"] .cat-h p{font-style:italic}
+[data-skin="bistro"] .it h4{font-family:var(--fd);font-weight:600;font-size:18px}
+[data-skin="bistro"] .it-d{font-style:italic;font-size:14.5px;color:var(--muted)}
+[data-skin="bistro"] .lay-lista .it,[data-skin="bistro"] .lay-compacta .it{border-bottom:1px solid color-mix(in srgb,var(--accent3) 30%,transparent)}
+[data-skin="bistro"] .lead{border-bottom:1.5px dotted color-mix(in srgb,var(--accent3) 75%,transparent)}
+[data-skin="bistro"] .price{font-weight:600;color:var(--c-price,var(--accent))}
+[data-skin="bistro"] .tag{background:none;padding:0;color:var(--c-tag,var(--accent));font-variant-caps:all-small-caps;text-transform:none;font-size:14px;letter-spacing:.1em;font-weight:600}
+[data-skin="bistro"] .tag+.tag::before{content:"·";margin-right:8px;color:var(--accent3)}
+[data-skin="bistro"] .add{background:var(--c-btn,var(--accent2));color:var(--c-btn-on,var(--on-accent2))}
+[data-skin="bistro"] .add .q{background:var(--accent);color:var(--on-accent)}
+[data-skin="bistro"] .media{border-radius:2px;background:color-mix(in srgb,var(--accent3) 16%,var(--surface))}
+[data-skin="bistro"] .media.m1{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+[data-skin="bistro"] .media.m2{background:color-mix(in srgb,var(--accent2) 10%,var(--surface))}
+[data-skin="bistro"] .promo-d,[data-skin="bistro"] .ev-w{font-variant-caps:all-small-caps;text-transform:none;font-size:15px!important;letter-spacing:.14em;color:var(--accent)!important}
+[data-skin="bistro"] .promo h4,[data-skin="bistro"] .feat-b h4,[data-skin="bistro"] .ev h4{font-family:var(--fd);font-weight:600}
+[data-skin="bistro"] .promo.today{background:var(--accent);color:var(--on-accent);box-shadow:inset 0 0 0 4px var(--accent),inset 0 0 0 5px color-mix(in srgb,var(--on-accent) 45%,transparent)}
+[data-skin="bistro"] .promo.today .price{color:inherit}
+[data-skin="bistro"] .badge{border-radius:1px;background:var(--accent3);color:var(--on-accent3);font-variant-caps:all-small-caps;text-transform:none;font-size:14px;letter-spacing:.12em}
+[data-skin="bistro"] .md-when{font-style:italic;text-transform:none;letter-spacing:0;font-size:15px;font-weight:600}
+[data-skin="bistro"] .md-price{font-weight:700;font-size:38px;color:var(--c-price,var(--accent))}
+[data-skin="bistro"] .md-row dt{font-variant-caps:all-small-caps;text-transform:none;font-size:14px;letter-spacing:.12em}
+[data-skin="bistro"] .stamp{border:1.5px dashed color-mix(in srgb,var(--accent3) 70%,transparent)}
+[data-skin="bistro"] .stamp.on{border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+[data-skin="bistro"] .hrow,[data-skin="bistro"] .g{border-bottom:1px solid color-mix(in srgb,var(--accent3) 30%,transparent)}
+[data-skin="bistro"] .hrow dt{font-variant-caps:all-small-caps;text-transform:none;font-size:17px;letter-spacing:.08em;font-weight:600}
+[data-skin="bistro"] .hrow .lead{border-bottom:1.5px dotted color-mix(in srgb,var(--accent3) 70%,transparent)}
+[data-skin="bistro"] .hrow.today dt,[data-skin="bistro"] .hrow.today dd{color:var(--accent)}
+[data-skin="bistro"] .hrow .hoy{border-radius:1px}
+[data-skin="bistro"] .g dt{font-style:italic;color:var(--accent)}
+[data-skin="bistro"] .story{font-size:17.5px}
+[data-skin="bistro"] .sig{font-family:var(--fd);font-style:italic;font-size:24px;color:var(--accent)}
+[data-skin="bistro"] .quote blockquote{font-family:var(--fd);font-style:italic;font-size:19px;line-height:1.4}
+[data-skin="bistro"] .qbig blockquote{font-size:24px}
+[data-skin="bistro"] .svc-i{border-radius:2px;background:color-mix(in srgb,var(--accent3) 18%,var(--surface));color:var(--accent2)}
+[data-skin="bistro"] .cl .ic{color:var(--accent)}
+[data-skin="bistro"] .wheel{box-shadow:0 0 0 6px var(--surface),0 0 0 7px var(--accent3),0 0 0 11px var(--accent2)}
+[data-skin="bistro"] .fab{border-radius:4px;background:var(--c-btn,var(--accent2));color:var(--c-btn-on,var(--on-accent2))}
+[data-skin="bistro"] .fab-n{border-radius:2px;background:var(--c-btn-on,var(--on-accent2));color:var(--c-btn,var(--accent2))}
+[data-skin="bistro"] .sheet{border-top:3px double var(--accent3);border-radius:6px 6px 0 0}
+[data-skin="bistro"] .sheet h3{font-style:italic}
+[data-skin="bistro"] .inp,[data-skin="bistro"] .search input,[data-skin="bistro"] .stepper,[data-skin="bistro"] .tq-o{border-radius:2px;border-color:color-mix(in srgb,var(--ink) 25%,transparent)}
+[data-skin="bistro"] .seg{border-radius:3px}
+[data-skin="bistro"] .seg button{border-radius:2px}
+[data-skin="bistro"] .seg button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="bistro"] .keypad button{border-radius:3px}
+[data-skin="bistro"] .foot::before{content:"";display:block;position:relative;width:132px;height:7px;margin-top:16px;background:linear-gradient(var(--accent3),var(--accent3)) 0 0/100% 1px no-repeat,linear-gradient(var(--accent3),var(--accent3)) 0 100%/100% 1px no-repeat;margin:0 auto 22px}
+[data-skin="bistro"] .foot.fa-izq::before{margin-left:0}
+[data-skin="bistro"] .foot-n{font-style:italic;font-size:34px}
+[data-skin="bistro"] .navi{font-size:26px}
 `
   };
 
@@ -1649,9 +1739,9 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' }, tropical: { deco: 'monstera' } };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' }, tropical: { deco: 'monstera' }, bistro: { deco: 'toldo' } };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
-  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera'];
+  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera', 'toldo'];
   const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG, monstera: monsteraSVG };
   /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
   function decoPreview(k) {
@@ -1659,6 +1749,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     if (k === 'fachada') return facadeSVG('') + '<div class="zocalo"></div>';
     if (k === 'lomas') return hillsSVG();
     if (k === 'damero') return '<div class="damero"></div>';
+    if (k === 'toldo') return '<div class="toldo"></div>';
     if (k === 'neon') return '<p class="neon on">Abierto</p>';
     return ART[k] ? ART[k]() : '';
   }
@@ -2217,6 +2308,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       else if (dk === 'neon') { if (st) deco += '<p class="neon ' + (st.open ? 'on' : 'off') + '" aria-hidden="true">' + esc(st.open ? ui('open') : ui('closed')) + '</p>'; }
       else if (dk === 'lomas') band = hillsSVG();
       else if (dk === 'damero') band = '<div class="damero" aria-hidden="true"></div>';
+      else if (dk === 'toldo') { if (v === 'texto') deco = '<div class="toldo" aria-hidden="true"></div>' + deco; }
       else if (dk === 'termales' || dk === 'willys') { if (v === 'texto') deco += ART[dk](); }
       else if (dk) band = ART[dk]();
       const needPh = PREVIEW && !img && (variant === 'foto' || variant === 'arriba' || variant === 'tarjeta') ? '<div class="wrap"><p class="pv-empty">Este diseño de portada necesita una foto. Súbela en «Foto de portada».</p></div>' : '';
