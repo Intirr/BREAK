@@ -71,7 +71,7 @@
   const S = {
     apps: [], cur: null, kind: 'tpl', tpl: {}, tab: DESKTOP.matches ? 'estilo' : 'vista',
     openMod: null, openCat: null, edit: null, save: 'idle', store: 'loading', storeNote: '', dirty: false,
-    pvLang: 'es', full: false, confirmFn: null, sheetOnClose: null, restored: false, opener: null,
+    pvLang: 'es', pvScheme: 'auto', full: false, confirmFn: null, sheetOnClose: null, restored: false, opener: null,
     /* Estilo: «Opciones avanzadas» se recuerda en el navegador; sub es la sección abierta en ese modo. */
     adv: !!lsGet('break.studio.adv', false), sub: 'estetica'
   };
@@ -97,9 +97,20 @@
       try {
         if (PV.cfgId !== S.cur.id) { PV.rt.reset(clone(S.cur)); PV.cfgId = S.cur.id; if (S.pvLang === 'en') PV.rt.setLang('en'); }
         else PV.rt.update(clone(S.cur));
+        PV.rt.setScheme(pvSchemeArg());
       } catch (e) { toast('Error en la vista previa: ' + e.message); }
     };
     if (now) run(); else PV.timer = setTimeout(run, 140);
+  }
+  /* Día o noche en la vista previa: «auto» sigue al computador; «dia» y «noche» lo fuerzan. */
+  function pvSchemeArg() { return S.pvScheme === 'noche' ? 'dark' : S.pvScheme === 'dia' ? 'light' : ''; }
+  function osDark() { try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; } }
+  function pvNight() { return S.pvScheme === 'noche' || (S.pvScheme === 'auto' && osDark()); }
+  function schemeSegHTML(cls) {
+    return '<div class="seg' + (cls || '') + '" role="group" aria-label="Día o noche en la vista previa">' + [['dia', 'Día'], ['noche', 'Noche']].map(function (o) {
+      const on = pvNight() === (o[0] === 'noche');
+      return '<button type="button" class="' + (on ? 'on' : '') + '" data-a="pv-scheme" data-v="' + o[0] + '" aria-pressed="' + on + '">' + o[1] + '</button>';
+    }).join('') + '</div>';
   }
   function pvFocus(mid) { if (PV.ready) { clearTimeout(PV.timer); PV.rt.update(clone(S.cur)); PV.rt.focus(mid); } }
 
@@ -390,7 +401,7 @@
     const t = TEMPLATES.filter(function (x) { return x.id === id; })[0] || TEMPLATES[0];
     flushSave();
     if (!S.tpl[t.id]) S.tpl[t.id] = { cfg: clone(t), dirty: false };
-    S.cur = S.tpl[t.id].cfg; S.kind = 'tpl'; S.openMod = null; S.openCat = null; S.pvLang = 'es'; S.save = 'idle';
+    S.cur = S.tpl[t.id].cfg; S.kind = 'tpl'; S.openMod = null; S.openCat = null; S.pvLang = 'es'; S.pvScheme = 'auto'; S.save = 'idle';
     lsSet('break.studio.last', { kind: 'tpl', id: t.id });
     renderAll(); pvUpdate(true);
   }
@@ -398,7 +409,7 @@
     const a = S.apps.filter(function (x) { return x.id === id; })[0];
     if (!a) return;
     flushSave();
-    S.cur = clone(a); S.kind = 'app'; S.openMod = null; S.openCat = null; S.pvLang = 'es'; S.dirty = false; S.save = 'saved';
+    S.cur = clone(a); S.kind = 'app'; S.openMod = null; S.openCat = null; S.pvLang = 'es'; S.pvScheme = 'auto'; S.dirty = false; S.save = 'saved';
     lsSet('break.studio.last', { kind: 'app', id: id });
     closeSheet(); renderAll(); pvUpdate(true);
   }
@@ -415,7 +426,7 @@
     if (name) base.brand.name = name;
     S.apps.unshift(clone(base));
     if (S.tpl[from]) S.tpl[from] = null;
-    S.cur = base; S.kind = 'app'; S.openMod = null; S.openCat = null; S.dirty = false; S.pvLang = 'es';
+    S.cur = base; S.kind = 'app'; S.openMod = null; S.openCat = null; S.dirty = false; S.pvLang = 'es'; S.pvScheme = 'auto';
     lsSet('break.studio.last', { kind: 'app', id: base.id });
     persist(base);
     closeSheet(); renderAll(); pvUpdate(true);
@@ -444,7 +455,7 @@
   function applyPalette(i) {
     const sk = SKINS[S.cur.theme.skin] || SKINS.elegante, p = sk.palettes[i]; if (!p) return;
     S.cur.theme.colors = clone(p.colors);
-    edited(); renderEditor(); renderHeader();
+    edited(); renderEditor(); renderHeader(); renderStageTop();
   }
   function modIndex(mid) { return S.cur.modules.findIndex(function (m) { return m.id === mid; }); }
   function addMod(type) {
@@ -771,6 +782,17 @@
     if (!out.length) return '<p class="okline">Buen contraste: el texto se lee bien sobre el fondo y las tarjetas.</p>';
     return '<p class="warnline"><b>Poco contraste.</b> ' + esc(out.join(' · ')) + '. Lo recomendable es 4,5:1 o más.</p>';
   }
+  /* Contraste de la paleta de noche. */
+  function darkContrastHTML() {
+    const c = META.darkOf(S.cur.theme); if (!c) return '';
+    const out = [], f = function (x) { return x.toFixed(1).replace('.', ',') + ':1'; };
+    const r1 = contrast(c.ink, c.bg), r2 = contrast(c.ink, c.surface), r3 = contrast(c.muted, c.bg);
+    if (r1 < 4.5) out.push('Texto sobre fondo: ' + f(r1));
+    if (r2 < 4.5) out.push('Texto sobre tarjetas: ' + f(r2));
+    if (r3 < 3) out.push('Texto suave sobre fondo: ' + f(r3));
+    if (!out.length) return '<p class="okline">Buen contraste de noche: el texto se lee bien sobre el fondo y las tarjetas.</p>';
+    return '<p class="warnline"><b>Poco contraste de noche.</b> ' + esc(out.join(' · ')) + '. Lo recomendable es 4,5:1 o más.</p>';
+  }
   /* Contraste de los colores por elemento que son texto (títulos, antetítulos y precios). */
   function roleHexOf(v, c) { return /^#[0-9a-f]{6}$/i.test(String(v || '')) ? v : (v && v !== 'auto' && /^#[0-9a-f]{6}$/i.test(String(c[v] || '')) ? c[v] : ''); }
   function roleWarnings(cfg) {
@@ -943,6 +965,26 @@
       return '<div class="icosample" aria-hidden="true" style="' + attr(texVars()) + '">' + sample.map(function (x) {
         return '<span>' + (META.glyph(mode, x[0], '', '') || '<em>' + x[1].charAt(0) + '</em>') + '</span>';
       }).join('') + '</div>';
+    },
+    dark: function () {
+      const th = S.cur.theme, d = th.dark || {}, sk = SKINS[th.skin] || SKINS.elegante;
+      let h = fieldHTML({ k: 'dark.mode', t: 'seg', label: 'De noche', def: 'off', opts: [['off', 'Igual que de día'], ['auto', 'Con paleta de noche']] }, 'theme');
+      if (d.mode !== 'auto') return h;
+      const dk = META.darkOf(th), gen = META.genDark(th.colors), custom = !!(d.colors && Object.keys(d.colors).length);
+      const darks = sk.palettes.map(function (pl, i) { return [pl, i]; }).filter(function (x) { return contrast(x[0].colors.bg, '#FFFFFF') > 4.2; });
+      h += '<div class="pals" role="group" aria-label="Paleta de noche"><button type="button" class="pal' + (custom ? '' : ' on') + '" data-a="dark-pal" data-i="auto" aria-pressed="' + !custom + '"><span class="sws">' + swatches(gen || th.colors) + '</span>Automática</button>' +
+        darks.map(function (x) {
+          const on = custom && sameVal(d.colors, x[0].colors);
+          return '<button type="button" class="pal' + (on ? ' on' : '') + '" data-a="dark-pal" data-i="' + x[1] + '" aria-pressed="' + on + '"><span class="sws">' + swatches(x[0].colors) + '</span>' + esc(x[0].name) + '</button>';
+        }).join('') + '</div>';
+      if (!dk) return h + '<p class="help">Tu paleta de día ya es oscura: de noche la app se ve igual. Elige una paleta de noche distinta si quieres que cambie.</p>';
+      if (S.adv) h += '<div class="colors">' + COLOR_KEYS.map(function (ck) {
+        const v = String(dk[ck[0]]).toUpperCase(), id = 'dc-' + ck[0];
+        return '<div class="crow"><input type="color" id="' + id + '" value="' + attr(v.toLowerCase()) + '" data-p="theme.dark.colors.' + ck[0] + '" data-type="color" data-pair="dh-' + ck[0] + '" aria-label="' + ck[1] + ' de noche"><label for="dh-' + ck[0] + '">' + ck[1] + '</label>' +
+          '<input class="in hex" id="dh-' + ck[0] + '" value="' + attr(v) + '" maxlength="7" spellcheck="false" autocomplete="off" data-p="theme.dark.colors.' + ck[0] + '" data-type="color" data-pair="' + id + '"></div>';
+      }).join('') + '</div>';
+      else h += '<p class="help">Con las opciones avanzadas puedes ajustar cada color de noche.</p>';
+      return h + '<div id="dark-contrast">' + darkContrastHTML() + '</div><div class="fld"><span class="lab">Ver en la vista previa</span>' + schemeSegHTML() + '</div>';
     },
     fxReplay: function () {
       return '<div class="fx-rp"><button type="button" class="btn sm" data-a="fx-replay">Ver el movimiento</button><span class="help">Abre la app otra vez en la vista previa, desde arriba.</span></div>';
@@ -1205,6 +1247,7 @@
     const bi = bilingual();
     $('#stageTop').innerHTML = '<div class="st-row"><span class="st-k">Vista en vivo</span><div class="st-tools">' +
       (bi ? '<div class="seg sm" role="group" aria-label="Idioma de la vista previa"><button type="button" class="' + (S.pvLang === 'es' ? 'on' : '') + '" data-a="pv-lang" data-v="es">ES</button><button type="button" class="' + (S.pvLang === 'en' ? 'on' : '') + '" data-a="pv-lang" data-v="en">EN</button></div>' : '') +
+      (META.darkOf(S.cur.theme) ? schemeSegHTML(' sm') : '') +
       '<button type="button" class="ib" data-a="pv-reset" aria-label="Reiniciar la vista previa" title="Vaciar carrito y reiniciar juegos">↺</button>' +
       '<button type="button" class="ib" data-a="pv-full" aria-label="' + (S.full ? 'Salir de pantalla completa' : 'Ver en pantalla completa') + '" title="Mostrarle la app a un cliente">' + (S.full ? '×' : '⤢') + '</button></div></div>' +
       '<div class="tpls" role="group" aria-label="Apps de ejemplo">' +
@@ -1349,7 +1392,9 @@
     tex: function (d) { S.cur.theme.texture = d.v; edited(); renderEditor(); refocus('tex', 'v', d.v); },
     /* Campo de opciones (tipo seg): guarda el valor en su ruta y devuelve el foco al botón elegido. */
     set: function (d) {
-      setPath(S.cur, d.p, d.v); edited(); renderEditor();
+      setPath(S.cur, d.p, d.v);
+      if (d.p === 'theme.dark.mode') { S.pvScheme = d.v === 'auto' ? 'noche' : 'auto'; renderStageTop(); }
+      edited(); renderEditor();
       /* En una hoja (por ejemplo, el plato) el editor de atrás no la vuelve a pintar: se marca aquí. */
       const sg = document.querySelectorAll('[data-a="set"]');
       for (let i = 0; i < sg.length; i++) if (sg[i].getAttribute('data-p') === d.p) { const on = sg[i].getAttribute('data-v') === d.v; sg[i].classList.toggle('on', on); sg[i].setAttribute('aria-pressed', String(on)); }
@@ -1361,14 +1406,14 @@
     sub: function (d) { S.sub = d.g; renderEditor(); refocus('sub', 'g', d.g); },
     'style-reset': function (d) {
       const c = findCard(d.card); if (!c) return;
-      resetKeys(cardKeys(c)); edited(); renderEditor(); renderHeader();
+      resetKeys(cardKeys(c)); if (!META.darkOf(S.cur.theme)) S.pvScheme = 'auto'; edited(); renderEditor(); renderHeader(); renderStageTop();
       toast('«' + c.title + '» volvió a lo que trae la estética.');
     },
     'style-reset-all': function () {
       const k = S.cur.theme.skin, sk = SKINS[k] || SKINS.elegante;
       confirmBox('¿Volver a la estética ' + sk.label.toLowerCase() + '?', 'Se quitan todos los ajustes de diseño propios: colores, tipografías, formas y fondo. El contenido de la app no cambia.', 'Restablecer', function () {
         S.cur.theme = Object.assign({ skin: k }, clone(sk.defaults));
-        edited(); renderEditor(); renderHeader(); pvUpdate(true);
+        S.pvScheme = 'auto'; edited(); renderEditor(); renderHeader(); renderStageTop(); pvUpdate(true);
         toast('La app volvió a la estética ' + sk.label.toLowerCase() + '.');
       });
     },
@@ -1493,6 +1538,18 @@
     'exp-json': function () { exportJSON(); },
     'copy-html': function () { copyHTML(); },
     'exp-qr': function () { exportQR(); },
+    'pv-scheme': function (d) {
+      S.pvScheme = d.v === 'noche' ? 'noche' : 'dia';
+      if (PV.ready) PV.rt.setScheme(pvSchemeArg());
+      renderStageTop(); renderEditor();
+    },
+    'dark-pal': function (d) {
+      const th = S.cur.theme, sk = SKINS[th.skin] || SKINS.elegante;
+      th.dark = Object.assign({ mode: 'auto' }, th.dark || {});
+      if (d.i === 'auto') delete th.dark.colors;
+      else { const pl = sk.palettes[+d.i]; if (!pl) return; th.dark.colors = clone(pl.colors); }
+      S.pvScheme = 'noche'; edited(); renderEditor(); renderStageTop();
+    },
     'pv-lang': function (d) { S.pvLang = d.v === 'en' ? 'en' : 'es'; if (PV.ready) PV.rt.setLang(S.pvLang); renderStageTop(); },
     'pv-reset': function () { if (PV.ready) { PV.rt.reset(clone(S.cur)); if (S.pvLang === 'en') PV.rt.setLang('en'); toast('Vista reiniciada.'); } },
     'pv-full': function () { toggleFull(); },
@@ -1556,7 +1613,17 @@
       for (let i = 0; i < dots.length; i++) dots[i].style.background = v;
       const rc = $('#role-contrast'); if (rc) rc.innerHTML = roleContrastHTML();
     }
-    if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); const tx = $('.texs'); if (tx) tx.setAttribute('style', texVars()); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') renderHeader(); return; }
+    if (p.indexOf('theme.dark.colors.') === 0) {
+      const dc = $('#dark-contrast'); if (dc) dc.innerHTML = darkContrastHTML();
+      const ps = document.querySelectorAll('[data-a="dark-pal"]');
+      for (let i = 0; i < ps.length; i++) { ps[i].classList.remove('on'); ps[i].setAttribute('aria-pressed', 'false'); }
+      return;
+    }
+    if (p.indexOf('theme.colors.') === 0 && S.cur.theme.dark && S.cur.theme.dark.mode === 'auto') {
+      const sec = $('section[data-card="oscuro"]'), card = findCard('oscuro');
+      if (sec && card) sec.outerHTML = styleCard(card);
+    }
+    if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); const tx = $('.texs'); if (tx) tx.setAttribute('style', texVars()); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') { renderHeader(); renderStageTop(); } return; }
     if (p === 'brand.name') { renderHeader(); renderStageTop(); return; }
     if (p === 'i18n.bilingual') { if (!v && S.pvLang === 'en') { S.pvLang = 'es'; if (PV.ready) PV.rt.setLang('es'); } renderEditor(); renderStageTop(); renderTabs(); return; }
     if (t.getAttribute('data-rr') || /^brand\.hours\.\d+\.closed$/.test(p)) { renderEditor(); return; }
@@ -1679,7 +1746,7 @@
   }
   function buildAppHTML(c, o) {
     o = o || {};
-    const x = exportCfg(c), bg = x.theme.colors.bg || '#ffffff', name = x.brand.name || 'Carta';
+    const x = exportCfg(c), bg = x.theme.colors.bg || '#ffffff', name = x.brand.name || 'Carta', dk = META.darkOf(x.theme);
     const desc = [x.brand.tagline, x.brand.kind, x.brand.city].filter(Boolean).join(' · ');
     const json = JSON.stringify(x).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
     /* Con la dirección publicada, el enlace se comparte con la imagen og.png del paquete. */
@@ -1696,14 +1763,14 @@
       '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
       '<title>' + esc(name + (x.brand.tagline ? ' · ' + x.brand.tagline : '')) + '</title>',
       '<meta name="description" content="' + attr(desc || 'Carta digital') + '">',
-      '<meta name="theme-color" content="' + attr(bg) + '">',
+      '<meta name="theme-color" content="' + attr(bg) + '"' + (dk ? ' media="(prefers-color-scheme: light)">\n<meta name="theme-color" media="(prefers-color-scheme: dark)" content="' + attr(dk.bg) + '">' : '>'),
       '<meta property="og:title" content="' + attr(name) + '">',
       '<meta property="og:description" content="' + attr(desc || 'Carta digital') + '">',
       o.pwa ? '<link rel="manifest" href="manifest.webmanifest">\n<link rel="icon" href="icon-192.png">\n<link rel="apple-touch-icon" href="icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="mobile-web-app-capable" content="yes">' : '<link rel="icon" href="' + attr(svgIcon(x)) + '">',
       og,
       '<link rel="preconnect" href="https://fonts.googleapis.com">',
       '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
-      '<style>html,body{margin:0;background:' + bg + '}</style>'
+      '<style>html,body{margin:0;background:' + bg + '}' + (dk ? '@media (prefers-color-scheme:dark){html,body{background:' + dk.bg + '}#bk-splash{background:' + dk.bg + '!important}}' : '') + '</style>'
     ].join('\n');
     return '<!doctype html>\n<html lang="es">\n<head>\n' + head.replace(/\n\n/g, '\n') + '\n</head>\n<body>\n' + splash + '<noscript><p style="font:16px/1.5 system-ui;padding:24px">Esta carta necesita JavaScript activado.</p></noscript>\n<script>\n' +
       'window.__BREAK__=' + json + ';\n(' + breakApp.toString() + ')(window,document,window.__BREAK__,{mode:"app"});\n' +

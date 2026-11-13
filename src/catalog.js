@@ -86,6 +86,7 @@ const STYLE = [
   ] },
   { id: 'color', label: 'Color', cards: [
     { id: 'colores', card: 'colors', title: 'Colores', keys: ['colors'] },
+    { id: 'oscuro', card: 'dark', title: 'Modo oscuro', desc: 'Si el celular del cliente está en modo oscuro, la app puede cambiar sola a una paleta de noche.', keys: ['dark'] },
     { id: 'fondoapp', card: 'bgapp', title: 'Fondo de la app', desc: 'Liso, en degradado hacia un acento o con una foto detrás y un velo del color de fondo para que todo se lea.', keys: ['bg'] },
     { id: 'roles', card: 'roles', adv: true, title: 'Color por elemento', desc: 'Cambia el color de cada pieza sin tocar la paleta. «Auto» deja el de la estética.', keys: ['roles'] }
   ] },

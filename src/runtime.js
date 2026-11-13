@@ -428,6 +428,8 @@ main>.m.sb{padding-bottom:48px;color:var(--ink)}
 .m.sb-superficie{background:var(--surface)}
 .m.sb-tinte{background:color-mix(in srgb,var(--accent) 9%,var(--bg))}
 .m.sb-acento,.m.sb-invertido{background:var(--bg)}
+.m.sb-acento{--bg:var(--sba-bg);--ink:var(--sba-ink);--muted:var(--sba-muted);--surface:var(--sba-surface);--accent:var(--sba-accent);--on-accent:var(--sba-on-accent);--accent2:var(--sba-accent2);--on-accent2:var(--sba-on-accent2);--accent3:var(--sba-accent3);--on-accent3:var(--sba-on-accent3)}
+.m.sb-invertido{--bg:var(--sbi-bg);--ink:var(--sbi-ink);--muted:var(--sbi-muted);--surface:var(--sbi-surface);--accent:var(--sbi-accent);--on-accent:var(--sbi-on-accent);--accent2:var(--sbi-accent2);--on-accent2:var(--sbi-on-accent2);--accent3:var(--sbi-accent3);--on-accent3:var(--sbi-on-accent3)}
 .m.sa-izq .sh{text-align:left}
 .m.sa-izq .sh .orn{margin-left:0;margin-right:auto}
 .m.sa-centro .sh{text-align:center}
@@ -1256,7 +1258,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   /* El estudio pide las constantes del motor (tipografías, estéticas, íconos…) para no repetirlas en su catálogo. */
   if (opts.meta) return { fonts: FONTS, skins: Object.keys(CSS_SKIN), tags: TAG_ORDER, icons: ICONS, iconSets: ICON_SETS, emoIcon: EMO_ICON, iconOf: emoIcon, glyph: glyphOf,
-    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview };
+    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview, darkOf: darkOf, genDark: genDark };
 
   /* ---------- Estado ---------- */
   let cfg = normalize(initialCfg);
@@ -2439,7 +2441,60 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     return ':root{--bg:' + hexOk(c.bg, '#111412') + ';--surface:' + hexOk(c.surface, '#191d1a') + ';--ink:' + hexOk(c.ink, '#ede7da') + ';--muted:' + hexOk(c.muted, '#a3a89d') +
       ';--accent:' + acc + ';--accent2:' + a2 + ';--accent3:' + a3 + ';--on-accent:' + onColor(acc) + ';--on-accent2:' + onColor(a2) + ';--on-accent3:' + onColor(a3) +
       ';--r:' + r + 'px;--fd:' + fontStack(f.display) + ';--fb:' + fontStack(f.body) + ';' + artVars({ accent: acc, accent2: a2, accent3: a3 }) + roleVars() +
-      ';color-scheme:' + (lum(hexOk(c.bg, '#111412')) < 0.3 ? 'dark' : 'light') + '}';
+      extraTokens({ bg: hexOk(c.bg, '#111412'), surface: hexOk(c.surface, '#191d1a'), ink: hexOk(c.ink, '#ede7da'), muted: hexOk(c.muted, '#a3a89d'), accent: acc, accent2: a2, accent3: a3 }) +
+      ';color-scheme:' + (lum(hexOk(c.bg, '#111412')) < 0.3 ? 'dark' : 'light') + '}' + secRoleReset() + darkCSS();
+  }
+  /* Los colores por elemento (theme.roles) se eligieron contra el fondo de la app: dentro de una sección con fondo de
+     acento o invertido vuelven a los de la estética. Solo se escribe si hay roles elegidos y secciones así. */
+  function secRoleReset() {
+    const R = cfg.theme.roles || {}, ks = ROLE_KEYS.filter(function (k) { return roleHex(R[k]); });
+    const used = cfg.modules.some(function (m) { return m && m.on !== false && m.s && (m.s._bg === 'acento' || m.s._bg === 'invertido'); });
+    return used && ks.length ? '.m.sb-acento,.m.sb-invertido{' + ks.map(function (k) { return '--c-' + k + ':initial;--c-' + k + '-on:initial'; }).join(';') + '}' : '';
+  }
+  /* ---------- Modo oscuro automático (theme.dark) ----------
+     genDark y darkOf no usan constantes de más abajo: el estudio las llama vía opts.meta. */
+  /* Paleta de noche generada desde la de día: fondo oscuro con el tono de la tinta, texto con el del fondo y acentos
+     aclarados hasta leerse sobre el fondo y las tarjetas. Si la paleta de día ya es oscura, null. */
+  function genDark(c) {
+    c = c || {};
+    const B = hexOk(c.bg, '#ffffff'), I = hexOk(c.ink, '#111111');
+    if (lum(B) < 0.2) return null;
+    const bg = mixHex(mixHex(I, '#000000', 0.45), hexOk(c.accent, I), 0.04), sf = mixHex(bg, B, 0.07);
+    const ink = mixHex(B, '#ffffff', lum(B) > 0.75 ? 0.2 : 0.6);
+    const out = { bg: bg, surface: sf, ink: ink, muted: legible(mixHex(ink, bg, 0.4), [bg, sf], ink) };
+    [['accent', '#c8a46a'], ['accent2', '#7fa088'], ['accent3', '#8e6f4e']].forEach(function (k) { out[k[0]] = legible(hexOk(c[k[0]], k[1]), [bg, sf], ink); });
+    return out;
+  }
+  /* Paleta de noche de un tema: la generada, con los colores cambiados a mano encima. Sin modo oscuro, o si de noche
+     se vería igual que de día, null. */
+  function darkOf(th) {
+    const d = th && th.dark;
+    if (!d || d.mode !== 'auto') return null;
+    const c = th.colors || {}, dc = d.colors || {}, gen = genDark(c), out = {};
+    let diff = false;
+    ['bg', 'surface', 'ink', 'muted', 'accent', 'accent2', 'accent3'].forEach(function (k) {
+      const day = hexOk(c[k], '#888888'), v = String(dc[k] || '');
+      out[k] = /^#[0-9a-f]{6}$/i.test(v) ? v : (gen ? gen[k] : day);
+      if (out[k].toLowerCase() !== day.toLowerCase()) diff = true;
+    });
+    return diff ? out : null;
+  }
+  /* Colores por elemento de noche: los de la paleta salen de la de noche; los propios que son texto se ajustan para leerse. */
+  function roleVarsDark(d) {
+    const R = cfg.theme.roles || {}, TEXT = { title: 1, kicker: 1, price: 1 };
+    return ROLE_KEYS.map(function (k) {
+      const v = String(R[k] || ''); let h = '';
+      if (/^#[0-9a-f]{6}$/i.test(v)) h = TEXT[k] ? legible(v, [d.bg, d.surface], d.ink) : v;
+      else if (ROLE_PALETTE.indexOf(v) >= 0) h = d[v];
+      return h ? ';--c-' + k + ':' + h + ';--c-' + k + '-on:' + onColor(h) : '';
+    }).join('');
+  }
+  /* De noche: con el celular en modo oscuro (salvo que la vista previa pida el día) o si la vista previa pide la noche. */
+  function darkCSS() {
+    const d = darkOf(cfg.theme); if (!d) return '';
+    const v = '--bg:' + d.bg + ';--surface:' + d.surface + ';--ink:' + d.ink + ';--muted:' + d.muted + ';--accent:' + d.accent + ';--accent2:' + d.accent2 + ';--accent3:' + d.accent3 +
+      ';--on-accent:' + onColor(d.accent) + ';--on-accent2:' + onColor(d.accent2) + ';--on-accent3:' + onColor(d.accent3) + ';' + artVars(d) + roleVarsDark(d) + extraTokens(d) + ';color-scheme:dark';
+    return '@media (prefers-color-scheme:dark){:root:not([data-scheme="light"]){' + v + '}' + texCSS(d, 'html:not([data-scheme="light"])') + '}:root[data-scheme="dark"]{' + v + '}' + texCSS(d, 'html[data-scheme="dark"]');
   }
   /* Color por elemento (theme.roles): cada rol vale «auto» o un color de la paleta o propio. Solo los roles
      elegidos escriben su variable (--c-ROL y el texto legible encima, --c-ROL-on); los demás usan el de la estética. */
@@ -2598,7 +2653,6 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       const shp = o('shape'), sz = o('size'), pos = o('pos'), ds = o('desc'), pr = o('price'), tg = o('tags'), ld = o('lead');
       const ct = o('cat'), ci = o('catIcon'), cp = o('catPhoto'), tb = o('tabs'), n = { '1': 1, '2': 2, '3': 3 }[o('cols')];
       const B = '.carta-body', T = B + '.lay-tarjetas', G = B + '.lay-cuadricula', P = B + '.lay-fotos';
-      const c = cfg.theme.colors, bg = hexOk(c.bg, '#ffffff'), sf = hexOk(c.surface, bg), ink = hexOk(c.ink, '#111111');
       // Tamaño y posición de la foto en las tarjetas
       const W = { s: 56, l: 96 }[sz] || 72;
       if (W !== 72 || pos === 'der') {
@@ -2632,14 +2686,14 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       else if (ds === 'completa') rule(G + ' .it-d', 'display:block');
       if (ds === '1' || ds === '2' || ds === 'completa') rule(G + ' .it-d', 'margin-top:4px;font-size:13px;line-height:1.4');
       // Precio en la carta y en los destacados; «en color» y «contorno» se ajustan para leerse sobre el fondo y las tarjetas
-      const PRC = B + ' .price,.feat .price', pc = 'var(--c-price,' + legible(hexOk(c.accent, '#888888'), [bg, sf], ink) + ')';
+      const PRC = B + ' .price,.feat .price', pc = 'var(--c-price,var(--lg-accent))';
       const PLAIN = 'background:none;padding:0;border:0;border-radius:0;box-shadow:none;text-shadow:none;color:';
       if (pr === 'texto') rule(PRC, PLAIN + 'var(--c-price,var(--ink))');
       else if (pr === 'color') rule(PRC, PLAIN + pc);
       else if (pr === 'pildora') rule(PRC, 'background:var(--c-price,var(--accent));color:var(--c-price-on,var(--on-accent));padding:3px 10px;border:0;border-radius:999px;box-shadow:none;text-shadow:none');
       else if (pr === 'contorno') rule(PRC, 'background:none;color:' + pc + ';border:1.5px solid currentColor;padding:2px 9px;border-radius:999px;box-shadow:none;text-shadow:none');
       // Etiquetas
-      const tc = 'var(--c-tag,' + legible(hexOk(c.accent2, '#888888'), [bg, sf], ink) + ')', TG = '.tag:not(.sold)', SD = '.tag.sold';
+      const tc = 'var(--c-tag,var(--lg-accent2))', TG = '.tag:not(.sold)', SD = '.tag.sold';
       if (tg === 'relleno') {
         rule('.tag', 'border:0;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;font-size:11px;font-weight:700');
         rule(TG, 'background:var(--c-tag,var(--accent2));color:var(--c-tag-on,var(--on-accent2))');
@@ -2757,11 +2811,11 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   const FX_MARQ = { lenta: 42, normal: 24, rapida: 13 };
 
   /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
-  function texCSS() {
-    const t = cfg.theme.texture, c = cfg.theme.colors;
+  function texCSS(c, pre) {
+    const t = cfg.theme.texture; c = c || cfg.theme.colors; pre = pre || 'html';
     const col = function (hex, d) { return '%23' + hexOk(hex, d).slice(1); };
-    if (t === 'hojas') return 'html[data-tex="hojas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'132\' height=\'132\' viewBox=\'0 0 120 120\'%3E%3Cg fill=\'' + col(c.accent2, '#7fa088') + '\' fill-opacity=\'.17\'%3E' + LEAF_PATHS + '%3C/g%3E%3C/svg%3E")}';
-    if (t === 'ondas') return 'html[data-tex="ondas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'90\' height=\'24\'%3E%3Cpath d=\'M0 12Q22.5 2 45 12T90 12\' fill=\'none\' stroke=\'' + col(c.accent, '#c8a46a') + '\' stroke-opacity=\'.16\' stroke-width=\'1.6\'/%3E%3C/svg%3E")}';
+    if (t === 'hojas') return pre + '[data-tex="hojas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'132\' height=\'132\' viewBox=\'0 0 120 120\'%3E%3Cg fill=\'' + col(c.accent2, '#7fa088') + '\' fill-opacity=\'.17\'%3E' + LEAF_PATHS + '%3C/g%3E%3C/svg%3E")}';
+    if (t === 'ondas') return pre + '[data-tex="ondas"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'90\' height=\'24\'%3E%3Cpath d=\'M0 12Q22.5 2 45 12T90 12\' fill=\'none\' stroke=\'' + col(c.accent, '#c8a46a') + '\' stroke-opacity=\'.16\' stroke-width=\'1.6\'/%3E%3C/svg%3E")}';
     return '';
   }
   function applyHead() {
@@ -2785,9 +2839,16 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       if (!ln2) { ln2 = doc.createElement('link'); ln2.id = 'bk-fonts2'; ln2.rel = 'stylesheet'; doc.head.appendChild(ln2); }
       if (ln2.getAttribute('href') !== href2) ln2.setAttribute('href', href2);
     } else if (ln2 && ln2.parentNode) ln2.parentNode.removeChild(ln2);
-    let tc = doc.querySelector('meta[name="theme-color"]');
+    let tc = doc.querySelector('meta[name="theme-color"]:not([media*="dark"])');
     if (!tc) { tc = doc.createElement('meta'); tc.setAttribute('name', 'theme-color'); doc.head.appendChild(tc); }
     tc.setAttribute('content', hexOk(cfg.theme.colors.bg, '#111412'));
+    const dk = darkOf(cfg.theme);
+    let td = doc.querySelector('meta[name="theme-color"][media*="dark"]');
+    if (dk) {
+      tc.setAttribute('media', '(prefers-color-scheme: light)');
+      if (!td) { td = doc.createElement('meta'); td.setAttribute('name', 'theme-color'); td.setAttribute('media', '(prefers-color-scheme: dark)'); doc.head.appendChild(td); }
+      td.setAttribute('content', dk.bg);
+    } else { tc.removeAttribute('media'); if (td && td.parentNode) td.parentNode.removeChild(td); }
     doc.documentElement.setAttribute('lang', lang());
     doc.documentElement.setAttribute('data-tex', cfg.theme.texture || 'none');
     if (!PREVIEW && cfg.brand.name) doc.title = cfg.brand.name + (tx(cfg.brand, 'tagline') ? ' · ' + tx(cfg.brand, 'tagline') : '');
@@ -2874,22 +2935,21 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     for (let t = 0; t <= 10; t++) { const m = mixHex(c, to, t / 10); if (bgs.every(function (b) { return ratio(m, b) >= 4.5; })) return m; }
     return to;
   }
-  function secVars(bg) {
-    const c = cfg.theme.colors, B = hexOk(c.bg, '#ffffff'), I = hexOk(c.ink, '#111111'), A = hexOk(c.accent, '#888888');
-    const A2 = hexOk(c.accent2, A), A3 = hexOk(c.accent3, A), acc = function (k, v) { return ';--' + k + ':' + v + ';--on-' + k + ':' + onColor(v); };
-    let v;
-    if (bg === 'acento') {
-      const OA = onColor(A);
-      v = '--bg:' + A + ';--ink:' + OA + ';--muted:color-mix(in srgb,' + OA + ' 78%,' + A + ');--surface:color-mix(in srgb,' + OA + ' 14%,' + A + ');--accent:' + OA + ';--on-accent:' + A +
-        acc('accent2', legible(A2, A, OA)) + acc('accent3', legible(A3, A, OA));
-    } else if (bg === 'invertido') {
-      v = '--bg:' + I + ';--ink:' + B + ';--muted:color-mix(in srgb,' + B + ' 72%,' + I + ');--surface:color-mix(in srgb,' + B + ' 10%,' + I + ')' +
-        acc('accent', legible(A, I, B)) + acc('accent2', legible(A2, I, B)) + acc('accent3', legible(A3, I, B));
-    } else return '';
-    // Los colores por elemento (theme.roles) se eligieron contra el fondo de la app: adentro vuelven a los de la estética.
-    const R = cfg.theme.roles || {};
-    ROLE_KEYS.forEach(function (k) { if (roleHex(R[k])) v += ';--c-' + k + ':initial;--c-' + k + '-on:initial'; });
-    return v;
+  /* Variables que solo hacen falta si algo las usa: secciones con fondo de acento o invertido (la paleta cambia adentro y
+     los acentos se ajustan hasta leerse) y los colores legibles de precios y etiquetas de la carta. c: paleta completa. */
+  function extraTokens(c) {
+    const B = c.bg, S = c.surface, I = c.ink, A = c.accent, A2 = c.accent2, A3 = c.accent3, OA = onColor(A);
+    const v = function (k, x) { return ';--' + k + ':' + x; }, on = function (k, x) { return v(k, x) + v(k.replace(/-(accent\d?)$/, '-on-$1'), onColor(x)); };
+    const used = function (k) { return cfg.modules.some(function (m) { return m && m.on !== false && m.s && m.s._bg === k; }); };
+    let out = '';
+    if (used('acento')) out += v('sba-bg', A) + v('sba-ink', OA) + v('sba-muted', 'color-mix(in srgb,' + OA + ' 78%,' + A + ')') + v('sba-surface', 'color-mix(in srgb,' + OA + ' 14%,' + A + ')') +
+      v('sba-accent', OA) + v('sba-on-accent', A) + on('sba-accent2', legible(A2, A, OA)) + on('sba-accent3', legible(A3, A, OA));
+    if (used('invertido')) out += v('sbi-bg', I) + v('sbi-ink', B) + v('sbi-muted', 'color-mix(in srgb,' + B + ' 72%,' + I + ')') + v('sbi-surface', 'color-mix(in srgb,' + B + ' 10%,' + I + ')') +
+      on('sbi-accent', legible(A, I, B)) + on('sbi-accent2', legible(A2, I, B)) + on('sbi-accent3', legible(A3, I, B));
+    const pr = opt('carta.price', ''), tg = opt('carta.tags', '');
+    if (pr === 'color' || pr === 'contorno') out += v('lg-accent', legible(A, [B, S], I));
+    if (tg === 'contorno' || tg === 'texto') out += v('lg-accent2', legible(A2, [B, S], I));
+    return out;
   }
   function sectionHTML(m) {
     let inner = '';
@@ -2899,7 +2959,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     if (bg) cls.push('sb', 'sb-' + bg);
     if (s._align === 'izq' || s._align === 'centro') cls.push('sa-' + s._align);
     if (s._pad === 'compacto' || s._pad === 'amplio') cls.push('sp-' + s._pad);
-    return '<section class="m m-' + attr(m.type) + (cls.length ? ' ' + cls.join(' ') : '') + '" id="' + attr(anchor(m)) + '" data-mid="' + attr(m.id) + '"' + (bg ? ' style="' + secVars(bg) + '"' : '') + '>' + inner + '</section>';
+    return '<section class="m m-' + attr(m.type) + (cls.length ? ' ' + cls.join(' ') : '') + '" id="' + attr(anchor(m)) + '" data-mid="' + attr(m.id) + '">' + inner + '</section>';
   }
   function renderAll(keepScroll) {
     const y = win.pageYOffset || 0;
@@ -3166,6 +3226,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       return true;
     },
     setLang: function (l) { state.lang = l === 'en' ? 'en' : 'es'; renderAll(true); },
+    setScheme: function (sc) { if (sc === 'dark' || sc === 'light') doc.documentElement.setAttribute('data-scheme', sc); else doc.documentElement.removeAttribute('data-scheme'); },
     destroy: function () {
       timers.forEach(function (t) { win.clearTimeout(t); win.clearInterval(t); });
       if (spy) spy.disconnect();

@@ -753,21 +753,22 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     let A = mount(b, NOW);
     const sec = A.$('section[data-mid="' + ho.id + '"]');
     ok(sec.classList.contains('sb-invertido') && sec.classList.contains('sa-centro') && sec.classList.contains('sp-amplio'), 'la sección lleva su fondo, alineación y espacio');
-    ok(new RegExp('--bg:' + b.theme.colors.ink + ';--ink:' + b.theme.colors.bg).test(sec.getAttribute('style')), 'el fondo invertido cambia los colores solo adentro');
+    const bcss = A.d.getElementById('bk-css').textContent;
+    ok(new RegExp('--sbi-bg:' + b.theme.colors.ink + ';--sbi-ink:' + b.theme.colors.bg).test(bcss) && !sec.hasAttribute('style') && /\n\.m\.sb-invertido\{--bg:var\(--sbi-bg\)/.test(bcss), 'el fondo invertido cambia los colores solo adentro');
     {
       // Los acentos se aclaran u oscurecen hasta leerse sobre el fondo nuevo
       const L = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
       const R = (a, z) => { const p = L(a), q = L(z); return (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05); };
-      const st = sec.getAttribute('style'), get = k => (st.match(new RegExp('--' + k + ':(#[0-9a-f]{6})', 'i')) || [])[1];
+      const get = k => (bcss.match(new RegExp('--sbi-' + k + ':(#[0-9a-f]{6})', 'i')) || [])[1];
       ok(['accent', 'accent2', 'accent3'].every(k => get(k) && R(get(k), b.theme.colors.ink) >= 4.5), 'acentos legibles sobre el fondo invertido: ' + ['accent', 'accent2', 'accent3'].map(get).join(' '));
     }
     eq(sec.querySelector('.sh-k').textContent, 'Te esperamos', 'antetítulo propio de la sección');
-    ok(/--accent:#(ffffff|141414);--on-accent:/.test(A.$('section[data-mid="' + pr.id + '"]').getAttribute('style')), 'en una sección de acento los botones cambian de color');
+    ok(/--sba-accent:#(ffffff|141414);--sba-on-accent:/.test(bcss) && A.$('section[data-mid="' + pr.id + '"]').classList.contains('sb-acento'), 'en una sección de acento los botones cambian de color');
     A.close();
     b.theme.roles = { btn: '#1F7A8C', price: 'accent3' };
-    A = mount(b, NOW);
-    ok(/--c-btn:initial;--c-btn-on:initial;--c-price:initial/.test(A.$('section[data-mid="' + ho.id + '"]').getAttribute('style')), 'adentro, los colores por elemento vuelven a los de la estética');
-    A.close();
+    ok(css(b).includes('.m.sb-acento,.m.sb-invertido{--c-btn:initial;--c-btn-on:initial;--c-price:initial;--c-price-on:initial}'), 'adentro, los colores por elemento vuelven a los de la estética');
+    const nob = TPL('tpl-zocalo');
+    ok(!/;--sb[ai]-bg:/.test(css(nob)), 'sin secciones con fondo propio no se escriben sus variables');
     const bad = TPL('tpl-zocalo'); bad.modules.find(m => m.type === 'horario').s._bg = 'x" onmouseover="alert(1)';
     A = mount(bad, NOW); ok(!A.$('[onmouseover]') && !A.$('section.sb'), 'un fondo desconocido no se usa'); A.close();
     // Variantes
@@ -828,8 +829,9 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     // Precio y etiquetas legibles
     const pz = TPL('tpl-antojo'); pz.theme.carta = { price: 'color', tags: 'contorno' };
     x = css(pz);
-    const pcol = (x.match(/#bk \.carta-body \.price,#bk \.feat \.price\{[^}]*color:var\(--c-price,(#[0-9a-f]{6})\)/) || [])[1];
-    const tcol = (x.match(/#bk \.tag:not\(\.sold\)\{color:var\(--c-tag,(#[0-9a-f]{6})\)/) || [])[1];
+    ok(x.includes('#bk .carta-body .price,#bk .feat .price{background:none;padding:0;border:0;border-radius:0;box-shadow:none;text-shadow:none;color:var(--c-price,var(--lg-accent))}') && x.includes('#bk .tag:not(.sold){color:var(--c-tag,var(--lg-accent2))}'), 'precio y etiquetas usan los colores legibles');
+    const pcol = (x.match(/--lg-accent:(#[0-9a-f]{6})/) || [])[1];
+    const tcol = (x.match(/--lg-accent2:(#[0-9a-f]{6})/) || [])[1];
     ok(!!pcol && R(pcol, pz.theme.colors.bg) >= 4.5 && R(pcol, pz.theme.colors.surface) >= 4.5, 'precio en color que se lee sobre el fondo y las tarjetas: ' + pcol);
     ok(!!tcol && R(tcol, pz.theme.colors.bg) >= 4.5, 'etiquetas de contorno que se leen: ' + tcol);
     const pp = TPL('tpl-zocalo'); pp.theme.carta = { price: 'pildora', tags: 'punto', lead: 'linea' };
@@ -911,6 +913,48 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(hit(tz), 'confeti siempre, aunque el movimiento sea suave');
     tz.theme.motion = 'vivo'; tz.theme.fx = { confetti: 'nunca' };
     ok(!hit(tz), 'sin confeti aunque el movimiento sea vivo');
+  }
+
+  /* 11s. Modo oscuro automático */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const css = cfg => { const A = mount(cfg, NOW); const x = A.d.getElementById('bk-css').textContent; A.close(); return x; };
+    const L = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const R = (a, z) => { const p = L(a), q = L(z); return (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05); };
+    const M = ctx.breakApp(null, null, null, { meta: true });
+    ok(typeof M.darkOf === 'function' && typeof M.genDark === 'function' && M.darkOf({ colors: {} }) === null, 'el estudio puede calcular la paleta de noche');
+    const z = TPL('tpl-zocalo');
+    ok(!/prefers-color-scheme:dark\)\{:root/.test(css(z)) && !/data-scheme/.test(css(z)), 'sin modo oscuro no se escribe nada de noche');
+    z.theme.dark = { mode: 'auto' };
+    const x = css(z), d = M.darkOf(z.theme);
+    ok(x.includes('@media (prefers-color-scheme:dark){:root:not([data-scheme="light"]){--bg:' + d.bg) && x.includes(':root[data-scheme="dark"]{--bg:' + d.bg), 'paleta de noche con el celular oscuro, o forzada en la vista previa');
+    ok(R(d.ink, d.bg) >= 7 && R(d.ink, d.surface) >= 7 && R(d.muted, d.bg) >= 4.5 && ['accent', 'accent2', 'accent3'].every(k => R(d[k], d.bg) >= 4.5 && R(d[k], d.surface) >= 4.5), 'la paleta generada se lee: ' + JSON.stringify(d));
+    ok(L(d.bg) < 0.03 && L(d.ink) > 0.8, 'fondo oscuro y texto claro');
+    let A = mount(z, NOW);
+    const tl = A.$('meta[name="theme-color"][media="(prefers-color-scheme: light)"]'), td = A.$('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]');
+    ok(!!tl && !!td && td.getAttribute('content') === d.bg && tl.getAttribute('content') === z.theme.colors.bg, 'color de la barra del navegador de día y de noche');
+    A.rt.setScheme('dark'); eq(A.d.documentElement.getAttribute('data-scheme'), 'dark', 'la vista previa puede pedir la noche');
+    A.rt.setScheme(''); ok(!A.d.documentElement.hasAttribute('data-scheme'), 'y volver a seguir al celular');
+    A.rt.update(TPL('tpl-zocalo'));
+    ok(!A.$('meta[name="theme-color"][media*="dark"]') && !A.$('meta[name="theme-color"]').hasAttribute('media'), 'al quitar el modo oscuro queda un solo color de barra');
+    A.close();
+    // Colores cambiados a mano encima de los generados; los inválidos no se usan
+    const z2 = TPL('tpl-zocalo'); z2.theme.dark = { mode: 'auto', colors: { accent: '#FF8800', bg: 'red;}body{' } };
+    const d2 = M.darkOf(z2.theme);
+    ok(d2.accent === '#FF8800' && d2.bg === d.bg && css(z2).includes(':root[data-scheme="dark"]{--bg:' + d.bg + ';') && !/red;\}body/.test(css(z2)), 'un color de noche propio encima de los generados');
+    // Una paleta de día que ya es oscura no cambia de noche, salvo que se elija otra
+    const ar = TPL('tpl-araucaria'); ar.theme.dark = { mode: 'auto' };
+    ok(M.darkOf(ar.theme) === null && !/data-scheme="dark"/.test(css(ar)), 'una paleta ya oscura se ve igual de noche');
+    ar.theme.dark.colors = JSON.parse(JSON.stringify(ctx.SKINS.elegante.palettes[2].colors));
+    ok(css(ar).includes(':root[data-scheme="dark"]{--bg:' + ctx.SKINS.elegante.palettes[2].colors.bg), 'salvo que se elija otra paleta de noche');
+    // Colores por elemento, secciones con fondo propio, texturas y carta también de noche
+    const z3 = TPL('tpl-zocalo'); z3.theme.dark = { mode: 'auto' }; z3.theme.roles = { title: '#1F2A44', btn: 'accent2' }; z3.theme.texture = 'hojas';
+    z3.modules.find(m => m.type === 'horario').s._bg = 'invertido'; z3.theme.carta = { price: 'color' };
+    const x3 = css(z3), d3 = M.darkOf(z3.theme), night = x3.slice(x3.indexOf(':root[data-scheme="dark"]{'));
+    const ttl = (night.match(/--c-title:(#[0-9a-f]{6})/) || [])[1];
+    ok(!!ttl && R(ttl, d3.bg) >= 4.5 && night.includes('--c-btn:' + d3.accent2 + ';'), 'de noche, los títulos propios se aclaran y los botones usan el acento de noche');
+    ok(night.includes('--sbi-bg:' + d3.ink + ';--sbi-ink:' + d3.bg) && /--lg-accent:#[0-9a-f]{6}/.test(night), 'secciones invertidas y precios legibles también de noche');
+    ok(x3.includes('html:not([data-scheme="light"])[data-tex="hojas"] body{') && x3.includes('html[data-scheme="dark"][data-tex="hojas"] body{'), 'la textura de hojas con los colores de noche');
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */
@@ -1267,6 +1311,26 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="style-reset"][data-card="mov"]'));
   ok(!ST.S.cur.theme.fx || (!ST.S.cur.theme.fx.entry && !ST.S.cur.theme.fx.reveal), 'restablecer el movimiento');
   click($('[data-a="adv"]'));
+  // Estilo: modo oscuro
+  ok(!!$('section[data-card="oscuro"]') && !$('#stageTop [data-a="pv-scheme"]'), 'modo oscuro en el modo sencillo; sin él, la vista previa no ofrece día y noche');
+  click($('[data-a="set"][data-p="theme.dark.mode"][data-v="auto"]'));
+  eq(ST.S.cur.theme.dark.mode, 'auto', 'activa la paleta de noche');
+  await sleep(220);
+  eq(ST.pv.frame.contentDocument.documentElement.getAttribute('data-scheme'), 'dark', 'la vista previa pasa a la noche para mostrarla');
+  ok(!!$('#stageTop [data-a="pv-scheme"][data-v="noche"].on') && /Buen contraste de noche/.test($('#dark-contrast').textContent), 'día y noche en la vista previa, con revisión de contraste');
+  const dp = $('[data-a="dark-pal"]:not([data-i="auto"])');
+  if (dp) {
+    click(dp);
+    eq(ST.S.cur.theme.dark.colors.bg, ctx.SKINS[ST.S.cur.theme.skin].palettes[+dp.getAttribute('data-i')].colors.bg, 'elige una paleta de noche de la estética');
+    click($('[data-a="dark-pal"][data-i="auto"]'));
+    ok(!ST.S.cur.theme.dark.colors, 'vuelve a la paleta de noche automática');
+  }
+  click($('#stageTop [data-a="pv-scheme"][data-v="dia"]'));
+  eq(ST.pv.frame.contentDocument.documentElement.getAttribute('data-scheme'), 'light', 'la vista previa muestra el día');
+  ok(/media="\(prefers-color-scheme: dark\)" content="#[0-9a-f]{6}"/i.test(ST.buildAppHTML(ST.S.cur, {})) && /#bk-splash\{background:#[0-9a-f]{6}!important\}/i.test(ST.buildAppHTML(ST.S.cur, {})), 'la app exportada trae el color de barra y la pantalla de carga de noche');
+  click($('[data-a="style-reset"][data-card="oscuro"]'));
+  await sleep(220);
+  ok(!ST.S.cur.theme.dark && !$('#stageTop [data-a="pv-scheme"]'), 'restablecer quita el modo oscuro');
   // Estilo: formas avanzadas
   click($('[data-a="adv"]'));
   click($('[data-a="sub"][data-g="formas"]'));
