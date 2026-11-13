@@ -710,6 +710,88 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 9. ASADERO · RÚSTICO ---------- */
+  {
+    v: 1, id: 'tpl-tronco', template: true,
+    brand: {
+      name: 'Asadero El Tronco', tagline: 'Chorizo santarrosano a la brasa, camino a los termales', kind: 'Asadero',
+      logo: { type: 'icon', value: 'fuego' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Vía a los termales, km 1', addressNote: 'Saliendo del pueblo, a mano derecha. Siga el humo.',
+      mapsQuery: 'Vía a los Termales, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: null, 2: ['11:00', '20:00'], 3: ['11:00', '20:00'], 4: ['11:00', '20:00'], 5: ['11:00', '22:00'], 6: ['10:00', '22:00'], 0: ['10:00', '20:00'] })
+    },
+    i18n: { bilingual: false, usted: true },
+    theme: {
+      skin: 'rustico',
+      colors: { bg: '#231811', surface: '#33251B', ink: '#F6EADA', muted: '#C9B49D', accent: '#F2862E', accent2: '#EDC151', accent3: '#E8735A' },
+      fonts: { display: 'Bebas Neue', body: 'Barlow' }, radius: 4, motion: 'suave', texture: 'madera', icons: 'linea',
+      fx: { reveal: 'aparecer' }
+    },
+    menu: {
+      categories: [
+        { id: 'chorizos', name: 'Chorizos', icon: '🌭', ico: 'chorizo', note: 'Hechos en casa cada mañana, con la receta santarrosana', items: [
+          IT('chorizo', 'Chorizo santarrosano', 'Asado en leña de café, con arepa y limón.', 9000, '🌭', ['popular', 'local'], { ico: 'chorizo' }),
+          IT('chorizo-doble', 'Chorizo doble con papa salada', 'Dos chorizos, papa criolla salada y ají de la casa.', 16000, '🌭', [], { ico: 'chorizo' }),
+          IT('chorizo-arepa', 'Chorizo en arepa de queso', 'Arepa de maíz blanco rellena de quesito derretido.', 13000, '🫓', ['nuevo']),
+          IT('morcilla', 'Morcilla', 'Rellena de arroz y arveja, con limón.', 8000, '🌭', [], { ico: 'chorizo' }),
+          IT('chicharron', 'Chicharrón carnudo', 'Crocante por fuera y jugoso por dentro.', 12000, '🥓', ['popular'])
+        ] },
+        { id: 'brasa', name: 'A la brasa', icon: '🔥', note: 'Con papa salada, arepa y ensalada', items: [
+          IT('punta-anca', 'Punta de anca', '350 gramos, al término que usted quiera.', 38000, '🥩', ['chef', 'popular']),
+          IT('costillas', 'Costillas de cerdo', 'Ahumadas despacio y terminadas en salsa de la casa.', 32000, '🍖', ['popular']),
+          IT('pollo', 'Medio pollo asado', 'Marinado en naranja agria y hierbas.', 26000, '🍗'),
+          IT('sobrebarriga', 'Sobrebarriga a la brasa', 'Blandita, bañada en hogao.', 30000, '🥩', ['local']),
+          IT('trucha', 'Trucha a la brasa', 'Envuelta en hoja de plátano, con limón.', 34000, '🐟', ['singluten'])
+        ] },
+        { id: 'compartir', name: 'Para compartir', icon: '🍖', note: '', items: [
+          IT('picada-dos', 'Picada para dos', 'Chorizo, morcilla, chicharrón, carne, papa criolla y arepitas.', 52000, '🍖', ['compartir', 'popular']),
+          IT('picada-familiar', 'Picada familiar', 'La de dos, más costillas y pollo. Alcanza para cuatro.', 98000, '🍖', ['compartir']),
+          IT('parrillada', 'Parrillada El Tronco', 'Punta de anca, costillas, pollo, chorizo y todos los acompañantes.', 145000, '🔥', ['compartir', 'chef'])
+        ] },
+        { id: 'acompanantes', name: 'Acompañantes', icon: '🌽', note: '', items: [
+          IT('papa-salada', 'Papa salada', 'Papa criolla y pastusa con sal gruesa.', 5000, '🥔', ['vegano'], { ico: 'papas' }),
+          IT('arepa', 'Arepa con quesito', 'Asada en el budare.', 4000, '🫓', ['vegetariano']),
+          IT('mazorca', 'Mazorca asada', 'Con mantequilla y sal.', 6000, '🌽', ['vegetariano', 'temporada']),
+          IT('maduro', 'Maduro con queso y bocadillo', 'Asado en la brasa hasta que se caramelice.', 7000, '🍌', ['vegetariano']),
+          IT('ensalada', 'Ensalada de la huerta', 'Lechuga, tomate, cebolla y aguacate.', 6000, '🥗', ['vegano'])
+        ] },
+        { id: 'bebidas', name: 'Bebidas', icon: '🥤', note: '', items: [
+          IT('limonada', 'Limonada de panela', 'Bien fría, en vaso o en jarra.', 6000, '🍋', ['vegano', 'popular']),
+          IT('aguapanela', 'Aguapanela con limón', 'Fría o caliente.', 4000, '🍯', ['local']),
+          IT('lulo', 'Jugo de lulo', 'En agua o en leche.', 7000, '🥤'),
+          IT('cerveza', 'Cerveza nacional', 'Solo para mayores de 18 años.', 6000, '🍺'),
+          IT('tinto', 'Tinto', 'Para cerrar el almuerzo.', 2000, '☕')
+        ] },
+        { id: 'postres', name: 'Postres', icon: '🍯', note: '', items: [
+          IT('brevas', 'Brevas con arequipe', 'Con una tajada de queso fresco.', 9000, '🍯', ['local']),
+          IT('cuajada', 'Cuajada con melao', 'Melao de panela tibio, como en la finca.', 8000, '🧀', ['popular'])
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'aviso', type: 'aviso', on: true, s: { text: 'Domingos y festivos: sancocho de gallina en fogón de leña, desde las 11:00 a. m.', icon: '🍲', style: 'acento', until: '', cta: 'carta' } },
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Leña de café · desde 1987', title: '', subtitle: 'Chorizo santarrosano, carnes a la brasa y arepa con quesito, camino a los termales.', cta1: 'carta', cta2: 'pedido', showStatus: true, ribbon: 'Chorizo santarrosano, Punta de anca, Costillas, Arepa con quesito, Limonada de panela' } },
+      { id: 'top', type: 'destacados', on: true, s: { title: 'Lo que más sale', tag: 'popular', max: 4, layout: 'cuadricula' } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'tarjetas', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'combos', type: 'promos', on: true, s: { title: 'Combos', highlightToday: true, items: [
+        { days: [2, 3, 4], title: 'Combo Tronco', desc: 'Chorizo santarrosano, arepa con quesito y limonada de panela.', price: 15000 },
+        { days: [5, 6], title: 'Picada con jarra', desc: 'Picada para dos con jarra de limonada de panela.', price: 60000 },
+        { days: [0], title: 'Domingo en familia', desc: 'Picada familiar y cuatro limonadas.', price: 112000 }
+      ] } },
+      { id: 'pedido', type: 'pedido', on: true, s: { title: 'Para llevar o a domicilio', showSection: true, modes: { mesa: true, llevar: true, domicilio: true }, deliveryFee: 5000, minOrder: 25000, deliveryNote: 'Domicilios en el casco urbano y por la vía a los termales hasta el km 5.', payments: 'Efectivo, Nequi, Tarjeta', intro: '' } },
+      { id: 'servicios', type: 'servicios', on: true, s: { title: 'En el asadero', list: ['parqueadero', 'infantil', 'mascotas', 'terraza', 'tarjeta', 'transferencia'], extra: 'Fogón a la vista', note: 'Parqueadero gratis para clientes.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Cómo estuvo el asado?', text: 'Su reseña ayuda a que otros viajeros encuentren el humo.', rating: '', layout: 'destacada', _bg: 'acento', quotes: [
+        { text: 'El mejor chorizo de la vía. Paramos de ida y de vuelta.', author: 'Andrés M.' },
+        { text: 'La punta de anca en su punto y la limonada de panela bien fría.', author: 'Luisa F.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 10:00 a. m. a 8:00 p. m.' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
+    ],
+    meta: { credit: true }
   }
 ];
 

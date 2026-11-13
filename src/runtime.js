@@ -163,6 +163,8 @@ function breakApp(win, doc, initialCfg, opts) {
   /* Máscaras SVG: la forma viene del SVG y el color del tema (background + mask). */
   const LEAF = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 14\'%3E%3Cpath d=\'M1 7C5 1 15 0 23 7C15 14 5 13 1 7Z\'/%3E%3C/svg%3E")';
   const SQUIG = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 60 10\'%3E%3Cpath d=\'M0 5Q7.5 0 15 5T30 5T45 5T60 5\' fill=\'none\' stroke=\'%23000\' stroke-width=\'2.2\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
+  /* Marcas de parrilla (Rústico): siete trazos inclinados con puntas redondas, para usar como máscara. */
+  const GRILL = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 92 12\'%3E%3Cpath d=\'M3 10.5L8 1.5M16 10.5L21 1.5M29 10.5L34 1.5M42 10.5L47 1.5M55 10.5L60 1.5M68 10.5L73 1.5M81 10.5L86 1.5\' fill=\'none\' stroke=\'%23000\' stroke-width=\'3.2\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
   /* Hojas y ondas se dibujan en el fondo con el color de la paleta ya puesto (ver texCSS). */
   const LEAF_PATHS = '%3Cpath d=\'M12 30C20 21 34 21 42 30C34 39 20 39 12 30Z\' transform=\'rotate(-28 27 30)\'/%3E%3Cpath d=\'M70 22C78 13 92 13 100 22C92 31 78 31 70 22Z\' transform=\'rotate(40 85 22)\'/%3E%3Cpath d=\'M24 88C32 79 46 79 54 88C46 97 32 97 24 88Z\' transform=\'rotate(62 39 88)\'/%3E%3Cpath d=\'M76 84C84 75 98 75 106 84C98 93 84 93 76 84Z\' transform=\'rotate(-58 91 84)\'/%3E%3Ccircle cx=\'60\' cy=\'56\' r=\'3\'/%3E%3Ccircle cx=\'66\' cy=\'60\' r=\'3\'/%3E';
   /* Ilustraciones de la región para la portada (araucarias, cafetal, guadua, termales y Willys). Se dibujan con
@@ -177,6 +179,19 @@ const ART_CSS = [
     '.art .a-tz2{stroke:var(--accent2);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
     '.art .a-tz3{stroke:var(--accent3);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
     '.art-garab{max-width:360px}',
+    '.art-bras{height:104px}',
+    '.art .a-gl{fill:color-mix(in srgb,var(--accent) 55%,var(--bg))}',
+    '.art .a-cb{fill:color-mix(in srgb,var(--ink) 20%,var(--bg))}',
+    '.art .a-em{fill:var(--accent)}',
+    '.art .a-em2{fill:var(--accent2)}',
+    '.art .a-ek{stroke:var(--accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
+    '.art .a-gt{stroke:color-mix(in srgb,var(--ink) 72%,var(--bg));stroke-width:3;stroke-linecap:round}',
+    '.art .a-gt2{stroke:color-mix(in srgb,var(--ink) 45%,var(--bg));stroke-width:2}',
+    '.art .a-cz{fill:color-mix(in srgb,var(--earth) 72%,var(--bg))}',
+    '.art .a-ar{fill:color-mix(in srgb,var(--accent2) 60%,var(--surface))}',
+    '.art .a-mt{fill:color-mix(in srgb,var(--earth) 52%,var(--bg))}',
+    '.art .a-ft{stroke:color-mix(in srgb,var(--ink) 78%,var(--accent2));stroke-width:3;stroke-linecap:round}',
+    '.art .a-mk{stroke:color-mix(in srgb,var(--earth) 30%,var(--bg));stroke-width:2.4;stroke-linecap:round}',
     '.art .a-k1{fill:color-mix(in srgb,var(--ink) 13%,var(--bg))}',
     '.art .a-k2{fill:color-mix(in srgb,var(--ink) 28%,var(--bg))}',
     '.art .a-t1{fill:color-mix(in srgb,var(--leaf) 30%,var(--bg))}',
@@ -1196,6 +1211,92 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="pizarra"] .foot{border-top:2px dashed color-mix(in srgb,var(--c-foot-on,var(--ink)) 22%,transparent)}
 [data-skin="pizarra"] .foot-n{font-family:var(--fd);font-weight:700;font-size:44px;line-height:1;text-shadow:var(--chalk)}
 [data-skin="pizarra"] .navi{font-family:var(--fd);font-weight:700;font-size:30px;letter-spacing:.02em}
+`,
+    rustico: `
+[data-skin="rustico"]{font-size:16px;--gw:.39}
+[data-skin="rustico"] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 92%,transparent));border-bottom:2px solid color-mix(in srgb,var(--c-top-on,var(--accent)) 55%,transparent)}
+[data-skin="rustico"] .brand-mini{font-size:25px;letter-spacing:.06em}
+[data-skin="rustico"] .status,[data-skin="rustico"] .lang,[data-skin="rustico"] .menu-btn{background:transparent;border:1.5px solid color-mix(in srgb,var(--c-top-on,var(--ink)) 30%,transparent);border-radius:4px}
+[data-skin="rustico"] .status{font-family:var(--fd);font-weight:400;letter-spacing:.1em;font-size:15px;padding:5px 10px 3px}
+[data-skin="rustico"] .lang button{border-radius:3px}
+[data-skin="rustico"] .lang button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="rustico"] .menu-btn{width:40px;height:40px}
+[data-skin="rustico"] .m-hero{padding-block:36px 0}
+[data-skin="rustico"] .hero-k{display:inline-block;padding:6px 10px 4px;border:2px solid currentColor;border-radius:3px;font-family:var(--fd);font-weight:400;letter-spacing:.1em;letter-spacing:.14em;font-size:17px;line-height:1.1;color:var(--c-kicker,var(--accent2));rotate:-1.5deg}
+[data-skin="rustico"] .hero-t{font-size:min(calc(clamp(66px,21vw,124px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.88;letter-spacing:.015em;color:var(--c-title,var(--ink));text-shadow:0 3px 0 color-mix(in srgb,var(--accent) 40%,transparent)}
+[data-skin="rustico"] .hero-s{font-size:18px;color:color-mix(in srgb,var(--ink) 82%,var(--bg))}
+[data-skin="rustico"] .btn{border-radius:4px;border-width:2px;font-family:var(--fd);font-weight:400;font-size:20px;letter-spacing:.08em;line-height:1;padding:13px 20px 11px}
+[data-skin="rustico"] .btn.sm{font-size:17px;padding:9px 14px 7px}
+[data-skin="rustico"] .btn .ic{width:1.05em;height:1.05em}
+[data-skin="rustico"] .btn.pri{box-shadow:0 4px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 45%,var(--bg))}
+[data-skin="rustico"] .btn.pri:active{box-shadow:0 1px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 45%,var(--bg))}
+[data-skin="rustico"] .btn.ghost{border-color:color-mix(in srgb,var(--ink) 45%,transparent);color:var(--ink)}
+[data-skin="rustico"] .ribbon{margin-top:30px;white-space:normal;font-family:var(--fd);font-size:20px;letter-spacing:.08em;color:var(--accent2)}
+[data-skin="rustico"] .ribbon-track{display:flex;flex-wrap:wrap;gap:2px 0}
+[data-skin="rustico"] .ribbon-track span{padding:0 12px 0 0}
+[data-skin="rustico"] .ribbon-track span:not(:last-child)::after{content:"";display:inline-block;width:7px;height:7px;margin-left:12px;background:var(--accent);rotate:45deg;vertical-align:.2em}
+[data-skin="rustico"] .sh-k{font-family:var(--fd);font-weight:400;letter-spacing:.1em;letter-spacing:.2em;font-size:17px;color:var(--c-kicker,var(--accent2))}
+[data-skin="rustico"] .sh-t{font-size:calc(clamp(44px,12.5vw,62px) * var(--ts,1));line-height:.92;letter-spacing:.015em}
+[data-skin="rustico"] .sh .orn{display:block;width:92px;height:12px;margin-top:10px;background:var(--accent);-webkit-mask:${GRILL} 0 50%/92px 12px no-repeat;mask:${GRILL} 0 50%/92px 12px no-repeat}
+[data-skin="rustico"] .card,[data-skin="rustico"] .svc,[data-skin="rustico"] .fq,[data-skin="rustico"] .lay-tarjetas .it,[data-skin="rustico"] .lay-cuadricula .it,[data-skin="rustico"] .lay-fotos .it,[data-skin="rustico"] .feat,[data-skin="rustico"] .promo,[data-skin="rustico"] .quote,[data-skin="rustico"] .cl,[data-skin="rustico"] .wres{background:radial-gradient(circle at 9px 9px,color-mix(in srgb,var(--ink) 34%,transparent) 0 1.7px,transparent 2.3px),radial-gradient(circle at calc(100% - 9px) 9px,color-mix(in srgb,var(--ink) 34%,transparent) 0 1.7px,transparent 2.3px),radial-gradient(circle at 9px calc(100% - 9px),color-mix(in srgb,var(--ink) 34%,transparent) 0 1.7px,transparent 2.3px),radial-gradient(circle at calc(100% - 9px) calc(100% - 9px),color-mix(in srgb,var(--ink) 34%,transparent) 0 1.7px,transparent 2.3px) var(--surface);border:1px solid color-mix(in srgb,var(--ink) 13%,transparent)}
+[data-skin="rustico"] .chip{border-radius:4px;font-family:var(--fd);font-weight:400;letter-spacing:.1em;letter-spacing:.08em;font-size:17px;padding:9px 14px 6px;border-color:color-mix(in srgb,var(--ink) 26%,transparent)}
+[data-skin="rustico"] .chip.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2));border-color:var(--c-sel,var(--accent2))}
+[data-skin="rustico"] .cat-tabs{border-bottom:2px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+[data-skin="rustico"] .cat-h h3{font-size:36px;line-height:1;letter-spacing:.03em;color:var(--c-title,var(--ink))}
+[data-skin="rustico"] .cat-h h3 .ci{color:var(--accent)}
+[data-skin="rustico"] .cat-h h3::after{content:"";flex:1;min-width:24px;height:7px;background:linear-gradient(currentColor,currentColor) 0 0/100% 2px no-repeat,linear-gradient(currentColor,currentColor) 0 100%/100% 2px no-repeat;opacity:.24}
+[data-skin="rustico"] .it h4{font-family:var(--fd);font-weight:400;font-size:23px;line-height:1.02;letter-spacing:.035em}
+[data-skin="rustico"] .lay-cuadricula .it h4,[data-skin="rustico"] .lay-compacta .it h4{font-size:20px}
+[data-skin="rustico"] .lay-fotos .it h4{font-size:27px}
+[data-skin="rustico"] .feat-b h4,[data-skin="rustico"] .promo h4,[data-skin="rustico"] .ev h4{font-family:var(--fd);font-weight:400;font-size:24px;line-height:1.02;letter-spacing:.035em}
+[data-skin="rustico"] .feat-cuadricula .feat .feat-b h4{font-size:20px}
+[data-skin="rustico"] .it-d{font-size:15px;color:color-mix(in srgb,var(--ink) 74%,var(--bg))}
+[data-skin="rustico"] .lay-lista .it,[data-skin="rustico"] .lay-compacta .it{border-bottom:1px solid color-mix(in srgb,var(--ink) 14%,transparent)}
+[data-skin="rustico"] .lead{border-bottom:2px dotted color-mix(in srgb,var(--ink) 30%,transparent)}
+[data-skin="rustico"] .it .price,[data-skin="rustico"] .feat .price,[data-skin="rustico"] .promo .price,[data-skin="rustico"] .price.big,[data-skin="rustico"] .wres .price{display:inline-block;font-family:var(--fd);font-weight:400;font-size:20px;letter-spacing:.05em;line-height:1;padding:6px 10px 4px 20px;border-radius:2px 5px 5px 2px;background:radial-gradient(circle at 9px 50%,var(--surface) 0 2.2px,transparent 2.8px) var(--c-price,var(--accent2));color:var(--c-price-on,var(--on-accent2))}
+[data-skin="rustico"] .lay-compacta .price{font-size:18px}
+[data-skin="rustico"] .price.big{font-size:24px;justify-self:start;width:fit-content}
+[data-skin="rustico"] .promo.today .price{background:radial-gradient(circle at 9px 50%,var(--accent) 0 2.2px,transparent 2.8px) var(--bg);color:var(--accent2)}
+[data-skin="rustico"] .lines .price{font-family:var(--fd);font-weight:400;font-size:20px;letter-spacing:.04em;color:var(--c-price,var(--accent2))}
+[data-skin="rustico"] .md-price{font-size:54px;letter-spacing:.02em;color:var(--c-price,var(--accent2))}
+[data-skin="rustico"] .md-when{font-family:var(--fd);font-weight:400;letter-spacing:.1em;letter-spacing:.12em;font-size:17px;color:var(--accent2)}
+[data-skin="rustico"] .md-today{border-radius:3px}
+[data-skin="rustico"] .tag{background:transparent;border:1.5px solid currentColor;border-radius:3px;color:var(--c-tag,var(--accent3));font-family:var(--fd);font-weight:400;letter-spacing:.1em;font-size:14.5px;line-height:1;padding:4px 7px 2px}
+[data-skin="rustico"] .tag.sold{color:var(--muted)}
+[data-skin="rustico"] .add{border-radius:4px;box-shadow:0 3px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 45%,var(--bg))}
+[data-skin="rustico"] .add .q{background:var(--accent2);color:var(--on-accent2);border-radius:3px}
+[data-skin="rustico"] .media{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+[data-skin="rustico"] .media.m1{background:color-mix(in srgb,var(--accent2) 12%,var(--surface))}
+[data-skin="rustico"] .media.m2{background:color-mix(in srgb,var(--accent3) 14%,var(--surface))}
+[data-skin="rustico"] .media.ln .ic{stroke-width:1.5}
+[data-skin="rustico"] .promo-d,[data-skin="rustico"] .ev-w{font-family:var(--fd);font-weight:400;letter-spacing:.1em;letter-spacing:.14em;font-size:16px!important;color:var(--accent)!important}
+[data-skin="rustico"] .promo.today{background:radial-gradient(circle at 9px 9px,color-mix(in srgb,var(--on-accent) 40%,transparent) 0 1.7px,transparent 2.3px),radial-gradient(circle at calc(100% - 9px) 9px,color-mix(in srgb,var(--on-accent) 40%,transparent) 0 1.7px,transparent 2.3px),radial-gradient(circle at 9px calc(100% - 9px),color-mix(in srgb,var(--on-accent) 40%,transparent) 0 1.7px,transparent 2.3px),radial-gradient(circle at calc(100% - 9px) calc(100% - 9px),color-mix(in srgb,var(--on-accent) 40%,transparent) 0 1.7px,transparent 2.3px) var(--accent);color:var(--on-accent);border-color:transparent}
+[data-skin="rustico"] .badge{border-radius:3px;background:var(--bg);color:var(--accent2);font-family:var(--fd);font-weight:400;letter-spacing:.1em;font-size:15px;padding:5px 9px 3px;rotate:3deg}
+[data-skin="rustico"] .stamp{border:2px dashed color-mix(in srgb,var(--ink) 30%,transparent)}
+[data-skin="rustico"] .stamp.on{border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent)}
+[data-skin="rustico"] .hrow,[data-skin="rustico"] .g{border-bottom:1px solid color-mix(in srgb,var(--ink) 13%,transparent)}
+[data-skin="rustico"] .hrow dt{font-family:var(--fd);font-weight:400;letter-spacing:.1em;letter-spacing:.06em;font-size:20px}
+[data-skin="rustico"] .hrow.today dt,[data-skin="rustico"] .hrow.today dd{color:var(--accent2)}
+[data-skin="rustico"] .hrow .hoy{border-radius:3px;font-family:var(--fd);font-weight:400;letter-spacing:.1em;font-size:14px;padding:3px 7px 1px}
+[data-skin="rustico"] .g dt{font-size:24px;letter-spacing:.04em;color:var(--accent2)}
+[data-skin="rustico"] .sig{font-family:var(--fd);font-style:normal;font-size:26px;letter-spacing:.06em;color:var(--accent2)}
+[data-skin="rustico"] .quote blockquote{font-size:17px}
+[data-skin="rustico"] .qbig blockquote{font-size:30px;line-height:1.05;letter-spacing:.03em}
+[data-skin="rustico"] .cl-k{font-family:var(--fd);font-weight:400;letter-spacing:.1em;letter-spacing:.06em;font-size:20px;font-weight:400}
+[data-skin="rustico"] .svc-i{border-radius:4px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent2)}
+[data-skin="rustico"] .wheel{box-shadow:0 0 0 6px var(--surface),0 0 0 9px color-mix(in srgb,var(--accent) 55%,transparent)}
+[data-skin="rustico"] .fab{border-radius:5px;box-shadow:0 4px 0 color-mix(in srgb,var(--c-btn,var(--accent)) 45%,var(--bg)),0 14px 28px -10px color-mix(in srgb,var(--bg) 85%,transparent)}
+[data-skin="rustico"] .fab-n{border-radius:3px}
+[data-skin="rustico"] .sheet{border-top:3px solid var(--accent)}
+[data-skin="rustico"] .inp,[data-skin="rustico"] .search input,[data-skin="rustico"] .stepper,[data-skin="rustico"] .tq-o{border-radius:4px;border-color:color-mix(in srgb,var(--ink) 26%,transparent)}
+[data-skin="rustico"] .seg{border-radius:5px}
+[data-skin="rustico"] .seg button{border-radius:3px}
+[data-skin="rustico"] .seg button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="rustico"] .keypad button{border-radius:5px;font-family:var(--fd);font-weight:400;font-size:26px}
+[data-skin="rustico"] .foot::before{content:"";display:block;width:92px;height:12px;margin:0 auto 22px;background:var(--accent);-webkit-mask:${GRILL} 0 50%/92px 12px no-repeat;mask:${GRILL} 0 50%/92px 12px no-repeat}
+[data-skin="rustico"] .foot.fa-izq::before{margin-left:0}
+[data-skin="rustico"] .foot-n{font-size:44px;letter-spacing:.04em;line-height:1}
+[data-skin="rustico"] .navi{font-size:30px;letter-spacing:.05em}
 `
   };
 
@@ -1328,10 +1429,10 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' } };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' } };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
-  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos'];
-  const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG };
+  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas'];
+  const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG };
   /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
   function decoPreview(k) {
     if (k === 'stickers') return '<div class="hero-in">' + ['☕', '🧁', '🍓', '🥐'].map(function (e, i) { return '<span class="stk s' + (i + 1) + '">' + e + '</span>'; }).join('') + '</div>';
@@ -1714,6 +1815,47 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       '<path class="a-tz2" d="M300 154c10-18 24-27 42-31-5 13-17 26-42 31ZM300 154c13-11 24-18 38-27"/>' +
       '<path class="a-tz1" d="M314 44v18M305 53h18M36 44l9 9M45 44l-9 9M196 30l4 7 8 1-6 5 2 8-8-4-7 4 2-8-6-5 8-1Z"/>' +
       '<path class="a-tz0" d="M28 98h0M332 92h0M208 76h0"/></svg>';
+  }
+
+  /* Parrilla con brasas: carbón encendido con llamitas, la parrilla con chorizos, arepas y una punta de anca,
+     humo y chispas. Franja de abajo. */
+  function brasasSVG() {
+    const r = artRnd(19);
+    let coal = '', crack = '', hot = '', fl = '', fl2 = '';
+    for (let x = -6; x < 612; x += 18 + r() * 9) {
+      const w = 11 + r() * 6, h = 8 + r() * 5, y = 115 + r() * 3;
+      coal += 'M' + r1(x - w) + ' ' + r1(y) + 'q' + r1(w * 0.12) + ' ' + r1(-h * 1.3) + ' ' + r1(w) + ' ' + r1(-h * 1.3) + 'q' + r1(w * 0.88) + ' 0 ' + r1(w) + ' ' + r1(h * 1.3) + 'Z';
+      if (r() < 0.6) {
+        const k = r() < 0.5 ? 1 : -1;
+        crack += 'M' + r1(x - w * 0.55) + ' ' + r1(y - h * (0.35 + r() * 0.4)) + 'l' + r1(w * 0.3) + ' ' + r1(k * h * 0.22) + 'l' + r1(w * 0.25) + ' ' + r1(-k * h * 0.4) + 'l' + r1(w * 0.3) + ' ' + r1(k * h * 0.12);
+      }
+      if (r() < 0.3) hot += 'M' + r1(x + w * 0.2 - 1.8) + ' ' + r1(y - h * 0.75) + 'a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0-3.6 0Z';
+    }
+    const flame = function (x, h, w) {
+      return 'M' + x + ' 106c' + r1(-w) + ' 0 ' + r1(-w * 0.95) + ' ' + r1(-h * 0.5) + ' 0 ' + r1(-h) + 'c' + r1(w * 0.95) + ' ' + r1(h * 0.5) + ' ' + r1(w) + ' ' + r1(h) + ' 0 ' + r1(h) + 'Z';
+    };
+    [[62, 18, 6], [100, 24, 8], [142, 16, 6], [182, 22, 7], [228, 26, 8.5], [276, 17, 6], [318, 23, 7.5], [362, 18, 6.5], [404, 25, 8], [446, 17, 6], [488, 22, 7.5], [534, 19, 6.5]].forEach(function (f) {
+      fl += flame(f[0], f[1], f[2]); fl2 += flame(f[0], f[1] * 0.55, f[2] * 0.5);
+    });
+    let bars = '';
+    for (let x = 4; x < 600; x += 12) bars += 'M' + x + ' 86V92';
+    const link = function (x) { return '<rect class="a-cz" x="' + x + '" y="69" width="40" height="15" rx="7.5"/>'; };
+    const arepa = function (x) { return '<rect class="a-ar" x="' + x + '" y="74" width="58" height="10" rx="5"/>'; };
+    let marks = '';
+    [92, 136, 180, 420, 464].forEach(function (x) { marks += 'M' + (x + 12) + ' 71l-4 11M' + (x + 22) + ' 71l-4 11M' + (x + 32) + ' 71l-4 11'; });
+    [8, 236, 520].forEach(function (x) { marks += 'M' + (x + 14) + ' 76l-3 7M' + (x + 26) + ' 76l-3 7M' + (x + 38) + ' 76l-3 7M' + (x + 50) + ' 76l-3 7'; });
+    marks += 'M336 69l-6 14M352 67l-6 16M368 67l-6 16M384 69l-5 14';
+    return '<svg class="art art-band art-bras" viewBox="0 0 600 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">' +
+      '<path class="a-gl" d="M0 120V100C120 95 240 97 360 96S540 98 600 101V120Z"/>' +
+      '<path class="a-em2" d="' + fl + '"/><path class="a-em" d="' + fl2 + '"/>' +
+      '<path class="a-cb" d="M0 112H600V120H0Z' + coal + '"/><path class="a-ek" d="' + crack + '"/><path class="a-em2" d="' + hot + '"/>' +
+      '<path class="a-gt2" d="M0 92H600' + bars + '"/><path class="a-gt" d="M0 86H600"/>' +
+      arepa(8) + arepa(236) + arepa(520) + link(92) + link(136) + link(180) + link(420) + link(464) +
+      '<path class="a-mt" d="M310 84c-2-8 3-15 15-17 16-3 34-4 50-2 16 2 28 7 29 19Z"/>' +
+      '<path class="a-ft" d="M318 70c16-5 40-7 60-4 10 1 18 4 22 8"/>' +
+      '<path class="a-mk" d="' + marks + '"/><path class="a-gt" d="M132 76.5h4M176 76.5h4M460 76.5h4"/>' +
+      '<path class="a-st" d="M160 62c-8-8 7-13 0-22s8-13 1-22M350 58c-9-9 8-15 0-25s9-15 0-25M480 62c-8-8 7-13 0-22s8-13 1-21"/>' +
+      '<path class="a-em2" d="M122.3 40a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM212.3 50a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM260.3 34a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM398.3 44a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM444.3 28a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0Z"/></svg>';
   }
 
   /* Jeep Willys cargado con bultos de café y racimos de plátano. Escena arriba del título. */

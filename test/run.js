@@ -576,10 +576,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const hero = cfg => cfg.modules.find(m => m.type === 'hero').s;
     const NOW = { now: '2026-11-06T15:30:00Z' };
     // Lo de cada estética sigue igual sin tocar nada
-    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab' };
+    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras' };
     for (const id of Object.keys(auto)) { const A = mount(TPL(id), NOW); ok(!!A.$(auto[id]), id + ': la portada conserva la decoración de su estética'); A.close(); }
     ok(/--leaf:#[0-9a-f]{6}/i.test((() => { const A = mount(TPL('tpl-espiga'), NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; })()), 'el verde de la paleta queda listo para las ilustraciones');
-    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
+    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
     // Sin decoración
     const z = TPL('tpl-zocalo'); hero(z).deco = 'ninguna';
     let A = mount(z, NOW); ok(!A.$('.facade') && !A.$('.zocalo') && !A.$('.hero-box[class*=" d-"]'), '«Ninguna» quita la fachada y el zócalo'); A.close();
@@ -1024,6 +1024,24 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'garabatos';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-garabatos svg.art-garab') && !A.$('.hero-box.d-garabatos .facade'), 'los dibujos de tiza sirven en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'garabatos'), 'los dibujos de tiza se ofrecen en el estudio');
+  }
+
+  /* 11w. Estética Rústico y Asadero El Tronco */
+  {
+    const NOW = { now: '2026-11-06T22:30:00Z' };
+    let A = mount(TPL('tpl-tronco'), NOW);
+    ok(A.$('.app').getAttribute('data-skin') === 'rustico' && /\[data-skin="rustico"\] \.hero-t\{/.test(A.d.getElementById('bk-css').textContent), 'Rústico: su CSS se aplica');
+    ok(!!A.$('.hero-box.d-brasas svg.art-bras') && !!A.$('section.m-carta .lay-tarjetas') && A.d.documentElement.getAttribute('data-tex') === 'madera', 'El Tronco: parrilla con brasas, carta en tarjetas y textura de madera');
+    ok(A.d.getElementById('bk-fonts').href.includes('family=Bebas+Neue') && A.d.getElementById('bk-fonts').href.includes('family=Barlow'), 'Rústico: pide sus tipografías a Google Fonts');
+    ok(A.$$('section.m-carta .it .price').length >= 25 && !!A.$('.promos .promo.today .badge'), 'El Tronco: precios en la carta y el combo de hoy resaltado');
+    A.close();
+    const block = (SRC('runtime.js').match(/\n    rustico: `([\s\S]*?)`/) || [])[1] || '';
+    ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Rústico: su CSS solo usa colores de la paleta');
+    const tag = (block.match(/\.price\.big,[^{]*\{([^}]*)\}/) || [])[1] || '';
+    ok(/background:radial-gradient/.test(tag) && !/clip-path|mask/.test(tag), 'Rústico: la etiqueta del precio es solo fondo, así las opciones de precio de la carta la quitan');
+    const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'brasas';
+    A = mount(z, NOW); ok(!!A.$('.hero-box.d-brasas svg.art-bras') && !A.$('.hero-box.d-brasas .facade'), 'la parrilla con brasas sirve en cualquier estética'); A.close();
+    ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'brasas'), 'la parrilla con brasas se ofrece en el estudio');
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */
