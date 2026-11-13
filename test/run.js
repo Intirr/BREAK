@@ -16,6 +16,8 @@ const SRC = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
 const ctx = {}; vm.createContext(ctx);
 vm.runInContext(SRC('runtime.js') + '\n' + SRC('templates.js') + '\n' + SRC('catalog.js') + '\n;this.breakApp=breakApp;this.TEMPLATES=TEMPLATES;this.blankApp=blankApp;this.SKINS=SKINS;this.MODULES=MODULES;this.TEXTURES=TEXTURES;this.DISPLAY_FONTS=DISPLAY_FONTS;this.BODY_FONTS=BODY_FONTS;this.STYLE=STYLE;this.ICON_NAMES=ICON_NAMES;', ctx);
 const TPL = id => JSON.parse(JSON.stringify(ctx.TEMPLATES.find(t => t.id === id)));
+// Copia de una plantilla sin algunas de sus opciones: claves de theme (carta, fx, dark…) o '_bg' (fondos de sección)
+const bare = (id, ...keys) => { const c = TPL(id); keys.forEach(k => { if (k === '_bg') c.modules.forEach(m => { if (m.s) delete m.s._bg; }); else delete c.theme[k]; }); return c; };
 
 /* Monta una app con el motor serializado (prueba que es autocontenido). */
 function mount(cfg, o) {
@@ -767,9 +769,9 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     A.close();
     b.theme.roles = { btn: '#1F7A8C', price: 'accent3' };
     ok(css(b).includes('.m.sb-acento,.m.sb-invertido{--c-btn:initial;--c-btn-on:initial;--c-price:initial;--c-price-on:initial}'), 'adentro, los colores por elemento vuelven a los de la estética');
-    const nob = TPL('tpl-zocalo');
+    const nob = bare('tpl-zocalo', '_bg');
     ok(!/;--sb[ai]-bg:/.test(css(nob)), 'sin secciones con fondo propio no se escriben sus variables');
-    const bad = TPL('tpl-zocalo'); bad.modules.find(m => m.type === 'horario').s._bg = 'x" onmouseover="alert(1)';
+    const bad = bare('tpl-zocalo', '_bg'); bad.modules.find(m => m.type === 'horario').s._bg = 'x" onmouseover="alert(1)';
     A = mount(bad, NOW); ok(!A.$('[onmouseover]') && !A.$('section.sb'), 'un fondo desconocido no se usa'); A.close();
     // Variantes
     const v = TPL('tpl-araucaria'), de = v.modules.find(m => m.type === 'destacados');
@@ -806,10 +808,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const R = (a, z) => { const p = L(a), q = L(z); return (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05); };
     const lay = (cfg, l) => { cfg.modules.find(m => m.type === 'carta').s.layout = l; return cfg; };
     // En «auto» nada cambia
-    const base = css(TPL('tpl-zocalo'));
-    const z0 = TPL('tpl-zocalo'); z0.theme.carta = { shape: 'auto', size: 'auto', pos: 'auto', desc: 'auto', price: 'auto', tags: 'auto', lead: 'auto', cat: 'auto', catPhoto: 'auto', catIcon: 'auto', tabs: 'auto', cols: 'auto' };
+    const base = css(bare('tpl-zocalo', 'carta'));
+    const z0 = bare('tpl-zocalo', 'carta'); z0.theme.carta = { shape: 'auto', size: 'auto', pos: 'auto', desc: 'auto', price: 'auto', tags: 'auto', lead: 'auto', cat: 'auto', catPhoto: 'auto', catIcon: 'auto', tabs: 'auto', cols: 'auto' };
     ok(css(z0) === base, 'carta en «auto»: nada cambia');
-    const zx = TPL('tpl-zocalo'); zx.theme.carta = { shape: 'x;}body{color:red', cols: '9', price: '"><b>', desc: '7' };
+    const zx = bare('tpl-zocalo', 'carta'); zx.theme.carta = { shape: 'x;}body{color:red', cols: '9', price: '"><b>', desc: '7' };
     ok(css(zx) === base, 'valores desconocidos en la carta no escriben nada');
     // Fotos: tamaño, posición, forma y columnas
     const a = TPL('tpl-zocalo'); a.theme.carta = { shape: 'circulo', size: 'l', pos: 'der', desc: '2', cols: '3' };
@@ -861,10 +863,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const css = (cfg, o) => { const A = mount(cfg, Object.assign({}, NOW, o)); const x = A.d.getElementById('bk-css').textContent; A.close(); return x; };
     // IntersectionObserver de mentira: guarda lo observado para «entrar» a mano
     const io = w => { w.__ios = []; w.IntersectionObserver = class { constructor(cb) { this.cb = cb; this.els = []; w.__ios.push(this); } observe(el) { this.els.push(el); } unobserve(el) { this.els = this.els.filter(e => e !== el); } disconnect() { this.els = []; } }; };
-    const base = css(TPL('tpl-zocalo'));
-    const z0 = TPL('tpl-zocalo'); z0.theme.fx = { entry: 'auto', reveal: 'auto', tap: 'auto', speed: 'auto', marquee: 'auto', deco: 'auto', confetti: 'auto' };
+    const base = css(bare('tpl-zocalo', 'fx'));
+    const z0 = bare('tpl-zocalo', 'fx'); z0.theme.fx = { entry: 'auto', reveal: 'auto', tap: 'auto', speed: 'auto', marquee: 'auto', deco: 'auto', confetti: 'auto' };
     ok(css(z0) === base, 'movimiento en «auto»: nada cambia');
-    const zx = TPL('tpl-zocalo'); zx.theme.fx = { entry: 'x}body{', reveal: '1', tap: '<b>', speed: '9', marquee: 'loca', deco: 'si' };
+    const zx = bare('tpl-zocalo', 'fx'); zx.theme.fx = { entry: 'x}body{', reveal: '1', tap: '<b>', speed: '9', marquee: 'loca', deco: 'si' };
     ok(css(zx) === base, 'valores desconocidos de movimiento no escriben nada');
     // Quieto o «reducir movimiento»: nada
     const off = TPL('tpl-zocalo'); off.theme.motion = 'off'; const offBase = css(off);
@@ -923,7 +925,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const R = (a, z) => { const p = L(a), q = L(z); return (Math.max(p, q) + 0.05) / (Math.min(p, q) + 0.05); };
     const M = ctx.breakApp(null, null, null, { meta: true });
     ok(typeof M.darkOf === 'function' && typeof M.genDark === 'function' && M.darkOf({ colors: {} }) === null, 'el estudio puede calcular la paleta de noche');
-    const z = TPL('tpl-zocalo');
+    const z = bare('tpl-zocalo', 'dark');
     ok(!/prefers-color-scheme:dark\)\{:root/.test(css(z)) && !/data-scheme/.test(css(z)), 'sin modo oscuro no se escribe nada de noche');
     z.theme.dark = { mode: 'auto' };
     const x = css(z), d = M.darkOf(z.theme);
@@ -935,7 +937,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(!!tl && !!td && td.getAttribute('content') === d.bg && tl.getAttribute('content') === z.theme.colors.bg, 'color de la barra del navegador de día y de noche');
     A.rt.setScheme('dark'); eq(A.d.documentElement.getAttribute('data-scheme'), 'dark', 'la vista previa puede pedir la noche');
     A.rt.setScheme(''); ok(!A.d.documentElement.hasAttribute('data-scheme'), 'y volver a seguir al celular');
-    A.rt.update(TPL('tpl-zocalo'));
+    A.rt.update(bare('tpl-zocalo', 'dark'));
     ok(!A.$('meta[name="theme-color"][media*="dark"]') && !A.$('meta[name="theme-color"]').hasAttribute('media'), 'al quitar el modo oscuro queda un solo color de barra');
     A.close();
     // Colores cambiados a mano encima de los generados; los inválidos no se usan
@@ -978,6 +980,32 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(!A.$('script') && A.d.getElementById('bk-css').textContent.endsWith(c), 'la app usa el CSS limpio');
     A.close();
     ok(M.cleanCSS('   ') === '' && M.cleanCSS(null) === '' && M.cleanCSS('a'.repeat(30000)).length === 20000, 'CSS vacío o demasiado largo');
+  }
+
+  /* 11u. Las apps de ejemplo muestran lo nuevo */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const M = ctx.breakApp(null, null, null, { meta: true });
+    const sec = (A, id) => A.$('section[data-mid="' + id + '"]');
+    const has = (id, check) => { const B = mount(TPL(id), NOW); const r = check(B); B.close(); return r; };
+    let A = mount(TPL('tpl-zocalo'), NOW);
+    ok(sec(A, 'horario').classList.contains('sb-invertido') && sec(A, 'horario').classList.contains('sa-centro') && sec(A, 'horario').querySelector('.sh-k').textContent === 'Te esperamos', 'Casa Zócalo: horario invertido, centrado y con antetítulo');
+    ok(!!A.$('.events.tl') && A.$$('.quotes.qbig .quote').length === 2 && sec(A, 'contacto').classList.contains('sb-acento') && !!A.$('.contact.clg'), 'Casa Zócalo: agenda en línea, reseñas destacadas y contacto con botones de acento');
+    ok(!!A.$('.carta-body.lay-tarjetas') && /#bk \.carta-body\.lay-tarjetas \.media\{[^}]*border-radius:50%/.test(A.d.getElementById('bk-css').textContent), 'Casa Zócalo: fotos de la carta en círculo');
+    A.close();
+    A = mount(TPL('tpl-zocalo'), { now: NOW.now, lang: 'en-US' });
+    ok(sec(A, 'horario').querySelector('.sh-k').textContent === 'Come visit us' && /grandma/.test(A.$('.quotes').textContent), 'Casa Zócalo en inglés: antetítulo y citas traducidas');
+    A.close();
+    ok(has('tpl-araucaria', B => !!B.$('.feat-cuadricula') && sec(B, 'resenas').classList.contains('sb-invertido') && !!B.$('.hours.hc') && sec(B, 'horario').classList.contains('sb-tinte')), 'Araucaria: destacados en cuadrícula, reseñas invertidas y horario compacto con tinte');
+    ok(has('tpl-antojo', B => !!B.$('.rail.promo-rail') && sec(B, 'promos').classList.contains('sb-acento') && !!B.$('.feat-lista') && sec(B, 'contacto').classList.contains('sb-invertido') && !!B.$('.contact.clg') && !!B.$('.hours.hc') && !!B.$('.fab')), 'Antojo: promos en carrusel de acento, destacados en lista, contacto invertido y el pedido de siempre');
+    ok(has('tpl-espiga', B => !!B.$('.feat-lista') && sec(B, 'top').classList.contains('sb-tinte') && sec(B, 'promos').classList.contains('sb-invertido') && !!B.$('.hours.hc')), 'La Espiga: destacados con tinte, promos invertidas y horario compacto');
+    ok(has('tpl-neblina', B => !!B.$('.events.tl') && sec(B, 'agenda').classList.contains('sb-superficie') && !!B.$('.quotes.qbig') && !!B.$('.hours.hc')), 'Neblina: agenda en línea, reseñas destacadas y horario compacto');
+    ok(has('tpl-alisos', B => !!B.$('.quotes.qbig') && sec(B, 'contacto').classList.contains('sb-acento') && !!B.$('.hours.hc')), 'Los Alisos: reseñas destacadas, horario compacto y contacto de acento');
+    ok(has('tpl-esquina', B => !!B.$('.rail.promo-rail') && !!B.$('.feat-cuadricula') && !!B.$('.contact.clg') && sec(B, 'horario').classList.contains('sb-acento')), 'La Esquina: promos en carrusel, destacados en cuadrícula y horario de acento');
+    eq(ctx.TEMPLATES.filter(t => M.darkOf(t.theme)).map(t => t.id).join(','), 'tpl-antojo,tpl-zocalo,tpl-espiga,tpl-neblina,tpl-alisos', 'paleta de noche en las apps de paleta clara');
+    ok(ctx.TEMPLATES.every(t => t.theme.fx && t.theme.fx.reveal), 'todas las apps de ejemplo aparecen al bajar');
+    ok(ctx.TEMPLATES.every(t => t.modules.filter(m => m.type === 'resenas').every(m => m.s.quotes.length === 2 && !m.s.rating)), 'reseñas con dos citas y sin calificación inventada');
+    ok(ctx.TEMPLATES.every(t => !t.theme.nav && !t.theme.css && !t.theme.roles && !t.theme.shape && !t.theme.type), 'las apps de ejemplo no cambian navegación, colores por elemento, formas, letra ni CSS propio');
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */
@@ -1195,7 +1223,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   eq(ST.S.cur.theme.fonts.display, 'Alfa Slab One', 'aplica la tipografía de la estética');
   eq(ST.S.cur.theme.icons, 'linea', 'la cultural trae íconos de línea');
   eq(ST.S.cur.modules.find(m => m.type === 'carta').s.layout, 'tarjetas', 'aplica el diseño de carta de la estética');
-  eq($$('.pal').length, 5, 'cinco paletas para la estética');
+  eq($$('[data-a="pal"]').length, 5, 'cinco paletas para la estética');
   click($('[data-a="pal"][data-i="2"]'));
   eq(ST.S.cur.theme.colors.bg, '#2A1E17', 'aplica la paleta');
   eq($$('.tex').length, ctx.TEXTURES.length, 'muestras de todas las texturas');

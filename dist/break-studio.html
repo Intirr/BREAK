@@ -3782,7 +3782,8 @@ const TEMPLATES = [
     theme: {
       skin: 'elegante',
       colors: { bg: '#111412', surface: '#191D1A', ink: '#EDE7DA', muted: '#A3A89D', accent: '#C8A46A', accent2: '#7FA088', accent3: '#8E6F4E' },
-      fonts: { display: 'Bodoni Moda', body: 'Jost' }, radius: 2, motion: 'suave', texture: 'grano', icons: 'linea'
+      fonts: { display: 'Bodoni Moda', body: 'Jost' }, radius: 2, motion: 'suave', texture: 'grano', icons: 'linea',
+      fx: { reveal: 'aparecer' }
     },
     menu: {
       categories: [
@@ -3824,12 +3825,15 @@ const TEMPLATES = [
     modules: [
       { id: 'hero', type: 'hero', on: true, s: { kicker: 'Santa Rosa de Cabal · Risaralda', title: '', subtitle: 'Cocina de montaña con producto de la región.', cta1: 'reservas', cta2: 'carta', showStatus: true, ribbon: '' } },
       { id: 'historia', type: 'historia', on: true, s: { title: 'La casa', kicker: '', year: '2019', text: 'Cocinamos con lo que da la cordillera: trucha de aguas frías, hongos de los bosques de pino, maíz, panela y el chorizo que hizo famosa a Santa Rosa.\n\nCada plato empieza en una conversación con los productores de las veredas cercanas. La carta cambia con la cosecha.', signature: 'La cocina de Araucaria' } },
-      { id: 'chef', type: 'destacados', on: true, s: { title: 'Recomendación del chef', tag: 'chef', max: 4 } },
+      { id: 'chef', type: 'destacados', on: true, s: { title: 'Recomendación del chef', tag: 'chef', max: 4, layout: 'cuadricula' } },
       { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'lista', priceStyle: 'short', showFilters: true, showSearch: false, footnote: 'Precios en miles de pesos colombianos. Impuesto al consumo incluido. La propina es voluntaria; sugerimos el 10 %.' } },
       { id: 'degusta', type: 'libre', on: true, s: { kicker: 'Jueves a sábado', title: 'Menú degustación', text: 'Cinco tiempos que recorren la montaña, del páramo al cafetal.\n\n$185.000 por persona · maridaje opcional de $95.000.', style: 'destacado', btnLabel: 'Reservar la degustación', btnTarget: 'reservas', url: '', waText: '' } },
       { id: 'reservas', type: 'reservas', on: true, s: { title: 'Reserve su mesa', text: 'Recibimos grupos de hasta diez personas. Para eventos privados, escríbanos.', slots: '12:30, 13:30, 19:00, 20:00, 21:00', maxPeople: 10, occasions: 'Cena, Aniversario, Cumpleaños, Negocios', note: 'Confirmamos su reserva por WhatsApp.' } },
-      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Nos acompañó?', text: 'Su opinión nos ayuda a crecer. Déjenos una reseña o escríbanos directamente.', rating: '', quotes: [] } },
-      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Lunes cerrado, excepto festivos.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Nos acompañó?', text: 'Su opinión nos ayuda a crecer. Déjenos una reseña o escríbanos directamente.', rating: '', layout: 'destacada', _bg: 'invertido', quotes: [
+          { text: 'Una cena para recordar: cada plato llega con su historia y el servicio es impecable.', author: 'Camila R.' },
+          { text: 'El chorizo curado en casa vale el viaje desde Pereira.', author: 'Andrés M.' }
+        ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Lunes cerrado, excepto festivos.', layout: 'compacto', _bg: 'tinte' } },
       { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', text: '' } },
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
@@ -3851,7 +3855,8 @@ const TEMPLATES = [
     theme: {
       skin: 'animado',
       colors: { bg: '#FFE36E', surface: '#FFFDF6', ink: '#1D1A1B', muted: '#5E5646', accent: '#FF5A36', accent2: '#2EBFA5', accent3: '#FF9BC8' },
-      fonts: { display: 'Lilita One', body: 'Nunito' }, radius: 18, motion: 'vivo', texture: 'puntos', icons: 'emoji'
+      fonts: { display: 'Lilita One', body: 'Nunito' }, radius: 18, motion: 'vivo', texture: 'puntos', icons: 'emoji',
+      fx: { reveal: 'zoom', tap: 'rebote' }, dark: { mode: 'auto' }
     },
     menu: {
       categories: [
@@ -3887,7 +3892,7 @@ const TEMPLATES = [
     },
     modules: [
       { id: 'hero', type: 'hero', on: true, s: { kicker: 'Santa Rosa de Cabal', title: '', subtitle: 'Malteadas, waffles y arepas rellenas. Pide desde tu mesa o a domicilio.', cta1: 'carta', cta2: 'sellos', showStatus: true, ribbon: 'Malteadas, Waffles, Arepas rellenas, Café helado, Papas locas' } },
-      { id: 'promos', type: 'promos', on: true, s: { title: 'Promos de la semana', highlightToday: true, items: [
+      { id: 'promos', type: 'promos', on: true, s: { title: 'Promos de la semana', highlightToday: true, layout: 'carrusel', _bg: 'acento', items: [
         { days: [1], title: 'Lunes de waffle', desc: 'Waffle de arequipe y queso con tinto.', price: 15900 },
         { days: [2], title: 'Martes 2×1 en malteadas', desc: 'De 3:00 a 6:00 p. m., en todos los sabores.', price: 0 },
         { days: [3], title: 'Miércoles de arepa', desc: 'Cualquier arepa rellena con limonada.', price: 18900 },
@@ -3895,15 +3900,15 @@ const TEMPLATES = [
         { days: [5, 6], title: 'Fin de semana dulce', desc: 'Topping gratis en cualquier waffle.', price: 0 },
         { days: [0], title: 'Domingo en familia', desc: 'Cuatro malteadas del sabor que quieran.', price: 54900 }
       ] } },
-      { id: 'top', type: 'destacados', on: true, s: { title: 'Lo más pedido', tag: 'popular', max: 6 } },
+      { id: 'top', type: 'destacados', on: true, s: { title: 'Lo más pedido', tag: 'popular', max: 6, layout: 'lista' } },
       { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'cuadricula', priceStyle: 'full', showFilters: true, showSearch: true, footnote: 'Todos los precios incluyen impuestos.' } },
       { id: 'ruleta', type: 'ruleta', on: true, s: { title: '¿No sabes qué pedir?', text: 'Gira la ruleta y que decida el antojo.', mode: 'carta', category: '', options: [], oncePerDay: false } },
       { id: 'sellos', type: 'sellos', on: true, s: { title: 'Tu tarjeta de sellos', goal: 8, reward: 'La malteada número 9 va por la casa', icon: '🥤', pin: '2468', note: 'En cada compra, pídele a quien te atiende que selle tu tarjeta.' } },
       { id: 'pedido', type: 'pedido', on: true, s: { title: 'Cómo pedir', showSection: true, modes: { mesa: true, llevar: true, domicilio: true }, deliveryFee: 3000, minOrder: 15000, deliveryNote: 'Domicilios en el casco urbano de Santa Rosa.', payments: 'Efectivo, Nequi, Daviplata, Tarjeta', intro: '' } },
       { id: 'wifi', type: 'wifi', on: true, s: { title: 'Wi-Fi gratis', network: 'Antojo_Clientes', password: 'malteada2026' } },
-      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos abrimos de 10:00 a. m. a 8:00 p. m.' } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos abrimos de 10:00 a. m. a 8:00 p. m.', layout: 'compacto' } },
       { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
-      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Síguenos' } }
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Síguenos', layout: 'botones', _bg: 'invertido' } }
     ],
     meta: { credit: true }
   },
@@ -3923,7 +3928,8 @@ const TEMPLATES = [
     theme: {
       skin: 'cultural',
       colors: { bg: '#F9F8F4', surface: '#FFFFFF', ink: '#2B2320', muted: '#6E625B', accent: '#C2362A', accent2: '#2E6B4F', accent3: '#2B5C9E' },
-      fonts: { display: 'Alfa Slab One', body: 'Alegreya Sans' }, radius: 6, motion: 'suave', texture: 'none', icons: 'linea'
+      fonts: { display: 'Alfa Slab One', body: 'Alegreya Sans' }, radius: 6, motion: 'suave', texture: 'none', icons: 'linea',
+      carta: { shape: 'circulo', pos: 'der', desc: '2', tags: 'punto' }, fx: { reveal: 'subir' }, dark: { mode: 'auto' }
     },
     menu: {
       categories: [
@@ -4011,15 +4017,18 @@ const TEMPLATES = [
         { q: '¿Por qué comida es famosa Santa Rosa de Cabal?', q_en: 'What food is Santa Rosa de Cabal famous for?', a1: 'La lechona', a1_en: 'Lechona', a2: 'El chorizo', a2_en: 'Chorizo sausage', a3: 'El ajiaco', a3_en: 'Ajiaco soup', correct: 2, fact: 'El chorizo santarrosano es uno de los sabores más conocidos de Risaralda.', fact_en: 'Santa Rosa chorizo is one of Risaralda’s best-known flavors.' },
         { q: 'En el Eje Cafetero, ¿qué es un «yipao»?', q_en: 'In the Coffee Region, what is a “yipao”?', a1: 'Un baile típico', a1_en: 'A folk dance', a2: 'Un postre de maíz', a2_en: 'A corn dessert', a3: 'Un jeep Willys cargado hasta el techo', a3_en: 'A Willys jeep loaded to the roof', correct: 3, fact: 'Los jeeps Willys llegaron a la región a mediados del siglo XX y todavía suben a las veredas.', fact_en: 'Willys jeeps arrived in the mid-20th century and still climb up to the farms.' }
       ] } },
-      { id: 'agenda', type: 'eventos', on: true, s: { title: 'En la casa', title_en: 'At the house', items: [
+      { id: 'agenda', type: 'eventos', on: true, s: { title: 'En la casa', title_en: 'At the house', layout: 'linea', items: [
         { when: 'Viernes · 7:00 p. m.', when_en: 'Fridays · 7:00 p.m.', title: 'Noche de música de cuerda', title_en: 'String music night', desc: 'Trío de bambucos y pasillos en vivo. Entrada libre.', desc_en: 'A live trio plays bambucos and pasillos. Free entry.', rsvp: false },
         { when: 'Sábados · 10:00 a. m.', when_en: 'Saturdays · 10:00 a.m.', title: 'Taller de arepas', title_en: 'Arepa workshop', desc: 'Amase, rellene y ase su propia arepa en el fogón de leña. Cupos limitados.', desc_en: 'Knead, fill and grill your own arepa over the wood fire. Limited spots.', rsvp: true },
         { when: 'Domingos · desde las 11:00 a. m.', when_en: 'Sundays · from 11:00 a.m.', title: 'Sancocho de olla grande', title_en: 'Big-pot sancocho', desc: 'Hasta que se acabe.', desc_en: 'Until it runs out.', rsvp: false }
       ] } },
-      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Le gustó la visita?', title_en: 'Enjoyed your visit?', text: 'Su reseña ayuda a que otros viajeros encuentren la casa.', text_en: 'Your review helps other travelers find the house.', rating: '', quotes: [] } },
-      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', title_en: 'Opening hours', note: 'Festivos abrimos con horario de domingo.', note_en: 'Public holidays: Sunday hours.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Le gustó la visita?', title_en: 'Enjoyed your visit?', text: 'Su reseña ayuda a que otros viajeros encuentren la casa.', text_en: 'Your review helps other travelers find the house.', rating: '', layout: 'destacada', quotes: [
+          { text: 'El sancocho sabe a domingo en casa de la abuela.', text_en: 'The sancocho tastes like Sunday at grandma’s house.', author: 'Luz Marina' },
+          { text: 'Fogón de leña, música de cuerda y una atención de las de antes.', text_en: 'Wood-fired stove, string music and old-fashioned hospitality.', author: 'Jorge P.' }
+        ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', title_en: 'Opening hours', kicker: 'Te esperamos', kicker_en: 'Come visit us', _bg: 'invertido', _align: 'centro', note: 'Festivos abrimos con horario de domingo.', note_en: 'Public holidays: Sunday hours.' } },
       { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', title_en: 'How to get here', text: '' } },
-      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact' } }
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact', layout: 'botones', _bg: 'acento' } }
     ],
     meta: { credit: true }
   },
@@ -4039,7 +4048,8 @@ const TEMPLATES = [
     theme: {
       skin: 'natural',
       colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' },
-      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel', icons: 'linea', textSize: 'grande'
+      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'papel', icons: 'linea', textSize: 'grande',
+      fx: { reveal: 'subir' }, dark: { mode: 'auto' }
     },
     menu: {
       categories: [
@@ -4085,8 +4095,8 @@ const TEMPLATES = [
     modules: [
       { id: 'aviso', type: 'aviso', on: true, s: { text: 'Pan caliente a las 6:00 a. m. y a las 4:00 p. m.', icon: '🔥', style: 'suave', until: '', cta: 'carta' } },
       { id: 'hero', type: 'hero', on: true, s: { kicker: 'Santa Rosa de Cabal · desde 1986', title: '', subtitle: 'Pan de bono, almojábanas y tortas de la casa. Pida para llevar o a domicilio.', cta1: 'carta', cta2: 'pedido', showStatus: true, ribbon: 'Pan de bono, Almojábanas, Buñuelos, Tortas por encargo', img: '', veil: '60', align: 'auto', size: 'm' } },
-      { id: 'top', type: 'destacados', on: true, s: { title: 'Lo que más sale', tag: 'popular', max: 6 } },
-      { id: 'promos', type: 'promos', on: true, s: { title: 'Promos de la semana', highlightToday: true, items: [
+      { id: 'top', type: 'destacados', on: true, s: { title: 'Lo que más sale', tag: 'popular', max: 6, layout: 'lista', _bg: 'tinte' } },
+      { id: 'promos', type: 'promos', on: true, s: { title: 'Promos de la semana', highlightToday: true, _bg: 'invertido', items: [
         { days: [1, 2, 3, 4, 5], title: 'Tinto y pan de bono', desc: 'De lunes a viernes, de 6:00 a 9:00 a. m.', price: 3200 },
         { days: [6], title: 'Sábado de pan blandito', desc: 'Diez panes blanditos para el desayuno de la familia.', price: 9000 },
         { days: [0], title: 'Domingo de chocolate', desc: 'Chocolate con queso y almojábana.', price: 8000 }
@@ -4106,7 +4116,7 @@ const TEMPLATES = [
         { q: '¿Hacen domicilios?', a: 'Sí, en el casco urbano de Santa Rosa, de 7:00 a. m. a 7:00 p. m. El domicilio vale $3.000.' },
         { q: '¿Tienen opciones sin lactosa?', a: 'La torta de zanahoria se hace sin lactosa y los jugos se pueden pedir en agua.' }
       ] } },
-      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 6:30 a. m. a 1:00 p. m.' } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 6:30 a. m. a 1:00 p. m.', layout: 'compacto' } },
       { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
@@ -4128,7 +4138,8 @@ const TEMPLATES = [
     theme: {
       skin: 'minimalista',
       colors: { bg: '#FAFAF8', surface: '#F0F0EC', ink: '#141413', muted: '#66655E', accent: '#2445D6', accent2: '#141413', accent3: '#C9C8C0' },
-      fonts: { display: 'Schibsted Grotesk', body: 'Instrument Sans' }, radius: 2, motion: 'suave', texture: 'none', icons: 'linea'
+      fonts: { display: 'Schibsted Grotesk', body: 'Instrument Sans' }, radius: 2, motion: 'suave', texture: 'none', icons: 'linea',
+      carta: { price: 'color', tags: 'contorno' }, fx: { reveal: 'aparecer' }, dark: { mode: 'auto' }
     },
     menu: {
       categories: [
@@ -4181,7 +4192,7 @@ const TEMPLATES = [
         { term: 'Cuerpo', def: 'Qué tan pesado o ligero se siente el café en la boca.' },
         { term: 'Tueste medio', def: 'El punto que usamos casi siempre: deja ver el origen sin amargor.' }
       ] } },
-      { id: 'agenda', type: 'eventos', on: true, s: { title: 'Agenda', items: [
+      { id: 'agenda', type: 'eventos', on: true, s: { title: 'Agenda', layout: 'linea', _bg: 'superficie', items: [
         { when: 'Sábados · 10:00 a. m.', title: 'Cata guiada', desc: 'Probamos tres cafés de Risaralda y aprendes a reconocer sus notas. Cupo para ocho personas.', rsvp: true },
         { when: 'Domingos · 3:00 p. m.', title: 'Taller de métodos en casa', desc: 'V60, prensa y AeroPress: cómo preparar buen café sin máquina.', rsvp: true }
       ] } },
@@ -4199,8 +4210,11 @@ const TEMPLATES = [
         { q: '¿Tienen leche vegetal?', a: 'De avena y de almendras, por $1.500 más.' },
         { q: '¿Puedo trabajar con el portátil?', a: 'Claro: hay Wi-Fi y enchufes en la barra larga. Los fines de semana, después de las 11:00 a. m., te pedimos compartir la mesa si hay fila.' }
       ] } },
-      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Cómo estuvo tu café?', text: 'Tu reseña ayuda a que más gente descubra el café de la región.', rating: '', quotes: [] } },
-      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Lunes cerrado. Festivos, de 9:00 a. m. a 6:00 p. m.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Cómo estuvo tu café?', text: 'Tu reseña ayuda a que más gente descubra el café de la región.', rating: '', layout: 'destacada', quotes: [
+          { text: 'El mejor filtrado de la región, y te explican cada finca con paciencia.', author: 'Valentina G.' },
+          { text: 'La cata de los sábados es el plan perfecto.', author: 'Sebastián O.' }
+        ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Lunes cerrado. Festivos, de 9:00 a. m. a 6:00 p. m.', layout: 'compacto' } },
       { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
@@ -4222,7 +4236,8 @@ const TEMPLATES = [
     theme: {
       skin: 'natural',
       colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4E6E4D', accent2: '#9A4E2A', accent3: '#C9A04A' },
-      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'hojas', icons: 'linea'
+      fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'hojas', icons: 'linea',
+      carta: { size: 's', pos: 'der', price: 'pildora', cat: 'banda' }, fx: { reveal: 'subir' }, dark: { mode: 'auto' }
     },
     menu: {
       categories: [
@@ -4283,10 +4298,13 @@ const TEMPLATES = [
         { q: '¿Aceptan mascotas?', q_en: 'Are pets allowed?', a: 'Sí, en la terraza y con correa.', a_en: 'Yes, on the terrace and on a leash.' },
         { q: '¿Tienen platos sin trucha?', q_en: 'Do you have dishes without trout?', a: 'Sí: chorizo, picada campestre, patacones y crema de ahuyama.', a_en: 'Yes: chorizo, the country platter, patacones and pumpkin soup.' }
       ] } },
-      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Le gustó la visita?', title_en: 'Did you enjoy your visit?', text: 'Su reseña ayuda a que otros viajeros nos encuentren camino a los termales.', text_en: 'Your review helps other travelers find us on the way to the hot springs.', rating: '', quotes: [] } },
-      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', title_en: 'Opening hours', note: 'Festivos, de 10:00 a. m. a 7:00 p. m.', note_en: 'Public holidays: 10:00 a.m. to 7:00 p.m.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Le gustó la visita?', title_en: 'Did you enjoy your visit?', text: 'Su reseña ayuda a que otros viajeros nos encuentren camino a los termales.', text_en: 'Your review helps other travelers find us on the way to the hot springs.', rating: '', layout: 'destacada', quotes: [
+          { text: 'La trucha al ajillo, fresca y en su punto. Parada obligada camino a los termales.', text_en: 'The garlic trout, fresh and just right. A must-stop on the way to the hot springs.', author: 'Diana C.' },
+          { text: 'Los niños felices en la zona infantil y nosotros tranquilos junto al fogón.', text_en: 'The kids loved the play area while we relaxed by the wood stove.', author: 'Mauricio L.' }
+        ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', title_en: 'Opening hours', note: 'Festivos, de 10:00 a. m. a 7:00 p. m.', note_en: 'Public holidays: 10:00 a.m. to 7:00 p.m.', layout: 'compacto' } },
       { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', title_en: 'How to get here', text: '' } },
-      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact' } }
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact', _bg: 'acento' } }
     ],
     meta: { credit: true }
   },
@@ -4306,7 +4324,8 @@ const TEMPLATES = [
     theme: {
       skin: 'nocturna',
       colors: { bg: '#0E0B16', surface: '#181427', ink: '#F4F1FF', muted: '#A9A3C4', accent: '#FF4F9A', accent2: '#2EE6C8', accent3: '#FFC247' },
-      fonts: { display: 'Tilt Neon', body: 'Barlow' }, radius: 12, motion: 'vivo', texture: 'none', icons: 'emoji'
+      fonts: { display: 'Tilt Neon', body: 'Barlow' }, radius: 12, motion: 'vivo', texture: 'none', icons: 'emoji',
+      carta: { cat: 'centrado' }, fx: { reveal: 'zoom', tap: 'brillo' }
     },
     menu: {
       categories: [
@@ -4344,22 +4363,25 @@ const TEMPLATES = [
     modules: [
       { id: 'aviso', type: 'aviso', on: true, s: { text: 'Martes y miércoles: domicilio gratis en el casco urbano.', icon: '🛵', style: 'acento', until: '', cta: 'pedido' } },
       { id: 'hero', type: 'hero', on: true, s: { kicker: 'Santa Rosa de Cabal', title: '', subtitle: 'Hamburguesas al carbón, perros, salchipapas y picadas. Pide en la mesa o a domicilio.', cta1: 'carta', cta2: 'pedido', showStatus: true, ribbon: 'Hamburguesas al carbón, Perros, Salchipapas, Picadas, Domicilios', img: '', veil: '60', align: 'auto', size: 'm' } },
-      { id: 'promos', type: 'promos', on: true, s: { title: 'Promos de la semana', highlightToday: true, items: [
+      { id: 'promos', type: 'promos', on: true, s: { title: 'Promos de la semana', highlightToday: true, layout: 'carrusel', items: [
         { days: [2], title: 'Martes de perros 2×1', desc: 'En perro americano y ranchero, toda la noche.', price: 0 },
         { days: [3], title: 'Miércoles de salchipapa', desc: 'Salchipapa de la casa con dos gaseosas.', price: 26900 },
         { days: [4], title: 'Jueves de parche', desc: 'Picada para dos con dos cervezas nacionales.', price: 49900 },
         { days: [5, 6], title: 'Abierto hasta las 2:00 a. m.', desc: 'Cocina y domicilios hasta la 1:30 a. m.', price: 0 },
         { days: [0], title: 'Domingo en familia', desc: 'Cuatro hamburguesas clásicas con papas.', price: 69900 }
       ] } },
-      { id: 'casa', type: 'destacados', on: true, s: { title: 'Las de la casa', tag: 'chef', max: 4 } },
+      { id: 'casa', type: 'destacados', on: true, s: { title: 'Las de la casa', tag: 'chef', max: 4, layout: 'cuadricula' } },
       { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'fotos', priceStyle: 'full', showFilters: true, showSearch: true, footnote: 'Todos los precios incluyen impuestos.' } },
       { id: 'ruleta', type: 'ruleta', on: true, s: { title: 'Gira y gana', text: 'Un giro al día por celular. Muéstrale el premio a quien te atiende.', mode: 'premios', category: '', options: [{ label: 'Papas gratis' }, { label: 'Gaseosa gratis' }, { label: '10 % de descuento' }, { label: 'Sigue intentando' }, { label: 'Malteada a mitad de precio' }], oncePerDay: true } },
       { id: 'pedido', type: 'pedido', on: true, s: { title: 'Cómo pedir', showSection: true, modes: { mesa: true, llevar: true, domicilio: true }, deliveryFee: 4000, minOrder: 20000, deliveryNote: 'Domicilios en el casco urbano; viernes y sábado hasta la 1:30 a. m.', payments: 'Efectivo, Nequi, Daviplata, Tarjeta', intro: '' } },
       { id: 'servicios', type: 'servicios', on: true, s: { title: 'Servicios', list: ['domicilios', 'tarjeta', 'transferencia', 'wifi', 'musica'], extra: 'Pantalla para partidos', note: '' } },
-      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Qué tal estuvo?', text: 'Cuéntanos en Google o por WhatsApp. Leemos todo.', rating: '', quotes: [] } },
-      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Lunes cerrado. Festivos, de 5:00 p. m. a 12:00 a. m.' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Qué tal estuvo?', text: 'Cuéntanos en Google o por WhatsApp. Leemos todo.', rating: '', layout: 'destacada', quotes: [
+          { text: 'La salchipapa de la una de la mañana me salvó la noche.', author: 'Kevin A.' },
+          { text: 'El domicilio llegó rapidísimo y la hamburguesa todavía caliente.', author: 'Paola T.' }
+        ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Lunes cerrado. Festivos, de 5:00 p. m. a 12:00 a. m.', layout: 'compacto', _bg: 'acento' } },
       { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
-      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Síguenos' } }
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Síguenos', layout: 'botones' } }
     ],
     meta: { credit: true }
   }
