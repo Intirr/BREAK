@@ -957,6 +957,29 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(x3.includes('html:not([data-scheme="light"])[data-tex="hojas"] body{') && x3.includes('html[data-scheme="dark"][data-tex="hojas"] body{'), 'la textura de hojas con los colores de noche');
   }
 
+  /* 11t. CSS propio */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    const css = (cfg, o) => { const A = mount(cfg, Object.assign({}, NOW, o)); const x = A.d.getElementById('bk-css').textContent; A.close(); return x; };
+    const z = TPL('tpl-zocalo');
+    ok(!/CSS propio/.test(css(z)), 'sin CSS propio no se agrega nada');
+    z.theme.css = '#bk .sh-t{color:#c00}';
+    let x = css(z);
+    ok(x.endsWith('\n/* CSS propio */\n#bk .sh-t{color:#c00}') && !/^@layer/.test(x), 'el CSS propio va de último');
+    x = css(z, { setup: w => { w.CSSLayerBlockRule = function () {}; } });
+    ok(/^@layer break\{/.test(x) && x.endsWith('}\n/* CSS propio */\n#bk .sh-t{color:#c00}'), 'con @layer, lo demás va en una capa para que el CSS propio gane');
+    const M = ctx.breakApp(null, null, null, { meta: true });
+    const bad = '@import url(https://x.com/a.css); .a{background:url(javascript:alert(1))} .b{background:url( "https://ok.com/a.png" )} .c{background:url(http://x.com/b.png)} </style><script>alert(1)</script> .d{width:expression(alert(1))} .e{background:\\75 rl(data:text/html,x)} .f{background:image-set("https://x.com/c.png" 1x)} .g{background:url(data:image/png;base64,AAAA)}';
+    const c = M.cleanCSS(bad);
+    ok(!/@import|javascript|expression|<|\\|http:\/\/|image-set|url\(\s*["']?data:text/.test(c), 'el CSS propio se limpia: ' + c);
+    ok(c.includes('.b{background:url("https://ok.com/a.png")}') && c.includes('.g{background:url("data:image/png;base64,AAAA")}') && c.includes('.c{background:none}'), 'solo quedan imágenes https o data:image');
+    z.theme.css = bad;
+    A = mount(z, NOW);
+    ok(!A.$('script') && A.d.getElementById('bk-css').textContent.endsWith(c), 'la app usa el CSS limpio');
+    A.close();
+    ok(M.cleanCSS('   ') === '' && M.cleanCSS(null) === '' && M.cleanCSS('a'.repeat(30000)).length === 20000, 'CSS vacío o demasiado largo');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
@@ -1223,7 +1246,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   eq(w.localStorage.getItem('break.studio.adv'), 'true', 'y lo recuerda en el navegador');
   eq($('[data-a="adv"]').getAttribute('aria-checked'), 'true', 'el interruptor queda encendido');
   eq($$('.subnav [data-a="sub"]').length, ctx.STYLE.filter(g => g.cards.length).length, 'modo avanzado: una sección por grupo');
-  eq($$('.editor section[data-card]').length, 1, 'modo avanzado: solo se ve la sección abierta');
+  eq($$('.editor section[data-card]').length, ctx.STYLE[0].cards.length, 'modo avanzado: solo se ven las tarjetas de la sección abierta');
   click($('[data-a="sub"][data-g="color"]'));
   ok(!!d.getElementById('h-accent') && !$('.skins') && $('[data-a="sub"][data-g="color"]').getAttribute('aria-selected') === 'true', 'cambia a la sección Color');
   click($('[data-a="adv"]'));
@@ -1331,6 +1354,50 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   click($('[data-a="style-reset"][data-card="oscuro"]'));
   await sleep(220);
   ok(!ST.S.cur.theme.dark && !$('#stageTop [data-a="pv-scheme"]'), 'restablecer quita el modo oscuro');
+  // Estilo: mis estilos
+  ok(!!$('section[data-card="misestilos"] [data-a="my-save"]') && /Todavía no tienes estilos/.test($('section[data-card="misestilos"]').textContent), 'mis estilos en el modo sencillo, vacío al empezar');
+  const myTheme = JSON.stringify(ST.S.cur.theme), myLay = (ST.S.cur.modules.find(m => m.type === 'carta') || { s: {} }).s.layout;
+  click($('[data-a="my-save"]'));
+  setVal(d.getElementById('my-name'), 'Fonda roja');
+  click($('[data-a="my-save-ok"]'));
+  await sleep(40);
+  const msd = docs.get('mis-estilos');
+  ok(!!msd && msd.kind === 'break-estilos' && msd.items.length === 1 && msd.items[0].name === 'Fonda roja' && msd.items[0].carta === myLay, 'guarda el estilo con nombre en la cuenta, con el diseño de la carta');
+  ok(!ST.S.apps.some(a => a.id === 'mis-estilos') && !!$('section[data-card="misestilos"] .mys'), 'el documento de estilos no es una app y el estilo aparece en la lista');
+  click($('[data-a="my-copy"]'));
+  ok($$('[data-a="my-copy-from"][data-k="tpl"]').length === ctx.TEMPLATES.length, 'copiar de otra app ofrece las apps de ejemplo');
+  click($('[data-a="my-copy-from"][data-k="tpl"][data-id="tpl-antojo"]'));
+  click($('[data-a="confirm-yes"]'));
+  eq(ST.S.cur.theme.skin + ',' + ST.S.cur.modules.find(m => m.type === 'carta').s.layout, 'animado,cuadricula', 'copia el estilo y el diseño de la carta de otra app');
+  click($('[data-a="my-apply"]'));
+  click($('[data-a="confirm-yes"]'));
+  ok(JSON.stringify(ST.S.cur.theme) === myTheme && ST.S.cur.modules.find(m => m.type === 'carta').s.layout === myLay, 'aplicar un estilo guardado devuelve el diseño de antes');
+  click($('[data-a="my-export"]'));
+  await sleep(40);
+  const exp = saved[saved.length - 1];
+  ok(!!exp && /fonda-roja-estilo\.json$/.test(exp.filename) && JSON.parse(exp.data).format === 'break-estilo', 'descarga el estilo como .json');
+  ok(ST.importStyle(exp.data.replace('"Fonda roja"', '"Copia de fonda"')) && ST.my.items[0].name === 'Copia de fonda' && ST.my.items.length === 2, 'importa un estilo descargado');
+  ok(!ST.importStyle('{"format":"break-app"}') && ST.my.items.length === 2, 'no importa un archivo que no es un estilo');
+  await sleep(40);
+  click($('[data-a="my-del"]'));
+  click($('[data-a="confirm-yes"]'));
+  await sleep(40);
+  eq(docs.get('mis-estilos').items.map(x => x.name).join(','), 'Fonda roja', 'borra un estilo guardado');
+  // Estilo: CSS propio
+  click($('[data-a="adv"]'));
+  click($('[data-a="sub"][data-g="avanzado"]'));
+  const cssBox = d.getElementById('f-theme-css');
+  ok(!!cssBox && cssBox.tagName === 'TEXTAREA', 'CSS propio en Avanzado');
+  setVal(cssBox, '#bk .sh-t{letter-spacing:.3em}');
+  eq(ST.S.cur.theme.css, '#bk .sh-t{letter-spacing:.3em}', 'escribe el CSS propio');
+  ok($('#css-warn').hidden, 'sin avisos si todo se permite');
+  await sleep(220);
+  ok(/#bk \.sh-t\{letter-spacing:\.3em\}$/.test(ST.pv.frame.contentDocument.getElementById('bk-css').textContent), 'la vista previa usa el CSS propio');
+  setVal(cssBox, '@import url(https://x.com/a.css); #bk .sh-t{color:red}');
+  ok(!$('#css-warn').hidden, 'avisa cuando se quitó algo');
+  click($('[data-a="style-reset"][data-card="cssprop"]'));
+  ok(!ST.S.cur.theme.css, 'restablecer quita el CSS propio');
+  click($('[data-a="adv"]'));
   // Estilo: formas avanzadas
   click($('[data-a="adv"]'));
   click($('[data-a="sub"][data-g="formas"]'));
@@ -1491,7 +1558,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(h && !/<\/script>[\s\S]*<\/script>/.test(h.data.replace(/<script>[\s\S]*?<\/script>/, '')), 'el .html tiene un solo bloque de script');
   click($('[data-a="exp-json"]'));
   await sleep(60);
-  const j = saved.find(s => s.filename.endsWith('.json'));
+  const j = saved.find(s => s.filename.endsWith('-break.json'));
   ok(j && JSON.parse(j.data).format === 'break-app' && JSON.parse(j.data).app.brand.name === 'Antojo Centro', 'descarga la configuración .json');
   ok(j && /^data:image\/webp;base64,/.test(JSON.parse(j.data).app.modules[0].s.img), 'el .json también lleva las fotos');
   click($('[data-a="exp-zip"]'));

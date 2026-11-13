@@ -316,6 +316,14 @@ input[type="range"]{width:100%;accent-color:var(--carbon)}
 .dths .dth-a .hero-in{position:absolute;inset:0}
 .dths .dth-a .cth{position:absolute;inset:0;width:100%;height:100%}
 .fx-rp{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:14px}
+.mystyles{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.mys{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--rule);border-radius:12px;background:var(--sheet)}
+.mys .sws{flex:none}
+.mys-m{flex:1;min-width:0;display:grid;gap:1px}
+.mys-m b{font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mys-m small{font-size:12px;color:var(--ink2)}
+.mys-a{display:flex;align-items:center;gap:6px;flex:none}
+.in.code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.5;white-space:pre;overflow:auto;tab-size:2;min-height:200px}
 .fx-rp .help{margin:0}
 .cth .s{fill:var(--surface)}
 .cth .p{fill:color-mix(in srgb,var(--accent) 45%,var(--bg))}
@@ -1733,7 +1741,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   /* El estudio pide las constantes del motor (tipografías, estéticas, íconos…) para no repetirlas en su catálogo. */
   if (opts.meta) return { fonts: FONTS, skins: Object.keys(CSS_SKIN), tags: TAG_ORDER, icons: ICONS, iconSets: ICON_SETS, emoIcon: EMO_ICON, iconOf: emoIcon, glyph: glyphOf,
-    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview, darkOf: darkOf, genDark: genDark };
+    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview, darkOf: darkOf, genDark: genDark, cleanCSS: cleanCSS };
 
   /* ---------- Estado ---------- */
   let cfg = normalize(initialCfg);
@@ -3285,6 +3293,26 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   const FX_KF = { subir: ['rise', 0.8, 'cubic-bezier(.2,.7,.2,1)'], aparecer: ['fadein', 0.9, 'ease'], zoom: ['zoomin', 0.7, 'cubic-bezier(.2,1,.3,1)'], lado: ['slidein', 0.75, 'cubic-bezier(.2,.7,.2,1)'] };
   const FX_MARQ = { lenta: 42, normal: 24, rapida: 13 };
 
+  /* CSS propio: sin @import, sin escapes que disfracen palabras, sin «<», sin javascript: ni expression(), y solo
+     imágenes https o data:image. Pura: el estudio la usa vía opts.meta para avisar qué se quitó. */
+  function cleanCSS(x) {
+    x = String(x == null ? '' : x).slice(0, 20000).replace(/[\u0000-\u0008]/g, '');
+    if (!x.trim()) return '';
+    const keep = [];
+    x = x.replace(/[\\<]/g, '')
+      .replace(/@(import|charset|namespace)[^;{}]*;?/gi, '')
+      .replace(/(javascript|vbscript)\s*:/gi, '')
+      .replace(/expression\s*\(/gi, '(')
+      .replace(/-moz-binding|behavior\s*:/gi, '')
+      .replace(/url\s*\(\s*(['"]?)([^'"()]*)\1\s*\)/gi, function (m0, q, u) {
+        u = u.trim();
+        if (!/^(https:\/\/|data:image\/(png|jpeg|gif|webp|svg\+xml)[;,])/i.test(u)) return 'none';
+        keep.push('url("' + u.replace(/"/g, '') + '")');
+        return '\u0001' + (keep.length - 1) + '\u0001';
+      })
+      .replace(/(-webkit-)?image-set\s*\(|\burl\s*\(|\bsrc\s*\(/gi, '(');
+    return x.replace(/\u0001(\d+)\u0001/g, function (m0, i) { return keep[+i] || ''; });
+  }
   /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
   function texCSS(c, pre) {
     const t = cfg.theme.texture; c = c || cfg.theme.colors; pre = pre || 'html';
@@ -3301,6 +3329,10 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
        «Letra grande» es 115 %; el deslizador de Estilo (type.textScale) manda si se movió. */
     const ts = opt('type.textScale', ''), pct = ts !== '' && +ts !== 100 && isFinite(+ts) ? Math.round(clamp(+ts, 80, 140)) : (cfg.theme.textSize === 'grande' ? 115 : 100);
     if (pct !== 100) css = css.replace(/font-size:(\d+(?:\.\d+)?)px/g, function (m0, n) { return 'font-size:' + Math.round(n * pct / 10) / 10 + 'px'; });
+    /* CSS propio (theme.css), saneado y al final. Si el navegador entiende @layer, el resto va en una capa
+       para que el CSS propio gane sin !important; si no, igual va de último. */
+    const uc = cleanCSS(cfg.theme.css);
+    if (uc) css = (win.CSSLayerBlockRule ? '@layer break{' + css + '}' : css) + '\n/* CSS propio */\n' + uc;
     if (st.textContent !== css) st.textContent = css;
     const href = fontsHref();
     let ln = doc.getElementById('bk-fonts');
@@ -4462,7 +4494,8 @@ const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pe
    Una opción sin valor, o con «auto», deja lo que trae la estética. */
 const STYLE = [
   { id: 'estetica', label: 'Estética', cards: [
-    { id: 'skin', card: 'skins', title: 'Estética', desc: 'Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.', keys: [] }
+    { id: 'skin', card: 'skins', title: 'Estética', desc: 'Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.', keys: [] },
+    { id: 'misestilos', card: 'myStyles', title: 'Mis estilos', desc: 'Guarda el diseño de esta app con un nombre para usarlo en otras: colores, letras, formas, opciones y diseño de la carta. El contenido no cambia.', keys: [] }
   ] },
   { id: 'color', label: 'Color', cards: [
     { id: 'colores', card: 'colors', title: 'Colores', keys: ['colors'] },
@@ -4573,6 +4606,9 @@ const STYLE = [
       { k: 'fx.deco', t: 'seg', label: 'Stickers y letrero de neón', def: 'auto', opts: [['auto', 'Según el movimiento'], ['animadas', 'Se mueven'], ['quietas', 'Quietos']] },
       { k: 'fx.confetti', t: 'seg', label: 'Confeti al ganar', def: 'auto', opts: [['auto', 'Con movimiento vivo'], ['siempre', 'Siempre'], ['nunca', 'Nunca']], help: 'Al completar la tarjeta de sellos o acertar en la trivia.' }
     ] }
+  ] },
+  { id: 'avanzado', label: 'Avanzado', cards: [
+    { id: 'cssprop', adv: true, card: 'userCss', title: 'CSS propio', desc: 'Para lo que no alcanza con las opciones: reglas CSS que se aplican encima de todo el diseño.', keys: ['css'] }
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
@@ -4982,6 +5018,8 @@ const BRAND_FIELDS = [
       const all = snap.docs.map(function (d) { return d.data(); });
       const lib = all.filter(function (x) { return x && x.kind === 'break-fotos'; })[0];
       if (lib) libFromDoc(lib);
+      const ms = all.filter(function (x) { return x && x.kind === 'break-estilos'; })[0];
+      myFromList(ms ? ms.items : []); refreshMyCard();
       onRemoteList(all);
     }, function (err) {
       clearTimeout(timer);
@@ -4996,6 +5034,7 @@ const BRAND_FIELDS = [
     try { localStorage.setItem('break.studio.probe', '1'); localStorage.removeItem('break.studio.probe'); } catch (e) { ok = false; }
     Store.kind = ok ? 'local' : 'memory';
     const all = ok ? lsGet('break.studio.apps', {}) : {};
+    myFromList(ok ? lsGet('break.studio.styles', []) : []);
     onRemoteList(Object.keys(all).map(function (k) { return all[k]; }));
   }
   function onRemoteList(list) {
@@ -5033,6 +5072,74 @@ const BRAND_FIELDS = [
     if (Store.kind === 'db') return Store.col.doc(id).delete();
     if (Store.kind === 'local') { const all = lsGet('break.studio.apps', {}); delete all[id]; lsSet('break.studio.apps', all); }
     return Promise.resolve();
+  }
+  /* ---------- Mis estilos: diseños guardados con nombre, en un documento aparte que validApp() ignora ---------- */
+  const MY_DOC = 'mis-estilos';
+  const MY = { items: [] };
+  function myValid(st) { return st && typeof st === 'object' && typeof st.id === 'string' && st.theme && typeof st.theme === 'object' && !!SKINS[st.theme.skin]; }
+  function myFromList(list) { MY.items = (Array.isArray(list) ? list : []).filter(myValid).slice(0, 40); }
+  function myFind(id) { return MY.items.filter(function (x) { return x.id === id; })[0] || null; }
+  /* El estilo de un tema: todo menos las fotos incrustadas (pesan demasiado para guardarlas aparte). */
+  function styleOf(th) {
+    const x = clone(th);
+    if (x.bg && /^data:/.test(String(x.bg.img || ''))) { delete x.bg.img; if (x.bg.type === 'foto') x.bg.type = 'liso'; }
+    return x;
+  }
+  function cartaLayoutOf(app) { const m = (app.modules || []).filter(function (x) { return x && x.type === 'carta'; })[0]; return m && m.s && m.s.layout ? m.s.layout : ''; }
+  function myWrite() {
+    if (Store.kind === 'db') {
+      const body = { kind: 'break-estilos', v: 1, items: MY.items };
+      if (JSON.stringify(body).length > 240000) return Promise.reject({ code: 'too_big' });
+      return Store.col.doc(MY_DOC).set(body);
+    }
+    if (Store.kind === 'local') { try { localStorage.setItem('break.studio.styles', JSON.stringify(MY.items)); } catch (e) { return Promise.reject({ code: 'quota_exceeded' }); } return Promise.resolve(); }
+    if (Store.kind === 'memory') return Promise.resolve();
+    return Promise.reject({ code: 'unavailable' });
+  }
+  function mySave(msg) {
+    return myWrite().then(function () { if (msg) toast(msg); }, function (e) { toast(e && (e.code === 'too_big' || e.code === 'quota_exceeded') ? 'Ya no caben más estilos: borra alguno.' : 'No se pudo guardar el estilo.'); });
+  }
+  function myAdd(name, theme, carta) {
+    MY.items.unshift({ id: 'st-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: String(name || 'Mi estilo').trim().slice(0, 40) || 'Mi estilo', theme: styleOf(theme), carta: carta || '', created: Date.now() });
+    MY.items = MY.items.slice(0, 40);
+  }
+  function refreshMyCard() {
+    const sec = document.querySelector('section[data-card="misestilos"]'), card = findCard('misestilos');
+    if (sec && card) sec.outerHTML = styleCard(card);
+  }
+  /* Aplicar un estilo: cambia el tema completo y, si lo trae, el diseño de la carta. */
+  function applyStyle(theme, carta, msg) {
+    S.cur.theme = clone(theme);
+    const m = S.cur.modules.filter(function (x) { return x.type === 'carta'; })[0];
+    if (m && carta && CARTA_LAYOUTS.some(function (l) { return l[0] === carta; })) m.s.layout = carta;
+    S.pvScheme = 'auto';
+    edited(); renderEditor(); renderHeader(); renderStageTop(); pvUpdate(true);
+    toast(msg);
+  }
+  function importStyleText(txt) {
+    let data = null;
+    try { data = JSON.parse(txt); } catch (e) { data = null; }
+    if (!data || data.format !== 'break-estilo' || !data.theme || typeof data.theme !== 'object' || !SKINS[data.theme.skin]) { toast('Ese archivo no es un estilo de Break.'); return false; }
+    const th = clone(data.theme);
+    if (th.colors && typeof th.colors === 'object') Object.keys(th.colors).forEach(function (k) { if (!/^#[0-9a-f]{6}$/i.test(String(th.colors[k]))) delete th.colors[k]; });
+    const name = String(data.name || 'Estilo importado').slice(0, 40);
+    myAdd(name, th, CARTA_LAYOUTS.some(function (l) { return l[0] === data.carta; }) ? data.carta : '');
+    mySave('Estilo «' + name + '» importado. Aplícalo desde Mis estilos.');
+    renderEditor();
+    return true;
+  }
+  function importStyleFile(file) {
+    const rd = new FileReader();
+    rd.onload = function () { importStyleText(String(rd.result || '')); };
+    rd.onerror = function () { toast('No se pudo leer el archivo.'); };
+    rd.readAsText(file);
+  }
+  /* CSS propio: ¿el motor le quitó algo? (se comparan sin espacios y con las direcciones normalizadas) */
+  function cssWarn(raw) {
+    raw = String(raw || '');
+    if (!raw.trim()) return false;
+    const norm = raw.replace(/[\u0000-\u0008]/g, '').replace(/url\s*\(\s*(['"]?)([^'"()]*)\1\s*\)/gi, function (m0, q, u) { return 'url("' + u.trim().replace(/"/g, '') + '")'; });
+    return META.cleanCSS(raw).replace(/\s+/g, '') !== norm.replace(/\s+/g, '');
   }
   function isWriting(id) { const q = WQ[id]; return !!(q && (q.busy || q.next)); }
   function upsertList(app) {
@@ -5833,6 +5940,26 @@ const BRAND_FIELDS = [
       else h += '<p class="help">Con las opciones avanzadas puedes ajustar cada color de noche.</p>';
       return h + '<div id="dark-contrast">' + darkContrastHTML() + '</div><div class="fld"><span class="lab">Ver en la vista previa</span>' + schemeSegHTML() + '</div>';
     },
+    myStyles: function () {
+      const list = MY.items;
+      let h = '<div class="btnrow"><button type="button" class="btn sm pri" data-a="my-save">Guardar el estilo de esta app</button>' +
+        '<button type="button" class="btn sm" data-a="my-copy">Copiar de otra app</button>' +
+        '<label class="btn sm ghost filebtn">Importar estilo<input type="file" accept=".json,application/json" data-a="my-import" hidden></label></div>';
+      if (!list.length) return h + '<p class="help">Todavía no tienes estilos guardados.</p>';
+      return h + '<ul class="mystyles">' + list.map(function (st) {
+        const sk = SKINS[st.theme.skin] || SKINS.elegante;
+        return '<li class="mys"><span class="sws" aria-hidden="true">' + swatches(st.theme.colors || {}) + '</span><div class="mys-m"><b>' + esc(st.name) + '</b><small>' + esc(sk.label) + '</small></div>' +
+          '<div class="mys-a"><button type="button" class="btn sm" data-a="my-apply" data-id="' + attr(st.id) + '">Aplicar</button>' +
+          '<button type="button" class="ib" data-a="my-export" data-id="' + attr(st.id) + '" aria-label="Descargar ' + attr(st.name) + '" title="Descargar">⤓</button>' +
+          '<button type="button" class="ib danger" data-a="my-del" data-id="' + attr(st.id) + '" aria-label="Borrar ' + attr(st.name) + '" title="Borrar">×</button></div></li>';
+      }).join('') + '</ul>';
+    },
+    userCss: function () {
+      const raw = String(S.cur.theme.css || '');
+      return '<div class="fld"><label class="lab" for="f-theme-css">Tu CSS</label><textarea class="in code" id="f-theme-css" data-p="theme.css" rows="12" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="#bk .sh-t { letter-spacing: .02em }">' + esc(raw) + '</textarea>' +
+        '<p class="help">Se aplica al final y le gana a lo demás. Empieza cada regla con #bk para tocar solo la app. Piezas útiles: .top (encabezado), .hero-t (título de portada), .sh-t (títulos de sección), .cat-h (categorías), .it (platos), .price (precios), .btn (botones) y .foot (pie).</p>' +
+        '<p class="warnline" id="css-warn"' + (cssWarn(raw) ? '' : ' hidden') + '>Se quitaron partes que no se permiten: @import, barras invertidas, «<», javascript: o direcciones que no son https.</p></div>';
+    },
     fxReplay: function () {
       return '<div class="fx-rp"><button type="button" class="btn sm" data-a="fx-replay">Ver el movimiento</button><span class="help">Abre la app otra vez en la vista previa, desde arriba.</span></div>';
     },
@@ -6385,6 +6512,48 @@ const BRAND_FIELDS = [
     'exp-json': function () { exportJSON(); },
     'copy-html': function () { copyHTML(); },
     'exp-qr': function () { exportQR(); },
+    'my-save': function () {
+      openSheet(sheetHead('Guardar el estilo') + '<div class="fld"><label class="lab" for="my-name">Nombre del estilo</label><input class="in" id="my-name" maxlength="40" autocomplete="off" value="' + attr(S.cur.brand.name || 'Mi estilo') + '"></div>' +
+        '<p class="help">Se guarda el diseño completo de esta app. Lo encuentras en Estilo › Mis estilos de cualquier app.</p>' +
+        '<div class="sh-foot"><button type="button" class="btn" data-a="sheet-close">Cancelar</button><button type="button" class="btn pri" data-a="my-save-ok">Guardar</button></div>', 'mystyle');
+    },
+    'my-save-ok': function () {
+      const inp = document.getElementById('my-name'), name = String((inp && inp.value) || '').trim() || 'Mi estilo';
+      myAdd(name, S.cur.theme, cartaLayoutOf(S.cur));
+      closeSheet(); renderEditor();
+      mySave('Estilo «' + name.slice(0, 40) + '» guardado.');
+    },
+    'my-apply': function (d) {
+      const st = myFind(d.id); if (!st) return;
+      confirmBox('¿Aplicar «' + st.name + '»?', 'Cambian los colores, las letras, las formas y las demás opciones de diseño de esta app. El contenido no cambia.', 'Aplicar', function () { applyStyle(st.theme, st.carta, 'Se aplicó «' + st.name + '».'); });
+    },
+    'my-del': function (d) {
+      const st = myFind(d.id); if (!st) return;
+      confirmBox('¿Borrar «' + st.name + '»?', 'Se borra de tus estilos guardados. Las apps que ya lo usan no cambian.', 'Borrar', function () {
+        MY.items = MY.items.filter(function (x) { return x.id !== d.id; });
+        renderEditor(); mySave('Estilo borrado.');
+      });
+    },
+    'my-export': function (d) {
+      const st = myFind(d.id); if (!st) return;
+      saveFile(slug(st.name) + '-estilo.json', JSON.stringify({ format: 'break-estilo', version: 1, name: st.name, carta: st.carta || '', theme: st.theme }, null, 2));
+    },
+    'my-copy': function () {
+      const row = function (kind, id, name, sub, th) {
+        return '<li class="mys"><span class="sws" aria-hidden="true">' + swatches(th.colors || {}) + '</span><div class="mys-m"><b>' + esc(name) + '</b><small>' + esc(sub) + '</small></div>' +
+          '<div class="mys-a"><button type="button" class="btn sm" data-a="my-copy-from" data-k="' + kind + '" data-id="' + attr(id) + '">Copiar</button></div></li>';
+      };
+      const apps = S.apps.filter(function (a) { return !(S.kind === 'app' && a.id === S.cur.id); });
+      openSheet(sheetHead('Copiar el estilo de otra app') + '<p class="help">Se copia el diseño (colores, letras, formas, opciones y diseño de la carta). El contenido de esta app no cambia.</p>' +
+        (apps.length ? '<h4 class="sep">Mis apps</h4><ul class="mystyles">' + apps.map(function (a) { return row('app', a.id, a.brand.name || 'Sin nombre', (SKINS[a.theme.skin] || SKINS.elegante).label, a.theme); }).join('') + '</ul>' : '') +
+        '<h4 class="sep">Apps de ejemplo</h4><ul class="mystyles">' + TEMPLATES.map(function (x) { return row('tpl', x.id, x.brand.name, SKINS[x.theme.skin].label, x.theme); }).join('') + '</ul>', 'mycopy');
+    },
+    'my-copy-from': function (d) {
+      const src = d.k === 'tpl' ? TEMPLATES.filter(function (x) { return x.id === d.id; })[0] : S.apps.filter(function (x) { return x.id === d.id; })[0];
+      if (!src) return;
+      const name = src.brand.name || 'otra app';
+      confirmBox('¿Copiar el estilo de «' + name + '»?', 'Cambian los colores, las letras, las formas y las demás opciones de diseño de esta app. El contenido no cambia.', 'Copiar', function () { applyStyle(styleOf(src.theme), cartaLayoutOf(src), 'Se copió el estilo de «' + name + '».'); });
+    },
     'pv-scheme': function (d) {
       S.pvScheme = d.v === 'noche' ? 'noche' : 'dia';
       if (PV.ready) PV.rt.setScheme(pvSchemeArg());
@@ -6460,6 +6629,7 @@ const BRAND_FIELDS = [
       for (let i = 0; i < dots.length; i++) dots[i].style.background = v;
       const rc = $('#role-contrast'); if (rc) rc.innerHTML = roleContrastHTML();
     }
+    if (p === 'theme.css') { const w = $('#css-warn'); if (w) w.hidden = !cssWarn(v); return; }
     if (p.indexOf('theme.dark.colors.') === 0) {
       const dc = $('#dark-contrast'); if (dc) dc.innerHTML = darkContrastHTML();
       const ps = document.querySelectorAll('[data-a="dark-pal"]');
@@ -6495,6 +6665,7 @@ const BRAND_FIELDS = [
     t.value = '';
     if (!f) return;
     if (a === 'imp-json') importJSON(f);
+    if (a === 'my-import') importStyleFile(f);
     if (a === 'logo-file') onLogoFile(f);
     if (a === 'img-file') onPhotoFile(f, t.getAttribute('data-ip'), +t.getAttribute('data-max') || 1100);
   }
@@ -6919,7 +7090,7 @@ const BRAND_FIELDS = [
     setTimeout(function () { startOnce((HOT && HOT.data) || {}); }, 400);
   } else startOnce((HOT && HOT.data) || {});
 
-  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META, lib: LIB, materialize: materialize };
+  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META, lib: LIB, materialize: materialize, my: MY, importStyle: importStyleText };
 })();
 
 </script>

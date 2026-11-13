@@ -1258,7 +1258,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   /* El estudio pide las constantes del motor (tipografías, estéticas, íconos…) para no repetirlas en su catálogo. */
   if (opts.meta) return { fonts: FONTS, skins: Object.keys(CSS_SKIN), tags: TAG_ORDER, icons: ICONS, iconSets: ICON_SETS, emoIcon: EMO_ICON, iconOf: emoIcon, glyph: glyphOf,
-    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview, darkOf: darkOf, genDark: genDark };
+    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview, darkOf: darkOf, genDark: genDark, cleanCSS: cleanCSS };
 
   /* ---------- Estado ---------- */
   let cfg = normalize(initialCfg);
@@ -2810,6 +2810,26 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   const FX_KF = { subir: ['rise', 0.8, 'cubic-bezier(.2,.7,.2,1)'], aparecer: ['fadein', 0.9, 'ease'], zoom: ['zoomin', 0.7, 'cubic-bezier(.2,1,.3,1)'], lado: ['slidein', 0.75, 'cubic-bezier(.2,.7,.2,1)'] };
   const FX_MARQ = { lenta: 42, normal: 24, rapida: 13 };
 
+  /* CSS propio: sin @import, sin escapes que disfracen palabras, sin «<», sin javascript: ni expression(), y solo
+     imágenes https o data:image. Pura: el estudio la usa vía opts.meta para avisar qué se quitó. */
+  function cleanCSS(x) {
+    x = String(x == null ? '' : x).slice(0, 20000).replace(/[\u0000-\u0008]/g, '');
+    if (!x.trim()) return '';
+    const keep = [];
+    x = x.replace(/[\\<]/g, '')
+      .replace(/@(import|charset|namespace)[^;{}]*;?/gi, '')
+      .replace(/(javascript|vbscript)\s*:/gi, '')
+      .replace(/expression\s*\(/gi, '(')
+      .replace(/-moz-binding|behavior\s*:/gi, '')
+      .replace(/url\s*\(\s*(['"]?)([^'"()]*)\1\s*\)/gi, function (m0, q, u) {
+        u = u.trim();
+        if (!/^(https:\/\/|data:image\/(png|jpeg|gif|webp|svg\+xml)[;,])/i.test(u)) return 'none';
+        keep.push('url("' + u.replace(/"/g, '') + '")');
+        return '\u0001' + (keep.length - 1) + '\u0001';
+      })
+      .replace(/(-webkit-)?image-set\s*\(|\burl\s*\(|\bsrc\s*\(/gi, '(');
+    return x.replace(/\u0001(\d+)\u0001/g, function (m0, i) { return keep[+i] || ''; });
+  }
   /* Texturas que llevan el color de la paleta dentro del SVG del fondo. */
   function texCSS(c, pre) {
     const t = cfg.theme.texture; c = c || cfg.theme.colors; pre = pre || 'html';
@@ -2826,6 +2846,10 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
        «Letra grande» es 115 %; el deslizador de Estilo (type.textScale) manda si se movió. */
     const ts = opt('type.textScale', ''), pct = ts !== '' && +ts !== 100 && isFinite(+ts) ? Math.round(clamp(+ts, 80, 140)) : (cfg.theme.textSize === 'grande' ? 115 : 100);
     if (pct !== 100) css = css.replace(/font-size:(\d+(?:\.\d+)?)px/g, function (m0, n) { return 'font-size:' + Math.round(n * pct / 10) / 10 + 'px'; });
+    /* CSS propio (theme.css), saneado y al final. Si el navegador entiende @layer, el resto va en una capa
+       para que el CSS propio gane sin !important; si no, igual va de último. */
+    const uc = cleanCSS(cfg.theme.css);
+    if (uc) css = (win.CSSLayerBlockRule ? '@layer break{' + css + '}' : css) + '\n/* CSS propio */\n' + uc;
     if (st.textContent !== css) st.textContent = css;
     const href = fontsHref();
     let ln = doc.getElementById('bk-fonts');

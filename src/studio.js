@@ -135,6 +135,8 @@
       const all = snap.docs.map(function (d) { return d.data(); });
       const lib = all.filter(function (x) { return x && x.kind === 'break-fotos'; })[0];
       if (lib) libFromDoc(lib);
+      const ms = all.filter(function (x) { return x && x.kind === 'break-estilos'; })[0];
+      myFromList(ms ? ms.items : []); refreshMyCard();
       onRemoteList(all);
     }, function (err) {
       clearTimeout(timer);
@@ -149,6 +151,7 @@
     try { localStorage.setItem('break.studio.probe', '1'); localStorage.removeItem('break.studio.probe'); } catch (e) { ok = false; }
     Store.kind = ok ? 'local' : 'memory';
     const all = ok ? lsGet('break.studio.apps', {}) : {};
+    myFromList(ok ? lsGet('break.studio.styles', []) : []);
     onRemoteList(Object.keys(all).map(function (k) { return all[k]; }));
   }
   function onRemoteList(list) {
@@ -186,6 +189,74 @@
     if (Store.kind === 'db') return Store.col.doc(id).delete();
     if (Store.kind === 'local') { const all = lsGet('break.studio.apps', {}); delete all[id]; lsSet('break.studio.apps', all); }
     return Promise.resolve();
+  }
+  /* ---------- Mis estilos: diseños guardados con nombre, en un documento aparte que validApp() ignora ---------- */
+  const MY_DOC = 'mis-estilos';
+  const MY = { items: [] };
+  function myValid(st) { return st && typeof st === 'object' && typeof st.id === 'string' && st.theme && typeof st.theme === 'object' && !!SKINS[st.theme.skin]; }
+  function myFromList(list) { MY.items = (Array.isArray(list) ? list : []).filter(myValid).slice(0, 40); }
+  function myFind(id) { return MY.items.filter(function (x) { return x.id === id; })[0] || null; }
+  /* El estilo de un tema: todo menos las fotos incrustadas (pesan demasiado para guardarlas aparte). */
+  function styleOf(th) {
+    const x = clone(th);
+    if (x.bg && /^data:/.test(String(x.bg.img || ''))) { delete x.bg.img; if (x.bg.type === 'foto') x.bg.type = 'liso'; }
+    return x;
+  }
+  function cartaLayoutOf(app) { const m = (app.modules || []).filter(function (x) { return x && x.type === 'carta'; })[0]; return m && m.s && m.s.layout ? m.s.layout : ''; }
+  function myWrite() {
+    if (Store.kind === 'db') {
+      const body = { kind: 'break-estilos', v: 1, items: MY.items };
+      if (JSON.stringify(body).length > 240000) return Promise.reject({ code: 'too_big' });
+      return Store.col.doc(MY_DOC).set(body);
+    }
+    if (Store.kind === 'local') { try { localStorage.setItem('break.studio.styles', JSON.stringify(MY.items)); } catch (e) { return Promise.reject({ code: 'quota_exceeded' }); } return Promise.resolve(); }
+    if (Store.kind === 'memory') return Promise.resolve();
+    return Promise.reject({ code: 'unavailable' });
+  }
+  function mySave(msg) {
+    return myWrite().then(function () { if (msg) toast(msg); }, function (e) { toast(e && (e.code === 'too_big' || e.code === 'quota_exceeded') ? 'Ya no caben más estilos: borra alguno.' : 'No se pudo guardar el estilo.'); });
+  }
+  function myAdd(name, theme, carta) {
+    MY.items.unshift({ id: 'st-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: String(name || 'Mi estilo').trim().slice(0, 40) || 'Mi estilo', theme: styleOf(theme), carta: carta || '', created: Date.now() });
+    MY.items = MY.items.slice(0, 40);
+  }
+  function refreshMyCard() {
+    const sec = document.querySelector('section[data-card="misestilos"]'), card = findCard('misestilos');
+    if (sec && card) sec.outerHTML = styleCard(card);
+  }
+  /* Aplicar un estilo: cambia el tema completo y, si lo trae, el diseño de la carta. */
+  function applyStyle(theme, carta, msg) {
+    S.cur.theme = clone(theme);
+    const m = S.cur.modules.filter(function (x) { return x.type === 'carta'; })[0];
+    if (m && carta && CARTA_LAYOUTS.some(function (l) { return l[0] === carta; })) m.s.layout = carta;
+    S.pvScheme = 'auto';
+    edited(); renderEditor(); renderHeader(); renderStageTop(); pvUpdate(true);
+    toast(msg);
+  }
+  function importStyleText(txt) {
+    let data = null;
+    try { data = JSON.parse(txt); } catch (e) { data = null; }
+    if (!data || data.format !== 'break-estilo' || !data.theme || typeof data.theme !== 'object' || !SKINS[data.theme.skin]) { toast('Ese archivo no es un estilo de Break.'); return false; }
+    const th = clone(data.theme);
+    if (th.colors && typeof th.colors === 'object') Object.keys(th.colors).forEach(function (k) { if (!/^#[0-9a-f]{6}$/i.test(String(th.colors[k]))) delete th.colors[k]; });
+    const name = String(data.name || 'Estilo importado').slice(0, 40);
+    myAdd(name, th, CARTA_LAYOUTS.some(function (l) { return l[0] === data.carta; }) ? data.carta : '');
+    mySave('Estilo «' + name + '» importado. Aplícalo desde Mis estilos.');
+    renderEditor();
+    return true;
+  }
+  function importStyleFile(file) {
+    const rd = new FileReader();
+    rd.onload = function () { importStyleText(String(rd.result || '')); };
+    rd.onerror = function () { toast('No se pudo leer el archivo.'); };
+    rd.readAsText(file);
+  }
+  /* CSS propio: ¿el motor le quitó algo? (se comparan sin espacios y con las direcciones normalizadas) */
+  function cssWarn(raw) {
+    raw = String(raw || '');
+    if (!raw.trim()) return false;
+    const norm = raw.replace(/[\u0000-\u0008]/g, '').replace(/url\s*\(\s*(['"]?)([^'"()]*)\1\s*\)/gi, function (m0, q, u) { return 'url("' + u.trim().replace(/"/g, '') + '")'; });
+    return META.cleanCSS(raw).replace(/\s+/g, '') !== norm.replace(/\s+/g, '');
   }
   function isWriting(id) { const q = WQ[id]; return !!(q && (q.busy || q.next)); }
   function upsertList(app) {
@@ -986,6 +1057,26 @@
       else h += '<p class="help">Con las opciones avanzadas puedes ajustar cada color de noche.</p>';
       return h + '<div id="dark-contrast">' + darkContrastHTML() + '</div><div class="fld"><span class="lab">Ver en la vista previa</span>' + schemeSegHTML() + '</div>';
     },
+    myStyles: function () {
+      const list = MY.items;
+      let h = '<div class="btnrow"><button type="button" class="btn sm pri" data-a="my-save">Guardar el estilo de esta app</button>' +
+        '<button type="button" class="btn sm" data-a="my-copy">Copiar de otra app</button>' +
+        '<label class="btn sm ghost filebtn">Importar estilo<input type="file" accept=".json,application/json" data-a="my-import" hidden></label></div>';
+      if (!list.length) return h + '<p class="help">Todavía no tienes estilos guardados.</p>';
+      return h + '<ul class="mystyles">' + list.map(function (st) {
+        const sk = SKINS[st.theme.skin] || SKINS.elegante;
+        return '<li class="mys"><span class="sws" aria-hidden="true">' + swatches(st.theme.colors || {}) + '</span><div class="mys-m"><b>' + esc(st.name) + '</b><small>' + esc(sk.label) + '</small></div>' +
+          '<div class="mys-a"><button type="button" class="btn sm" data-a="my-apply" data-id="' + attr(st.id) + '">Aplicar</button>' +
+          '<button type="button" class="ib" data-a="my-export" data-id="' + attr(st.id) + '" aria-label="Descargar ' + attr(st.name) + '" title="Descargar">⤓</button>' +
+          '<button type="button" class="ib danger" data-a="my-del" data-id="' + attr(st.id) + '" aria-label="Borrar ' + attr(st.name) + '" title="Borrar">×</button></div></li>';
+      }).join('') + '</ul>';
+    },
+    userCss: function () {
+      const raw = String(S.cur.theme.css || '');
+      return '<div class="fld"><label class="lab" for="f-theme-css">Tu CSS</label><textarea class="in code" id="f-theme-css" data-p="theme.css" rows="12" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="#bk .sh-t { letter-spacing: .02em }">' + esc(raw) + '</textarea>' +
+        '<p class="help">Se aplica al final y le gana a lo demás. Empieza cada regla con #bk para tocar solo la app. Piezas útiles: .top (encabezado), .hero-t (título de portada), .sh-t (títulos de sección), .cat-h (categorías), .it (platos), .price (precios), .btn (botones) y .foot (pie).</p>' +
+        '<p class="warnline" id="css-warn"' + (cssWarn(raw) ? '' : ' hidden') + '>Se quitaron partes que no se permiten: @import, barras invertidas, «<», javascript: o direcciones que no son https.</p></div>';
+    },
     fxReplay: function () {
       return '<div class="fx-rp"><button type="button" class="btn sm" data-a="fx-replay">Ver el movimiento</button><span class="help">Abre la app otra vez en la vista previa, desde arriba.</span></div>';
     },
@@ -1538,6 +1629,48 @@
     'exp-json': function () { exportJSON(); },
     'copy-html': function () { copyHTML(); },
     'exp-qr': function () { exportQR(); },
+    'my-save': function () {
+      openSheet(sheetHead('Guardar el estilo') + '<div class="fld"><label class="lab" for="my-name">Nombre del estilo</label><input class="in" id="my-name" maxlength="40" autocomplete="off" value="' + attr(S.cur.brand.name || 'Mi estilo') + '"></div>' +
+        '<p class="help">Se guarda el diseño completo de esta app. Lo encuentras en Estilo › Mis estilos de cualquier app.</p>' +
+        '<div class="sh-foot"><button type="button" class="btn" data-a="sheet-close">Cancelar</button><button type="button" class="btn pri" data-a="my-save-ok">Guardar</button></div>', 'mystyle');
+    },
+    'my-save-ok': function () {
+      const inp = document.getElementById('my-name'), name = String((inp && inp.value) || '').trim() || 'Mi estilo';
+      myAdd(name, S.cur.theme, cartaLayoutOf(S.cur));
+      closeSheet(); renderEditor();
+      mySave('Estilo «' + name.slice(0, 40) + '» guardado.');
+    },
+    'my-apply': function (d) {
+      const st = myFind(d.id); if (!st) return;
+      confirmBox('¿Aplicar «' + st.name + '»?', 'Cambian los colores, las letras, las formas y las demás opciones de diseño de esta app. El contenido no cambia.', 'Aplicar', function () { applyStyle(st.theme, st.carta, 'Se aplicó «' + st.name + '».'); });
+    },
+    'my-del': function (d) {
+      const st = myFind(d.id); if (!st) return;
+      confirmBox('¿Borrar «' + st.name + '»?', 'Se borra de tus estilos guardados. Las apps que ya lo usan no cambian.', 'Borrar', function () {
+        MY.items = MY.items.filter(function (x) { return x.id !== d.id; });
+        renderEditor(); mySave('Estilo borrado.');
+      });
+    },
+    'my-export': function (d) {
+      const st = myFind(d.id); if (!st) return;
+      saveFile(slug(st.name) + '-estilo.json', JSON.stringify({ format: 'break-estilo', version: 1, name: st.name, carta: st.carta || '', theme: st.theme }, null, 2));
+    },
+    'my-copy': function () {
+      const row = function (kind, id, name, sub, th) {
+        return '<li class="mys"><span class="sws" aria-hidden="true">' + swatches(th.colors || {}) + '</span><div class="mys-m"><b>' + esc(name) + '</b><small>' + esc(sub) + '</small></div>' +
+          '<div class="mys-a"><button type="button" class="btn sm" data-a="my-copy-from" data-k="' + kind + '" data-id="' + attr(id) + '">Copiar</button></div></li>';
+      };
+      const apps = S.apps.filter(function (a) { return !(S.kind === 'app' && a.id === S.cur.id); });
+      openSheet(sheetHead('Copiar el estilo de otra app') + '<p class="help">Se copia el diseño (colores, letras, formas, opciones y diseño de la carta). El contenido de esta app no cambia.</p>' +
+        (apps.length ? '<h4 class="sep">Mis apps</h4><ul class="mystyles">' + apps.map(function (a) { return row('app', a.id, a.brand.name || 'Sin nombre', (SKINS[a.theme.skin] || SKINS.elegante).label, a.theme); }).join('') + '</ul>' : '') +
+        '<h4 class="sep">Apps de ejemplo</h4><ul class="mystyles">' + TEMPLATES.map(function (x) { return row('tpl', x.id, x.brand.name, SKINS[x.theme.skin].label, x.theme); }).join('') + '</ul>', 'mycopy');
+    },
+    'my-copy-from': function (d) {
+      const src = d.k === 'tpl' ? TEMPLATES.filter(function (x) { return x.id === d.id; })[0] : S.apps.filter(function (x) { return x.id === d.id; })[0];
+      if (!src) return;
+      const name = src.brand.name || 'otra app';
+      confirmBox('¿Copiar el estilo de «' + name + '»?', 'Cambian los colores, las letras, las formas y las demás opciones de diseño de esta app. El contenido no cambia.', 'Copiar', function () { applyStyle(styleOf(src.theme), cartaLayoutOf(src), 'Se copió el estilo de «' + name + '».'); });
+    },
     'pv-scheme': function (d) {
       S.pvScheme = d.v === 'noche' ? 'noche' : 'dia';
       if (PV.ready) PV.rt.setScheme(pvSchemeArg());
@@ -1613,6 +1746,7 @@
       for (let i = 0; i < dots.length; i++) dots[i].style.background = v;
       const rc = $('#role-contrast'); if (rc) rc.innerHTML = roleContrastHTML();
     }
+    if (p === 'theme.css') { const w = $('#css-warn'); if (w) w.hidden = !cssWarn(v); return; }
     if (p.indexOf('theme.dark.colors.') === 0) {
       const dc = $('#dark-contrast'); if (dc) dc.innerHTML = darkContrastHTML();
       const ps = document.querySelectorAll('[data-a="dark-pal"]');
@@ -1648,6 +1782,7 @@
     t.value = '';
     if (!f) return;
     if (a === 'imp-json') importJSON(f);
+    if (a === 'my-import') importStyleFile(f);
     if (a === 'logo-file') onLogoFile(f);
     if (a === 'img-file') onPhotoFile(f, t.getAttribute('data-ip'), +t.getAttribute('data-max') || 1100);
   }
@@ -2072,5 +2207,5 @@
     setTimeout(function () { startOnce((HOT && HOT.data) || {}); }, 400);
   } else startOnce((HOT && HOT.data) || {});
 
-  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META, lib: LIB, materialize: materialize };
+  window.__breakStudio = { S: S, buildAppHTML: buildAppHTML, checks: checks, Store: Store, ACTIONS: ACTIONS, pv: PV, meta: META, lib: LIB, materialize: materialize, my: MY, importStyle: importStyleText };
 })();

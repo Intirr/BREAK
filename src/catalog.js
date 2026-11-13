@@ -82,7 +82,8 @@ const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pe
    Una opción sin valor, o con «auto», deja lo que trae la estética. */
 const STYLE = [
   { id: 'estetica', label: 'Estética', cards: [
-    { id: 'skin', card: 'skins', title: 'Estética', desc: 'Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.', keys: [] }
+    { id: 'skin', card: 'skins', title: 'Estética', desc: 'Cambia el estilo de toda la app sin tocar el contenido. Al cambiar se aplican sus colores, tipografías y diseño de carta.', keys: [] },
+    { id: 'misestilos', card: 'myStyles', title: 'Mis estilos', desc: 'Guarda el diseño de esta app con un nombre para usarlo en otras: colores, letras, formas, opciones y diseño de la carta. El contenido no cambia.', keys: [] }
   ] },
   { id: 'color', label: 'Color', cards: [
     { id: 'colores', card: 'colors', title: 'Colores', keys: ['colors'] },
@@ -193,6 +194,9 @@ const STYLE = [
       { k: 'fx.deco', t: 'seg', label: 'Stickers y letrero de neón', def: 'auto', opts: [['auto', 'Según el movimiento'], ['animadas', 'Se mueven'], ['quietas', 'Quietos']] },
       { k: 'fx.confetti', t: 'seg', label: 'Confeti al ganar', def: 'auto', opts: [['auto', 'Con movimiento vivo'], ['siempre', 'Siempre'], ['nunca', 'Nunca']], help: 'Al completar la tarjeta de sellos o acertar en la trivia.' }
     ] }
+  ] },
+  { id: 'avanzado', label: 'Avanzado', cards: [
+    { id: 'cssprop', adv: true, card: 'userCss', title: 'CSS propio', desc: 'Para lo que no alcanza con las opciones: reglas CSS que se aplican encima de todo el diseño.', keys: ['css'] }
   ] }
 ];
 const GROUPS = ['Esenciales', 'Ventas', 'Fidelización y juegos', 'Turismo y contenido'];
