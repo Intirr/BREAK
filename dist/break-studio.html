@@ -3,7 +3,7 @@
 <meta name="description" content="Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&family=Pacifico&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&family=Pacifico&family=Fredoka:wght@700&display=swap">
 <style>
 /* Layout: two-pane workbench — order-ticket editor on the left, live phone on the right; tabs and one column on phones. */
 :root{
@@ -211,6 +211,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-termal::after{content:"";position:absolute;left:calc(50% - 28px);width:56px;bottom:16px;height:14px;background:#1F7168;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 14'%3E%3Cpath d='M2 5q6.5-4 13 0t13 0 13 0 13 0M2 11q6.5-4 13 0t13 0 13 0 13 0' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/56px 14px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 14'%3E%3Cpath d='M2 5q6.5-4 13 0t13 0 13 0 13 0M2 11q6.5-4 13 0t13 0 13 0 13 0' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/56px 14px no-repeat}
 .sk-retro{background:#FBF1E1;color:#BE1E30;font:400 34px/1.2 Pacifico,"Brush Script MT",cursive;text-shadow:2px 2px 0 #E8A92E;padding-bottom:16px}
 .sk-retro::after{content:"";position:absolute;left:16px;right:16px;bottom:12px;height:10px;border-top:3px solid #BE1E30;background:repeating-conic-gradient(#2A1C19 0 25%,#FFFAF2 0 50%) 0 0/10px 10px}
+.sk-tropical{background:radial-gradient(circle at 88% 18%,#F6A21E 0 13px,transparent 14px),radial-gradient(circle at 12% 84%,#C8175F 0 9px,transparent 10px),#FFF5E6;color:#123D2E;font:700 38px/1 Fredoka,"Arial Rounded MT Bold",system-ui,sans-serif;letter-spacing:-.01em}
+.sk-tropical::after{content:"";position:absolute;right:-8px;bottom:-10px;width:58px;height:46px;border-radius:40px 6px;background:#0D7347;rotate:-24deg}
 .sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}
@@ -675,6 +677,13 @@ const ART_CSS = [
     '.art .a-tz3{stroke:var(--accent3);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}',
     '.art-garab{max-width:360px}',
     '.art-bras{height:104px}',
+    '.art-mons{height:112px}',
+    '.art .a-mo1{fill:color-mix(in srgb,var(--leaf) 82%,var(--ink))}',
+    '.art .a-mo2{fill:color-mix(in srgb,var(--leaf) 70%,var(--bg))}',
+    '.art .a-mor{stroke:color-mix(in srgb,var(--leaf) 45%,var(--ink));stroke-width:2.2;stroke-linecap:round;fill:none}',
+    '.art .a-mos{fill:var(--bg)}',
+    '.art .a-mf{fill:var(--accent3)}',
+    '.art .a-mh{fill:var(--accent)}',
     '.art .a-gl{fill:color-mix(in srgb,var(--accent) 55%,var(--bg))}',
     '.art .a-cb{fill:color-mix(in srgb,var(--ink) 20%,var(--bg))}',
     '.art .a-em{fill:var(--accent)}',
@@ -1932,6 +1941,77 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="retro"] .foot.fa-izq::before{margin-left:0}
 [data-skin="retro"] .foot-n{font-size:38px;line-height:1.3;color:var(--c-foot-on,var(--accent))}
 [data-skin="retro"] .navi{font-size:28px;line-height:1.35}
+`,
+    tropical: `
+[data-skin="tropical"]{--gw:.53}
+[data-skin="tropical"] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 88%,transparent))}
+[data-skin="tropical"] .brand-mini{font-weight:700;font-size:22px}
+[data-skin="tropical"] .status,[data-skin="tropical"] .lang,[data-skin="tropical"] .menu-btn{background:var(--surface);border-radius:14px 4px;box-shadow:0 2px 8px color-mix(in srgb,var(--ink) 10%,transparent);color:var(--ink)}
+[data-skin="tropical"] .menu-btn{width:40px;height:40px}
+[data-skin="tropical"] .lang button{border-radius:10px 3px}
+[data-skin="tropical"] .lang button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="tropical"] .m-hero{padding-block:36px 0}
+[data-skin="tropical"] .hero-k{display:inline-block;padding:6px 14px;border-radius:14px 4px;background:var(--c-kicker,var(--accent3));color:var(--c-kicker-on,var(--on-accent3));letter-spacing:.14em;font-weight:700}
+[data-skin="tropical"] .hero-t{font-weight:700;font-size:min(calc(clamp(56px,17vw,100px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.95;letter-spacing:-.01em;color:var(--c-title,var(--ink))}
+[data-skin="tropical"] .hero-s{font-size:18.5px;color:color-mix(in srgb,var(--ink) 80%,var(--bg))}
+[data-skin="tropical"] .btn{border-radius:999px;border-width:2px;font-weight:700}
+[data-skin="tropical"] .btn.pri{box-shadow:0 8px 18px -8px color-mix(in srgb,var(--c-btn,var(--accent)) 75%,transparent)}
+[data-skin="tropical"] .btn.ghost{background:var(--surface);border-color:color-mix(in srgb,var(--ink) 20%,transparent)}
+[data-skin="tropical"] .ribbon{margin-top:28px;white-space:normal;font-family:var(--fd);font-weight:600;font-size:18px;color:var(--accent2)}
+[data-skin="tropical"] .ribbon-track{display:flex;flex-wrap:wrap;gap:4px 0}
+[data-skin="tropical"] .ribbon-track span{padding:0 12px 0 0}
+[data-skin="tropical"] .ribbon-track span:not(:last-child)::after{content:"";display:inline-block;width:10px;height:10px;margin-left:12px;border-radius:10px 2px;background:var(--accent);vertical-align:.05em}
+[data-skin="tropical"] .sh-k{color:var(--c-kicker,var(--accent));letter-spacing:.16em;font-weight:700}
+[data-skin="tropical"] .sh-t{font-weight:700;font-size:calc(clamp(36px,10vw,50px) * var(--ts,1));line-height:1;letter-spacing:-.01em}
+[data-skin="tropical"] .sh .orn{display:block;width:46px;height:14px;margin-top:12px;background:radial-gradient(circle at 7px 7px,var(--accent) 0 6px,transparent 6.5px),radial-gradient(circle at 23px 7px,var(--accent3) 0 6px,transparent 6.5px),radial-gradient(circle at 39px 7px,var(--accent2) 0 6px,transparent 6.5px)}
+[data-skin="tropical"] .card,[data-skin="tropical"] .svc,[data-skin="tropical"] .fq,[data-skin="tropical"] .lay-tarjetas .it,[data-skin="tropical"] .lay-cuadricula .it,[data-skin="tropical"] .lay-fotos .it,[data-skin="tropical"] .feat,[data-skin="tropical"] .promo,[data-skin="tropical"] .quote,[data-skin="tropical"] .cl,[data-skin="tropical"] .wres,[data-skin="tropical"] .free{background:var(--surface);border-radius:calc(var(--r) * 1.6) calc(var(--r) * .35);box-shadow:0 10px 26px -16px color-mix(in srgb,var(--accent2) 45%,transparent)}
+[data-skin="tropical"] .free.hl{background:var(--accent);color:var(--on-accent)}
+[data-skin="tropical"] .chip{border:2px solid color-mix(in srgb,var(--accent2) 30%,transparent);background:var(--surface);border-radius:16px 5px;font-weight:700}
+[data-skin="tropical"] .chip.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2));border-color:var(--c-sel,var(--accent2))}
+[data-skin="tropical"] .cat-tabs{background:color-mix(in srgb,var(--bg) 92%,transparent)}
+[data-skin="tropical"] .cat-h h3{font-weight:700;font-size:30px;color:var(--c-title,var(--ink))}
+[data-skin="tropical"] .cat-h h3 .ci{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:18px 5px;background:color-mix(in srgb,var(--accent3) 30%,var(--surface))}
+[data-skin="tropical"] .it h4{font-family:var(--fd);font-weight:600;font-size:18px;line-height:1.15}
+[data-skin="tropical"] .lay-cuadricula .it h4{font-size:16.5px}
+[data-skin="tropical"] .it-d{color:var(--muted)}
+[data-skin="tropical"] .media{border-radius:calc(var(--r) * 1.6) calc(var(--r) * .35);background:color-mix(in srgb,var(--accent3) 26%,var(--surface))}
+[data-skin="tropical"] .media.m1{background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+[data-skin="tropical"] .media.m2{background:color-mix(in srgb,var(--accent2) 18%,var(--surface))}
+[data-skin="tropical"] .feat .media,[data-skin="tropical"] .lay-fotos .media{border-radius:0}
+[data-skin="tropical"] .lay-lista .it,[data-skin="tropical"] .lay-compacta .it{border-bottom:1.5px dotted color-mix(in srgb,var(--accent2) 30%,transparent)}
+[data-skin="tropical"] .price{font-family:var(--fd);font-weight:700;font-size:17px;color:var(--c-price,var(--accent2))}
+[data-skin="tropical"] .tag{background:color-mix(in srgb,var(--c-tag,var(--accent)) 12%,transparent);color:var(--ink);border-radius:10px 3px;text-transform:none;letter-spacing:.01em;font-size:12px}
+[data-skin="tropical"] .add{border-radius:16px 5px;background:var(--c-btn,var(--accent));color:var(--c-btn-on,var(--on-accent))}
+[data-skin="tropical"] .add .q{background:var(--accent2);color:var(--on-accent2)}
+[data-skin="tropical"] .promo.today{background:var(--accent);color:var(--on-accent)}
+[data-skin="tropical"] .promo.today .price{color:inherit}
+[data-skin="tropical"] .promo-d,[data-skin="tropical"] .ev-w{color:var(--accent2)!important}
+[data-skin="tropical"] .badge{background:var(--accent3);color:var(--on-accent3);border-radius:12px 3px;rotate:-6deg}
+[data-skin="tropical"] .md-price{font-weight:700;font-size:36px;color:var(--c-price,var(--accent2))}
+[data-skin="tropical"] .stamp{border:2px dashed color-mix(in srgb,var(--accent2) 40%,transparent);border-radius:24px 6px}
+[data-skin="tropical"] .stamp.on{border:2px solid var(--accent2);background:color-mix(in srgb,var(--accent3) 30%,var(--surface))}
+[data-skin="tropical"] .hrow,[data-skin="tropical"] .g{border-bottom:1.5px dotted color-mix(in srgb,var(--accent2) 30%,transparent)}
+[data-skin="tropical"] .hrow.today dt,[data-skin="tropical"] .hrow.today dd{color:var(--accent2)}
+[data-skin="tropical"] .hrow .hoy{border-radius:10px 3px}
+[data-skin="tropical"] .g dt{color:var(--accent2);font-weight:600}
+[data-skin="tropical"] .sig{font-family:var(--fd);font-style:normal;font-weight:600;font-size:24px;color:var(--accent)}
+[data-skin="tropical"] .quote blockquote{font-size:16.5px}
+[data-skin="tropical"] .qbig blockquote{font-weight:600;font-size:23px;line-height:1.3}
+[data-skin="tropical"] .svc-i{border-radius:14px 4px;background:color-mix(in srgb,var(--accent3) 30%,var(--surface))}
+[data-skin="tropical"] .wheel{box-shadow:0 0 0 7px var(--surface),0 0 0 11px var(--accent2)}
+[data-skin="tropical"] .fab{border-radius:24px 8px;box-shadow:0 14px 30px -12px color-mix(in srgb,var(--c-btn,var(--accent)) 70%,transparent)}
+[data-skin="tropical"] .fab-n{border-radius:14px 4px}
+[data-skin="tropical"] .sheet{border-radius:32px 32px 0 0}
+[data-skin="tropical"] .sheet h3{font-weight:600}
+[data-skin="tropical"] .inp,[data-skin="tropical"] .search input,[data-skin="tropical"] .stepper,[data-skin="tropical"] .tq-o{border-radius:16px 5px;border-color:color-mix(in srgb,var(--accent2) 30%,transparent)}
+[data-skin="tropical"] .seg{border-radius:18px 6px}
+[data-skin="tropical"] .seg button{border-radius:14px 4px}
+[data-skin="tropical"] .seg button.on{background:var(--c-sel,var(--accent2));color:var(--c-sel-on,var(--on-accent2))}
+[data-skin="tropical"] .keypad button{border-radius:20px 6px}
+[data-skin="tropical"] .foot::before{content:"";display:block;width:46px;height:14px;margin:0 auto 20px;background:radial-gradient(circle at 7px 7px,var(--accent) 0 6px,transparent 6.5px),radial-gradient(circle at 23px 7px,var(--accent3) 0 6px,transparent 6.5px),radial-gradient(circle at 39px 7px,var(--accent2) 0 6px,transparent 6.5px)}
+[data-skin="tropical"] .foot.fa-izq::before{margin-left:0}
+[data-skin="tropical"] .foot-n{font-weight:700;font-size:34px}
+[data-skin="tropical"] .navi{font-weight:600;font-size:26px}
 `
   };
 
@@ -2064,10 +2144,10 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' } };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' }, retro: { deco: 'damero' }, tropical: { deco: 'monstera' } };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
-  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero'];
-  const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG };
+  const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera'];
+  const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG, monstera: monsteraSVG };
   /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
   function decoPreview(k) {
     if (k === 'stickers') return '<div class="hero-in">' + ['☕', '🧁', '🍓', '🥐'].map(function (e, i) { return '<span class="stk s' + (i + 1) + '">' + e + '</span>'; }).join('') + '</div>';
@@ -2492,6 +2572,28 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       '<path class="a-mk" d="' + marks + '"/><path class="a-gt" d="M132 76.5h4M176 76.5h4M460 76.5h4"/>' +
       '<path class="a-st" d="M160 62c-8-8 7-13 0-22s8-13 1-22M350 58c-9-9 8-15 0-25s9-15 0-25M480 62c-8-8 7-13 0-22s8-13 1-21"/>' +
       '<path class="a-em2" d="M122.3 40a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM212.3 50a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM260.3 34a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM398.3 44a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0ZM444.3 28a1.7 1.7 0 1 0 3.4 0a1.7 1.7 0 1 0-3.4 0Z"/></svg>';
+  }
+
+  /* Hojas de monstera con sus cortes, mangos y una flor de cayena. Franja de abajo. Los cortes se pintan con el
+     color de fondo, que es el de la portada. */
+  function monsteraSVG() {
+    const leaf = 'M0 0C-46-8-66-62-36-98C-20-116-4-110 0-100C4-110 20-116 36-98C66-62 46-8 0 0Z';
+    const cuts = 'M-36 -23.2L-12 -28L-36 -14.8ZM36 -23.2L12 -28L36 -14.8ZM-48 -44.2L-15 -46L-48 -35.8ZM48 -44.2L15 -46L48 -35.8ZM-52 -67.2L-16 -66L-52 -58.8ZM52 -67.2L16 -66L52 -58.8ZM-48 -87.2L-14 -80L-48 -78.8ZM48 -87.2L14 -80L48 -78.8ZM-31-109L-8-94L-24-112ZM31-109L8-94L24-112ZM-33.2 -34a3.2 4.2 0 1 0 6.4 0a3.2 4.2 0 1 0-6.4 0ZM-36.2 -55a3.2 4.2 0 1 0 6.4 0a3.2 4.2 0 1 0-6.4 0ZM26.8 -35a3.2 4.2 0 1 0 6.4 0a3.2 4.2 0 1 0-6.4 0ZM29.8 -74a3.2 4.2 0 1 0 6.4 0a3.2 4.2 0 1 0-6.4 0Z';
+    const one = function (x, a, k, sc) {
+      return '<g transform="translate(' + x + ' 136) rotate(' + a + ') scale(' + sc + ')"><path class="a-mo' + k + '" d="' + leaf + '"/>' +
+        '<path class="a-mor" d="M0-2V-96"/><path class="a-mos" d="' + cuts + '"/></g>';
+    };
+    const mango = function (x, y, a) {
+      return '<g transform="translate(' + x + ' ' + y + ') rotate(' + a + ')"><ellipse class="a-mf" rx="13" ry="10"/><path class="a-mo1" d="M2-9c4-8 12-10 16-8-3 6-9 9-16 8Z"/></g>';
+    };
+    let flower = '';
+    for (let i = 0; i < 5; i++) {
+      const t = i * Math.PI * 2 / 5 - Math.PI / 2;
+      flower += '<circle class="a-mh" cx="' + r1(312 + Math.cos(t) * 9) + '" cy="' + r1(104 + Math.sin(t) * 9) + '" r="8.5"/>';
+    }
+    return '<svg class="art art-band art-mons" viewBox="0 0 600 130" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">' +
+      one(40, -28, 2, 1.05) + one(132, 14, 1, 0.86) + one(250, -12, 2, 1.12) + one(366, 22, 1, 0.9) + one(474, -18, 2, 1.06) + one(566, 26, 1, 0.9) +
+      mango(196, 116, -18) + flower + '<circle class="a-mf" cx="312" cy="104" r="4"/>' + mango(424, 118, 14) + mango(536, 114, -8) + '</svg>';
   }
 
   /* Jeep Willys cargado con bultos de café y racimos de plátano. Escena arriba del título. */
@@ -5099,6 +5201,75 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 12. BARRA DE JUGOS · TROPICAL ---------- */
+  {
+    v: 1, id: 'tpl-mango', template: true,
+    brand: {
+      name: 'Mango Biche', tagline: 'Jugos, açaí, ensaladas de fruta y wraps', kind: 'Barra de jugos',
+      logo: { type: 'emoji', value: '🥭' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Calle 13 # 15-08, local 2', addressNote: 'Al lado de la galería, frente al paradero de buses.',
+      mapsQuery: 'Galería, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['07:00', '19:00'], 2: ['07:00', '19:00'], 3: ['07:00', '19:00'], 4: ['07:00', '19:00'], 5: ['07:00', '19:00'], 6: ['07:00', '19:00'], 0: ['08:00', '14:00'] })
+    },
+    i18n: { bilingual: false, usted: false },
+    theme: {
+      skin: 'tropical',
+      colors: { bg: '#FFF5E6', surface: '#FFFFFF', ink: '#123D2E', muted: '#4A685B', accent: '#C8175F', accent2: '#0D7347', accent3: '#F6A21E' },
+      fonts: { display: 'Fredoka', body: 'Figtree' }, radius: 18, motion: 'vivo', texture: 'hojas', icons: 'emoji',
+      carta: { desc: 'completa' }, fx: { reveal: 'lado' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'jugos', name: 'Jugos naturales', icon: '🍹', note: 'En agua o en leche, sin azúcar si quieres', items: [
+          IT('lulo', 'Jugo de lulo', 'El de la región, ácido y fresco.', 6500, '🍹', ['local', 'popular']),
+          IT('maracuya', 'Jugo de maracuyá', 'Bien frío.', 6500, '🍹'),
+          IT('mora', 'Jugo de mora', 'Mora de Castilla de las fincas vecinas.', 6500, '🫐', ['local']),
+          IT('limonada-coco', 'Limonada de coco', 'Cremosa, con leche de coco.', 8900, '🥥', ['popular']),
+          IT('verde', 'Jugo verde', 'Piña, pepino, espinaca y jengibre.', 9500, '🥬', ['vegano', 'nuevo'])
+        ] },
+        { id: 'acai', name: 'Bowls de açaí', icon: '🫐', note: 'Con granola de la casa', items: [
+          IT('acai-clasico', 'Bowl clásico', 'Açaí, banano, granola y miel.', 18900, '🫐', ['popular']),
+          IT('acai-tropical', 'Bowl tropical', 'Açaí, mango, piña, coco y semillas de chía.', 19900, '🥭', ['vegano']),
+          IT('acai-proteico', 'Bowl proteico', 'Açaí, mantequilla de maní, banano y proteína.', 21900, '🥜', ['nuevo'])
+        ] },
+        { id: 'frutas', name: 'Frutas', icon: '🍓', note: '', items: [
+          IT('ensalada', 'Ensalada de frutas', 'Con helado, crema y queso rallado.', 14900, '🍓', ['popular', 'local']),
+          IT('salpicon', 'Salpicón', 'Frutas picadas en jugo de sandía.', 9900, '🍉'),
+          IT('fresas', 'Fresas con crema', 'Fresas de la región.', 11900, '🍓', ['temporada']),
+          IT('mango-biche', 'Mango biche', 'En vaso, con sal, limón y pimienta.', 5500, '🥭', ['local', 'vegano'])
+        ] },
+        { id: 'wraps', name: 'Wraps y arepas', icon: '🌯', note: 'Para el almuerzo liviano', items: [
+          IT('wrap-pollo', 'Wrap de pollo', 'Pollo a la plancha, lechuga, tomate y salsa de yogur.', 17900, '🌯', ['popular']),
+          IT('wrap-veggie', 'Wrap vegetariano', 'Hummus, aguacate, zanahoria y espinaca.', 16900, '🥑', ['vegano']),
+          IT('sandwich', 'Sándwich de pavo', 'Pan integral, pavo, queso y vegetales.', 15900, '🥪'),
+          IT('arepa', 'Arepa con aguacate', 'Arepa de maíz, aguacate y queso campesino.', 9900, '🫓', ['vegetariano', 'local'])
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Al lado de la galería', title: '', subtitle: 'Fruta fresca de la región, licuada al momento.', cta1: 'carta', cta2: 'pedido', showStatus: true, ribbon: 'Jugos naturales, Bowls de açaí, Ensaladas de fruta, Wraps' } },
+      { id: 'top', type: 'destacados', on: true, s: { title: 'Los favoritos', tag: 'popular', max: 4, layout: 'lista' } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'cuadricula', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'combos', type: 'promos', on: true, s: { title: 'Combos', highlightToday: true, layout: 'carrusel', items: [
+        { days: [1, 2, 3, 4, 5], title: 'Desayuno tropical', desc: 'Jugo natural y arepa con aguacate, hasta las 10:00 a. m.', price: 14900 },
+        { days: [2], title: 'Martes de açaí', desc: 'El segundo bowl a mitad de precio.', price: 18900 },
+        { days: [3, 4, 5, 6], title: 'Combo wrap', desc: 'Cualquier wrap con jugo natural.', price: 22900 }
+      ] } },
+      { id: 'sellos', type: 'sellos', on: true, s: { title: 'Tarjeta Mango', goal: 9, reward: 'El décimo jugo va por la casa', icon: '🥭', pin: '7351', note: 'Un sello por cada jugo o bowl.' } },
+      { id: 'pedido', type: 'pedido', on: true, s: { title: 'Pide para llevar', showSection: true, modes: { mesa: false, llevar: true, domicilio: true }, deliveryFee: 2500, minOrder: 12000, deliveryNote: 'Domicilios en el casco urbano.', payments: 'Efectivo, Nequi, Daviplata', intro: '' } },
+      { id: 'servicios', type: 'servicios', on: true, s: { title: 'Servicios', list: ['domicilios', 'wifi', 'tarjeta', 'transferencia', 'mascotas'], extra: 'Leches vegetales', note: '' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Te gustó?', text: 'Déjanos una reseña o escríbenos por WhatsApp.', rating: '', _bg: 'acento', quotes: [
+        { text: 'El bowl tropical es mi desayuno de los sábados. Todo fresco.', author: 'Valentina S.' },
+        { text: 'La limonada de coco más rica del pueblo, y atienden rapidísimo.', author: 'Sebastián M.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 8:00 a. m. a 2:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
@@ -5258,6 +5429,17 @@ const SKINS = {
       { name: 'Azul diner', colors: { bg: '#E5EDF5', surface: '#F8FBFE', ink: '#18222E', muted: '#4E5C6B', accent: '#BD2338', accent2: '#1D669C', accent3: '#F2B632' } },
       { name: 'Rocola', colors: { bg: '#1F1517', surface: '#2C1E21', ink: '#FBEFE3', muted: '#C7B2A8', accent: '#FF6272', accent2: '#6FD6BE', accent3: '#F5C14B' } }
     ]
+  },
+  tropical: {
+    label: 'Tropical', art: 'Jugos', desc: 'Verde selva, mango y fucsia, esquinas en forma de hoja y letra redonda. Para jugos, açaí, fruterías y comida fresca.', layout: 'cuadricula',
+    defaults: { colors: { bg: '#FFF5E6', surface: '#FFFFFF', ink: '#123D2E', muted: '#4A685B', accent: '#C8175F', accent2: '#0D7347', accent3: '#F6A21E' }, fonts: { display: 'Fredoka', body: 'Figtree' }, radius: 18, motion: 'vivo', texture: 'hojas', icons: 'emoji' },
+    palettes: [
+      { name: 'Mango', colors: { bg: '#FFF5E6', surface: '#FFFFFF', ink: '#123D2E', muted: '#4A685B', accent: '#C8175F', accent2: '#0D7347', accent3: '#F6A21E' } },
+      { name: 'Selva', colors: { bg: '#0E3528', surface: '#164536', ink: '#FFF3DF', muted: '#B9D0C2', accent: '#FF85B6', accent2: '#FFB43C', accent3: '#7FE0A8' } },
+      { name: 'Pitahaya', colors: { bg: '#FFF0F5', surface: '#FFFFFF', ink: '#3A1530', muted: '#755467', accent: '#B0156A', accent2: '#0E7458', accent3: '#FFC23D' } },
+      { name: 'Coco', colors: { bg: '#F6F1E7', surface: '#FFFFFF', ink: '#1F2B24', muted: '#58645D', accent: '#B5411A', accent2: '#18704E', accent3: '#F2C14E' } },
+      { name: 'Maracuyá', colors: { bg: '#24123A', surface: '#33204B', ink: '#FFF3E8', muted: '#C8B6D6', accent: '#FFC94A', accent2: '#7EE3B0', accent3: '#FF7AB6' } }
+    ]
   }
 };
 
@@ -5407,7 +5589,7 @@ const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3'
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
-  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
+  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['monstera', 'Hojas de monstera'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',

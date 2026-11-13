@@ -109,6 +109,17 @@ const SKINS = {
       { name: 'Azul diner', colors: { bg: '#E5EDF5', surface: '#F8FBFE', ink: '#18222E', muted: '#4E5C6B', accent: '#BD2338', accent2: '#1D669C', accent3: '#F2B632' } },
       { name: 'Rocola', colors: { bg: '#1F1517', surface: '#2C1E21', ink: '#FBEFE3', muted: '#C7B2A8', accent: '#FF6272', accent2: '#6FD6BE', accent3: '#F5C14B' } }
     ]
+  },
+  tropical: {
+    label: 'Tropical', art: 'Jugos', desc: 'Verde selva, mango y fucsia, esquinas en forma de hoja y letra redonda. Para jugos, açaí, fruterías y comida fresca.', layout: 'cuadricula',
+    defaults: { colors: { bg: '#FFF5E6', surface: '#FFFFFF', ink: '#123D2E', muted: '#4A685B', accent: '#C8175F', accent2: '#0D7347', accent3: '#F6A21E' }, fonts: { display: 'Fredoka', body: 'Figtree' }, radius: 18, motion: 'vivo', texture: 'hojas', icons: 'emoji' },
+    palettes: [
+      { name: 'Mango', colors: { bg: '#FFF5E6', surface: '#FFFFFF', ink: '#123D2E', muted: '#4A685B', accent: '#C8175F', accent2: '#0D7347', accent3: '#F6A21E' } },
+      { name: 'Selva', colors: { bg: '#0E3528', surface: '#164536', ink: '#FFF3DF', muted: '#B9D0C2', accent: '#FF85B6', accent2: '#FFB43C', accent3: '#7FE0A8' } },
+      { name: 'Pitahaya', colors: { bg: '#FFF0F5', surface: '#FFFFFF', ink: '#3A1530', muted: '#755467', accent: '#B0156A', accent2: '#0E7458', accent3: '#FFC23D' } },
+      { name: 'Coco', colors: { bg: '#F6F1E7', surface: '#FFFFFF', ink: '#1F2B24', muted: '#58645D', accent: '#B5411A', accent2: '#18704E', accent3: '#F2C14E' } },
+      { name: 'Maracuyá', colors: { bg: '#24123A', surface: '#33204B', ink: '#FFF3E8', muted: '#C8B6D6', accent: '#FFC94A', accent2: '#7EE3B0', accent3: '#FF7AB6' } }
+    ]
   }
 };
 
@@ -258,7 +269,7 @@ const ROLE_SWATCHES = [['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3'
 /* Portada: diseños y decoraciones (los dibujos están en el motor). */
 const HERO_VARIANT_OPTS = [['auto', 'Según la foto'], ['texto', 'Solo texto'], ['foto', 'Foto de fondo con velo'], ['arriba', 'Foto arriba y texto abajo'], ['tarjeta', 'Tarjeta sobre la foto']];
 const HERO_DECO_OPTS = [['auto', 'Según la estética'], ['ninguna', 'Ninguna'], ['araucarias', 'Araucarias'], ['cafetal', 'Cafetal'], ['guadua', 'Guadual'], ['termales', 'Termales'],
-  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
+  ['willys', 'Jeep Willys'], ['garabatos', 'Dibujos de tiza'], ['brasas', 'Parrilla con brasas'], ['damero', 'Franja de cuadros'], ['monstera', 'Hojas de monstera'], ['fachada', 'Fachada y zócalo'], ['lomas', 'Lomas sembradas'], ['stickers', 'Stickers'], ['neon', 'Letrero de neón']];
 /* Nombres de los íconos de línea en el selector del estudio. Los dibujos y sus grupos están en el motor (opts.meta). */
 const ICON_NAMES = {
   cubiertos: 'Cubiertos', pan: 'Pan', baguette: 'Baguette', croissant: 'Croissant', rosca: 'Rosca o dona', bunuelo: 'Buñuelo', arepa: 'Arepa', empanada: 'Empanada',

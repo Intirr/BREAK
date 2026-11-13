@@ -952,6 +952,75 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', layout: 'botones' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 12. BARRA DE JUGOS · TROPICAL ---------- */
+  {
+    v: 1, id: 'tpl-mango', template: true,
+    brand: {
+      name: 'Mango Biche', tagline: 'Jugos, açaí, ensaladas de fruta y wraps', kind: 'Barra de jugos',
+      logo: { type: 'emoji', value: '🥭' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Calle 13 # 15-08, local 2', addressNote: 'Al lado de la galería, frente al paradero de buses.',
+      mapsQuery: 'Galería, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['07:00', '19:00'], 2: ['07:00', '19:00'], 3: ['07:00', '19:00'], 4: ['07:00', '19:00'], 5: ['07:00', '19:00'], 6: ['07:00', '19:00'], 0: ['08:00', '14:00'] })
+    },
+    i18n: { bilingual: false, usted: false },
+    theme: {
+      skin: 'tropical',
+      colors: { bg: '#FFF5E6', surface: '#FFFFFF', ink: '#123D2E', muted: '#4A685B', accent: '#C8175F', accent2: '#0D7347', accent3: '#F6A21E' },
+      fonts: { display: 'Fredoka', body: 'Figtree' }, radius: 18, motion: 'vivo', texture: 'hojas', icons: 'emoji',
+      carta: { desc: 'completa' }, fx: { reveal: 'lado' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'jugos', name: 'Jugos naturales', icon: '🍹', note: 'En agua o en leche, sin azúcar si quieres', items: [
+          IT('lulo', 'Jugo de lulo', 'El de la región, ácido y fresco.', 6500, '🍹', ['local', 'popular']),
+          IT('maracuya', 'Jugo de maracuyá', 'Bien frío.', 6500, '🍹'),
+          IT('mora', 'Jugo de mora', 'Mora de Castilla de las fincas vecinas.', 6500, '🫐', ['local']),
+          IT('limonada-coco', 'Limonada de coco', 'Cremosa, con leche de coco.', 8900, '🥥', ['popular']),
+          IT('verde', 'Jugo verde', 'Piña, pepino, espinaca y jengibre.', 9500, '🥬', ['vegano', 'nuevo'])
+        ] },
+        { id: 'acai', name: 'Bowls de açaí', icon: '🫐', note: 'Con granola de la casa', items: [
+          IT('acai-clasico', 'Bowl clásico', 'Açaí, banano, granola y miel.', 18900, '🫐', ['popular']),
+          IT('acai-tropical', 'Bowl tropical', 'Açaí, mango, piña, coco y semillas de chía.', 19900, '🥭', ['vegano']),
+          IT('acai-proteico', 'Bowl proteico', 'Açaí, mantequilla de maní, banano y proteína.', 21900, '🥜', ['nuevo'])
+        ] },
+        { id: 'frutas', name: 'Frutas', icon: '🍓', note: '', items: [
+          IT('ensalada', 'Ensalada de frutas', 'Con helado, crema y queso rallado.', 14900, '🍓', ['popular', 'local']),
+          IT('salpicon', 'Salpicón', 'Frutas picadas en jugo de sandía.', 9900, '🍉'),
+          IT('fresas', 'Fresas con crema', 'Fresas de la región.', 11900, '🍓', ['temporada']),
+          IT('mango-biche', 'Mango biche', 'En vaso, con sal, limón y pimienta.', 5500, '🥭', ['local', 'vegano'])
+        ] },
+        { id: 'wraps', name: 'Wraps y arepas', icon: '🌯', note: 'Para el almuerzo liviano', items: [
+          IT('wrap-pollo', 'Wrap de pollo', 'Pollo a la plancha, lechuga, tomate y salsa de yogur.', 17900, '🌯', ['popular']),
+          IT('wrap-veggie', 'Wrap vegetariano', 'Hummus, aguacate, zanahoria y espinaca.', 16900, '🥑', ['vegano']),
+          IT('sandwich', 'Sándwich de pavo', 'Pan integral, pavo, queso y vegetales.', 15900, '🥪'),
+          IT('arepa', 'Arepa con aguacate', 'Arepa de maíz, aguacate y queso campesino.', 9900, '🫓', ['vegetariano', 'local'])
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Al lado de la galería', title: '', subtitle: 'Fruta fresca de la región, licuada al momento.', cta1: 'carta', cta2: 'pedido', showStatus: true, ribbon: 'Jugos naturales, Bowls de açaí, Ensaladas de fruta, Wraps' } },
+      { id: 'top', type: 'destacados', on: true, s: { title: 'Los favoritos', tag: 'popular', max: 4, layout: 'lista' } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', intro: '', layout: 'cuadricula', priceStyle: 'full', showFilters: true, showSearch: false, footnote: 'Precios en pesos colombianos, impuestos incluidos.' } },
+      { id: 'combos', type: 'promos', on: true, s: { title: 'Combos', highlightToday: true, layout: 'carrusel', items: [
+        { days: [1, 2, 3, 4, 5], title: 'Desayuno tropical', desc: 'Jugo natural y arepa con aguacate, hasta las 10:00 a. m.', price: 14900 },
+        { days: [2], title: 'Martes de açaí', desc: 'El segundo bowl a mitad de precio.', price: 18900 },
+        { days: [3, 4, 5, 6], title: 'Combo wrap', desc: 'Cualquier wrap con jugo natural.', price: 22900 }
+      ] } },
+      { id: 'sellos', type: 'sellos', on: true, s: { title: 'Tarjeta Mango', goal: 9, reward: 'El décimo jugo va por la casa', icon: '🥭', pin: '7351', note: 'Un sello por cada jugo o bowl.' } },
+      { id: 'pedido', type: 'pedido', on: true, s: { title: 'Pide para llevar', showSection: true, modes: { mesa: false, llevar: true, domicilio: true }, deliveryFee: 2500, minOrder: 12000, deliveryNote: 'Domicilios en el casco urbano.', payments: 'Efectivo, Nequi, Daviplata', intro: '' } },
+      { id: 'servicios', type: 'servicios', on: true, s: { title: 'Servicios', list: ['domicilios', 'wifi', 'tarjeta', 'transferencia', 'mascotas'], extra: 'Leches vegetales', note: '' } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Te gustó?', text: 'Déjanos una reseña o escríbenos por WhatsApp.', rating: '', _bg: 'acento', quotes: [
+        { text: 'El bowl tropical es mi desayuno de los sábados. Todo fresco.', author: 'Valentina S.' },
+        { text: 'La limonada de coco más rica del pueblo, y atienden rapidísimo.', author: 'Sebastián M.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', note: 'Festivos, de 8:00 a. m. a 2:00 p. m.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Dónde estamos', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
+    ],
+    meta: { credit: true }
   }
 ];
 

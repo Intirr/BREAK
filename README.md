@@ -1,6 +1,6 @@
 # Break Studio
 
-Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes. Incluye once apps de ejemplo: Araucaria (elegante), Antojo (animada), Casa Zócalo (cultural), La Espiga (natural, panadería), Neblina (minimalista, café de especialidad), Los Alisos (natural, truchas camino a los termales) La Esquina (nocturna, comida rápida hasta tarde) Café del Parque (pizarra, café de barrio con menú del día) Asadero El Tronco (rústico, chorizo santarrosano a la brasa) Agua Tibia (termal, restaurante de hotel termal, bilingüe) y Fuente de Soda Polar (retro, helados y malteadas desde 1968).
+Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes. Incluye doce apps de ejemplo: Araucaria (elegante), Antojo (animada), Casa Zócalo (cultural), La Espiga (natural, panadería), Neblina (minimalista, café de especialidad), Los Alisos (natural, truchas camino a los termales) La Esquina (nocturna, comida rápida hasta tarde) Café del Parque (pizarra, café de barrio con menú del día) Asadero El Tronco (rústico, chorizo santarrosano a la brasa) Agua Tibia (termal, restaurante de hotel termal, bilingüe) Fuente de Soda Polar (retro, helados y malteadas desde 1968) y Mango Biche (tropical, jugos y açaí).
 
 ```bash
 npm install

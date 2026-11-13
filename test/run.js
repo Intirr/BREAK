@@ -576,10 +576,10 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const hero = cfg => cfg.modules.find(m => m.type === 'hero').s;
     const NOW = { now: '2026-11-06T15:30:00Z' };
     // Lo de cada estética sigue igual sin tocar nada
-    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras', 'tpl-aguatibia': '.hero-box.d-termales svg.art-term', 'tpl-polar': '.hero-box.d-damero .damero' };
+    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras', 'tpl-aguatibia': '.hero-box.d-termales svg.art-term', 'tpl-polar': '.hero-box.d-damero .damero', 'tpl-mango': '.hero-box.d-monstera svg.art-mons' };
     for (const id of Object.keys(auto)) { const A = mount(TPL(id), NOW); ok(!!A.$(auto[id]), id + ': la portada conserva la decoración de su estética'); A.close(); }
     ok(/--leaf:#[0-9a-f]{6}/i.test((() => { const A = mount(TPL('tpl-espiga'), NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; })()), 'el verde de la paleta queda listo para las ilustraciones');
-    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
+    ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
     // Sin decoración
     const z = TPL('tpl-zocalo'); hero(z).deco = 'ninguna';
     let A = mount(z, NOW); ok(!A.$('.facade') && !A.$('.zocalo') && !A.$('.hero-box[class*=" d-"]'), '«Ninguna» quita la fachada y el zócalo'); A.close();
@@ -1081,6 +1081,24 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'damero';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-damero .damero') && !A.$('.hero-box.d-damero .zocalo'), 'la franja de cuadros sirve en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'damero'), 'la franja de cuadros se ofrece en el estudio');
+  }
+
+  /* 11z. Estética Tropical y Mango Biche */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    let A = mount(TPL('tpl-mango'), NOW);
+    const x = A.d.getElementById('bk-css').textContent;
+    ok(A.$('.app').getAttribute('data-skin') === 'tropical' && /\[data-skin="tropical"\] \.hero-t\{/.test(x), 'Tropical: su CSS se aplica');
+    ok(!!A.$('.hero-box.d-monstera svg.art-mons') && !!A.$('section.m-carta .lay-cuadricula') && A.d.documentElement.getAttribute('data-tex') === 'hojas' && !!A.$('.rail.promo-rail') && !!A.$('.feat-lista'), 'Mango Biche: monsteras, carta en cuadrícula, hojas de fondo, combos en carrusel y destacados en lista');
+    ok(A.d.getElementById('bk-fonts').href.includes('family=Fredoka') && A.d.getElementById('bk-fonts').href.includes('family=Figtree'), 'Tropical: pide sus tipografías a Google Fonts');
+    ok(x.includes('@media (prefers-color-scheme:dark){:root:not([data-scheme="light"]){--bg:'), 'Mango Biche: modo oscuro automático');
+    A.close();
+    const block = (SRC('runtime.js').match(/\n    tropical: `([\s\S]*?)`/) || [])[1] || '';
+    ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Tropical: su CSS solo usa colores de la paleta');
+    ok(/calc\(var\(--r\) \* 1\.6\) calc\(var\(--r\) \* \.35\)/.test(block), 'Tropical: las esquinas de hoja siguen las esquinas que elija el usuario');
+    const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'monstera';
+    A = mount(z, NOW); ok(!!A.$('.hero-box.d-monstera svg.art-mons') && !A.$('.hero-box.d-monstera .facade'), 'las monsteras sirven en cualquier estética'); A.close();
+    ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'monstera'), 'las monsteras se ofrecen en el estudio');
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */
