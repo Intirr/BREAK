@@ -68,10 +68,10 @@ const SKINS = {
   }
 };
 
-const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'DM Serif Display', 'Fraunces', 'Young Serif', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Pacifico', 'Caveat', 'Tilt Neon', 'Bricolage Grotesque', 'Schibsted Grotesk', 'Archivo Black', 'Oswald', 'Alfa Slab One'];
-const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Barlow', 'Instrument Sans', 'Rubik', 'Outfit', 'Lora', 'Source Serif 4'];
+const DISPLAY_FONTS = ['Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', 'DM Serif Display', 'Fraunces', 'Young Serif', 'Yeseva One', 'Abril Fatface', 'Lilita One', 'Fredoka', 'Baloo 2', 'Pacifico', 'Caveat', 'Tilt Neon', 'Bricolage Grotesque', 'Schibsted Grotesk', 'Archivo Black', 'Oswald', 'Alfa Slab One', 'Amatic SC', 'Bebas Neue', 'Big Shoulders Stencil', 'Instrument Serif'];
+const BODY_FONTS = ['Jost', 'Nunito', 'Alegreya Sans', 'DM Sans', 'Work Sans', 'Karla', 'Libre Franklin', 'Figtree', 'Barlow', 'Instrument Sans', 'Rubik', 'Outfit', 'Lora', 'Source Serif 4', 'Kalam'];
 /* Detalle de fondo de la app: [clave, nombre en el estudio]. */
-const TEXTURES = [['none', 'Ninguno'], ['grano', 'Grano'], ['papel', 'Papel'], ['puntos', 'Puntos'], ['rayas', 'Rayas'], ['cuadros', 'Mantel'], ['hojas', 'Hojas'], ['ondas', 'Ondas'], ['zocalo', 'Zócalo']];
+const TEXTURES = [['none', 'Ninguno'], ['grano', 'Grano'], ['papel', 'Papel'], ['puntos', 'Puntos'], ['rayas', 'Rayas'], ['cuadros', 'Mantel'], ['hojas', 'Hojas'], ['ondas', 'Ondas'], ['zocalo', 'Zócalo'], ['tiza', 'Tiza'], ['madera', 'Madera']];
 const COLOR_KEYS = [['bg', 'Fondo'], ['surface', 'Tarjetas'], ['ink', 'Texto'], ['muted', 'Texto suave'], ['accent', 'Acento'], ['accent2', 'Acento 2'], ['accent3', 'Acento 3']];
 const TAGS = [['chef', 'Recomendado'], ['popular', 'Favorito'], ['nuevo', 'Nuevo'], ['temporada', 'De temporada'], ['local', 'De la región'], ['compartir', 'Para compartir'], ['ninos', 'Para niños'], ['vegano', 'Vegano'], ['vegetariano', 'Vegetariano'], ['singluten', 'Sin gluten'], ['sinlactosa', 'Sin lactosa'], ['picante', 'Picante']];
 const CTA_OPTS = [['carta', 'Ver la carta'], ['reservas', 'Reservar mesa'], ['pedido', 'Hacer un pedido'], ['sellos', 'Tarjeta de sellos'], ['ubicacion', 'Cómo llegar'], ['eventos', 'Ver la agenda'], ['whatsapp', 'Escribir por WhatsApp'], ['none', 'Ninguno']];

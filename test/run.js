@@ -322,7 +322,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   {
     const lum = h => { h = h.replace('#', ''); const c = [0, 2, 4].map(i => { const v = parseInt(h.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
     const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
-    const bad = [];
+    const bad = [], RTF = SRC('runtime.js');
     for (const k of Object.keys(ctx.SKINS)) {
       const sk = ctx.SKINS[k];
       eq(sk.palettes.length, 5, k + ': cinco paletas');
@@ -330,6 +330,8 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
       ok(sk.palettes.some(p => JSON.stringify(p.colors) === JSON.stringify(sk.defaults.colors)), k + ': sus colores por defecto son una de sus paletas');
     }
     eq(bad.join(', '), '', 'todas las paletas tienen buen contraste');
+    ok(Object.keys(ctx.SKINS).every(k => ['lista', 'tarjetas', 'cuadricula', 'fotos', 'compacta'].includes(ctx.SKINS[k].layout) && ctx.SKINS[k].art && ctx.SKINS[k].desc), 'cada estética trae diseño de carta, muestra y descripción');
+    ok(Object.keys(ctx.SKINS).every(k => ['display', 'body'].every(f => RTF.indexOf("'" + ctx.SKINS[k].defaults.fonts[f] + "': [") >= 0)), 'las tipografías de cada estética están en el motor');
     const RT = SRC('runtime.js');
     eq(ctx.DISPLAY_FONTS.concat(ctx.BODY_FONTS).filter(f => RT.indexOf("'" + f + "': [") < 0).join(', '), '', 'cada tipografía del estudio está en el motor');
     for (const t of ctx.TEXTURES.map(x => x[0]).filter(x => x !== 'none')) {
@@ -1060,7 +1062,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   ok(ST.pv.ready && ST.pv.frame.contentDocument.querySelectorAll('section[data-mid]').length === 10, 'la vista previa muestra los 10 módulos de Araucaria');
   eq($$('.tab').length, 6, 'pestañas');
   eq($$('.skin').length, Object.keys(ctx.SKINS).length, 'todas las estéticas para elegir');
-  eq($$('.skin').length, 6, 'seis estéticas');
+  eq(Object.keys(ctx.SKINS).sort().join(','), ST.meta.skins.slice().sort().join(','), 'cada estética del catálogo tiene su CSS en el motor y viceversa');
 
   // Abrir otra plantilla desde el selector de la vista previa
   click($('[data-a="open-tpl"][data-id="tpl-antojo"]'));

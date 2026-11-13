@@ -40,7 +40,12 @@ function breakApp(win, doc, initialCfg, opts) {
     'Karla': [':ital,wght@0,400;0,500;0,700;1,400', 'system-ui, sans-serif'],
     'Lora': [':ital,wght@0,400;0,600;1,400', 'Georgia, serif'],
     'Libre Franklin': [':ital,wght@0,400;0,600;0,800;1,400', 'system-ui, sans-serif'],
-    'Figtree': [':wght@400;600;700', 'system-ui, sans-serif']
+    'Figtree': [':wght@400;600;700', 'system-ui, sans-serif'],
+    'Amatic SC': [':wght@400;700', '"Comic Sans MS", cursive'],
+    'Kalam': [':wght@300;400;700', '"Comic Sans MS", cursive'],
+    'Bebas Neue': ['', 'Impact, "Arial Narrow", system-ui, sans-serif'],
+    'Big Shoulders Stencil': [':wght@600;700;800', 'Impact, "Arial Narrow", system-ui, sans-serif'],
+    'Instrument Serif': [':ital@0;1', 'Georgia, serif']
   };
 
   /* ---------- Textos de interfaz ---------- */
@@ -690,6 +695,8 @@ html[data-tex="puntos"] body{background-image:radial-gradient(color-mix(in srgb,
 html[data-tex="rayas"] body{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 5%,transparent) 0 2px,transparent 2px 13px)}
 html[data-tex="grano"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 html[data-tex="papel"] body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .33 0 0 0 0 .25 0 0 0 .7 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+html[data-tex="tiza"] body{background-image:radial-gradient(ellipse 58% 6% at 22% 7%,color-mix(in srgb,var(--ink) 7%,transparent),transparent 72%),radial-gradient(ellipse 46% 5% at 78% 31%,color-mix(in srgb,var(--ink) 6%,transparent),transparent 72%),radial-gradient(ellipse 62% 6% at 32% 58%,color-mix(in srgb,var(--ink) 6%,transparent),transparent 72%),radial-gradient(ellipse 42% 5% at 74% 84%,color-mix(in srgb,var(--ink) 7%,transparent),transparent 72%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)'/%3E%3C/svg%3E");background-size:100% 1600px,100% 1600px,100% 1600px,100% 1600px,180px 180px}
+html[data-tex="madera"] body{background-image:repeating-linear-gradient(90deg,transparent 0 118px,rgba(0,0,0,.2) 118px 120px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 1px,transparent 1px 9px,color-mix(in srgb,var(--ink) 3%,transparent) 9px 10px,transparent 10px 23px),repeating-linear-gradient(90deg,transparent 0 13px,rgba(0,0,0,.05) 13px 15px,transparent 15px 37px),repeating-linear-gradient(180deg,transparent 0 318px,rgba(0,0,0,.12) 318px 320px)}
 html[data-tex="cuadros"] body{background-image:linear-gradient(90deg,color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%),linear-gradient(color-mix(in srgb,var(--accent) 8%,transparent) 50%,transparent 50%);background-size:28px 28px}
 html[data-tex="zocalo"] .m+.m{position:relative}
 html[data-tex="zocalo"] .m+.m::before{content:"";position:absolute;left:20px;right:20px;top:0;height:10px;background:${ZZ};opacity:.9}
