@@ -1,4 +1,4 @@
-/* Break · las tres apps de ejemplo. Todo es configuración: el motor es el mismo. */
+/* Break · las apps de ejemplo, al menos una por estética. Todo es configuración: el motor es el mismo. */
 const HOURS = function (spec) {
   /* spec: { 0: ['12:00','17:00'] | null, ... } con 0 = domingo */
   return [1, 2, 3, 4, 5, 6, 0].map(function (d) {

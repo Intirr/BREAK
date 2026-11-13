@@ -1,6 +1,21 @@
 # Break Studio
 
-Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes. Incluye quince apps de ejemplo: Araucaria (elegante), Antojo (animada), Casa Zócalo (cultural), La Espiga (natural, panadería), Neblina (minimalista, café de especialidad), Los Alisos (natural, truchas camino a los termales) La Esquina (nocturna, comida rápida hasta tarde) Café del Parque (pizarra, café de barrio con menú del día) Asadero El Tronco (rústico, chorizo santarrosano a la brasa) Agua Tibia (termal, restaurante de hotel termal, bilingüe) Fuente de Soda Polar (retro, helados y malteadas desde 1968) Mango Biche (tropical, jugos y açaí) Pastelería La Rosa (bistró, pastelería con almuerzo ejecutivo) La Fábrica (industrial, cervecería artesanal) y Mesa Larga (editorial, cocina de autor y brunch).
+Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes. Trae catorce estéticas, cada una con al menos una app de ejemplo:
+
+- **Elegante**: Araucaria, cocina de montaña (bilingüe).
+- **Animado**: Antojo, arepas y malteadas.
+- **Cultural**: Casa Zócalo, cocina típica.
+- **Natural**: La Espiga (panadería) y Los Alisos (truchas camino a los termales, bilingüe).
+- **Nocturna**: La Esquina, comida rápida hasta tarde.
+- **Minimalista**: Neblina, café de especialidad.
+- **Pizarra**: Café del Parque, café de barrio con menú del día.
+- **Rústico**: Asadero El Tronco, chorizo santarrosano a la brasa.
+- **Termal**: Agua Tibia, restaurante de hotel termal (bilingüe).
+- **Retro**: Fuente de Soda Polar, helados y malteadas desde 1968.
+- **Tropical**: Mango Biche, jugos y açaí.
+- **Bistró**: Pastelería La Rosa, pastelería con almuerzo ejecutivo.
+- **Industrial**: La Fábrica, cervecería artesanal.
+- **Editorial**: Mesa Larga, cocina de autor y brunch.
 
 ```bash
 npm install

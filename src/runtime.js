@@ -258,7 +258,7 @@ const ART_CSS = [
 [data-motion="vivo"] .stk.s4{animation-delay:-.6s}
 .toldo{display:block;height:48px;margin:0 calc(-1 * max(20px,env(safe-area-inset-left,0px))) 30px;border-top:5px solid var(--ink);background:repeating-linear-gradient(90deg,var(--accent) 0 28px,var(--surface) 28px 56px);-webkit-mask:linear-gradient(black,black) 0 0/100% calc(100% - 14px) no-repeat,radial-gradient(circle at 14px 0,black 14px,transparent 14.5px) 0 100%/28px 14px repeat-x;mask:linear-gradient(black,black) 0 0/100% calc(100% - 14px) no-repeat,radial-gradient(circle at 14px 0,black 14px,transparent 14.5px) 0 100%/28px 14px repeat-x}
 section.m-hero:has(.toldo){padding-top:0}
-.obra{height:26px;margin-top:36px;transform:skewY(-2deg);border-block:3px solid var(--on-accent);background:repeating-linear-gradient(-45deg,var(--accent) 0 18px,var(--on-accent) 18px 36px)}
+.obra{height:26px;margin-top:36px;transform:skewY(-2deg);border-block:3px solid var(--on-accent,var(--bg));background:repeating-linear-gradient(-45deg,var(--accent) 0 18px,var(--on-accent,var(--bg)) 18px 36px)}
 .damero{height:30px;margin-top:34px;border-top:6px solid var(--accent);background:repeating-conic-gradient(var(--ink) 0 25%,var(--surface) 0 50%) 0 0/30px 30px}
 .hills{display:block;width:100%;height:72px;margin-top:30px}
 .hills .hl1{fill:color-mix(in srgb,var(--accent3) 50%,var(--bg))}

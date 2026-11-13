@@ -1139,6 +1139,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'obra';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-obra .obra') && !A.$('.hero-box.d-obra .facade'), 'la franja de obra sirve en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'obra'), 'la franja de obra se ofrece en el estudio');
+    ok(/\.obra\{[^}]*var\(--on-accent,var\(--bg\)\)/.test(ctx.breakApp(null, null, null, { meta: true }).decoCSS), 'la franja de obra se ve en las miniaturas del estudio, que no definen --on-accent');
   }
 
   /* 11zc. Estética Editorial y Mesa Larga */

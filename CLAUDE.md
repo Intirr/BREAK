@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (818 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (819 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -60,12 +60,12 @@ El estudio agrega solo, al final de cada módulo menos portada y aviso, «Diseñ
 ### Añadir una decoración de portada
 
 1. Función que devuelve el SVG en `runtime.js` (junto a `araucariasSVG()`), con clases `art art-band` (franja de abajo) o `art art-scene` (escena arriba del título, se oculta con foto) y colores solo por variables en `ART_CSS`.
-2. Su clave en `ART`, `HERO_DECOS` y `decoPreview()`; su nombre en `HERO_DECO_OPTS` de `catalog.js`.
+2. Su clave en `ART`, `HERO_DECOS` y `decoPreview()`; su nombre en `HERO_DECO_OPTS` de `catalog.js`. Las franjas de CSS (zócalo, `damero`, `toldo`, `obra`) van en `DECO_CSS` y en la cadena de `RENDER.hero`. Las miniaturas del estudio solo definen la paleta y `artVars()`: si la decoración usa otra variable (como `--on-accent`), ponle un respaldo.
 3. Revísala con la paleta de todas las estéticas antes de usarla, y pruebas en `test/run.js`.
 
 ### Añadir una estética
 
-1. Bloque en `CSS_SKIN` dentro de `runtime.js`, con selectores `[data-skin="clave"]` y colores solo por variables (`var(--accent)`, `color-mix(…)`). La decoración de portada, si la tiene, va en `RENDER.hero`.
+1. Bloque en `CSS_SKIN` dentro de `runtime.js`, con selectores `[data-skin="clave"]` y colores solo por variables (`var(--accent)`, `color-mix(…)`); la prueba de cada estética falla si el bloque trae un color fijo. Las máscaras de adornos son constantes del motor junto a `SQUIG` (`GRILL`, `RIPPLE`) y se usan con `${…}`. Un precio con forma propia usa solo fondo, relleno, borde y esquinas (nada de `clip-path`, máscara ni giro), para que las opciones de precio de la carta lo quiten. Un acento que no se lee sobre el fondo (el mostaza de Retro, el amarillo de Industrial) solo va de relleno. La decoración de portada, si la tiene, va en `RENDER.hero` y su clave en `HERO_AUTO`.
 2. Entrada en `SKINS` de `catalog.js` con `label`, `art` (texto de la muestra), `desc`, `layout`, `defaults` y `palettes`. Revisa el contraste: texto sobre fondo y sobre tarjetas de 4,5:1 o más.
 3. Muestra `.sk-clave` en `studio.css` y su tipografía en el enlace de Google Fonts de `page.html`.
 4. Pruebas en `test/run.js`.
