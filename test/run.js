@@ -1081,6 +1081,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'damero';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-damero .damero') && !A.$('.hero-box.d-damero .zocalo'), 'la franja de cuadros sirve en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'damero'), 'la franja de cuadros se ofrece en el estudio');
+    ok(/\[data-skin="retro"\] \.top :focus-visible\{outline-color:var\(--c-top-on,var\(--on-accent\)\)\}/.test(block), 'Retro: el anillo de foco se ve sobre el encabezado rojo');
   }
 
   /* 11z. Estética Tropical y Mango Biche */
@@ -1139,6 +1140,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'obra';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-obra .obra') && !A.$('.hero-box.d-obra .facade'), 'la franja de obra sirve en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'obra'), 'la franja de obra se ofrece en el estudio');
+    ok(/\[data-skin="industrial"\] :focus-visible\{outline-color:var\(--ink\)\}/.test(block), 'Industrial: el anillo de foco se ve también en las paletas claras');
     ok(/\.obra\{[^}]*var\(--on-accent,var\(--bg\)\)/.test(ctx.breakApp(null, null, null, { meta: true }).decoCSS), 'la franja de obra se ve en las miniaturas del estudio, que no definen --on-accent');
   }
 
