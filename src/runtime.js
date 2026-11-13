@@ -464,7 +464,7 @@ section.m-hero:has(.hero-box.v-arriba:not(.ph-fail)){padding-top:0}
 .promos{display:grid;gap:12px}
 main>.m.sb{padding-bottom:48px;color:var(--ink)}
 .m.sb-superficie{background:var(--surface)}
-.m.sb-tinte{background:color-mix(in srgb,var(--accent) 9%,var(--bg))}
+.m.sb-tinte{background:color-mix(in srgb,var(--accent) 9%,var(--bg));--muted:var(--sbt-muted)}
 .m.sb-acento,.m.sb-invertido{background:var(--bg)}
 .m.sb-acento{--bg:var(--sba-bg);--ink:var(--sba-ink);--muted:var(--sba-muted);--surface:var(--sba-surface);--accent:var(--sba-accent);--on-accent:var(--sba-on-accent);--accent2:var(--sba-accent2);--on-accent2:var(--sba-on-accent2);--accent3:var(--sba-accent3);--on-accent3:var(--sba-on-accent3)}
 .m.sb-invertido{--bg:var(--sbi-bg);--ink:var(--sbi-ink);--muted:var(--sbi-muted);--surface:var(--sbi-surface);--accent:var(--sbi-accent);--on-accent:var(--sbi-on-accent);--accent2:var(--sbi-accent2);--on-accent2:var(--sbi-on-accent2);--accent3:var(--sbi-accent3);--on-accent3:var(--sbi-on-accent3)}
@@ -688,7 +688,7 @@ textarea.inp{resize:vertical;min-height:76px}
 .bnav .q{position:absolute;top:1px;left:calc(50% + 5px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--c-btn,var(--accent));color:var(--c-btn-on,var(--on-accent));font-size:10.5px;font-weight:800;display:grid;place-items:center}
 .bnav .q[hidden]{display:none}
 .foot-n{font-family:var(--fd);font-size:24px;color:var(--c-foot-on,var(--ink))}
-.credit{margin-top:20px!important;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+.credit{margin-top:20px!important;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .fab{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:12px;min-height:58px;padding:9px 12px 9px 9px;border-radius:999px;background:var(--c-btn,var(--ink));color:var(--c-btn-on,var(--bg));font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.28);width:max-content;max-width:calc(100% - 32px);white-space:nowrap}
 .fab-n{min-width:40px;height:40px;padding:0 6px;border-radius:999px;background:var(--c-btn-on,var(--accent));color:var(--c-btn,var(--on-accent));display:grid;place-items:center;font-variant-numeric:tabular-nums}
 .fab-t{padding-right:6px;font-variant-numeric:tabular-nums;opacity:.85}
@@ -3715,10 +3715,10 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   function mixHex(a, b, t) { const x = hexRGB(a), y = hexRGB(b); return '#' + x.map(function (v, i) { return ('0' + Math.round(v + (y[i] - v) * t).toString(16)).slice(-2); }).join(''); }
   function ratio(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
-  /* Acerca un color hacia «to» hasta que se lea (4,5:1) sobre «bg», que puede ser uno o varios fondos; si no alcanza, usa «to». */
-  function legible(c, bg, to) {
-    const bgs = [].concat(bg);
-    for (let t = 0; t <= 10; t++) { const m = mixHex(c, to, t / 10); if (bgs.every(function (b) { return ratio(m, b) >= 4.5; })) return m; }
+  /* Acerca un color hacia «to» hasta que se lea (4,5:1, o «min») sobre «bg», que puede ser uno o varios fondos; si no alcanza, usa «to». */
+  function legible(c, bg, to, min) {
+    const bgs = [].concat(bg), k = min || 4.5;
+    for (let t = 0; t <= 10; t++) { const m = mixHex(c, to, t / 10); if (bgs.every(function (b) { return ratio(m, b) >= k; })) return m; }
     return to;
   }
   /* Variables que solo hacen falta si algo las usa: secciones con fondo de acento o invertido (la paleta cambia adentro y
@@ -3728,10 +3728,24 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     const v = function (k, x) { return ';--' + k + ':' + x; }, on = function (k, x) { return v(k, x) + v(k.replace(/-(accent\d?)$/, '-on-$1'), onColor(x)); };
     const used = function (k) { return cfg.modules.some(function (m) { return m && m.on !== false && m.s && m.s._bg === k; }); };
     let out = '';
-    if (used('acento')) out += v('sba-bg', A) + v('sba-ink', OA) + v('sba-muted', 'color-mix(in srgb,' + OA + ' 78%,' + A + ')') + v('sba-surface', 'color-mix(in srgb,' + OA + ' 14%,' + A + ')') +
-      v('sba-accent', OA) + v('sba-on-accent', A) + on('sba-accent2', legible(A2, A, OA)) + on('sba-accent3', legible(A3, A, OA));
-    if (used('invertido')) out += v('sbi-bg', I) + v('sbi-ink', B) + v('sbi-muted', 'color-mix(in srgb,' + B + ' 72%,' + I + ')') + v('sbi-surface', 'color-mix(in srgb,' + B + ' 10%,' + I + ')') +
-      on('sbi-accent', legible(A, I, B)) + on('sbi-accent2', legible(A2, I, B)) + on('sbi-accent3', legible(A3, I, B));
+    /* Tarjetas de la sección: el fondo se acerca al color del texto, pero no tanto que el texto deje de leerse. Si el
+       color no cambia se deja la mezcla de siempre, para que las apps que ya se leían bien no cambien. */
+    const mix = function (bg, txt, p) { return 'color-mix(in srgb,' + txt + ' ' + Math.round(p * 100) + '%,' + bg + ')'; };
+    const K = 4.6; // un poco de margen: el navegador redondea las mezclas distinto
+    const card = function (bg, txt, p) { let q = p; while (q > 0.03 && ratio(txt, mixHex(bg, txt, q)) < K) q -= 0.02; return q; };
+    const soft = function (bg, txt, p, sf) { const m0 = mixHex(bg, txt, p), m = legible(m0, [bg, sf], txt, K); return m === m0 ? mix(bg, txt, p) : m; };
+    if (used('acento')) {
+      const q = card(A, OA, 0.14), SA = mixHex(A, OA, q);
+      out += v('sba-bg', A) + v('sba-ink', OA) + v('sba-muted', soft(A, OA, 0.78, SA)) + v('sba-surface', mix(A, OA, q)) +
+        v('sba-accent', OA) + v('sba-on-accent', A) + on('sba-accent2', legible(A2, [A, SA], OA, K)) + on('sba-accent3', legible(A3, [A, SA], OA, K));
+    }
+    if (used('invertido')) {
+      const q = card(I, B, 0.10), SI = mixHex(I, B, q);
+      out += v('sbi-bg', I) + v('sbi-ink', B) + v('sbi-muted', soft(I, B, 0.72, SI)) + v('sbi-surface', mix(I, B, q)) +
+        on('sbi-accent', legible(A, [I, SI], B, K)) + on('sbi-accent2', legible(A2, [I, SI], B, K)) + on('sbi-accent3', legible(A3, [I, SI], B, K));
+    }
+    /* Con tinte, el texto suave se ajusta para leerse sobre el fondo teñido y sobre las tarjetas. */
+    if (used('tinte')) out += v('sbt-muted', legible(c.muted, [mixHex(B, A, 0.09), S], I, K));
     const pr = opt('carta.price', ''), tg = opt('carta.tags', '');
     if (pr === 'color' || pr === 'contorno') out += v('lg-accent', legible(A, [B, S], I));
     if (tg === 'contorno' || tg === 'texto') out += v('lg-accent2', legible(A2, [B, S], I));

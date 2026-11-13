@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (821 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (823 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -80,7 +80,7 @@ Las reglas que pintan botones, títulos, antetítulos, precios, selección, etiq
 
 ### Espaciado y diseño por sección
 
-`theme.space` (densidad y separador entre secciones) y `theme.heads` (alineación, adorno bajo el título y ocultar antetítulos) van por la capa de opciones. Cada sección puede llevar `s._bg` (`superficie`, `tinte`, `acento` o `invertido`), `s._align` y `s._pad`; `sectionHTML()` las vuelve clases (`sb-*`, `sa-*`, `sp-*`) y, con acento o invertido, la paleta cambia solo dentro de la sección: las clases `.m.sb-acento` y `.m.sb-invertido` leen variables `--sba-*` y `--sbi-*` que `extraTokens()` escribe solo si alguna sección las usa (los acentos se acercan al color de texto hasta leerse a 4,5:1 con `legible()`), y `secRoleReset()` devuelve los colores por elemento a los de la estética. Lo elegido en una sección le gana a lo general, y junto a una sección con fondo propio no se dibuja separador.
+`theme.space` (densidad y separador entre secciones) y `theme.heads` (alineación, adorno bajo el título y ocultar antetítulos) van por la capa de opciones. Cada sección puede llevar `s._bg` (`superficie`, `tinte`, `acento` o `invertido`), `s._align` y `s._pad`; `sectionHTML()` las vuelve clases (`sb-*`, `sa-*`, `sp-*`) y, con acento o invertido, la paleta cambia solo dentro de la sección: las clases `.m.sb-acento` y `.m.sb-invertido` leen variables `--sba-*` y `--sbi-*` que `extraTokens()` escribe solo si alguna sección las usa (los acentos y el texto suave se acercan al color de texto hasta leerse con `legible()` sobre el fondo de la sección y sobre sus tarjetas, con margen: 4,6:1; las tarjetas se acercan menos al texto si este dejara de leerse; si un color ya se leía, queda la mezcla de siempre) y, con tinte, `--sbt-muted`, y `secRoleReset()` devuelve los colores por elemento a los de la estética. Lo elegido en una sección le gana a lo general, y junto a una sección con fondo propio no se dibuja separador.
 
 Variantes (`s.layout`): Destacados `cuadricula` o `lista`, Promos `carrusel`, Reseñas `destacada`, Horario `compacto` (`hoursCompact()` junta los días seguidos con el mismo horario), Contacto `botones` y Agenda `linea`. Sin valor, cada módulo se ve como siempre.
 

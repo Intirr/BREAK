@@ -482,7 +482,7 @@ const TEMPLATES = [
     i18n: { bilingual: true, usted: true },
     theme: {
       skin: 'natural',
-      colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4E6E4D', accent2: '#9A4E2A', accent3: '#C9A04A' },
+      colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4B6B4A', accent2: '#9A4E2A', accent3: '#C9A04A' },
       fonts: { display: 'Young Serif', body: 'Karla' }, radius: 16, motion: 'suave', texture: 'hojas', icons: 'linea',
       carta: { size: 's', pos: 'der', price: 'pildora', cat: 'banda' }, fx: { reveal: 'subir' }, dark: { mode: 'auto' }
     },

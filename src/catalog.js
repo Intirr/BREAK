@@ -40,7 +40,7 @@ const SKINS = {
       { name: 'Kraft', colors: { bg: '#E3D3B4', surface: '#F8F1E4', ink: '#2A2117', muted: '#62513C', accent: '#4E6130', accent2: '#963322', accent3: '#C98B2B' } },
       { name: 'Huerta', colors: { bg: '#E6EBDD', surface: '#FAFBF5', ink: '#1D2618', muted: '#56624C', accent: '#9E3426', accent2: '#3F6A35', accent3: '#D6A23A' } },
       { name: 'Tostión', colors: { bg: '#2A1F18', surface: '#372920', ink: '#F2E6D6', muted: '#C3AE95', accent: '#D9A35F', accent2: '#9DBB7A', accent3: '#D0644A' } },
-      { name: 'Salvia', colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4E6E4D', accent2: '#9A4E2A', accent3: '#C9A04A' } },
+      { name: 'Salvia', colors: { bg: '#DFE5DA', surface: '#F6F8F3', ink: '#1F2620', muted: '#505C50', accent: '#4B6B4A', accent2: '#9A4E2A', accent3: '#C9A04A' } },
       { name: 'Arcilla', colors: { bg: '#EAD9CC', surface: '#FAF3EC', ink: '#2B1D16', muted: '#654D41', accent: '#9C4627', accent2: '#4F6B3A', accent3: '#D9A441' } }
     ]
   },

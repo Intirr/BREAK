@@ -1160,6 +1160,33 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Editorial: su CSS solo usa colores de la paleta');
   }
 
+  /* 11zd. Contraste dentro de las secciones con fondo propio */
+  {
+    const hx = h => { h = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+    const L = h => hx(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }).reduce((a, v, i) => a + v * [.2126, .7152, .0722][i], 0);
+    const R = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+    const col = (x, vars) => { const m = String(x).match(/^color-mix\(in srgb,(#[0-9a-fA-F]{6}) (\d+)%,(#[0-9a-fA-F]{6})\)$/); if (!m) return x;
+      const a = hx(m[1]), b = hx(m[3]), p = +m[2] / 100; return '#' + a.map((v, i) => ('0' + Math.round(b[i] + (v - b[i]) * p).toString(16)).slice(-2)).join(''); };
+    const fails = []; let seen = 0;
+    for (const tp of ctx.TEMPLATES) {
+      const A = mount(tp, { now: '2026-11-06T15:30:00Z' }), x = A.d.getElementById('bk-css').textContent; A.close();
+      // De día (primeras variables) y, si hay modo oscuro, de noche (las de la regla forzada)
+      const scopes = [x.slice(0, x.indexOf('@media (prefers-color-scheme:dark)') > 0 ? x.indexOf('@media (prefers-color-scheme:dark)') : x.length)];
+      const nd = x.indexOf(':root[data-scheme="dark"]{'); if (nd > 0) scopes.push(x.slice(nd));
+      scopes.forEach((sc, si) => {
+        const g = k => { const m = sc.match(new RegExp('--' + k + ':([^;}]+)')); return m ? col(m[1].trim()) : ''; };
+        [['sba', 'acento'], ['sbi', 'invertido']].forEach(([p, nm]) => {
+          if (!g(p + '-bg')) return; seen++;
+          const bg = g(p + '-bg'), sf = g(p + '-surface'), ink = g(p + '-ink'), mu = g(p + '-muted');
+          [[ink, 'texto'], [mu, 'texto suave']].forEach(([c, what]) => { [[bg, 'fondo'], [sf, 'tarjetas']].forEach(([b, on]) => { if (R(c, b) < 4.5) fails.push(tp.id + (si ? ' de noche' : '') + ' · ' + nm + ': ' + what + ' sobre ' + on + ' ' + R(c, b).toFixed(2)); }); });
+        });
+        const tm = g('sbt-muted'); if (tm) { const tin = (() => { const b = g('bg'), a = g('accent'); return b && a ? col('color-mix(in srgb,' + a + ' 9%,' + b + ')') : ''; })(); if (tin && R(tm, tin) < 4.5) fails.push(tp.id + ' · tinte: texto suave ' + R(tm, tin).toFixed(2)); }
+      });
+    }
+    ok(seen >= 8 && !fails.length, 'en las secciones con fondo propio el texto se lee sobre el fondo y sobre las tarjetas, de día y de noche' + (fails.length ? ': ' + fails.slice(0, 4).join(' | ') : ' (' + seen + ' revisadas)'));
+    ok(!/\.credit\{[^}]*opacity/.test(SRC('runtime.js')), 'el crédito del pie no va desvanecido');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
