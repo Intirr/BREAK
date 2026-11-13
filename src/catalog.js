@@ -87,6 +87,17 @@ const SKINS = {
       { name: 'Monte', colors: { bg: '#1D231A', surface: '#283023', ink: '#EFF1E4', muted: '#B6BDA8', accent: '#F0913A', accent2: '#E8C25A', accent3: '#E9866B' } },
       { name: 'Tabla clara', colors: { bg: '#F2E8D9', surface: '#FBF6EE', ink: '#2A1C13', muted: '#6B5646', accent: '#A9420C', accent2: '#855B00', accent3: '#A3352A' } }
     ]
+  },
+  termal: {
+    label: 'Termal', art: 'Bienestar', desc: 'Bruma aguamarina, piedra y arena, esquinas de canto rodado y mucho aire. Para hoteles termales, spas y cocina saludable.', layout: 'lista',
+    defaults: { colors: { bg: '#EDF3F1', surface: '#FAFCFB', ink: '#1C3331', muted: '#56706B', accent: '#1F7168', accent2: '#87653A', accent3: '#A9553F' }, fonts: { display: 'Cormorant Garamond', body: 'Outfit' }, radius: 20, motion: 'suave', texture: 'none', icons: 'linea' },
+    palettes: [
+      { name: 'Bruma', colors: { bg: '#EDF3F1', surface: '#FAFCFB', ink: '#1C3331', muted: '#56706B', accent: '#1F7168', accent2: '#87653A', accent3: '#A9553F' } },
+      { name: 'Piedra', colors: { bg: '#EEEDEA', surface: '#FAF9F7', ink: '#262A2B', muted: '#5D6364', accent: '#376A75', accent2: '#7A5D42', accent3: '#4C704E' } },
+      { name: 'Arena', colors: { bg: '#F3EDE4', surface: '#FBF8F3', ink: '#2E2A24', muted: '#6B6256', accent: '#2A716B', accent2: '#9A5A37', accent3: '#62724A' } },
+      { name: 'Pozo', colors: { bg: '#132624', surface: '#1C3330', ink: '#E8F1EE', muted: '#A3B9B4', accent: '#7FD1C3', accent2: '#E2C08F', accent3: '#E59A80' } },
+      { name: 'Noche termal', colors: { bg: '#121C26', surface: '#1B2834', ink: '#E7EEF3', muted: '#A0B1BF', accent: '#8CC9E8', accent2: '#D9C49A', accent3: '#A7D7B5' } }
+    ]
   }
 };
 

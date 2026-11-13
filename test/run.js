@@ -576,7 +576,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const hero = cfg => cfg.modules.find(m => m.type === 'hero').s;
     const NOW = { now: '2026-11-06T15:30:00Z' };
     // Lo de cada estética sigue igual sin tocar nada
-    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras' };
+    const auto = { 'tpl-araucaria': '.hero-mono', 'tpl-antojo': '.hero-box.d-stickers .stk', 'tpl-zocalo': '.hero-box.d-fachada .facade', 'tpl-espiga': '.hero-box.d-lomas .hills', 'tpl-esquina': '.hero-box.d-neon .neon', 'tpl-parque': '.hero-box.d-garabatos svg.art-garab', 'tpl-tronco': '.hero-box.d-brasas svg.art-bras', 'tpl-aguatibia': '.hero-box.d-termales svg.art-term' };
     for (const id of Object.keys(auto)) { const A = mount(TPL(id), NOW); ok(!!A.$(auto[id]), id + ': la portada conserva la decoración de su estética'); A.close(); }
     ok(/--leaf:#[0-9a-f]{6}/i.test((() => { const A = mount(TPL('tpl-espiga'), NOW); const t = A.d.getElementById('bk-css').textContent; A.close(); return t; })()), 'el verde de la paleta queda listo para las ilustraciones');
     ok(['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas'].every(k => M.heroDeco(k).length > 20) && /\.art \.a-t1/.test(M.decoCSS), 'el motor entrega las miniaturas y su CSS al estudio');
@@ -1005,7 +1005,8 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(has('tpl-neblina', B => !!B.$('.events.tl') && sec(B, 'agenda').classList.contains('sb-superficie') && !!B.$('.quotes.qbig') && !!B.$('.hours.hc')), 'Neblina: agenda en línea, reseñas destacadas y horario compacto');
     ok(has('tpl-alisos', B => !!B.$('.quotes.qbig') && sec(B, 'contacto').classList.contains('sb-acento') && !!B.$('.hours.hc')), 'Los Alisos: reseñas destacadas, horario compacto y contacto de acento');
     ok(has('tpl-esquina', B => !!B.$('.rail.promo-rail') && !!B.$('.feat-cuadricula') && !!B.$('.contact.clg') && sec(B, 'horario').classList.contains('sb-acento')), 'La Esquina: promos en carrusel, destacados en cuadrícula y horario de acento');
-    eq(ctx.TEMPLATES.filter(t => M.darkOf(t.theme)).map(t => t.id).join(','), 'tpl-antojo,tpl-zocalo,tpl-espiga,tpl-neblina,tpl-alisos', 'paleta de noche en las apps de paleta clara');
+    const clara = h => { const v = parseInt(h.slice(1), 16); return ((v >> 16) * 299 + ((v >> 8) & 255) * 587 + (v & 255) * 114) / 1000 > 128; };
+    ok(['tpl-antojo', 'tpl-zocalo', 'tpl-espiga', 'tpl-neblina', 'tpl-alisos'].every(id => !!M.darkOf(TPL(id).theme)) && ctx.TEMPLATES.every(t => !!M.darkOf(t.theme) === clara(t.theme.colors.bg)), 'paleta de noche en las apps de paleta clara, y solo en ellas');
     ok(ctx.TEMPLATES.every(t => t.theme.fx && t.theme.fx.reveal), 'todas las apps de ejemplo aparecen al bajar');
     ok(ctx.TEMPLATES.every(t => t.modules.filter(m => m.type === 'resenas').every(m => m.s.quotes.length === 2 && !m.s.rating)), 'reseñas con dos citas y sin calificación inventada');
     ok(ctx.TEMPLATES.every(t => !t.theme.nav && !t.theme.css && !t.theme.roles && !t.theme.shape && !t.theme.type), 'las apps de ejemplo no cambian navegación, colores por elemento, formas, letra ni CSS propio');
@@ -1042,6 +1043,24 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const z = TPL('tpl-zocalo'); z.modules.find(m => m.type === 'hero').s.deco = 'brasas';
     A = mount(z, NOW); ok(!!A.$('.hero-box.d-brasas svg.art-bras') && !A.$('.hero-box.d-brasas .facade'), 'la parrilla con brasas sirve en cualquier estética'); A.close();
     ok(ctx.HERO_DECO_OPTS.some(o => o[0] === 'brasas'), 'la parrilla con brasas se ofrece en el estudio');
+  }
+
+  /* 11x. Estética Termal y Agua Tibia */
+  {
+    const NOW = { now: '2026-11-06T15:30:00Z' };
+    let A = mount(TPL('tpl-aguatibia'), NOW);
+    const x = A.d.getElementById('bk-css').textContent;
+    ok(A.$('.app').getAttribute('data-skin') === 'termal' && /\[data-skin="termal"\] \.hero-t\{/.test(x), 'Termal: su CSS se aplica');
+    ok(!!A.$('.hero-box.d-termales svg.art-term') && A.d.documentElement.getAttribute('data-tex') === 'none' && !!A.$('section.m-reservas') && !!A.$('section.m-libre .free.hl'), 'Agua Tibia: vapor de los termales, fondo limpio, pasadía y reservas');
+    ok(A.d.getElementById('bk-fonts').href.includes('family=Cormorant+Garamond') && A.d.getElementById('bk-fonts').href.includes('family=Outfit'), 'Termal: pide sus tipografías a Google Fonts');
+    ok(x.includes('@media (prefers-color-scheme:dark){:root:not([data-scheme="light"]){--bg:'), 'Agua Tibia: modo oscuro automático');
+    A.close();
+    A = mount(TPL('tpl-aguatibia'), Object.assign({ lang: 'en-US' }, NOW));
+    ok(A.$('.lang button.on').textContent === 'EN' && A.$$('.it h4').some(h => h.textContent === 'Hot springs bowl') && A.$$('.fq summary').some(s => /bathrobe/.test(s.textContent)), 'Agua Tibia: carta y preguntas en inglés');
+    A.close();
+    const block = (SRC('runtime.js').match(/\n    termal: `([\s\S]*?)`/) || [])[1] || '';
+    ok(block.length > 3000 && !/#[0-9a-f]{3,6}\b|rgba?\(/i.test(block), 'Termal: su CSS solo usa colores de la paleta');
+    ok(/calc\(var\(--r\) \* 1\.3\)/.test(block), 'Termal: las esquinas de canto rodado siguen las esquinas que elija el usuario');
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */

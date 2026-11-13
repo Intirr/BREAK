@@ -792,6 +792,87 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 10. HOTEL TERMAL · TERMAL, BILINGÜE ---------- */
+  {
+    v: 1, id: 'tpl-aguatibia', template: true,
+    brand: {
+      name: 'Agua Tibia', tagline: 'Cocina saludable y café junto a las piscinas termales', tagline_en: 'Wholesome food and coffee by the hot spring pools', kind: 'Restaurante de hotel termal',
+      logo: { type: 'icon', value: 'hoja' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Vía a los termales, km 9', addressNote: 'Dentro del hotel. No necesita estar hospedado.', addressNote_en: 'Inside the hotel. You don’t need to be a guest.',
+      mapsQuery: 'Vía a los Termales, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['07:00', '21:00'], 2: ['07:00', '21:00'], 3: ['07:00', '21:00'], 4: ['07:00', '21:00'], 5: ['07:00', '21:00'], 6: ['07:00', '21:00'], 0: ['07:00', '20:00'] })
+    },
+    i18n: { bilingual: true, usted: true },
+    theme: {
+      skin: 'termal',
+      colors: { bg: '#EDF3F1', surface: '#FAFCFB', ink: '#1C3331', muted: '#56706B', accent: '#1F7168', accent2: '#87653A', accent3: '#A9553F' },
+      fonts: { display: 'Cormorant Garamond', body: 'Outfit' }, radius: 20, motion: 'suave', texture: 'none', icons: 'linea',
+      carta: { tags: 'punto' }, fx: { reveal: 'subir' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'desayunos', name: 'Desayunos', name_en: 'Breakfast', icon: '🍳', note: 'Hasta las 12:00 m.', note_en: 'Until noon', items: [
+          IT('bowl-frutas', 'Bowl de frutas con granola', 'Frutas de temporada, yogur griego, granola de la casa y miel.', 16000, '🍓', ['vegetariano', 'popular'], { name_en: 'Fruit bowl with granola', desc_en: 'Seasonal fruit, Greek yogurt, house granola and honey.' }),
+          IT('tostada', 'Tostada de aguacate', 'Pan de masa madre, aguacate, tomate cherry y semillas.', 17000, '🥑', ['vegano'], { name_en: 'Avocado toast', desc_en: 'Sourdough bread, avocado, cherry tomatoes and seeds.' }),
+          IT('huevos', 'Huevos al gusto', 'Con arepa de maíz, queso campesino y fruta.', 15000, '🍳', ['singluten'], { name_en: 'Eggs your way', desc_en: 'With corn arepa, farmer’s cheese and fruit.' }),
+          IT('calentado', 'Calentado de la casa', 'Fríjoles, arroz, huevo, aguacate y arepa.', 18000, '🍳', ['local'], { name_en: 'House calentado', desc_en: 'Beans, rice, egg, avocado and arepa: a Colombian classic.' }),
+          IT('avena', 'Avena caliente', 'Con canela, banano y nueces.', 11000, '🥣', ['vegano'], { name_en: 'Warm oatmeal', desc_en: 'With cinnamon, banana and walnuts.' })
+        ] },
+        { id: 'platos', name: 'Platos de la casa', name_en: 'Mains', icon: '🍽️', note: 'Con ensalada de la huerta', note_en: 'Served with a garden salad', items: [
+          IT('trucha', 'Trucha al vapor con hierbas', 'Trucha de aguas frías, papa criolla y vegetales.', 36000, '🐟', ['singluten', 'chef'], { name_en: 'Steamed trout with herbs', desc_en: 'Cold-water trout, yellow potatoes and vegetables.' }),
+          IT('bowl-termal', 'Bowl termal', 'Quinua, garbanzos, aguacate, verduras asadas y aderezo de limón.', 28000, '🥗', ['vegano', 'popular'], { name_en: 'Hot springs bowl', desc_en: 'Quinoa, chickpeas, avocado, roasted vegetables and lemon dressing.' }),
+          IT('pollo-limon', 'Pollo al limón con quinua', 'Pechuga a la plancha y quinua con hierbas.', 32000, '🍗', ['singluten'], { name_en: 'Lemon chicken with quinoa', desc_en: 'Grilled chicken breast and herbed quinoa.' }),
+          IT('sopa', 'Sopa de la huerta', 'Verduras del día, cilantro y aguacate.', 16000, '🍲', ['vegano'], { name_en: 'Garden soup', desc_en: 'Vegetables of the day, cilantro and avocado.' }),
+          IT('lomo', 'Lomo de cerdo con arracacha', 'Lomo asado, puré de arracacha y salsa de mora.', 34000, '🥩', [], { name_en: 'Pork loin with arracacha', desc_en: 'Roast pork loin, arracacha mash and blackberry sauce.' })
+        ] },
+        { id: 'picar', name: 'Para picar', name_en: 'Light bites', icon: '🥑', note: '', items: [
+          IT('ceviche', 'Ceviche de palmito', 'Con mango, cebolla morada y limón.', 19000, '🍋', ['vegano', 'nuevo'], { name_en: 'Hearts of palm ceviche', desc_en: 'With mango, red onion and lime.' }),
+          IT('patacones', 'Patacones con guacamole', 'Plátano verde crocante.', 15000, '🍌', ['vegano'], { name_en: 'Patacones with guacamole', desc_en: 'Crispy green plantain.' }),
+          IT('empanaditas', 'Empanaditas de queso', 'Seis, con ají de lulo.', 12000, '🥟', ['vegetariano'], { name_en: 'Cheese empanadas', desc_en: 'Six of them, with lulo hot sauce.' })
+        ] },
+        { id: 'bebidas', name: 'Bebidas', name_en: 'Drinks', icon: '🍵', note: '', items: [
+          IT('aromatica', 'Aromática de la huerta', 'Hierbabuena, limonaria y cidrón.', 6000, '🍵', ['vegano', 'local'], { name_en: 'Garden herbal tea', desc_en: 'Mint, lemongrass and lemon verbena.' }),
+          IT('jugo-verde', 'Jugo verde', 'Pepino, apio, manzana, espinaca y jengibre.', 10000, '🥤', ['vegano', 'popular'], { name_en: 'Green juice', desc_en: 'Cucumber, celery, apple, spinach and ginger.' }),
+          IT('limonada', 'Limonada de hierbabuena', 'Endulzada con panela.', 9000, '🍋', ['vegano'], { name_en: 'Mint lemonade', desc_en: 'Sweetened with panela.' }),
+          IT('cafe', 'Café de origen', 'Filtrado, de una finca de la vereda.', 7000, '☕', ['local'], { name_en: 'Single-origin coffee', desc_en: 'Filter coffee from a nearby farm.' }),
+          IT('chocolate', 'Chocolate de mesa', 'En agua o en leche, con queso.', 8000, '🍫', [], { name_en: 'Hot chocolate', desc_en: 'With water or milk, served with cheese.' })
+        ] },
+        { id: 'postres', name: 'Postres', name_en: 'Desserts', icon: '🍮', note: '', items: [
+          IT('panna', 'Panna cotta de coco y maracuyá', 'Sin lácteos.', 13000, '🍮', ['sinlactosa'], { name_en: 'Coconut and passion fruit panna cotta', desc_en: 'Dairy-free.' }),
+          IT('torta', 'Torta de zanahoria', 'Con crema de queso.', 11000, '🍰', [], { name_en: 'Carrot cake', desc_en: 'With cream cheese frosting.' }),
+          IT('fresas', 'Fresas con crema', 'Fresas de la región.', 12000, '🍓', ['temporada', 'local'], { name_en: 'Strawberries and cream', desc_en: 'Local strawberries.' })
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Hotel termal · km 9', kicker_en: 'Hot springs hotel · km 9', title: '', subtitle: 'Cocina sana y café de la región, entre baño y baño.', subtitle_en: 'Wholesome food and local coffee, between dips.', cta1: 'reservas', cta2: 'carta', showStatus: true,
+        ribbon: 'Desayunos hasta el mediodía, Opciones sin gluten, Café de origen, Vista a las piscinas', ribbon_en: 'Breakfast until noon, Gluten-free options, Single-origin coffee, Pool views' } },
+      { id: 'pasadia', type: 'libre', on: true, s: { kicker: 'Pasadía', kicker_en: 'Day pass', title: 'Piscinas y almuerzo', title_en: 'Pools and lunch',
+        text: 'Entrada a las piscinas termales de 9:00 a. m. a 6:00 p. m., toalla, casillero y el almuerzo del día.\n\n$95.000 por persona.',
+        text_en: 'Hot spring pools from 9:00 a.m. to 6:00 p.m., towel, locker and lunch of the day.\n\n$95,000 COP per person.',
+        style: 'destacado', btnLabel: 'Reservar', btnLabel_en: 'Book', btnTarget: 'reservas', url: '', waText: '' } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', title_en: 'Menu', intro: 'Ingredientes de la huerta del hotel y de fincas vecinas.', intro_en: 'Ingredients from the hotel garden and neighboring farms.', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false,
+        footnote: 'Precios en pesos colombianos (COP), impuestos incluidos.', footnote_en: 'Prices in Colombian pesos (COP), taxes included.' } },
+      { id: 'reservas', type: 'reservas', on: true, s: { title: 'Reserve su mesa', title_en: 'Book a table', text: 'Para desayuno, almuerzo o cena. Si viene con pasadía, cuéntenos en la nota.', text_en: 'For breakfast, lunch or dinner. If you have a day pass, tell us in the note.',
+        slots: '7:30, 9:00, 12:30, 14:00, 19:00', maxPeople: 10, occasions: 'Desayuno, Almuerzo, Cena, Cumpleaños', occasions_en: 'Breakfast, Lunch, Dinner, Birthday', note: 'Confirmamos su reserva por WhatsApp.', note_en: 'We confirm your booking on WhatsApp.' } },
+      { id: 'servicios', type: 'servicios', on: true, s: { title: 'En el hotel', title_en: 'At the hotel', list: ['parqueadero', 'wifi', 'terraza', 'accesible', 'tarjeta', 'ingles'], extra: 'Toallas y casilleros, Batas', extra_en: 'Towels and lockers, Bathrobes', note: '', note_en: '' } },
+      { id: 'faq', type: 'faq', on: true, s: { title: 'Preguntas frecuentes', title_en: 'FAQ', items: [
+        { q: '¿Tengo que estar hospedado?', q_en: 'Do I need to be a hotel guest?', a: 'No. El restaurante está abierto para todos.', a_en: 'No. The restaurant is open to everyone.' },
+        { q: '¿Tienen opciones sin gluten y veganas?', q_en: 'Do you have gluten-free and vegan options?', a: 'Sí. Están marcadas en la carta y la cocina conoce los cuidados.', a_en: 'Yes. They are marked on the menu and our kitchen knows the precautions.' },
+        { q: '¿Puedo ir en bata desde las piscinas?', q_en: 'Can I come in a bathrobe from the pools?', a: 'Sí, en la terraza. En el salón le pedimos ropa seca.', a_en: 'Yes, on the terrace. Inside, please wear dry clothes.' }
+      ] } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Le gustó la visita?', title_en: 'Did you enjoy your visit?', text: 'Su reseña ayuda a que otros viajeros nos encuentren.', text_en: 'Your review helps other travelers find us.', rating: '', _bg: 'tinte', quotes: [
+        { text: 'Desayunar viendo el vapor de las piscinas no tiene precio. El bowl de frutas, delicioso.', text_en: 'Breakfast while the steam rises from the pools is priceless. The fruit bowl was delicious.', author: 'Camila R.' },
+        { text: 'Por fin un lugar con opciones sin gluten de verdad, y el café de origen está buenísimo.', text_en: 'Finally a place with real gluten-free options, and the single-origin coffee is excellent.', author: 'Tomás H.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', title_en: 'Opening hours', note: 'Abierto todos los días, también festivos.', note_en: 'Open every day, including holidays.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', title_en: 'How to get here', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact' } }
+    ],
+    meta: { credit: true }
   }
 ];
 

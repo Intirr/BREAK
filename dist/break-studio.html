@@ -3,7 +3,7 @@
 <meta name="description" content="Estudio para diseñar apps de menú por módulos para cafeterías y restaurantes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Bodoni+Moda:ital,wght@1,400&family=Lilita+One&family=Alfa+Slab+One&family=Young+Serif&family=Tilt+Neon&family=Schibsted+Grotesk:wght@800&family=Amatic+SC:wght@700&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@1,500&display=swap">
 <style>
 /* Layout: two-pane workbench — order-ticket editor on the left, live phone on the right; tabs and one column on phones. */
 :root{
@@ -207,6 +207,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:var(--chev);b
 .sk-pizarra{background:#1F2B25;color:#F1EFE6;font:700 34px/1 "Amatic SC","Comic Sans MS",cursive;letter-spacing:.03em;text-shadow:0 0 1px rgba(241,239,230,.6);padding-bottom:10px}
 .sk-rustico{background:repeating-linear-gradient(180deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px),#231811;color:#F6EADA;font:400 40px/1 "Bebas Neue",Impact,"Arial Narrow",sans-serif;letter-spacing:.06em;text-shadow:0 3px 0 rgba(242,134,46,.45);padding-bottom:12px}
 .sk-rustico::after{content:"";position:absolute;left:calc(50% - 40px);width:80px;bottom:16px;height:10px;background:#F2862E;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 12'%3E%3Cpath d='M3 10.5L8 1.5M16 10.5L21 1.5M29 10.5L34 1.5M42 10.5L47 1.5M55 10.5L60 1.5M68 10.5L73 1.5M81 10.5L86 1.5' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/80px 10px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 12'%3E%3Cpath d='M3 10.5L8 1.5M16 10.5L21 1.5M29 10.5L34 1.5M42 10.5L47 1.5M55 10.5L60 1.5M68 10.5L73 1.5M81 10.5L86 1.5' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/80px 10px no-repeat}
+.sk-termal{background:linear-gradient(180deg,#F3F8F6,#DCEAE6);color:#1C3331;font:italic 500 40px/1 "Cormorant Garamond",Georgia,serif;padding-bottom:12px}
+.sk-termal::after{content:"";position:absolute;left:calc(50% - 28px);width:56px;bottom:16px;height:14px;background:#1F7168;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 14'%3E%3Cpath d='M2 5q6.5-4 13 0t13 0 13 0 13 0M2 11q6.5-4 13 0t13 0 13 0 13 0' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/56px 14px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 14'%3E%3Cpath d='M2 5q6.5-4 13 0t13 0 13 0 13 0M2 11q6.5-4 13 0t13 0 13 0 13 0' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/56px 14px no-repeat}
 .sk-pizarra::after{content:"";position:absolute;left:30%;right:30%;bottom:18px;height:9px;background:#F2D16B;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10'%3E%3Cpath d='M0 5Q7.5 0 15 5T30 5T45 5T60 5' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 50%/30px 9px repeat-x}
 .skin-t{display:grid;gap:3px;padding:0 4px}
 .skin-n{font-weight:800}
@@ -652,6 +654,8 @@ function breakApp(win, doc, initialCfg, opts) {
   /* Máscaras SVG: la forma viene del SVG y el color del tema (background + mask). */
   const LEAF = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 14\'%3E%3Cpath d=\'M1 7C5 1 15 0 23 7C15 14 5 13 1 7Z\'/%3E%3C/svg%3E")';
   const SQUIG = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 60 10\'%3E%3Cpath d=\'M0 5Q7.5 0 15 5T30 5T45 5T60 5\' fill=\'none\' stroke=\'%23000\' stroke-width=\'2.2\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
+  /* Ondas de agua (Termal): dos líneas onduladas, para usar como máscara. */
+  const RIPPLE = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 56 14\'%3E%3Cpath d=\'M2 5q6.5-4 13 0t13 0 13 0 13 0M2 11q6.5-4 13 0t13 0 13 0 13 0\' fill=\'none\' stroke=\'%23000\' stroke-width=\'1.8\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
   /* Marcas de parrilla (Rústico): siete trazos inclinados con puntas redondas, para usar como máscara. */
   const GRILL = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 92 12\'%3E%3Cpath d=\'M3 10.5L8 1.5M16 10.5L21 1.5M29 10.5L34 1.5M42 10.5L47 1.5M55 10.5L60 1.5M68 10.5L73 1.5M81 10.5L86 1.5\' fill=\'none\' stroke=\'%23000\' stroke-width=\'3.2\' stroke-linecap=\'round\'/%3E%3C/svg%3E")';
   /* Hojas y ondas se dibujan en el fondo con el color de la paleta ya puesto (ver texCSS). */
@@ -1786,6 +1790,76 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 [data-skin="rustico"] .foot.fa-izq::before{margin-left:0}
 [data-skin="rustico"] .foot-n{font-size:44px;letter-spacing:.04em;line-height:1}
 [data-skin="rustico"] .navi{font-size:30px;letter-spacing:.05em}
+`,
+    termal: `
+[data-skin="termal"]{--gw:.47}
+[data-skin="termal"] .top{background:var(--c-top,color-mix(in srgb,var(--bg) 82%,transparent));box-shadow:0 1px 0 color-mix(in srgb,var(--c-top-on,var(--ink)) 8%,transparent)}
+[data-skin="termal"] .brand-mini{font-size:25px;font-weight:600;letter-spacing:.01em}
+[data-skin="termal"] .status,[data-skin="termal"] .lang,[data-skin="termal"] .menu-btn{background:color-mix(in srgb,var(--surface) 80%,transparent);box-shadow:0 1px 3px color-mix(in srgb,var(--ink) 10%,transparent);color:var(--ink)}
+[data-skin="termal"] .lang button.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent))}
+[data-skin="termal"] .m{padding-top:64px}
+[data-skin="termal"] .m-hero{padding-block:40px 0}
+[data-skin="termal"] .hero-k{color:var(--c-kicker,var(--accent));letter-spacing:.24em;font-weight:500}
+[data-skin="termal"] .hero-t{font-weight:500;font-size:min(calc(clamp(54px,15.5vw,96px) * var(--hs,1) * var(--ts,1)),var(--fit,999px));line-height:.94;letter-spacing:-.015em;color:var(--c-title,var(--ink))}
+[data-skin="termal"] .hero-s{font-size:18px;line-height:1.55;color:var(--muted)}
+[data-skin="termal"] .art-term{-webkit-mask-image:linear-gradient(180deg,black 70%,transparent);mask-image:linear-gradient(180deg,black 70%,transparent)}
+[data-skin="termal"] .btn{border-radius:999px;border-width:1.5px;font-weight:500;letter-spacing:.02em;padding-inline:24px}
+[data-skin="termal"] .btn.sm{padding-inline:16px}
+[data-skin="termal"] .btn.pri{box-shadow:0 10px 24px -12px color-mix(in srgb,var(--c-btn,var(--accent)) 70%,transparent)}
+[data-skin="termal"] .btn.ghost{background:color-mix(in srgb,var(--surface) 70%,transparent);border-color:color-mix(in srgb,var(--ink) 18%,transparent)}
+[data-skin="termal"] .ribbon{margin-top:32px;white-space:normal;font-family:var(--fd);font-style:italic;font-size:20px;color:var(--muted)}
+[data-skin="termal"] .ribbon-track{display:flex;flex-wrap:wrap;gap:2px 0}
+[data-skin="termal"] .ribbon-track span{padding:0 12px 0 0}
+[data-skin="termal"] .ribbon-track span:not(:last-child)::after{content:"·";margin-left:12px;color:var(--accent)}
+[data-skin="termal"] .sh-k{font-family:var(--fd);font-style:italic;font-weight:500;font-size:19px;letter-spacing:.01em;text-transform:none;color:var(--c-kicker,var(--accent))}
+[data-skin="termal"] .sh-t{font-weight:500;font-size:calc(clamp(36px,10vw,50px) * var(--ts,1));line-height:1.02;letter-spacing:-.01em}
+[data-skin="termal"] .sh .orn{display:block;width:56px;height:14px;margin-top:12px;background:color-mix(in srgb,var(--accent) 70%,transparent);-webkit-mask:${RIPPLE} 0 50%/56px 14px no-repeat;mask:${RIPPLE} 0 50%/56px 14px no-repeat}
+[data-skin="termal"] .card,[data-skin="termal"] .svc,[data-skin="termal"] .fq,[data-skin="termal"] .lay-tarjetas .it,[data-skin="termal"] .lay-cuadricula .it,[data-skin="termal"] .lay-fotos .it,[data-skin="termal"] .feat,[data-skin="termal"] .promo,[data-skin="termal"] .quote,[data-skin="termal"] .cl,[data-skin="termal"] .wres{background:var(--surface);border-radius:calc(var(--r) * 1.3) calc(var(--r) * .95) calc(var(--r) * 1.4) calc(var(--r) * .85)/calc(var(--r) * 1) calc(var(--r) * 1.3) calc(var(--r) * .9) calc(var(--r) * 1.4);box-shadow:0 1px 2px color-mix(in srgb,var(--ink) 5%,transparent),0 12px 30px -16px color-mix(in srgb,var(--ink) 24%,transparent)}
+[data-skin="termal"] .chip{border:0;background:color-mix(in srgb,var(--accent) 8%,var(--surface));font-weight:500}
+[data-skin="termal"] .chip.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent))}
+[data-skin="termal"] .cat-tabs{background:color-mix(in srgb,var(--bg) 88%,transparent)}
+[data-skin="termal"] .cat-h h3{font-weight:500;font-size:32px;line-height:1.1;letter-spacing:-.005em}
+[data-skin="termal"] .cat-h h3::after{content:"";flex:1;min-width:24px;height:1px;background:color-mix(in srgb,var(--accent) 35%,transparent)}
+[data-skin="termal"] .cat-h p{font-family:var(--fd);font-style:italic;font-size:17px;color:var(--muted)}
+[data-skin="termal"] .it h4{font-weight:500}
+[data-skin="termal"] .it-d{color:var(--muted);font-size:14.5px}
+[data-skin="termal"] .lay-lista .it,[data-skin="termal"] .lay-compacta .it{border-bottom:1px solid color-mix(in srgb,var(--accent) 16%,transparent)}
+[data-skin="termal"] .lead{border-bottom:1px solid color-mix(in srgb,var(--ink) 12%,transparent);transform:translateY(-5px)}
+[data-skin="termal"] .price{font-weight:500;color:var(--c-price,var(--accent))}
+[data-skin="termal"] .tag{background:color-mix(in srgb,var(--c-tag,var(--accent)) 10%,transparent);color:var(--ink);text-transform:none;letter-spacing:.01em;font-size:12.5px;font-weight:500;padding:3px 10px}
+[data-skin="termal"] .add{background:color-mix(in srgb,var(--c-btn,var(--accent)) 12%,var(--surface));color:var(--c-btn,var(--accent));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c-btn,var(--accent)) 45%,transparent)}
+[data-skin="termal"] .add .q{background:var(--accent);color:var(--on-accent)}
+[data-skin="termal"] .media{border-radius:calc(var(--r) * 1.3) calc(var(--r) * .95) calc(var(--r) * 1.4) calc(var(--r) * .85)/calc(var(--r) * 1) calc(var(--r) * 1.3) calc(var(--r) * .9) calc(var(--r) * 1.4);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+[data-skin="termal"] .media.m1{background:color-mix(in srgb,var(--accent2) 10%,var(--surface))}
+[data-skin="termal"] .media.m2{background:color-mix(in srgb,var(--accent3) 10%,var(--surface))}
+[data-skin="termal"] .feat .media,[data-skin="termal"] .lay-fotos .media{border-radius:0}
+[data-skin="termal"] .promo-d,[data-skin="termal"] .ev-w{color:var(--accent2)!important;letter-spacing:.14em}
+[data-skin="termal"] .promo.today{background:var(--accent);color:var(--on-accent);box-shadow:0 14px 32px -16px color-mix(in srgb,var(--accent) 80%,transparent)}
+[data-skin="termal"] .promo.today .price{color:inherit}
+[data-skin="termal"] .badge{background:var(--surface);color:var(--accent);font-weight:600}
+[data-skin="termal"] .md-price{font-weight:500;font-size:38px;color:var(--c-price,var(--accent))}
+[data-skin="termal"] .stamp{border:1.5px dashed color-mix(in srgb,var(--accent) 40%,transparent)}
+[data-skin="termal"] .stamp.on{border:1.5px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+[data-skin="termal"] .hrow,[data-skin="termal"] .g{border-bottom:1px solid color-mix(in srgb,var(--accent) 14%,transparent)}
+[data-skin="termal"] .hrow .lead{border-bottom:1px solid color-mix(in srgb,var(--ink) 10%,transparent)}
+[data-skin="termal"] .hrow.today dt,[data-skin="termal"] .hrow.today dd{color:var(--accent)}
+[data-skin="termal"] .g dt{font-weight:500;font-size:24px;color:var(--accent)}
+[data-skin="termal"] .story{font-size:18px}
+[data-skin="termal"] .sig{font-family:var(--fd);font-size:24px;color:var(--accent)}
+[data-skin="termal"] .free{border-radius:calc(var(--r) * 1.3) calc(var(--r) * .95) calc(var(--r) * 1.4) calc(var(--r) * .85)/calc(var(--r) * 1) calc(var(--r) * 1.3) calc(var(--r) * .9) calc(var(--r) * 1.4)}
+[data-skin="termal"] .quote blockquote{font-family:var(--fd);font-style:italic;font-size:21px;line-height:1.35}
+[data-skin="termal"] .qbig blockquote{font-style:italic;font-size:26px;line-height:1.3}
+[data-skin="termal"] .map-art{background:repeating-radial-gradient(ellipse at 50% 64%,transparent 0 14px,color-mix(in srgb,var(--accent) 22%,transparent) 14px 15.5px),color-mix(in srgb,var(--accent) 7%,var(--surface))}
+[data-skin="termal"] .svc-i{background:color-mix(in srgb,var(--accent) 10%,var(--surface));color:var(--accent)}
+[data-skin="termal"] .wheel{box-shadow:0 0 0 7px var(--surface),0 16px 40px -18px color-mix(in srgb,var(--ink) 40%,transparent)}
+[data-skin="termal"] .fab{box-shadow:0 16px 34px -14px color-mix(in srgb,var(--ink) 45%,transparent)}
+[data-skin="termal"] .inp,[data-skin="termal"] .search input,[data-skin="termal"] .stepper,[data-skin="termal"] .tq-o{border-radius:16px;border-color:color-mix(in srgb,var(--ink) 14%,transparent)}
+[data-skin="termal"] .seg button.on{background:var(--c-sel,var(--accent));color:var(--c-sel-on,var(--on-accent))}
+[data-skin="termal"] .keypad button{border-radius:18px}
+[data-skin="termal"] .foot::before{content:"";display:block;width:56px;height:14px;margin:0 auto 18px;background:color-mix(in srgb,var(--accent) 70%,transparent);-webkit-mask:${RIPPLE} 0 50%/56px 14px no-repeat;mask:${RIPPLE} 0 50%/56px 14px no-repeat}
+[data-skin="termal"] .foot.fa-izq::before{margin-left:0}
+[data-skin="termal"] .foot-n{font-weight:500;font-size:34px}
+[data-skin="termal"] .navi{font-weight:500;font-size:28px;letter-spacing:-.005em}
 `
   };
 
@@ -1918,7 +1992,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     });
 
   /* Portada: lo que cada estética pone cuando la opción está en «auto», y las piezas que se pueden elegir. */
-  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' } };
+  const HERO_AUTO = { elegante: { logo: true }, animado: { deco: 'stickers' }, cultural: { deco: 'fachada' }, natural: { deco: 'lomas' }, nocturna: { deco: 'neon' }, minimalista: {}, pizarra: { deco: 'garabatos' }, rustico: { deco: 'brasas' }, termal: { deco: 'termales' } };
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
   const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas'];
   const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG };
@@ -4791,6 +4865,87 @@ const TEMPLATES = [
       { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto' } }
     ],
     meta: { credit: true }
+  },
+
+  /* ---------- 10. HOTEL TERMAL · TERMAL, BILINGÜE ---------- */
+  {
+    v: 1, id: 'tpl-aguatibia', template: true,
+    brand: {
+      name: 'Agua Tibia', tagline: 'Cocina saludable y café junto a las piscinas termales', tagline_en: 'Wholesome food and coffee by the hot spring pools', kind: 'Restaurante de hotel termal',
+      logo: { type: 'icon', value: 'hoja' },
+      city: 'Santa Rosa de Cabal, Risaralda', address: 'Vía a los termales, km 9', addressNote: 'Dentro del hotel. No necesita estar hospedado.', addressNote_en: 'Inside the hotel. You don’t need to be a guest.',
+      mapsQuery: 'Vía a los Termales, Santa Rosa de Cabal', maps: '',
+      whatsapp: '', phone: '', instagram: '', facebook: '', tiktok: '', reviewUrl: '', tz: 'America/Bogota',
+      hours: HOURS({ 1: ['07:00', '21:00'], 2: ['07:00', '21:00'], 3: ['07:00', '21:00'], 4: ['07:00', '21:00'], 5: ['07:00', '21:00'], 6: ['07:00', '21:00'], 0: ['07:00', '20:00'] })
+    },
+    i18n: { bilingual: true, usted: true },
+    theme: {
+      skin: 'termal',
+      colors: { bg: '#EDF3F1', surface: '#FAFCFB', ink: '#1C3331', muted: '#56706B', accent: '#1F7168', accent2: '#87653A', accent3: '#A9553F' },
+      fonts: { display: 'Cormorant Garamond', body: 'Outfit' }, radius: 20, motion: 'suave', texture: 'none', icons: 'linea',
+      carta: { tags: 'punto' }, fx: { reveal: 'subir' }, dark: { mode: 'auto' }
+    },
+    menu: {
+      categories: [
+        { id: 'desayunos', name: 'Desayunos', name_en: 'Breakfast', icon: '🍳', note: 'Hasta las 12:00 m.', note_en: 'Until noon', items: [
+          IT('bowl-frutas', 'Bowl de frutas con granola', 'Frutas de temporada, yogur griego, granola de la casa y miel.', 16000, '🍓', ['vegetariano', 'popular'], { name_en: 'Fruit bowl with granola', desc_en: 'Seasonal fruit, Greek yogurt, house granola and honey.' }),
+          IT('tostada', 'Tostada de aguacate', 'Pan de masa madre, aguacate, tomate cherry y semillas.', 17000, '🥑', ['vegano'], { name_en: 'Avocado toast', desc_en: 'Sourdough bread, avocado, cherry tomatoes and seeds.' }),
+          IT('huevos', 'Huevos al gusto', 'Con arepa de maíz, queso campesino y fruta.', 15000, '🍳', ['singluten'], { name_en: 'Eggs your way', desc_en: 'With corn arepa, farmer’s cheese and fruit.' }),
+          IT('calentado', 'Calentado de la casa', 'Fríjoles, arroz, huevo, aguacate y arepa.', 18000, '🍳', ['local'], { name_en: 'House calentado', desc_en: 'Beans, rice, egg, avocado and arepa: a Colombian classic.' }),
+          IT('avena', 'Avena caliente', 'Con canela, banano y nueces.', 11000, '🥣', ['vegano'], { name_en: 'Warm oatmeal', desc_en: 'With cinnamon, banana and walnuts.' })
+        ] },
+        { id: 'platos', name: 'Platos de la casa', name_en: 'Mains', icon: '🍽️', note: 'Con ensalada de la huerta', note_en: 'Served with a garden salad', items: [
+          IT('trucha', 'Trucha al vapor con hierbas', 'Trucha de aguas frías, papa criolla y vegetales.', 36000, '🐟', ['singluten', 'chef'], { name_en: 'Steamed trout with herbs', desc_en: 'Cold-water trout, yellow potatoes and vegetables.' }),
+          IT('bowl-termal', 'Bowl termal', 'Quinua, garbanzos, aguacate, verduras asadas y aderezo de limón.', 28000, '🥗', ['vegano', 'popular'], { name_en: 'Hot springs bowl', desc_en: 'Quinoa, chickpeas, avocado, roasted vegetables and lemon dressing.' }),
+          IT('pollo-limon', 'Pollo al limón con quinua', 'Pechuga a la plancha y quinua con hierbas.', 32000, '🍗', ['singluten'], { name_en: 'Lemon chicken with quinoa', desc_en: 'Grilled chicken breast and herbed quinoa.' }),
+          IT('sopa', 'Sopa de la huerta', 'Verduras del día, cilantro y aguacate.', 16000, '🍲', ['vegano'], { name_en: 'Garden soup', desc_en: 'Vegetables of the day, cilantro and avocado.' }),
+          IT('lomo', 'Lomo de cerdo con arracacha', 'Lomo asado, puré de arracacha y salsa de mora.', 34000, '🥩', [], { name_en: 'Pork loin with arracacha', desc_en: 'Roast pork loin, arracacha mash and blackberry sauce.' })
+        ] },
+        { id: 'picar', name: 'Para picar', name_en: 'Light bites', icon: '🥑', note: '', items: [
+          IT('ceviche', 'Ceviche de palmito', 'Con mango, cebolla morada y limón.', 19000, '🍋', ['vegano', 'nuevo'], { name_en: 'Hearts of palm ceviche', desc_en: 'With mango, red onion and lime.' }),
+          IT('patacones', 'Patacones con guacamole', 'Plátano verde crocante.', 15000, '🍌', ['vegano'], { name_en: 'Patacones with guacamole', desc_en: 'Crispy green plantain.' }),
+          IT('empanaditas', 'Empanaditas de queso', 'Seis, con ají de lulo.', 12000, '🥟', ['vegetariano'], { name_en: 'Cheese empanadas', desc_en: 'Six of them, with lulo hot sauce.' })
+        ] },
+        { id: 'bebidas', name: 'Bebidas', name_en: 'Drinks', icon: '🍵', note: '', items: [
+          IT('aromatica', 'Aromática de la huerta', 'Hierbabuena, limonaria y cidrón.', 6000, '🍵', ['vegano', 'local'], { name_en: 'Garden herbal tea', desc_en: 'Mint, lemongrass and lemon verbena.' }),
+          IT('jugo-verde', 'Jugo verde', 'Pepino, apio, manzana, espinaca y jengibre.', 10000, '🥤', ['vegano', 'popular'], { name_en: 'Green juice', desc_en: 'Cucumber, celery, apple, spinach and ginger.' }),
+          IT('limonada', 'Limonada de hierbabuena', 'Endulzada con panela.', 9000, '🍋', ['vegano'], { name_en: 'Mint lemonade', desc_en: 'Sweetened with panela.' }),
+          IT('cafe', 'Café de origen', 'Filtrado, de una finca de la vereda.', 7000, '☕', ['local'], { name_en: 'Single-origin coffee', desc_en: 'Filter coffee from a nearby farm.' }),
+          IT('chocolate', 'Chocolate de mesa', 'En agua o en leche, con queso.', 8000, '🍫', [], { name_en: 'Hot chocolate', desc_en: 'With water or milk, served with cheese.' })
+        ] },
+        { id: 'postres', name: 'Postres', name_en: 'Desserts', icon: '🍮', note: '', items: [
+          IT('panna', 'Panna cotta de coco y maracuyá', 'Sin lácteos.', 13000, '🍮', ['sinlactosa'], { name_en: 'Coconut and passion fruit panna cotta', desc_en: 'Dairy-free.' }),
+          IT('torta', 'Torta de zanahoria', 'Con crema de queso.', 11000, '🍰', [], { name_en: 'Carrot cake', desc_en: 'With cream cheese frosting.' }),
+          IT('fresas', 'Fresas con crema', 'Fresas de la región.', 12000, '🍓', ['temporada', 'local'], { name_en: 'Strawberries and cream', desc_en: 'Local strawberries.' })
+        ] }
+      ]
+    },
+    modules: [
+      { id: 'hero', type: 'hero', on: true, s: { kicker: 'Hotel termal · km 9', kicker_en: 'Hot springs hotel · km 9', title: '', subtitle: 'Cocina sana y café de la región, entre baño y baño.', subtitle_en: 'Wholesome food and local coffee, between dips.', cta1: 'reservas', cta2: 'carta', showStatus: true,
+        ribbon: 'Desayunos hasta el mediodía, Opciones sin gluten, Café de origen, Vista a las piscinas', ribbon_en: 'Breakfast until noon, Gluten-free options, Single-origin coffee, Pool views' } },
+      { id: 'pasadia', type: 'libre', on: true, s: { kicker: 'Pasadía', kicker_en: 'Day pass', title: 'Piscinas y almuerzo', title_en: 'Pools and lunch',
+        text: 'Entrada a las piscinas termales de 9:00 a. m. a 6:00 p. m., toalla, casillero y el almuerzo del día.\n\n$95.000 por persona.',
+        text_en: 'Hot spring pools from 9:00 a.m. to 6:00 p.m., towel, locker and lunch of the day.\n\n$95,000 COP per person.',
+        style: 'destacado', btnLabel: 'Reservar', btnLabel_en: 'Book', btnTarget: 'reservas', url: '', waText: '' } },
+      { id: 'carta', type: 'carta', on: true, s: { title: 'La carta', title_en: 'Menu', intro: 'Ingredientes de la huerta del hotel y de fincas vecinas.', intro_en: 'Ingredients from the hotel garden and neighboring farms.', layout: 'lista', priceStyle: 'full', showFilters: true, showSearch: false,
+        footnote: 'Precios en pesos colombianos (COP), impuestos incluidos.', footnote_en: 'Prices in Colombian pesos (COP), taxes included.' } },
+      { id: 'reservas', type: 'reservas', on: true, s: { title: 'Reserve su mesa', title_en: 'Book a table', text: 'Para desayuno, almuerzo o cena. Si viene con pasadía, cuéntenos en la nota.', text_en: 'For breakfast, lunch or dinner. If you have a day pass, tell us in the note.',
+        slots: '7:30, 9:00, 12:30, 14:00, 19:00', maxPeople: 10, occasions: 'Desayuno, Almuerzo, Cena, Cumpleaños', occasions_en: 'Breakfast, Lunch, Dinner, Birthday', note: 'Confirmamos su reserva por WhatsApp.', note_en: 'We confirm your booking on WhatsApp.' } },
+      { id: 'servicios', type: 'servicios', on: true, s: { title: 'En el hotel', title_en: 'At the hotel', list: ['parqueadero', 'wifi', 'terraza', 'accesible', 'tarjeta', 'ingles'], extra: 'Toallas y casilleros, Batas', extra_en: 'Towels and lockers, Bathrobes', note: '', note_en: '' } },
+      { id: 'faq', type: 'faq', on: true, s: { title: 'Preguntas frecuentes', title_en: 'FAQ', items: [
+        { q: '¿Tengo que estar hospedado?', q_en: 'Do I need to be a hotel guest?', a: 'No. El restaurante está abierto para todos.', a_en: 'No. The restaurant is open to everyone.' },
+        { q: '¿Tienen opciones sin gluten y veganas?', q_en: 'Do you have gluten-free and vegan options?', a: 'Sí. Están marcadas en la carta y la cocina conoce los cuidados.', a_en: 'Yes. They are marked on the menu and our kitchen knows the precautions.' },
+        { q: '¿Puedo ir en bata desde las piscinas?', q_en: 'Can I come in a bathrobe from the pools?', a: 'Sí, en la terraza. En el salón le pedimos ropa seca.', a_en: 'Yes, on the terrace. Inside, please wear dry clothes.' }
+      ] } },
+      { id: 'resenas', type: 'resenas', on: true, s: { title: '¿Le gustó la visita?', title_en: 'Did you enjoy your visit?', text: 'Su reseña ayuda a que otros viajeros nos encuentren.', text_en: 'Your review helps other travelers find us.', rating: '', _bg: 'tinte', quotes: [
+        { text: 'Desayunar viendo el vapor de las piscinas no tiene precio. El bowl de frutas, delicioso.', text_en: 'Breakfast while the steam rises from the pools is priceless. The fruit bowl was delicious.', author: 'Camila R.' },
+        { text: 'Por fin un lugar con opciones sin gluten de verdad, y el café de origen está buenísimo.', text_en: 'Finally a place with real gluten-free options, and the single-origin coffee is excellent.', author: 'Tomás H.' }
+      ] } },
+      { id: 'horario', type: 'horario', on: true, s: { title: 'Horario', title_en: 'Opening hours', note: 'Abierto todos los días, también festivos.', note_en: 'Open every day, including holidays.', layout: 'compacto' } },
+      { id: 'ubicacion', type: 'ubicacion', on: true, s: { title: 'Cómo llegar', title_en: 'How to get here', text: '' } },
+      { id: 'contacto', type: 'contacto', on: true, s: { title: 'Contacto', title_en: 'Contact' } }
+    ],
+    meta: { credit: true }
   }
 ];
 
@@ -4927,6 +5082,17 @@ const SKINS = {
       { name: 'Nogal', colors: { bg: '#2B1E16', surface: '#3A2A20', ink: '#F7EBDD', muted: '#CDB6A0', accent: '#EBA53E', accent2: '#F08B60', accent3: '#BCCB8C' } },
       { name: 'Monte', colors: { bg: '#1D231A', surface: '#283023', ink: '#EFF1E4', muted: '#B6BDA8', accent: '#F0913A', accent2: '#E8C25A', accent3: '#E9866B' } },
       { name: 'Tabla clara', colors: { bg: '#F2E8D9', surface: '#FBF6EE', ink: '#2A1C13', muted: '#6B5646', accent: '#A9420C', accent2: '#855B00', accent3: '#A3352A' } }
+    ]
+  },
+  termal: {
+    label: 'Termal', art: 'Bienestar', desc: 'Bruma aguamarina, piedra y arena, esquinas de canto rodado y mucho aire. Para hoteles termales, spas y cocina saludable.', layout: 'lista',
+    defaults: { colors: { bg: '#EDF3F1', surface: '#FAFCFB', ink: '#1C3331', muted: '#56706B', accent: '#1F7168', accent2: '#87653A', accent3: '#A9553F' }, fonts: { display: 'Cormorant Garamond', body: 'Outfit' }, radius: 20, motion: 'suave', texture: 'none', icons: 'linea' },
+    palettes: [
+      { name: 'Bruma', colors: { bg: '#EDF3F1', surface: '#FAFCFB', ink: '#1C3331', muted: '#56706B', accent: '#1F7168', accent2: '#87653A', accent3: '#A9553F' } },
+      { name: 'Piedra', colors: { bg: '#EEEDEA', surface: '#FAF9F7', ink: '#262A2B', muted: '#5D6364', accent: '#376A75', accent2: '#7A5D42', accent3: '#4C704E' } },
+      { name: 'Arena', colors: { bg: '#F3EDE4', surface: '#FBF8F3', ink: '#2E2A24', muted: '#6B6256', accent: '#2A716B', accent2: '#9A5A37', accent3: '#62724A' } },
+      { name: 'Pozo', colors: { bg: '#132624', surface: '#1C3330', ink: '#E8F1EE', muted: '#A3B9B4', accent: '#7FD1C3', accent2: '#E2C08F', accent3: '#E59A80' } },
+      { name: 'Noche termal', colors: { bg: '#121C26', surface: '#1B2834', ink: '#E7EEF3', muted: '#A0B1BF', accent: '#8CC9E8', accent2: '#D9C49A', accent3: '#A7D7B5' } }
     ]
   }
 };
