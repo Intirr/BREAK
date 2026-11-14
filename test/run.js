@@ -1187,6 +1187,39 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(!/\.credit\{[^}]*opacity/.test(SRC('runtime.js')), 'el crédito del pie no va desvanecido');
   }
 
+  /* 11ze. Estudio fuera de claude.ai: las descargas las hace el navegador */
+  {
+    const page = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
+    const clicks = [], made = [];
+    const dom2 = new JSDOM('<!doctype html><html><head><meta charset="utf-8"></head><body>' + page + '</body></html>', {
+      pretendToBeVisual: true, runScripts: 'dangerously', url: 'https://menu.example.com/estudio', virtualConsole: quietConsole(),
+      beforeParse(w) {
+        w.matchMedia = q => ({ matches: /min-width: 1000px/.test(q), addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
+        w.scrollTo = () => {};
+        w.URL.createObjectURL = b => { made.push(b); return 'blob:prueba/' + made.length; };
+        w.URL.revokeObjectURL = () => {};
+        w.HTMLAnchorElement.prototype.click = function () { clicks.push({ name: this.download, href: this.href }); };
+      }
+    });
+    const w2 = dom2.window, errs2 = [];
+    w2.addEventListener('error', e => errs2.push(e.message));
+    await sleep(500);
+    const ST2 = w2.__breakStudio, toastTxt = () => (w2.document.querySelector('.toast, #toast') || {}).textContent || '';
+    ok(!!ST2 && ST2.Store.kind !== 'db', 'fuera de claude.ai el estudio arranca y guarda en el navegador');
+    ST2.ACTIONS['exp-html'](); await sleep(400);
+    const h = clicks.find(c => /\.html$/.test(c.name));
+    ok(!!h && /^blob:prueba\//.test(h.href) && made.some(b => /text\/html/.test(b.type)), 'descarga la app .html con un enlace del navegador');
+    ok(/Listo/.test(toastTxt()), 'avisa que la descarga quedó lista');
+    ST2.ACTIONS['exp-json'](); await sleep(400);
+    const j = clicks.find(c => /-break\.json$/.test(c.name));
+    ok(!!j && made.some(b => /application\/json/.test(b.type)), 'descarga la configuración .json con un enlace del navegador');
+    const n = clicks.length; w2.URL.createObjectURL = () => { throw new Error('no se puede'); };
+    ST2.ACTIONS['exp-html'](); await sleep(400);
+    ok(clicks.length === n && /No se pudo descargar/.test(toastTxt()), 'si el navegador no deja descargar, lo avisa');
+    ok(!errs2.length, 'sin errores al descargar fuera de claude.ai' + (errs2.length ? ': ' + errs2.join(' | ') : ''));
+    w2.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];

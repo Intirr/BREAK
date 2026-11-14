@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (823 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (829 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -117,9 +117,9 @@ Toda opción de `theme` vale «auto» (lo que trae la estética) hasta que el us
 
 ## Plataforma actual
 
-El estudio se publica como Artifact de claude.ai y usa sus capacidades `db`, `user`, `downloads` y `assets` (`window.claude.use(...)`). Sin ellas cae a `localStorage`, las descargas se desactivan y las fotos se incrustan en la app (unos 100 KB cada una).
+El estudio se publica como Artifact de claude.ai y usa sus capacidades `db`, `user`, `downloads` y `assets` (`window.claude.use(...)`). Sin ellas cae a `localStorage`, las descargas las hace el navegador con un enlace `<a download>` (`browserSave()` en `saveFile()`) y las fotos se incrustan en la app (unos 100 KB cada una).
 
-Los estilos guardados van en el documento `mis-estilos` de la misma colección (ver «Mis estilos y CSS propio»). Biblioteca de fotos (`assets`, solo para quien puede editar el Artifact): cada foto se sube aparte y la app guarda `asset:<id>`; el índice es el documento `biblioteca-fotos` de la colección de la cuenta (no es una app: `validApp()` lo ignora). `assets.list()` solo se usa para el medidor y para «Borrar fotos sin usar», que mira todas las apps y plantillas abiertas antes de borrar. Al exportar, `materialize()` trae cada foto de `/_blob/<id>`: en el .zip van como `img/…` y entran al service worker; en el .html y el .json van incrustadas. El .zip también lleva `og.png` (imagen para compartir, `ogBlob()`), que se anuncia con metaetiquetas cuando hay dirección publicada. Toda app exportada abre con una pantalla de carga (`#bk-splash`, se quita con `brand.splash: false`) que el motor retira cuando cargan las tipografías. Al importar un .json, las fotos incrustadas pasan a la biblioteca. Si se va a servir fuera de claude.ai (por ejemplo en Cloudflare Pages), hay que reemplazar `storeInit()`/`saveFile()` en `studio.js` por un backend propio (p. ej. Cloudflare D1 o KV) y descargas con `<a download>`.
+Los estilos guardados van en el documento `mis-estilos` de la misma colección (ver «Mis estilos y CSS propio»). Biblioteca de fotos (`assets`, solo para quien puede editar el Artifact): cada foto se sube aparte y la app guarda `asset:<id>`; el índice es el documento `biblioteca-fotos` de la colección de la cuenta (no es una app: `validApp()` lo ignora). `assets.list()` solo se usa para el medidor y para «Borrar fotos sin usar», que mira todas las apps y plantillas abiertas antes de borrar. Al exportar, `materialize()` trae cada foto de `/_blob/<id>`: en el .zip van como `img/…` y entran al service worker; en el .html y el .json van incrustadas. El .zip también lleva `og.png` (imagen para compartir, `ogBlob()`), que se anuncia con metaetiquetas cuando hay dirección publicada. Toda app exportada abre con una pantalla de carga (`#bk-splash`, se quita con `brand.splash: false`) que el motor retira cuando cargan las tipografías. Al importar un .json, las fotos incrustadas pasan a la biblioteca. Si se va a servir fuera de claude.ai (por ejemplo en Cloudflare Pages), las descargas ya funcionan; para guardar en la nube hay que reemplazar `storeInit()` en `studio.js` por un backend propio (p. ej. Cloudflare D1 o KV).
 
 ## Reglas
 

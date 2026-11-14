@@ -8452,9 +8452,22 @@ const BRAND_FIELDS = [
     for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
     return new Blob([arr], { type: 'image/png' });
   }
+  /* Fuera de claude.ai (estudio abierto suelto o en otro sitio) la descarga la hace el navegador con un enlace <a download>. */
+  const MIME = { html: 'text/html', json: 'application/json', zip: 'application/zip', png: 'image/png' };
+  function browserSave(filename, data) {
+    try {
+      const ext = String(filename).split('.').pop().toLowerCase();
+      const blob = data instanceof Blob ? data : new Blob([data], { type: (MIME[ext] || 'text/plain') + ';charset=utf-8' });
+      const url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = filename; a.rel = 'noopener'; a.style.display = 'none';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+      toast('Listo: ' + filename); return true;
+    } catch (e) { toast('No se pudo descargar el archivo.'); return false; }
+  }
   async function saveFile(filename, data) {
     const dl = await useCap('downloads');
-    if (!dl) { toast('Las descargas no están disponibles en esta vista. Abre el estudio en claude.ai.'); return false; }
+    if (!dl) return browserSave(filename, data);
     try { await dl.save({ filename: filename, data: data }); toast('Listo: ' + filename); return true; } catch (e) {
       const code = e && e.code;
       if (code === 'declined') toast('Descarga cancelada.');
