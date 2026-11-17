@@ -1,0 +1,11 @@
+{
+  "name": "break-panel-worker",
+  "private": true,
+  "type": "module",
+  "description": "Servidor del panel del local de Break (Cloudflare Worker)",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy"
+  }
+}

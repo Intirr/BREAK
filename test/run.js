@@ -1282,6 +1282,106 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     A.close();
   }
 
+  /* 11zg. Servidor del panel (Worker) con KV y R2 simulados */
+  {
+    const W = await import(require('url').pathToFileURL(path.join(__dirname, '..', 'worker', 'src', 'index.js')).href);
+    class KV {
+      constructor() { this.m = new Map(); this.ttl = {}; }
+      async get(k, t) { const v = this.m.get(k); if (v == null) return null; return (t === 'json' || (t && t.type === 'json')) ? JSON.parse(v) : v; }
+      async put(k, v, o) { this.m.set(k, String(v)); if (o && o.expirationTtl) this.ttl[k] = o.expirationTtl; }
+      async delete(k) { this.m.delete(k); }
+      async list(o) { return { keys: [...this.m.keys()].filter(k => k.startsWith((o && o.prefix) || '')).map(name => ({ name })) }; }
+    }
+    class R2 {
+      constructor() { this.m = new Map(); }
+      async put(k, b, o) { this.m.set(k, { b: new Uint8Array(b), o }); }
+      async get(k) { const x = this.m.get(k); return x ? { body: x.b, writeHttpMetadata: h => h.set('Content-Type', x.o.httpMetadata.contentType) } : null; }
+    }
+    const env = { DATA: new KV(), FOTOS: new R2(), SESSION_SECRET: 'secreto-de-prueba-largo', ADMIN_TOKEN: 'clave-admin' };
+    const H = 'https://panel.example.com';
+    const call = async (method, p, body, headers) => {
+      const init = { method, headers: Object.assign({}, headers || {}) };
+      if (body !== undefined) { init.body = body instanceof Uint8Array ? body : JSON.stringify(body); if (!(body instanceof Uint8Array)) init.headers['Content-Type'] = 'application/json'; }
+      const res = await W.handle(new Request(H + p, init), env, { waitUntil() {} });
+      let data = null; try { data = await res.clone().json(); } catch (e) { data = null; }
+      return { status: res.status, data, res };
+    };
+    const bearer = t => ({ Authorization: 'Bearer ' + t });
+    let r = await W.handle(new Request(H + '/api/antojo/contenido'), {}, {});
+    ok(r.status === 500 && /Falta configurar/.test((await r.json()).error), 'sin KV ni secretos el servidor avisa qué falta');
+    const app = TPL('tpl-antojo');
+    r = await call('PUT', '/api/admin/locales/antojo', { name: 'Antojo', pin: '123456', app });
+    ok(r.status === 401, 'crear un local pide la clave de administración');
+    r = await call('PUT', '/api/admin/locales/antojo', { name: 'Antojo', pin: '123456', app }, bearer('otra'));
+    ok(r.status === 401, 'una clave de administración equivocada no sirve');
+    r = await call('PUT', '/api/admin/locales/antojo', { name: 'Antojo', app }, bearer('clave-admin'));
+    ok(r.status === 400 && /PIN/.test(r.data.error), 'un local nuevo necesita su PIN');
+    r = await call('PUT', '/api/admin/locales/antojo', { name: 'Antojo', pin: '123456', app }, bearer('clave-admin'));
+    ok(r.status === 200 && r.data.v === 1, 'el estudio crea el local con su app y su contenido inicial');
+    const stored = JSON.parse(env.DATA.m.get('local:antojo'));
+    ok(stored.pin && stored.salt && !JSON.stringify(stored).includes('123456'), 'el PIN no se guarda en claro');
+    r = await call('GET', '/api/admin/locales', undefined, bearer('clave-admin'));
+    ok(r.status === 200 && r.data.locales.join() === 'antojo', 'la administración lista los locales');
+    // Lectura pública
+    r = await call('GET', '/api/antojo/contenido');
+    ok(r.status === 200 && r.data.v === 1 && r.data.contenido.menu.categories.length === app.menu.categories.length && r.res.headers.get('Access-Control-Allow-Origin') === '*' && r.res.headers.get('ETag') === '"1"', 'el contenido se lee sin sesión, con su versión');
+    r = await call('GET', '/api/antojo/contenido', undefined, { 'If-None-Match': '"1"' });
+    ok(r.status === 304, 'si el celular ya tiene esa versión, no la vuelve a mandar');
+    r = await call('GET', '/api/no-existe/contenido'); ok(r.status === 404, 'un local que no existe da 404');
+    r = await call('GET', '/api/A..B/contenido'); ok(r.status === 404, 'una dirección con nombre inválido no llega a KV');
+    // Entrada con PIN y límite de intentos
+    const ipA = { 'CF-Connecting-IP': '10.0.0.1' }, ipB = { 'CF-Connecting-IP': '10.0.0.2' };
+    r = await call('POST', '/api/antojo/entrar', { pin: '000000' }, ipA);
+    ok(r.status === 401 && r.data.error === 'PIN incorrecto.', 'un PIN incorrecto no entra');
+    for (let i = 0; i < 4; i++) r = await call('POST', '/api/antojo/entrar', { pin: '000000' }, ipA);
+    r = await call('POST', '/api/antojo/entrar', { pin: '123456' }, ipA);
+    ok(r.status === 429 && env.DATA.ttl['tries:antojo:10.0.0.1'] === 900, 'después de 5 intentos fallidos espera 15 minutos, aunque el PIN sea el correcto');
+    r = await call('POST', '/api/antojo/entrar', { pin: '123456' }, ipB);
+    ok(r.status === 200 && /^[\w-]+\.[\w-]+$/.test(r.data.token) && r.data.name === 'Antojo', 'con el PIN correcto entrega una sesión');
+    const tok = r.data.token;
+    // Datos del panel y guardar
+    r = await call('GET', '/api/antojo/panel'); ok(r.status === 401, 'los datos del panel piden sesión');
+    r = await call('GET', '/api/antojo/panel', undefined, bearer(tok));
+    ok(r.status === 200 && r.data.app.theme.skin === app.theme.skin && r.data.doc.v === 1, 'con sesión, el panel recibe la app y el contenido');
+    const cont = r.data.doc.contenido;
+    cont.menu.categories[0].items[0].price = 7777; cont.menu.categories[0].items[0].evil = '<script>'; cont.hack = 1;
+    r = await call('PUT', '/api/antojo/contenido', { base: 1, contenido: cont }); ok(r.status === 401, 'guardar pide sesión');
+    r = await call('PUT', '/api/antojo/contenido', { base: 1, contenido: cont }, bearer(tok.replace(/.$/, c => c === 'A' ? 'B' : 'A')));
+    ok(r.status === 401, 'una sesión alterada no sirve');
+    r = await call('PUT', '/api/antojo/contenido', { base: 1, contenido: cont }, bearer(tok));
+    ok(r.status === 200 && r.data.v === 2 && r.data.contenido.menu.categories[0].items[0].price === 7777 && !('evil' in r.data.contenido.menu.categories[0].items[0]) && !('hack' in r.data.contenido), 'guarda el contenido revisado con el mismo saneador de la app');
+    r = await call('PUT', '/api/antojo/contenido', { base: 1, contenido: cont }, bearer(tok));
+    ok(r.status === 409 && r.data.doc.v === 2 && /Alguien guardó/.test(r.data.error), 'si alguien guardó antes, avisa y entrega la versión más reciente');
+    r = await call('GET', '/api/antojo/contenido'); ok(r.data.v === 2 && r.data.contenido.menu.categories[0].items[0].price === 7777, 'la app recibe la versión nueva');
+    const big = JSON.parse(JSON.stringify(cont)); big.menu.categories[0].items[0].desc = 'x'.repeat(700 * 1024);
+    r = await call('PUT', '/api/antojo/contenido', { base: 2, contenido: big }, bearer(tok)); ok(r.status === 413, 'un contenido demasiado grande se rechaza');
+    // Deshacer e historial
+    r = await call('GET', '/api/antojo/historial', undefined, bearer(tok)); ok(r.status === 200 && r.data.versiones.length === 1 && r.data.versiones[0].v === 1, 'el historial guarda la versión anterior');
+    r = await call('POST', '/api/antojo/deshacer', undefined, bearer(tok));
+    ok(r.status === 200 && r.data.v === 3 && r.data.contenido.menu.categories[0].items[0].price === app.menu.categories[0].items[0].price, 'deshacer vuelve a la versión anterior como una versión nueva');
+    r = await call('POST', '/api/antojo/deshacer', undefined, bearer(tok)); ok(r.status === 409, 'sin versiones anteriores no hay nada que deshacer');
+    // Sesiones vencidas, de otro local y cierre al cambiar el PIN
+    const vieja = await W.firmarSesion(env, 'antojo', stored.sv, Date.now() - 1000);
+    r = await call('GET', '/api/antojo/panel', undefined, bearer(vieja)); ok(r.status === 401 && /terminó/.test(r.data.error), 'una sesión vencida no sirve');
+    await call('PUT', '/api/admin/locales/zocalo', { name: 'Zócalo', pin: '654321', app: TPL('tpl-zocalo') }, bearer('clave-admin'));
+    r = await call('PUT', '/api/zocalo/contenido', { base: 1, contenido: cont }, bearer(tok)); ok(r.status === 401, 'la sesión de un local no sirve en otro');
+    await call('PUT', '/api/admin/locales/antojo', { pin: '112233' }, bearer('clave-admin'));
+    r = await call('GET', '/api/antojo/panel', undefined, bearer(tok)); ok(r.status === 401, 'cambiar el PIN cierra las sesiones abiertas');
+    r = await call('GET', '/api/antojo/contenido'); ok(r.data.v === 3, 'cambiar solo el PIN no toca el contenido');
+    r = await call('POST', '/api/antojo/entrar', { pin: '112233' }, ipB); const tok2 = r.data.token;
+    // Fotos
+    const webp = new Uint8Array([82, 73, 70, 70, 8, 0, 0, 0, 87, 69, 66, 80, 1, 2, 3, 4]);
+    r = await call('POST', '/api/antojo/fotos', webp, Object.assign({ 'Content-Type': 'image/gif' }, bearer(tok2))); ok(r.status === 415, 'solo se suben fotos JPG, PNG o WebP');
+    r = await call('POST', '/api/antojo/fotos', new Uint8Array([60, 115, 99, 114, 105, 112, 116, 62, 0, 0, 0, 0]), Object.assign({ 'Content-Type': 'image/webp' }, bearer(tok2))); ok(r.status === 415, 'un archivo que no es foto se rechaza aunque diga serlo');
+    r = await call('POST', '/api/antojo/fotos', new Uint8Array(2 * 1024 * 1024 + 1), Object.assign({ 'Content-Type': 'image/jpeg' }, bearer(tok2))); ok(r.status === 413, 'una foto de más de 2 MB se rechaza');
+    r = await call('POST', '/api/antojo/fotos', webp, { 'Content-Type': 'image/webp' }); ok(r.status === 401, 'subir fotos pide sesión');
+    r = await call('POST', '/api/antojo/fotos', webp, Object.assign({ 'Content-Type': 'image/webp' }, bearer(tok2)));
+    ok(r.status === 200 && /^https:\/\/panel\.example\.com\/fotos\/antojo\/[0-9a-f]{24}\.webp$/.test(r.data.url), 'sube la foto y devuelve su dirección');
+    const foto = await W.handle(new Request(r.data.url), env, {});
+    ok(foto.status === 200 && foto.headers.get('Content-Type') === 'image/webp' && /immutable/.test(foto.headers.get('Cache-Control')), 'la foto se sirve con su tipo y caché largo');
+    r = await call('OPTIONS', '/api/antojo/contenido'); ok(r.status === 204 && /PUT/.test(r.res.headers.get('Access-Control-Allow-Methods')), 'responde a la consulta previa del navegador');
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];

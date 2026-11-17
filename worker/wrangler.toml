@@ -1,0 +1,23 @@
+# Break · servidor del panel del local. Pasos para publicarlo en worker/LEEME.md.
+name = "break-panel"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[build]
+command = "node build.mjs"
+
+# Contenido de cada local, sus versiones, el PIN cifrado y los intentos de entrada.
+# Crear con: npx wrangler kv namespace create DATA   (y pegar aquí el id que muestra)
+[[kv_namespaces]]
+binding = "DATA"
+id = "PEGAR_AQUI_EL_ID_DEL_KV"
+
+# Fotos que suben los locales.
+# Crear con: npx wrangler r2 bucket create break-fotos
+[[r2_buckets]]
+binding = "FOTOS"
+bucket_name = "break-fotos"
+
+# Secretos (no van en este archivo):
+#   npx wrangler secret put SESSION_SECRET   (una frase larga al azar: firma las sesiones y el PIN)
+#   npx wrangler secret put ADMIN_TOKEN      (la clave que usa el estudio para crear locales)

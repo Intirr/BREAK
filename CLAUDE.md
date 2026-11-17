@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (847 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila, prepara el servidor del panel (`worker/build.mjs`) y corre `test/run.js` (883 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -47,6 +47,25 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 El dueño cambia su contenido desde un panel (en construcción por etapas) sin tocar el diseño. El contenido es solo carta, promos, menú del día, aviso, agenda, galería, reseñas, horario y festivos. `sanitizeContenido()` deja pasar solo esas claves, con tipos y largos revisados: en los módulos, solo las de contenido (`C_MODS`), nunca `layout` ni `_bg`; fotos `https` o `img/…`. `mergeContenido(app, contenido)` lo pone sobre una copia de la app (solo en módulos que ya existen y son del mismo tipo) y `contenidoOf(app)` lo saca. Las tres son puras, van antes del `return` de `opts.meta` y las usan la app, el panel y el servidor.
 
 Si la app trae `meta.panel {api, slug}` (dirección `https`, o `http://localhost` para pruebas), `loadPanel()` la abre con la última copia guardada en el celular (`break:<id>:contenido`) o con la carta que trae, y pide `api/api/<slug>/contenido` (`{v, at, contenido}`); cuando llega, la guarda y vuelve a pintar. La vista previa del estudio no lo pide. «Agotado hoy» es `soldDate` (fecha de hoy en `brand.tz`): `isOff()` lo trata como no disponible y vuelve solo al día siguiente. Los festivos (`brand.holidays`) le ganan al horario de la semana en `statusInfo()` y el horario lista los próximos (`holidaysHTML()`).
+
+### Servidor del panel (`worker/`)
+
+Un Cloudflare Worker (`worker/src/index.js`, función `handle()`) atiende a todos los locales:
+
+- **Almacenamiento:** KV `DATA` (`local:`, `app:`, `contenido:`, `hist:` y `tries:` por local) y R2 `FOTOS`.
+- **Validación:** usa el mismo saneador que la app. `worker/build.mjs` copia `src/runtime.js` en `worker/src/runtime-meta.js` y el panel compilado en `panel-html.js`; los dos son generados e ignorados por git.
+- **Rutas:**
+  - `GET /api/<slug>/contenido`: pública, con caché de borde de 30 s y `ETag`.
+  - `POST /api/<slug>/entrar`: PIN de 6 números, 5 intentos cada 15 min.
+  - Con sesión: `GET …/panel`, `PUT …/contenido` (`{base, contenido}`, que da 409 si alguien guardó antes), `POST …/deshacer`, `GET …/historial` (10 versiones) y `POST …/fotos` (JPG, PNG o WebP de hasta 2 MB, revisados por sus primeros bytes).
+  - Fotos en `GET /fotos/<slug>/<archivo>`.
+  - Administración con `ADMIN_TOKEN`: `PUT /api/admin/locales/<slug>` (nombre, PIN, app y contenido inicial) y `GET /api/admin/locales`.
+  - El panel en `GET /panel/<slug>`.
+- **PIN y sesiones:**
+  - El PIN se guarda como HMAC con `SESSION_SECRET` (un PBKDF2 fuerte no cabe en los 10 ms de CPU del plan gratis).
+  - Las sesiones son tokens firmados de 12 horas, no cookies, así que CORS abierto no expone nada.
+  - Cambiar el PIN cierra las sesiones abiertas.
+- **Pruebas y despliegue:** las pruebas corren el Worker en Node con KV y R2 simulados. `cd worker && npx wrangler deploy --dry-run` lo empaqueta sin cuenta de Cloudflare.
 
 ### Añadir un módulo
 

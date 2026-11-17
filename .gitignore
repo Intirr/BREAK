@@ -2,3 +2,6 @@ node_modules/
 dist/demo-*.html
 *.png
 .DS_Store
+worker/src/runtime-meta.js
+worker/src/panel-html.js
+.wrangler/
