@@ -1,5 +1,5 @@
 /* Break · panel del local. El dueño entra con el PIN de su local y cambia el contenido (carta, precios, «agotado
-   hoy», promos, menú del día, aviso, horario y festivos) sin tocar el diseño. Habla con el servidor del panel (worker/) en la misma dirección donde se abre:
+   hoy», promos, menú del día, aviso, horario, festivos, agenda, galería, reseñas y fotos) sin tocar el diseño. Habla con el servidor del panel (worker/) en la misma dirección donde se abre:
    /panel/<slug>. Usa el motor (breakApp) para la vista previa y su saneador para no guardar nada inválido. */
 (function () {
   'use strict';
@@ -147,7 +147,7 @@
   }
 
   /* ---------- Pantalla ---------- */
-  const TABS = [['carta', 'Carta'], ['promos', 'Promos'], ['avisos', 'Avisos y horario']];
+  const TABS = [['carta', 'Carta'], ['promos', 'Promos'], ['avisos', 'Avisos y horario'], ['mas', 'Más']];
   function render() {
     $('#top').innerHTML = '<div class="top-in"><div class="top-n"><b>' + esc(P.name) + '</b><small>Panel del local</small></div>' +
       '<button type="button" class="btn sm top-pv" data-a="pv">Ver la app</button><button type="button" class="btn sm" data-a="logout">Salir</button></div>' +
@@ -188,7 +188,7 @@
           '<button type="button" class="ib" data-a="cat-ed" data-c="' + ci + '" aria-label="Editar categoría">' + ICO.edit + '</button></div>' +
           (open ? '<div class="items">' + (its.length ? its.map(function (x) {
             const it = x.it, st = itemState(it);
-            return '<div class="it ' + st[0] + '"><button type="button" class="it-m" data-a="it-ed" data-c="' + ci + '" data-i="' + x.ii + '"><b>' + esc(it.name || 'Plato sin nombre') + '</b><span>' + esc(money(it.price)) + '</span>' + (st[1] ? '<em>' + st[1] + '</em>' : '') + '</button>' +
+            return '<div class="it ' + st[0] + '"><button type="button" class="it-m" data-a="it-ed" data-c="' + ci + '" data-i="' + x.ii + '"><b>' + esc(it.name || 'Plato sin nombre') + '</b><span>' + esc(money(it.price) + (it.img ? ' · Con foto' : '')) + '</span>' + (st[1] ? '<em>' + st[1] + '</em>' : '') + '</button>' +
               '<label class="sw"><input type="checkbox" class="soldsw" data-a="sold" data-c="' + ci + '" data-i="' + x.ii + '"' + (it.soldDate === hoy() ? ' checked' : '') + (it.on === false ? ' disabled' : '') + '>Agotado hoy</label></div>';
           }).join('') : '<p class="empty">Esta categoría no tiene platos.</p>') +
             (q ? '' : '<div class="add-row"><button type="button" class="btn sm" data-a="it-add" data-c="' + ci + '">+ Agregar plato</button></div>') + '</div>' : '') + '</section>';
@@ -203,7 +203,7 @@
   /* ---------- Promos, menú del día, aviso, horario y festivos ---------- */
   const DAYS = [[1, 'Lun', 'Lunes'], [2, 'Mar', 'Martes'], [3, 'Mié', 'Miércoles'], [4, 'Jue', 'Jueves'], [5, 'Vie', 'Viernes'], [6, 'Sáb', 'Sábado'], [0, 'Dom', 'Domingo']];
   /* Los mismos topes del saneador (C_MAX en el motor): lo que pase de ahí se perdería al guardar. */
-  const LIM = { promos: 20, parts: 12, holidays: 40 };
+  const LIM = { promos: 20, parts: 12, holidays: 40, events: 20, photos: 24, quotes: 6 };
   const AV_STYLES = [['acento', 'Con color'], ['suave', 'Suave'], ['alerta', 'Alerta']];
   /* Módulos de un tipo que la app sí tiene, en el orden de la app: el contenido solo se aplica a esos. */
   function modsOf(type) {
@@ -319,6 +319,131 @@
       '<h2 class="sec-t">Festivos y días especiales</h2><p class="intro">Para una fecha puntual: ese día le gana al horario de la semana.</p>' + holidaysCards();
   };
 
+  /* ---------- Agenda, galería y reseñas ---------- */
+  function eventosCard(x) {
+    const s = x.m.s, L = s.items || (s.items = []), td = hoy();
+    const past = L.filter(function (e) { return e.date && e.date < td; }).length;
+    return '<section class="blk card" data-mod="' + attr(x.id) + '"><div class="cat-h"><div class="blk-t"><b>' + esc(s.title || 'Agenda') + '</b><small>' + L.length + (L.length === 1 ? ' evento' : ' eventos') + '</small></div>' +
+      '<button type="button" class="ib" data-a="mt-ed" data-m="' + attr(x.id) + '" aria-label="Cambiar el título de la sección">' + ICO.edit + '</button></div>' + offNote(x.m) +
+      '<div class="items">' + (L.length ? L.map(function (e, i) {
+        const old = !!(e.date && e.date < td), sub = [e.when, e.date ? fmtFecha(e.date) : '', e.rsvp ? 'Con «Apartar cupo»' : ''].filter(Boolean).join(' · ');
+        return '<div class="it' + (old ? ' old' : '') + '"><button type="button" class="it-m" data-a="ev-ed" data-m="' + attr(x.id) + '" data-i="' + i + '"><b>' + esc(e.title || 'Evento sin título') + '</b><span>' + esc(sub || 'Sin fecha') + '</span>' +
+          (old ? '<em>Ya pasó: no se ve en la app</em>' : '') + '</button>' + mvBtns('ev-mv', x.id, i, L.length, 'evento') + '</div>';
+      }).join('') : '<p class="empty">Todavía no hay eventos.</p>') +
+      '<div class="add-row">' + (L.length < LIM.events ? '<button type="button" class="btn sm" data-a="ev-add" data-m="' + attr(x.id) + '">+ Agregar evento</button>' : '') +
+      (past ? '<button type="button" class="btn sm" data-a="ev-clean" data-m="' + attr(x.id) + '">Quitar los que ya pasaron</button>' : '') + '</div></div></section>';
+  }
+  function galeriaCard(x) {
+    const s = x.m.s, L = s.items || (s.items = []);
+    return '<section class="blk card" data-mod="' + attr(x.id) + '"><div class="cat-h"><div class="blk-t"><b>' + esc(s.title || 'Galería') + '</b><small>' + L.length + (L.length === 1 ? ' foto' : ' fotos') + '</small></div>' +
+      '<button type="button" class="ib" data-a="mt-ed" data-m="' + attr(x.id) + '" aria-label="Cambiar el título de la sección">' + ICO.edit + '</button></div>' + offNote(x.m) +
+      (L.length ? '<div class="gal">' + L.map(function (g, i) {
+        const src = photoSrc(g.img);
+        const pic = src ? '<img src="' + attr(src) + '" alt=""' + posCls(g.imgPos) + '>' : g.img ? '<span class="gal-e gal-t">Foto de la app</span>' :
+          g.emoji ? '<span class="gal-e" aria-hidden="true">' + esc(g.emoji) + '</span>' : '<span class="gal-e gal-t">Sin foto</span>';
+        return '<div class="gal-i"><button type="button" class="gal-m" data-a="ga-ed" data-m="' + attr(x.id) + '" data-i="' + i + '" aria-label="Cambiar la foto ' + (i + 1) + (g.caption ? ': ' + attr(g.caption) : '') + '">' + pic +
+          '<span class="gal-c">' + esc(g.caption || '') + '</span></button><div class="gal-mv">' + mvBtns('ga-mv', x.id, i, L.length, 'foto') + '</div></div>';
+      }).join('') + '</div>' : '<p class="empty">Todavía no hay fotos.</p>') +
+      (L.length < LIM.photos ? '<div class="add-row"><button type="button" class="btn sm" data-a="ga-add" data-m="' + attr(x.id) + '">+ Agregar foto</button></div>' : '') + '</section>';
+  }
+  function resenasCard(x) {
+    const s = x.m.s, L = s.quotes || (s.quotes = []);
+    return '<section class="blk card" data-mod="' + attr(x.id) + '"><div class="cat-h"><div class="blk-t"><b>Testimonios</b><small>' + L.length + ' de ' + LIM.quotes + '</small></div></div>' + offNote(x.m) +
+      '<div class="items">' + (L.length ? L.map(function (q, i) {
+        const t = String(q.text || '');
+        return '<div class="it"><button type="button" class="it-m" data-a="rs-ed" data-m="' + attr(x.id) + '" data-i="' + i + '"><b class="q">«' + esc(t.length > 90 ? t.slice(0, 88) + '…' : t) + '»</b><span>' + esc(q.author || 'Sin autor') + '</span></button>' +
+          mvBtns('rs-mv', x.id, i, L.length, 'testimonio') + '</div>';
+      }).join('') : '<p class="empty">Todavía no hay testimonios.</p>') +
+      (L.length < LIM.quotes ? '<div class="add-row"><button type="button" class="btn sm" data-a="rs-add" data-m="' + attr(x.id) + '">+ Agregar testimonio</button></div>' : '') + '</div></section>';
+  }
+  VIEWS.mas = function () {
+    const ev = modsOf('eventos'), ga = modsOf('galeria'), rs = modsOf('resenas');
+    return '<h2 class="sec-t">Agenda</h2>' + (ev.length ? '<p class="intro">Si le pone fecha a un evento, la app lo quita sola al día siguiente.</p>' + ev.map(eventosCard).join('') : none('agenda')) +
+      '<h2 class="sec-t">Galería</h2>' + (ga.length ? '<p class="intro">Toque una foto para cambiarla o escribirle un pie de foto.</p>' + ga.map(galeriaCard).join('') : none('galería')) +
+      '<h2 class="sec-t">Reseñas</h2>' + (rs.length ? '<p class="intro">Publique solo opiniones reales, con permiso de quien las escribió.</p>' + rs.map(resenasCard).join('') : none('reseñas'));
+  };
+
+  /* ---------- Fotos: se achican en el celular y se suben al servidor del panel ---------- */
+  const MAX_FOTO = 2 * 1024 * 1024, FOTO_OK = /^image\/(jpeg|png|webp)$/;
+  const POS = [['top', 'Arriba'], ['', 'Centro'], ['bottom', 'Abajo']];
+  /* Dirección publicada de la app (meta.url): con ella se ven las fotos img/… de la app exportada en .zip. */
+  function appBase() { const u = String((P.app && P.app.meta && P.app.meta.url) || '').trim().replace(/\/+$/, ''); return /^https:\/\/[^\s"'<>]+$/i.test(u) ? u : ''; }
+  function photoSrc(v) {
+    v = String(v || '');
+    if (/^https:\/\/[^\s"'<>]+$/i.test(v) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d{2,5})?\/fotos\/[\w./-]+$/.test(v)) return v;
+    if (/^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(v) && appBase()) return appBase() + '/' + v;
+    return '';
+  }
+  function posCls(v) { return v === 'top' ? ' class="op-t"' : v === 'bottom' ? ' class="op-b"' : ''; }
+  /* Campo de foto de una hoja: su estado vive en P.sheet.ph (phInit) y phRender solo vuelve a pintar #ph. */
+  function photoFld(help) {
+    return '<div class="fld"><span class="lab" id="ph-l">Foto</span><div class="ph" id="ph" role="group" aria-labelledby="ph-l"></div>' +
+      (help ? '<p class="help">' + esc(help) + '</p>' : '') + '<input type="file" id="ph-file" accept="image/*" hidden></div>';
+  }
+  function phInit(o) { P.sheet.ph = { img: o.img || '', imgPos: o.imgPos || '', busy: false, err: '' }; phRender(); }
+  function phRender() {
+    const box = $('#ph'), ph = P.sheet && P.sheet.ph; if (!box || !ph) return;
+    const src = photoSrc(ph.img);
+    box.innerHTML = (ph.img ? (src ? '<img class="ph-img' + (ph.imgPos === 'top' ? ' op-t' : ph.imgPos === 'bottom' ? ' op-b' : '') + '" src="' + attr(src) + '" alt="Foto elegida">' : '<p class="ph-none">Foto de la app: se ve en la app publicada.</p>') : '<p class="ph-none">Sin foto.</p>') +
+      (ph.busy ? '<p class="st" role="status">Subiendo foto…</p>' : '') + (ph.err ? '<p class="err" role="alert">' + esc(ph.err) + '</p>' : '') +
+      '<div class="ph-b"><button type="button" class="btn sm" data-a="ph-pick"' + (ph.busy ? ' disabled' : '') + '>' + (ph.img ? 'Cambiar foto' : 'Subir foto') + '</button>' +
+      (ph.img && !ph.busy ? '<button type="button" class="btn sm bad" data-a="ph-del">Quitar foto</button>' : '') + '</div>' +
+      (ph.img ? '<span class="lab">Encuadre</span><div class="chips" role="group" aria-label="Encuadre de la foto">' + POS.map(function (o) {
+        return '<button type="button" class="chip" data-a="ph-pos" data-v="' + o[0] + '" aria-pressed="' + ((ph.imgPos || '') === o[0]) + '">' + o[1] + '</button>';
+      }).join('') + '</div>' : '');
+  }
+  function phBusy() { if (P.sheet && P.sheet.ph && P.sheet.ph.busy) { toast('Espere a que termine de subir la foto.'); return true; } return false; }
+  function phTo(o) { const ph = P.sheet && P.sheet.ph; if (!ph || ph.busy) return; o.img = ph.img; o.imgPos = ph.img ? ph.imgPos : ''; }
+  function canvasOK() { try { const c = document.createElement('canvas'); return !!(c.getContext && c.getContext('2d') && c.toBlob); } catch (e) { return false; } }
+  function loadImg(file) {
+    return new Promise(function (res, rej) {
+      const url = URL.createObjectURL(file), im = new Image(); let over = false;
+      const end = function (ok) { if (over) return; over = true; clearTimeout(t); URL.revokeObjectURL(url); if (ok) res(im); else rej(new Error('sin leer')); };
+      const t = setTimeout(function () { end(false); }, 15000);
+      im.onload = function () { end(true); }; im.onerror = function () { end(false); };
+      im.src = url;
+    });
+  }
+  function canvasBlob(cv, type, q) { return new Promise(function (res) { try { cv.toBlob(function (b) { res(b); }, type, q); } catch (e) { res(null); } }); }
+  async function encode(im, side, q) {
+    const W = im.naturalWidth || im.width, H = im.naturalHeight || im.height, r = Math.min(1, side / Math.max(W, H));
+    const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(W * r)); cv.height = Math.max(1, Math.round(H * r));
+    cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+    let b = await canvasBlob(cv, 'image/webp', q);
+    if (!b || b.type !== 'image/webp') b = await canvasBlob(cv, 'image/jpeg', Math.min(0.9, q + 0.03));
+    return b;
+  }
+  /* La foto se achica a 1600 px en WebP (o JPEG). Sin canvas, o si no se puede leer, va la original si el servidor la acepta. */
+  async function prepPhoto(file) {
+    if (canvasOK()) {
+      try {
+        const im = await loadImg(file);
+        let b = await encode(im, 1600, 0.82);
+        if (b && b.size > MAX_FOTO) b = await encode(im, 1200, 0.7);
+        if (b && b.size <= MAX_FOTO && FOTO_OK.test(b.type)) return b;
+      } catch (e) { /* se intenta con la original */ }
+    }
+    if (FOTO_OK.test(file.type) && file.size <= MAX_FOTO) return file;
+    throw new Error(file.size > MAX_FOTO ? 'La foto pesa más de 2 MB y este navegador no la puede achicar. Pruebe con una más liviana.' : 'No se pudo leer esa foto. Pruebe con una JPG o PNG.');
+  }
+  async function uploadPhoto(file) {
+    const sh = P.sheet; if (!sh || !sh.ph || sh.ph.busy) return;
+    if (!/^image\//.test(file.type || '')) { sh.ph.err = 'Elija una foto (JPG, PNG o WebP).'; phRender(); return; }
+    sh.ph.busy = true; sh.ph.err = ''; phRender();
+    try {
+      const blob = await prepPhoto(file);
+      const r = await api('POST', '/fotos', undefined, blob), u = String((r && r.url) || '');
+      if (P.sheet !== sh) return;
+      if (!photoSrc(u)) throw new Error('El servidor no devolvió la dirección de la foto. Intente de nuevo.');
+      sh.ph.img = u; sh.ph.busy = false; phRender(); toast('Foto subida.');
+    } catch (e) {
+      if (P.sheet !== sh) return;
+      sh.ph.busy = false;
+      if (e.status === 401) { closeSheet(true); showLogin(e.message); return; }
+      sh.ph.err = e.message || 'No se pudo subir la foto.'; phRender();
+    }
+  }
+
   /* ---------- Hojas de edición ---------- */
   function openSheet(html, onClose) {
     P.sheet = { onClose: onClose || null };
@@ -353,6 +478,7 @@
       fld('Nombre', 'name', it.name, { max: 80 }) + (bilingual() ? fld('Nombre', 'name_en', it.name_en || '', { max: 80, en: true }) : '') +
       fld('Precio', 'price', it.price ? money(it.price) : '', { mode: 'numeric', ph: '$15.900', help: 'En pesos, sin centavos.' }) +
       fld('Descripción', 'desc', it.desc || '', { area: true, max: 300 }) + (bilingual() ? fld('Descripción', 'desc_en', it.desc_en || '', { area: true, max: 300, en: true }) : '') +
+      photoFld('Opcional. Según el diseño de su carta, sale al lado o encima del plato.') +
       '<div class="fld"><span class="lab">Etiquetas</span><div class="chips" role="group" aria-label="Etiquetas">' + TAGS.map(function (t) {
         return '<button type="button" class="chip" data-a="tag" data-t="' + t[0] + '" aria-pressed="' + (tags.indexOf(t[0]) >= 0) + '">' + esc(t[1]) + '</button>';
       }).join('') + '</div></div>' +
@@ -364,6 +490,7 @@
       (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="it-del">Eliminar este plato</button></div>') + '</form>',
       isNew ? function () { c.items.splice(ii, 1); render(); } : null);
     P.sheet.isNew = !!isNew;
+    phInit(it);
   }
   /* Pasa lo escrito en la hoja al plato (sin cerrarla). */
   function readItem(it) {
@@ -372,10 +499,12 @@
     it.tags = $$('#sheet [data-a="tag"][aria-pressed="true"]').map(function (b) { return b.getAttribute('data-t'); });
     it.on = !!$('#sheet [name="on"]').checked;
     if ($('#sheet [name="sold"]').checked) it.soldDate = hoy(); else delete it.soldDate;
+    phTo(it);
   }
   function applyItem(form) {
     const ci = +form.getAttribute('data-c'), ii = +form.getAttribute('data-i'), c = cats()[ci], it = c.items[ii];
     if (!val('name').trim()) { toast('Escriba el nombre del plato.'); const n = $('#sheet [name="name"]'); if (n) n.focus(); return; }
+    if (phBusy()) return;
     readItem(it);
     const sel = $('#sheet [name="cat"]'), to = sel ? +sel.value : ci;
     if (to !== ci && cats()[to]) { c.items.splice(ii, 1); cats()[to].items.push(it); P.openCats[cats()[to].id] = true; }
@@ -386,14 +515,17 @@
     openSheet('<form data-form="cat" data-c="' + ci + '" novalidate><div class="sheet-h"><h2 id="sheet-t">' + (isNew ? 'Categoría nueva' : 'Editar categoría') + '</h2><button type="button" class="btn sm" data-a="sheet-x">Cerrar</button></div>' +
       fld('Nombre', 'name', c.name, { max: 60, ph: 'Desayunos' }) + (bilingual() ? fld('Nombre', 'name_en', c.name_en || '', { max: 60, en: true }) : '') +
       fld('Nota', 'note', c.note || '', { max: 160, ph: 'Hasta las 11:00 a. m.', help: 'Opcional. Sale debajo del nombre.' }) + (bilingual() ? fld('Nota', 'note_en', c.note_en || '', { max: 160, en: true }) : '') +
+      photoFld('Opcional. Sale arriba del nombre de la categoría en la carta.') +
       '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div>' +
       (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="cat-del">Eliminar la categoría' + (c.items.length ? ' y sus ' + c.items.length + ' platos' : '') + '</button></div>') + '</form>',
       isNew ? function () { cats().splice(ci, 1); render(); } : null);
+    phInit(c);
   }
   function applyCat(form) {
     const c = cats()[+form.getAttribute('data-c')];
     if (!val('name').trim()) { toast('Escriba el nombre de la categoría.'); return; }
-    setTx(c, 'name'); setTx(c, 'note');
+    if (phBusy()) return;
+    setTx(c, 'name'); setTx(c, 'note'); phTo(c);
     P.sheet.onClose = null; closeSheet(); markDirty(); render();
   }
   /* Hojas de promos, menú del día, aviso y festivos. */
@@ -462,9 +594,57 @@
       (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="hol-del">Quitar este festivo</button></div>') + '</form>',
       isNew ? function () { holidays().splice(i, 1); render(); } : null);
   }
+  function editEvento(id, i, isNew) {
+    const L = modS(id).items, e = L[i];
+    openSheet('<form data-form="evento" data-m="' + attr(id) + '" data-i="' + i + '" novalidate>' + sheetHead(isNew ? 'Evento nuevo' : 'Editar evento') +
+      txFld('Título', 'title', e, { max: 80, ph: 'Música en vivo' }) + txFld('Cuándo', 'when', e, { max: 60, ph: 'Viernes · 7:00 p. m.' }) +
+      fld('Fecha', 'date', e.date || '', { type: 'date', help: 'Opcional. Al día siguiente el evento deja de verse en la app. Si «Cuándo» está vacío, la app muestra esta fecha.' }) +
+      txFld('Descripción', 'desc', e, { area: true, max: 300 }) +
+      '<div class="fld"><label class="sw"><input type="checkbox" name="rsvp"' + (e.rsvp ? ' checked' : '') + '>Botón «Apartar cupo»</label><p class="help">Abre WhatsApp con el nombre del evento.</p></div>' +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div>' +
+      (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="ev-del">Quitar este evento</button></div>') + '</form>',
+      isNew ? function () { L.splice(i, 1); render(); } : null);
+  }
+  function editFoto(id, i, isNew) {
+    const L = modS(id).items, g = L[i];
+    openSheet('<form data-form="foto" data-m="' + attr(id) + '" data-i="' + i + '" novalidate>' + sheetHead(isNew ? 'Foto nueva' : 'Editar foto') +
+      photoFld('JPG, PNG o WebP. Antes de subirla se achica para que la app cargue rápido.') +
+      txFld('Pie de foto', 'caption', g, { max: 120, ph: 'Nuestro fogón de leña', help: 'Opcional.' }) +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div>' +
+      (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="ga-del">Quitar esta foto de la galería</button></div>') + '</form>',
+      isNew ? function () { L.splice(i, 1); render(); } : null);
+    phInit(g);
+  }
+  function editResena(id, i, isNew) {
+    const L = modS(id).quotes, q = L[i];
+    openSheet('<form data-form="resena" data-m="' + attr(id) + '" data-i="' + i + '" novalidate>' + sheetHead(isNew ? 'Testimonio nuevo' : 'Editar testimonio') +
+      txFld('Lo que dijo', 'text', q, { area: true, max: 300, ph: 'La mejor trucha que he probado.' }) +
+      fld('Quién lo dijo', 'author', q.author || '', { max: 40, ph: 'Laura, de Pereira' }) +
+      '<p class="help">Publique solo opiniones reales, con permiso de quien las escribió.</p>' +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div>' +
+      (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="rs-del">Quitar este testimonio</button></div>') + '</form>',
+      isNew ? function () { L.splice(i, 1); render(); } : null);
+  }
   const TIME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/;
   const APPLY = {
     mtitle: function (f) { setTx(modS(f.getAttribute('data-m')), 'title'); done(); },
+    evento: function (f) {
+      const e = modS(f.getAttribute('data-m')).items[+f.getAttribute('data-i')], d = val('date');
+      if (!need('title', 'Escriba el título del evento.')) return;
+      if (d && d < hoy() && d !== e.date) { toast('Esa fecha ya pasó: el evento no se vería. Cámbiela o déjela vacía.'); return; }
+      setTx(e, 'title'); setTx(e, 'when'); setTx(e, 'desc'); e.date = d; e.rsvp = !!$('#sheet [name="rsvp"]').checked; done();
+    },
+    foto: function (f) {
+      const g = modS(f.getAttribute('data-m')).items[+f.getAttribute('data-i')], ph = P.sheet.ph;
+      if (phBusy()) return;
+      if (!ph.img && !g.emoji && !g.ico) { toast('Suba una foto.'); return; }
+      setTx(g, 'caption'); phTo(g); done();
+    },
+    resena: function (f) {
+      const q = modS(f.getAttribute('data-m')).quotes[+f.getAttribute('data-i')];
+      if (!need('text', 'Escriba lo que dijo la persona.')) return;
+      setTx(q, 'text'); q.author = val('author').trim(); done();
+    },
     promo: function (f) {
       const p = modS(f.getAttribute('data-m')).items[+f.getAttribute('data-i')];
       if (!need('title', 'Escriba el título de la promoción.')) return;
@@ -508,7 +688,7 @@
     const fr = $('#pv'); if (!fr || PV.rt) { pvUpdate(true); return; }
     try {
       const d = fr.contentDocument; d.open();
-      d.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vista previa</title></head><body></body></html>'); d.close();
+      d.write('<!doctype html><html lang="es"><head><meta charset="utf-8">' + (appBase() ? '<base href="' + attr(appBase() + '/') + '">' : '') + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Vista previa</title></head><body></body></html>'); d.close();
       PV.rt = breakApp(fr.contentWindow, d, previewCfg(), { mode: 'preview' });
     } catch (e) { PV.rt = null; }
   }
@@ -545,6 +725,7 @@
       case 'it-add': { const c = cats()[ci]; c.items.push({ id: uid('it'), name: '', desc: '', price: 0, emoji: '', ico: '', img: '', imgPos: '', tags: [], on: true }); editItem(ci, c.items.length - 1, true); break; }
       case 'it-mv': {
         const form = $('#sheet form'), k = +form.getAttribute('data-c'), j = +form.getAttribute('data-i'), d = +b.getAttribute('data-d');
+        if (phBusy()) break;
         readItem(cats()[k].items[j]);
         if (move(cats()[k].items, j, d)) { P.sheet.onClose = null; markDirty(); editItem(k, j + d); render(); }
         break;
@@ -555,6 +736,35 @@
         break;
       }
       case 'mt-ed': editModTitle(mid); break;
+      case 'ph-pick': { const inp = $('#ph-file'); if (inp && !phBusy()) inp.click(); break; }
+      case 'ph-del': if (P.sheet && P.sheet.ph) { P.sheet.ph.img = ''; P.sheet.ph.imgPos = ''; P.sheet.ph.err = ''; phRender(); } break;
+      case 'ph-pos': if (P.sheet && P.sheet.ph) { P.sheet.ph.imgPos = b.getAttribute('data-v') || ''; phRender(); } break;
+      case 'ev-ed': editEvento(mid, ii); break;
+      case 'ev-add': { const L = modS(mid).items; L.push({ when: '', date: '', title: '', desc: '', rsvp: false }); editEvento(mid, L.length - 1, true); break; }
+      case 'ev-mv': if (move(modS(mid).items, ii, +b.getAttribute('data-d'))) { markDirty(); render(); } break;
+      case 'ev-del': {
+        const form = $('#sheet form'), id = form.getAttribute('data-m'), j = +form.getAttribute('data-i');
+        ask('¿Quitar el evento?', 'Se quita «' + (modS(id).items[j].title || 'Evento sin título') + '» de la agenda.', 'Quitar', function () { modS(id).items.splice(j, 1); markDirty(); render(); }, true);
+        break;
+      }
+      case 'ev-clean': { const td = hoy(), s = modS(mid); s.items = s.items.filter(function (e) { return !(e.date && e.date < td); }); markDirty(); render(); toast('Se quitaron los eventos que ya pasaron.'); break; }
+      case 'ga-ed': editFoto(mid, ii); break;
+      case 'ga-add': { const L = modS(mid).items; L.push({ img: '', imgPos: '', emoji: '', ico: '', caption: '' }); editFoto(mid, L.length - 1, true); break; }
+      case 'ga-mv': if (move(modS(mid).items, ii, +b.getAttribute('data-d'))) { markDirty(); render(); } break;
+      case 'ga-del': {
+        const form = $('#sheet form'), id = form.getAttribute('data-m'), j = +form.getAttribute('data-i');
+        if (phBusy()) break;
+        ask('¿Quitar la foto?', 'Se quita de la galería de la app.', 'Quitar', function () { modS(id).items.splice(j, 1); markDirty(); render(); }, true);
+        break;
+      }
+      case 'rs-ed': editResena(mid, ii); break;
+      case 'rs-add': { const L = modS(mid).quotes; L.push({ text: '', author: '' }); editResena(mid, L.length - 1, true); break; }
+      case 'rs-mv': if (move(modS(mid).quotes, ii, +b.getAttribute('data-d'))) { markDirty(); render(); } break;
+      case 'rs-del': {
+        const form = $('#sheet form'), id = form.getAttribute('data-m'), j = +form.getAttribute('data-i');
+        ask('¿Quitar el testimonio?', 'Se quita de las reseñas de la app.', 'Quitar', function () { modS(id).quotes.splice(j, 1); markDirty(); render(); }, true);
+        break;
+      }
       case 'pr-ed': editPromo(mid, ii); break;
       case 'pr-add': { const L = modS(mid).items; L.push({ days: [], title: '', desc: '', price: 0 }); editPromo(mid, L.length - 1, true); break; }
       case 'pr-mv': if (move(modS(mid).items, ii, +b.getAttribute('data-d'))) { markDirty(); render(); } break;
@@ -600,6 +810,7 @@
   });
   document.addEventListener('change', function (e) {
     const t = e.target;
+    if (t.id === 'ph-file') { const f = t.files && t.files[0]; try { t.value = ''; } catch (err) { /* sin limpiar */ } if (f) uploadPhoto(f); return; }
     if (t.getAttribute('data-a') === 'sold') {
       const it = cats()[+t.getAttribute('data-c')].items[+t.getAttribute('data-i')];
       if (t.checked) it.soldDate = hoy(); else delete it.soldDate;

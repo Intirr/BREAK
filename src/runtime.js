@@ -1934,13 +1934,15 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
      el panel y el servidor), mergeContenido() las pone sobre una app y contenidoOf() las saca de una app. Puras y
      declaradas antes del return de opts.meta, para que el panel y el servidor las usen. */
   const C_MAX = { cats: 30, items: 80, promos: 20, parts: 12, events: 20, photos: 24, quotes: 6, holidays: 40 };
+  /* Foto subida al servidor del panel cuando corre en el computador (node worker/local.mjs): solo esa ruta exacta. */
+  const LOCAL_FOTO = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{2,5})?\/fotos\/[a-z0-9-]{2,40}\/[0-9a-f]{24}\.(webp|jpg|png)$/;
   function cStr(v, max) {
     if (typeof v === 'number' && isFinite(v)) v = String(v);
     if (typeof v !== 'string') return '';
     return v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, max);
   }
   function cInt(v, max) { const n = Math.round(Number(v)); return isFinite(n) && n > 0 ? Math.min(n, max) : 0; }
-  function cImg(v) { v = cStr(v, 600); return /^https:\/\/[^\s"'<>]+$/i.test(v) || /^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(v) ? v : ''; }
+  function cImg(v) { v = cStr(v, 600); return /^https:\/\/[^\s"'<>]+$/i.test(v) || /^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(v) || LOCAL_FOTO.test(v) ? v : ''; }
   function cId(v, i) { v = cStr(v, 40); return /^[\w-]{1,40}$/.test(v) ? v : 'x' + i; }
   function cDays(v) { return (Array.isArray(v) ? v : []).map(Number).filter(function (d, i, a) { return d >= 0 && d <= 6 && d % 1 === 0 && a.indexOf(d) === i; }); }
   function cTime(v) { v = cStr(v, 5); return /^([01]?\d|2[0-3]):[0-5]\d$/.test(v) ? v : ''; }
@@ -1964,7 +1966,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       return cTx(o, s, 'text', 200);
     },
     eventos: function (s) {
-      return cTx({ items: cList(s.items, C_MAX.events, function (x) { const o = { rsvp: !!x.rsvp }; cTx(o, x, 'when', 60); cTx(o, x, 'title', 80); return cTx(o, x, 'desc', 300); }) }, s, 'title', 80);
+      return cTx({ items: cList(s.items, C_MAX.events, function (x) { const o = { rsvp: !!x.rsvp, date: cDate(x.date) }; cTx(o, x, 'when', 60); cTx(o, x, 'title', 80); return cTx(o, x, 'desc', 300); }) }, s, 'title', 80);
     },
     galeria: function (s) {
       return cTx({ items: cList(s.items, C_MAX.photos, function (x) { return cTx({ img: cImg(x.img), imgPos: cPos(x.imgPos), emoji: cStr(x.emoji, 16), ico: cIco(x.ico) }, x, 'caption', 120); }) }, s, 'title', 80);
@@ -2124,7 +2126,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     u = String(u || '').trim();
     if (/^asset:[\w-]{8,64}$/.test(u)) { const r = typeof opts.assetURL === 'function' ? String(opts.assetURL(u.slice(6)) || '') : ''; return /^(https?:\/\/|\/)[^\s"'<>]+$/i.test(r) ? r : ''; }
     if (/^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(u)) return u;
-    return (/^https:\/\/[^\s"'<>]+$/i.test(u) || /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+\/=]+$/i.test(u)) ? u : '';
+    return (/^https:\/\/[^\s"'<>]+$/i.test(u) || LOCAL_FOTO.test(u) || /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+\/=]+$/i.test(u)) ? u : '';
   }
   /* Encuadre de una foto recortada: arriba, centro (sin clase) o abajo. */
   function posAttr(v) { return v === 'top' ? ' class="op-t"' : v === 'bottom' ? ' class="op-b"' : ''; }
@@ -2808,14 +2810,19 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     },
 
     eventos: function (m) {
-      const s = m.s, list = s.items || [];
+      const s = m.s, list = s.items || [], today = nowLocal().iso;
+      let past = 0;
       const cards = list.map(function (e, i) {
         if (!e || !tx(e, 'title')) return '';
-        return '<article class="ev card">' + (tx(e, 'when') ? '<p class="ev-w">' + esc(tx(e, 'when')) + '</p>' : '') + '<h4>' + esc(tx(e, 'title')) + '</h4>' +
+        /* Un evento con fecha deja de verse al día siguiente; sin fecha, se ve hasta que lo quiten. */
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') ? e.date : '';
+        if (date && date < today) { past++; return ''; }
+        const when = tx(e, 'when') || (date ? cap(fmtDate(date, lang())) : '');
+        return '<article class="ev card">' + (when ? '<p class="ev-w">' + esc(when) + '</p>' : '') + '<h4>' + esc(tx(e, 'title')) + '</h4>' +
           (tx(e, 'desc') ? '<p>' + esc(tx(e, 'desc')) + '</p>' : '') +
           (e.rsvp ? '<button class="btn sm ghost" data-act="rsvp" data-mid="' + attr(m.id) + '" data-i="' + i + '">' + esc(ui('rsvp')) + '</button>' : '') + '</article>';
       }).join('');
-      if (!cards) return emptyNote('Agrega al menos un evento.');
+      if (!cards) return emptyNote(past ? 'Todos los eventos ya pasaron. Agrega uno nuevo o cambia las fechas.' : 'Agrega al menos un evento.');
       return '<div class="wrap">' + sh(m) + '<div class="events' + (s.layout === 'linea' ? ' tl' : '') + '">' + cards + '</div></div>';
     },
 
@@ -4057,7 +4064,8 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       case 'gal': openGal(d.mid, +d.i || 0); break;
       case 'rsvp': {
         const m = modById(d.mid), ev = m && (m.s.items || [])[+d.i]; if (!ev) break;
-        openWa(uiL('es', 'rsvpMsg', { n: cfg.brand.name || '', e: ev.title || '', w: ev.when || '' }) + (lang() === 'en' ? '\n' + uiL('es', 'guestEn') : ''));
+        const w = ev.when || (/^\d{4}-\d{2}-\d{2}$/.test(ev.date || '') ? fmtDate(ev.date, 'es') : '');
+        openWa(uiL('es', 'rsvpMsg', { n: cfg.brand.name || '', e: ev.title || '', w: w }).replace(' ()', '') + (lang() === 'en' ? '\n' + uiL('es', 'guestEn') : ''));
         break;
       }
       case 'menudia-add': {

@@ -465,10 +465,10 @@ const MODULES = {
   },
   eventos: {
     label: 'Agenda', code: 'EV', group: 'Turismo y contenido', desc: 'Música en vivo, talleres y fechas especiales, con cupos por WhatsApp.',
-    defaults: { title: 'Agenda', items: [{ when: '', title: '', desc: '', rsvp: false }] },
+    defaults: { title: 'Agenda', items: [{ when: '', date: '', title: '', desc: '', rsvp: false }] },
     fields: [F.title('Agenda'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas'], ['linea', 'Línea de tiempo']] },
-      { k: 'items', t: 'list', label: 'Eventos', item: 'Evento', blank: { when: '', title: '', desc: '', rsvp: false },
-        fields: [F.text('when', 'Cuándo', 'Viernes · 7:00 p. m.'), F.text('title', 'Título'), F.area('desc', 'Descripción', '', 2), { k: 'rsvp', t: 'bool', label: 'Botón «Apartar cupo»' }] }]
+      { k: 'items', t: 'list', label: 'Eventos', item: 'Evento', blank: { when: '', date: '', title: '', desc: '', rsvp: false },
+        fields: [F.text('when', 'Cuándo', 'Viernes · 7:00 p. m.'), { k: 'date', t: 'date', label: 'Fecha (opcional)', help: 'Al día siguiente deja de verse en la app. Si «Cuándo» está vacío, la app muestra esta fecha.' }, F.text('title', 'Título'), F.area('desc', 'Descripción', '', 2), { k: 'rsvp', t: 'bool', label: 'Botón «Apartar cupo»' }] }]
   },
   wifi: {
     label: 'Wi-Fi', code: 'WF', group: 'Turismo y contenido', single: true, desc: 'Nombre de la red y clave con botón para copiar.',

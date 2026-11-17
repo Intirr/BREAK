@@ -2439,13 +2439,15 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
      el panel y el servidor), mergeContenido() las pone sobre una app y contenidoOf() las saca de una app. Puras y
      declaradas antes del return de opts.meta, para que el panel y el servidor las usen. */
   const C_MAX = { cats: 30, items: 80, promos: 20, parts: 12, events: 20, photos: 24, quotes: 6, holidays: 40 };
+  /* Foto subida al servidor del panel cuando corre en el computador (node worker/local.mjs): solo esa ruta exacta. */
+  const LOCAL_FOTO = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{2,5})?\/fotos\/[a-z0-9-]{2,40}\/[0-9a-f]{24}\.(webp|jpg|png)$/;
   function cStr(v, max) {
     if (typeof v === 'number' && isFinite(v)) v = String(v);
     if (typeof v !== 'string') return '';
     return v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, max);
   }
   function cInt(v, max) { const n = Math.round(Number(v)); return isFinite(n) && n > 0 ? Math.min(n, max) : 0; }
-  function cImg(v) { v = cStr(v, 600); return /^https:\/\/[^\s"'<>]+$/i.test(v) || /^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(v) ? v : ''; }
+  function cImg(v) { v = cStr(v, 600); return /^https:\/\/[^\s"'<>]+$/i.test(v) || /^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(v) || LOCAL_FOTO.test(v) ? v : ''; }
   function cId(v, i) { v = cStr(v, 40); return /^[\w-]{1,40}$/.test(v) ? v : 'x' + i; }
   function cDays(v) { return (Array.isArray(v) ? v : []).map(Number).filter(function (d, i, a) { return d >= 0 && d <= 6 && d % 1 === 0 && a.indexOf(d) === i; }); }
   function cTime(v) { v = cStr(v, 5); return /^([01]?\d|2[0-3]):[0-5]\d$/.test(v) ? v : ''; }
@@ -2469,7 +2471,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       return cTx(o, s, 'text', 200);
     },
     eventos: function (s) {
-      return cTx({ items: cList(s.items, C_MAX.events, function (x) { const o = { rsvp: !!x.rsvp }; cTx(o, x, 'when', 60); cTx(o, x, 'title', 80); return cTx(o, x, 'desc', 300); }) }, s, 'title', 80);
+      return cTx({ items: cList(s.items, C_MAX.events, function (x) { const o = { rsvp: !!x.rsvp, date: cDate(x.date) }; cTx(o, x, 'when', 60); cTx(o, x, 'title', 80); return cTx(o, x, 'desc', 300); }) }, s, 'title', 80);
     },
     galeria: function (s) {
       return cTx({ items: cList(s.items, C_MAX.photos, function (x) { return cTx({ img: cImg(x.img), imgPos: cPos(x.imgPos), emoji: cStr(x.emoji, 16), ico: cIco(x.ico) }, x, 'caption', 120); }) }, s, 'title', 80);
@@ -2629,7 +2631,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     u = String(u || '').trim();
     if (/^asset:[\w-]{8,64}$/.test(u)) { const r = typeof opts.assetURL === 'function' ? String(opts.assetURL(u.slice(6)) || '') : ''; return /^(https?:\/\/|\/)[^\s"'<>]+$/i.test(r) ? r : ''; }
     if (/^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(u)) return u;
-    return (/^https:\/\/[^\s"'<>]+$/i.test(u) || /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+\/=]+$/i.test(u)) ? u : '';
+    return (/^https:\/\/[^\s"'<>]+$/i.test(u) || LOCAL_FOTO.test(u) || /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+\/=]+$/i.test(u)) ? u : '';
   }
   /* Encuadre de una foto recortada: arriba, centro (sin clase) o abajo. */
   function posAttr(v) { return v === 'top' ? ' class="op-t"' : v === 'bottom' ? ' class="op-b"' : ''; }
@@ -3313,14 +3315,19 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     },
 
     eventos: function (m) {
-      const s = m.s, list = s.items || [];
+      const s = m.s, list = s.items || [], today = nowLocal().iso;
+      let past = 0;
       const cards = list.map(function (e, i) {
         if (!e || !tx(e, 'title')) return '';
-        return '<article class="ev card">' + (tx(e, 'when') ? '<p class="ev-w">' + esc(tx(e, 'when')) + '</p>' : '') + '<h4>' + esc(tx(e, 'title')) + '</h4>' +
+        /* Un evento con fecha deja de verse al día siguiente; sin fecha, se ve hasta que lo quiten. */
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') ? e.date : '';
+        if (date && date < today) { past++; return ''; }
+        const when = tx(e, 'when') || (date ? cap(fmtDate(date, lang())) : '');
+        return '<article class="ev card">' + (when ? '<p class="ev-w">' + esc(when) + '</p>' : '') + '<h4>' + esc(tx(e, 'title')) + '</h4>' +
           (tx(e, 'desc') ? '<p>' + esc(tx(e, 'desc')) + '</p>' : '') +
           (e.rsvp ? '<button class="btn sm ghost" data-act="rsvp" data-mid="' + attr(m.id) + '" data-i="' + i + '">' + esc(ui('rsvp')) + '</button>' : '') + '</article>';
       }).join('');
-      if (!cards) return emptyNote('Agrega al menos un evento.');
+      if (!cards) return emptyNote(past ? 'Todos los eventos ya pasaron. Agrega uno nuevo o cambia las fechas.' : 'Agrega al menos un evento.');
       return '<div class="wrap">' + sh(m) + '<div class="events' + (s.layout === 'linea' ? ' tl' : '') + '">' + cards + '</div></div>';
     },
 
@@ -4562,7 +4569,8 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       case 'gal': openGal(d.mid, +d.i || 0); break;
       case 'rsvp': {
         const m = modById(d.mid), ev = m && (m.s.items || [])[+d.i]; if (!ev) break;
-        openWa(uiL('es', 'rsvpMsg', { n: cfg.brand.name || '', e: ev.title || '', w: ev.when || '' }) + (lang() === 'en' ? '\n' + uiL('es', 'guestEn') : ''));
+        const w = ev.when || (/^\d{4}-\d{2}-\d{2}$/.test(ev.date || '') ? fmtDate(ev.date, 'es') : '');
+        openWa(uiL('es', 'rsvpMsg', { n: cfg.brand.name || '', e: ev.title || '', w: w }).replace(' ()', '') + (lang() === 'en' ? '\n' + uiL('es', 'guestEn') : ''));
         break;
       }
       case 'menudia-add': {
@@ -6468,10 +6476,10 @@ const MODULES = {
   },
   eventos: {
     label: 'Agenda', code: 'EV', group: 'Turismo y contenido', desc: 'Música en vivo, talleres y fechas especiales, con cupos por WhatsApp.',
-    defaults: { title: 'Agenda', items: [{ when: '', title: '', desc: '', rsvp: false }] },
+    defaults: { title: 'Agenda', items: [{ when: '', date: '', title: '', desc: '', rsvp: false }] },
     fields: [F.title('Agenda'), { k: 'layout', t: 'sel', label: 'Diseño', def: 'tarjetas', opts: [['tarjetas', 'Tarjetas'], ['linea', 'Línea de tiempo']] },
-      { k: 'items', t: 'list', label: 'Eventos', item: 'Evento', blank: { when: '', title: '', desc: '', rsvp: false },
-        fields: [F.text('when', 'Cuándo', 'Viernes · 7:00 p. m.'), F.text('title', 'Título'), F.area('desc', 'Descripción', '', 2), { k: 'rsvp', t: 'bool', label: 'Botón «Apartar cupo»' }] }]
+      { k: 'items', t: 'list', label: 'Eventos', item: 'Evento', blank: { when: '', date: '', title: '', desc: '', rsvp: false },
+        fields: [F.text('when', 'Cuándo', 'Viernes · 7:00 p. m.'), { k: 'date', t: 'date', label: 'Fecha (opcional)', help: 'Al día siguiente deja de verse en la app. Si «Cuándo» está vacío, la app muestra esta fecha.' }, F.text('title', 'Título'), F.area('desc', 'Descripción', '', 2), { k: 'rsvp', t: 'bool', label: 'Botón «Apartar cupo»' }] }]
   },
   wifi: {
     label: 'Wi-Fi', code: 'WF', group: 'Turismo y contenido', single: true, desc: 'Nombre de la red y clave con botón para copiar.',
@@ -7798,7 +7806,10 @@ const BRAND_FIELDS = [
       case 'resenas': return (c.brand.reviewUrl ? 'Enlace de Google listo' : 'Falta enlace de Google') + lay({ destacada: 'cita grande' });
       case 'glosario': return (s.items || []).length + ' palabras';
       case 'historia': return s.year ? 'Desde ' + s.year : 'Sin año';
-      case 'eventos': return (s.items || []).length + ' eventos' + lay({ linea: 'línea de tiempo' });
+      case 'eventos': {
+        const np = (s.items || []).filter(function (e) { return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') && e.date < todayISO(); }).length;
+        return (s.items || []).length + ' eventos' + (np ? ' · ' + np + (np === 1 ? ' ya pasó' : ' ya pasaron') : '') + lay({ linea: 'línea de tiempo' });
+      }
       case 'wifi': return s.network || 'Sin red';
       case 'horario': {
         const nh = (c.brand.holidays || []).filter(function (h) { return h && h.date >= todayISO(); }).length;
@@ -7887,6 +7898,7 @@ const BRAND_FIELDS = [
     if (ru && ru.s.mode === 'premios' && (ru.s.options || []).filter(function (o) { return o && o.label; }).length < 2) out.push({ s: 'warn', t: 'La ruleta necesita al menos dos premios', go: 'modulos' });
     c.modules.forEach(function (m) {
       if (m && m.on !== false && m.type === 'aviso' && /^\d{4}-\d{2}-\d{2}$/.test(m.s.until || '') && m.s.until < todayISO()) out.push({ s: 'warn', t: 'El aviso «' + String(m.s.text || '').slice(0, 40) + '» ya venció', d: 'Cambia la fecha o apaga el módulo.', go: 'modulos' });
+      if (m && m.on !== false && m.type === 'eventos' && (m.s.items || []).some(function (e) { return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') && e.date < todayISO(); })) out.push({ s: 'warn', t: 'La agenda tiene eventos que ya pasaron', d: 'Ya no se ven en la app. Quítalos o cámbiales la fecha.', go: 'modulos' });
     });
     const kb = Math.round(JSON.stringify(c).length / 1024);
     if (kb > 200) out.push({ s: 'warn', t: 'La app pesa ' + kb + ' KB', d: 'Para guardarla en tu cuenta debe pesar menos de 234 KB. Usa enlaces https para las fotos o sube menos.', go: 'modulos' });

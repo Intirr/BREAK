@@ -1282,6 +1282,47 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     A.close();
   }
 
+  /* 11zf2. Agenda con fecha opcional (se quita sola al día siguiente) y fotos del servidor del panel en el computador */
+  {
+    const M = ctx.breakApp(null, null, null, { meta: true });
+    const NOW = '2026-11-06T15:30:00Z'; // viernes 10:30 a. m. en Bogotá
+    const loc = 'http://localhost:8787/fotos/antojo/0123456789abcdef01234567.webp', loc2 = 'http://127.0.0.1/fotos/antojo/0123456789abcdef01234567.png';
+    const k = M.sanitizeContenido({ modules: {
+      ev: { type: 'eventos', s: { items: [{ title: 'A', date: '2026-11-20' }, { title: 'B', date: 'viernes' }] } },
+      ga: { type: 'galeria', s: { items: [{ img: loc }, { img: 'http://localhost:8787/otra.jpg' }, { img: 'http://otro.example.com/fotos/antojo/0123456789abcdef01234567.webp' }, { img: loc2 }, { img: 'http://localhost:8787/fotos/antojo/0123456789abcdef01234567.gif' }] } } } });
+    ok(k.modules.ev.s.items[0].date === '2026-11-20' && k.modules.ev.s.items[1].date === '', 'el saneador guarda la fecha válida del evento y borra la inválida');
+    eq(k.modules.ga.s.items.map(x => x.img).join('|'), [loc, '', '', loc2, ''].join('|'), 'de http solo acepta la ruta exacta de las fotos del servidor del panel en el computador');
+    // La agenda en la app
+    const ag = TPL('tpl-zocalo'), evm = ag.modules.find(m => m.type === 'eventos');
+    evm.s.items = [
+      { when: '', date: '2026-11-05', title: 'Ayer', desc: '', rsvp: false },
+      { when: '', date: '2026-11-06', title: 'Hoy', desc: '', rsvp: true },
+      { when: 'Todos los sábados', date: '', title: 'Siempre', desc: '', rsvp: false },
+      { when: '', date: '', title: 'Sin cuándo', desc: '', rsvp: true }
+    ];
+    let A = mount(ag, { now: NOW });
+    eq(A.$$('section.m-eventos .ev h4').map(h => h.textContent).join('|'), 'Hoy|Siempre|Sin cuándo', 'un evento con fecha se ve hasta ese día y desaparece al siguiente; sin fecha se ve siempre');
+    eq(A.$('section.m-eventos .ev .ev-w').textContent, 'Viernes, 6 de noviembre', 'sin «Cuándo», la app muestra la fecha del evento');
+    A.click(A.$$('section.m-eventos [data-act="rsvp"]')[0]);
+    ok(A.$('.wa-msg').textContent.includes('«Hoy» (viernes, 6 de noviembre).'), 'apartar cupo usa la fecha cuando no hay «Cuándo»');
+    A.click(A.$$('section.m-eventos [data-act="rsvp"]')[1]);
+    ok(A.$('.wa-msg').textContent.includes('«Sin cuándo».') && !A.$('.wa-msg').textContent.includes('()'), 'sin «Cuándo» ni fecha, el mensaje no deja paréntesis vacíos');
+    A.close();
+    evm.s.items = [{ when: 'Viernes', date: '2026-11-01', title: 'Ya fue', desc: '', rsvp: false }];
+    A = mount(ag, { now: NOW });
+    ok(!A.$('section.m-eventos'), 'si todos los eventos ya pasaron, la agenda no sale en la app');
+    A.close();
+    A = mount(ag, { now: NOW, mode: 'preview' });
+    ok(/Todos los eventos ya pasaron/.test(A.$('section.m-eventos').textContent), 'en la vista previa la agenda dice que todos los eventos ya pasaron');
+    A.close();
+    // Fotos del servidor del panel en el computador
+    const al = TPL('tpl-alisos'), gm = al.modules.find(m => m.type === 'galeria');
+    gm.s.items = [{ img: loc, caption: 'Local' }, { img: 'http://localhost:8787/otra.jpg', emoji: '🌲', caption: 'Otra' }];
+    A = mount(al, { now: NOW });
+    ok(!!A.$('section.m-galeria img[src="' + loc + '"]') && !A.$('section.m-galeria img[src="http://localhost:8787/otra.jpg"]'), 'la app muestra la foto del servidor del panel en el computador y no otras de http');
+    A.close();
+  }
+
   /* 11zg. Servidor del panel (Worker) con KV y R2 simulados */
   {
     const W = await import(require('url').pathToFileURL(path.join(__dirname, '..', 'worker', 'src', 'index.js')).href);
@@ -1392,7 +1433,13 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
       async delete(k) { this.m.delete(k); }
       async list(o) { return { keys: [...this.m.keys()].filter(k => k.startsWith((o && o.prefix) || '')).map(name => ({ name })) }; }
     }
-    const env = { DATA: new KV(), SESSION_SECRET: 'secreto-panel', ADMIN_TOKEN: 'admin' };
+    class R2 {
+      constructor() { this.m = new Map(); }
+      async put(k, b, o) { this.m.set(k, { b: new Uint8Array(b), o }); }
+      async get(k) { const x = this.m.get(k); return x ? { body: x.b, writeHttpMetadata: h => h.set('Content-Type', x.o.httpMetadata.contentType) } : null; }
+    }
+    const env = { DATA: new KV(), FOTOS: new R2(), SESSION_SECRET: 'secreto-panel', ADMIN_TOKEN: 'admin' };
+    let fotoPosts = 0;
     const app = TPL('tpl-antojo'); app.menu.categories[0].items[0].name = '<img src=x onerror=alert(1)>';
     await W.handle(new Request('https://panel.example.com/api/admin/locales/antojo', { method: 'PUT', headers: { Authorization: 'Bearer admin', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Antojo', pin: '123456', app }) }), env, {});
     const panelHTML = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-panel.html'), 'utf8');
@@ -1403,6 +1450,11 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
           w.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
           w.scrollTo = () => {};
           w.fetch = async (u, o) => {
+            if (/\/fotos$/.test(String(u))) fotoPosts++;
+            if (o && o.body && typeof o.body !== 'string') {
+              const ab = await new Promise((res, rej) => { const fr = new w.FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsArrayBuffer(o.body); });
+              o = Object.assign({}, o, { body: Buffer.from(ab) });
+            }
             const r = await W.handle(new Request(String(u), o), env, { waitUntil() {} });
             return { ok: r.ok, status: r.status, json: () => r.json() };
           };
@@ -1490,7 +1542,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
       const tab = t => A.click(A.$('.tab[data-t="' + t + '"]'));
       await login('123456'); await until(() => A.$('.cat'));
       const P4 = A.w.__breakPanel.P, M = id => P4.draft.modules[id].s, hoy4 = A.w.__breakPanel.hoy();
-      eq(A.$$('.tab').map(t => t.textContent).join('|'), 'Carta|Promos|Avisos y horario', 'el panel tiene las pestañas Carta, Promos y Avisos y horario');
+      eq(A.$$('.tab').map(t => t.textContent).join('|'), 'Carta|Promos|Avisos y horario|Más', 'el panel tiene las pestañas Carta, Promos, Avisos y horario y Más');
       tab('promos');
       ok(A.$('.tab[data-t="promos"]').getAttribute('aria-selected') === 'true' && !A.$('.cat') && A.$$('.blk[data-mod]').length === 3, 'la pestaña Promos muestra las dos secciones de promos y el menú del día');
       ok(/Para hoy/.test(A.$('.blk[data-mod="promos"] .blk-t').textContent) && /Combos <i>x<\/i>/.test(A.$('.blk[data-mod="combos"] .blk-t').textContent) && !A.$('#ed i'), 'cada sección de promos sale con su título, escapado');
@@ -1588,6 +1640,133 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
       ok(A.$$('.blk[data-mod]').length === 1 && A.$$('.none').length === 1 && /no tiene sección de menú del día; pídasela/.test(A.$('.none').textContent), 'sin menú del día en la app, el panel muestra una nota en vez del editor');
       A.click(A.$('.tab[data-t="avisos"]'));
       ok(/no tiene sección de aviso destacado/.test(A.$('.none').textContent) && !A.$('[data-a="av-ed"]') && A.$$('.hr-r').length === 7 && !!A.$('[data-a="hol-add"]'), 'sin aviso en la app hay nota, pero el horario y los festivos sí se editan');
+      A.close();
+    }
+    /* 11zj. Panel, etapa 5: agenda, galería, reseñas y fotos (Los Alisos, bilingüe, con agenda y su dirección publicada) */
+    {
+      const app5 = TPL('tpl-alisos');
+      app5.meta = Object.assign({}, app5.meta, { url: 'https://alisos.pages.dev' });
+      app5.modules.push({ id: 'agenda', type: 'eventos', on: true, s: { title: 'Agenda', items: [
+        { when: 'Sábados · 8:00 p. m.', date: '', title: 'Música <b>en vivo</b>', desc: '', rsvp: true },
+        { when: '', date: '2020-01-01', title: 'Feria vieja', desc: '', rsvp: false }] } });
+      const gal = app5.modules.find(m => m.type === 'galeria'), rs = app5.modules.find(m => m.type === 'resenas');
+      gal.s.items[0].img = 'img/foto-1.webp';
+      app5.menu.categories[0].items[0].img = 'img/plato-1.webp';
+      await W.handle(new Request('https://panel.example.com/api/admin/locales/alisos', { method: 'PUT', headers: { Authorization: 'Bearer admin', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Los Alisos', pin: '123456', app: app5 }) }), env, {});
+      A = open(null, 'alisos');
+      const submit = () => A.$('#sheet form').dispatchEvent(new A.w.Event('submit', { bubbles: true, cancelable: true }));
+      const tab = t => A.click(A.$('.tab[data-t="' + t + '"]'));
+      await login('123456'); await until(() => A.$('.cat'));
+      const P5 = A.w.__breakPanel.P, M5 = id => P5.draft.modules[id].s;
+      const pick = async file => {
+        const inp = A.$('#ph-file'); Object.defineProperty(inp, 'files', { value: [file], configurable: true });
+        inp.dispatchEvent(new A.w.Event('change', { bubbles: true }));
+        await until(() => !P5.sheet || !P5.sheet.ph || !P5.sheet.ph.busy, 100);
+      };
+      const jpg = new Uint8Array(64); jpg.set([0xFF, 0xD8, 0xFF, 0xE0]);
+      tab('mas');
+      ok(A.$$('.sec-t').map(h => h.textContent).join('|') === 'Agenda|Galería|Reseñas' && A.$$('.blk[data-mod]').length === 3, 'la pestaña Más tiene la agenda, la galería y las reseñas');
+      // Agenda
+      const evRows = A.$$('.blk[data-mod="agenda"] .it');
+      ok(/Música <b>en vivo<\/b>/.test(evRows[0].textContent) && !A.$('.blk[data-mod="agenda"] .it-m b b') && /Con «Apartar cupo»/.test(evRows[0].textContent), 'los eventos salen escapados, con su «Apartar cupo»');
+      ok(evRows[1].classList.contains('old') && /Ya pasó/.test(evRows[1].textContent) && !!A.$('[data-a="ev-clean"]'), 'un evento con fecha pasada sale como «Ya pasó» y se pueden quitar los que pasaron');
+      A.click(A.$('[data-a="ev-add"][data-m="agenda"]'));
+      ok(!A.$('#sheet').hidden && A.$('#f-date').type === 'date' && !!A.$('#f-title_en') && !!A.$('#f-when_en'), 'la hoja del evento trae la fecha y los textos en inglés');
+      submit();
+      ok(!A.$('#sheet').hidden && M5('agenda').items.length === 3, 'un evento sin título no se acepta');
+      A.$('#f-title').value = 'Noche de trova'; A.$('#f-title_en').value = 'Trova night'; A.$('#f-date').value = '2020-02-02';
+      submit();
+      ok(!A.$('#sheet').hidden, 'no se acepta una fecha que ya pasó');
+      A.$('#f-date').value = '2099-03-14'; A.$('#sheet [name="rsvp"]').checked = true;
+      submit();
+      const ne = M5('agenda').items[2];
+      ok(A.$('#sheet').hidden && ne.title === 'Noche de trova' && ne.title_en === 'Trova night' && ne.date === '2099-03-14' && ne.rsvp === true && ne.when === '', 'se agrega un evento con fecha, en los dos idiomas');
+      ok(/14 mar 2099/.test(A.$$('.blk[data-mod="agenda"] .it')[2].textContent), 'la lista muestra la fecha del evento');
+      A.click(A.$$('[data-a="ev-ed"]')[1]); A.$('#f-title').value = 'Feria antigua'; submit();
+      ok(A.$('#sheet').hidden && M5('agenda').items[1].title === 'Feria antigua' && M5('agenda').items[1].date === '2020-01-01', 'un evento que ya pasó se puede editar sin cambiarle la fecha');
+      A.click(A.$('[data-a="ev-mv"][data-i="2"][data-d="-1"]'));
+      eq(M5('agenda').items.map(e => e.title).join('|'), 'Música <b>en vivo</b>|Noche de trova|Feria antigua', 'los eventos se pueden subir y bajar');
+      A.click(A.$('[data-a="ev-clean"]'));
+      eq(M5('agenda').items.map(e => e.title).join('|'), 'Música <b>en vivo</b>|Noche de trova', 'se quitan de una vez los eventos que ya pasaron');
+      A.click(A.$$('[data-a="ev-ed"]')[0]); A.click(A.$('[data-a="ev-del"]')); A.click(A.$('[data-a="ask-yes"]'));
+      eq(M5('agenda').items.map(e => e.title).join('|'), 'Noche de trova', 'se quita un evento, con confirmación');
+      // Galería
+      const g0 = M5(gal.id).items.length, tiles = A.$$('.blk[data-mod="' + gal.id + '"] .gal-i');
+      ok(tiles.length === g0 && tiles[0].querySelector('img').getAttribute('src') === 'https://alisos.pages.dev/img/foto-1.webp' && !!tiles[1].querySelector('.gal-e') && tiles[1].querySelector('.gal-e').textContent === gal.s.items[1].emoji, 'la galería muestra las fotos de la app con su dirección publicada, y el emoji si no hay foto');
+      A.click(A.$('[data-a="ga-add"]'));
+      ok(!A.$('#sheet').hidden && /Sin foto/.test(A.$('#ph').textContent) && !!A.$('#ph-file') && !!A.$('#f-caption_en'), 'la hoja de una foto nueva trae el campo de foto y el pie en los dos idiomas');
+      submit();
+      ok(!A.$('#sheet').hidden && M5(gal.id).items.length === g0 + 1, 'una foto nueva sin imagen no se acepta');
+      const posts0 = fotoPosts;
+      await pick(new A.w.File(['hola'], 'nota.pdf', { type: 'application/pdf' }));
+      ok(/Elija una foto/.test(A.$('#ph .err').textContent) && fotoPosts === posts0, 'un archivo que no es foto no se sube');
+      const big = new Uint8Array(2 * 1024 * 1024 + 10); big.set([0xFF, 0xD8, 0xFF, 0xE0]);
+      await pick(new A.w.File([big], 'grande.jpg', { type: 'image/jpeg' }));
+      ok(/más de 2 MB/.test(A.$('#ph .err').textContent) && fotoPosts === posts0, 'una foto de más de 2 MB que no se puede achicar no se sube');
+      await pick(new A.w.File([new Uint8Array([1, 2, 3, 4, 5])], 'falsa.jpg', { type: 'image/jpeg' }));
+      ok(/no es una foto válida/.test(A.$('#ph .err').textContent) && fotoPosts === posts0 + 1 && !P5.sheet.ph.img, 'una foto falsa la rechaza el servidor y el panel lo dice');
+      await pick(new A.w.File([jpg], 'trucha.jpg', { type: 'image/jpeg' }));
+      const url = P5.sheet.ph.img;
+      ok(/^https:\/\/panel\.example\.com\/fotos\/alisos\/[0-9a-f]{24}\.jpg$/.test(url) && A.$('#ph img').getAttribute('src') === url && !A.$('#ph .err'), 'la foto se sube al servidor y se ve en la hoja');
+      const got = await W.handle(new Request(url), env, {});
+      ok(got.status === 200 && got.headers.get('Content-Type') === 'image/jpeg' && (await got.arrayBuffer()).byteLength === 64, 'el servidor entrega la foto subida');
+      A.click(A.$('[data-a="ph-pos"][data-v="top"]'));
+      ok(A.$('#ph img').classList.contains('op-t') && A.$('[data-a="ph-pos"][data-v="top"]').getAttribute('aria-pressed') === 'true', 'el encuadre se elige y se ve en la foto');
+      A.$('#f-caption').value = 'Trucha <i>al ajillo</i>'; A.$('#f-caption_en').value = 'Garlic trout';
+      submit();
+      const ng = M5(gal.id).items[g0];
+      ok(A.$('#sheet').hidden && ng.img === url && ng.imgPos === 'top' && ng.caption === 'Trucha <i>al ajillo</i>' && ng.caption_en === 'Garlic trout', 'la foto nueva queda en la galería con su encuadre y su pie');
+      ok(!A.$('.gal i') && A.$$('.gal-i')[g0].querySelector('img').getAttribute('src') === url, 'la galería muestra la foto nueva, con el pie escapado');
+      A.click(A.$$('[data-a="ga-ed"]')[g0]); A.click(A.$('[data-a="ph-del"]')); submit();
+      ok(!A.$('#sheet').hidden && M5(gal.id).items[g0].img === url, 'quitarle la foto a un elemento sin emoji no se acepta: hay que quitarlo de la galería');
+      A.click(A.$('[data-a="sheet-x"]'));
+      A.click(A.$$('[data-a="ga-ed"]')[0]); A.click(A.$('[data-a="ga-del"]')); A.click(A.$('[data-a="ask-yes"]'));
+      ok(M5(gal.id).items.length === g0 && M5(gal.id).items[g0 - 1].img === url, 'se quita una foto de la galería, con confirmación');
+      // Reseñas
+      const q0 = M5(rs.id).quotes.length;
+      A.click(A.$('[data-a="rs-add"]')); submit();
+      ok(!A.$('#sheet').hidden, 'un testimonio sin texto no se acepta');
+      A.$('#f-text').value = 'La mejor <b>trucha</b>'; A.$('#f-text_en').value = 'Best trout'; A.$('#f-author').value = 'Laura';
+      submit();
+      const nq = M5(rs.id).quotes[q0];
+      ok(nq.text === 'La mejor <b>trucha</b>' && nq.text_en === 'Best trout' && nq.author === 'Laura' && !A.$('.blk[data-mod="' + rs.id + '"] .it-m b b'), 'se agrega un testimonio, escapado y en los dos idiomas');
+      A.click(A.$('[data-a="rs-mv"][data-i="' + q0 + '"][data-d="-1"]'));
+      ok(M5(rs.id).quotes[q0 - 1].author === 'Laura', 'los testimonios se pueden subir y bajar');
+      A.click(A.$$('[data-a="rs-ed"]')[q0 - 1]); A.click(A.$('[data-a="rs-del"]')); A.click(A.$('[data-a="ask-yes"]'));
+      eq(M5(rs.id).quotes.length, q0, 'se quita un testimonio');
+      A.click(A.$('[data-a="rs-add"]')); A.$('#f-text').value = 'Volveremos pronto'; A.$('#f-author').value = 'Familia Ríos'; submit();
+      // Fotos de platos y categorías
+      tab('carta');
+      const c0 = P5.draft.menu.categories[0];
+      ok(/Con foto/.test(A.$$('.it-m')[0].textContent) && !/Con foto/.test(A.$$('.it-m')[1].textContent), 'la carta marca los platos que tienen foto');
+      A.click(A.$$('.it-m')[1]);
+      ok(/Sin foto/.test(A.$('#ph').textContent), 'la hoja del plato trae el campo de foto');
+      await pick(new A.w.File([jpg], 'plato.jpg', { type: 'image/jpeg' }));
+      const purl = P5.sheet.ph.img; submit();
+      ok(/^https:\/\/panel\.example\.com\/fotos\/alisos\//.test(purl) && c0.items[1].img === purl && /Con foto/.test(A.$$('.it-m')[1].textContent), 'se sube la foto de un plato');
+      A.click(A.$$('.it-m')[0]);
+      ok(A.$('#ph img').getAttribute('src') === 'https://alisos.pages.dev/img/plato-1.webp', 'la hoja muestra la foto que el plato trae de la app');
+      A.click(A.$('[data-a="sheet-x"]'));
+      A.click(A.$('[data-a="cat-ed"][data-c="0"]'));
+      await pick(new A.w.File([jpg], 'cat.jpg', { type: 'image/jpeg' }));
+      A.click(A.$('[data-a="ph-pos"][data-v="bottom"]')); submit();
+      ok(/^https:\/\/panel\.example\.com\/fotos\/alisos\//.test(c0.img) && c0.imgPos === 'bottom', 'se sube la foto de una categoría con su encuadre');
+      // Vista previa
+      await sleep(260);
+      const pvd = A.$('#pv').contentDocument;
+      ok(!!pvd.querySelector('base') && pvd.querySelector('base').getAttribute('href') === 'https://alisos.pages.dev/' && !!pvd.querySelector('img[src="' + url + '"]'), 'la vista previa usa la dirección publicada de la app y muestra la foto nueva');
+      // Guardar
+      A.click(A.$('[data-a="save"]')); await until(() => !P5.saving && !P5.dirty);
+      const c5 = JSON.parse(env.DATA.m.get('contenido:alisos')).contenido;
+      ok(c5.modules.agenda.s.items.length === 1 && c5.modules.agenda.s.items[0].date === '2099-03-14' && c5.modules.agenda.s.items[0].rsvp === true, 'guardar manda la agenda con la fecha al servidor');
+      ok(c5.modules[gal.id].s.items.some(g => g.img === url && g.imgPos === 'top') && c5.menu.categories[0].items[1].img === purl && c5.menu.categories[0].img === c0.img && c5.menu.categories[0].items[0].img === 'img/plato-1.webp', 'guardar manda las fotos de la galería, del plato y de la categoría, y conserva las de la app');
+      ok(c5.modules[rs.id].s.quotes.some(q => q.author === 'Familia Ríos') && !('layout' in c5.modules[gal.id].s) && !('_bg' in c5.modules[rs.id].s), 'guardar manda las reseñas, sin claves de diseño');
+      A.close();
+      // Una app sin agenda, galería ni reseñas (Antojo) lo explica
+      A = open();
+      await login('654321'); await until(() => A.$('.cat'));
+      A.click(A.$('.tab[data-t="mas"]'));
+      ok(A.$$('.none').length === 3 && /no tiene sección de agenda; pídasela/.test(A.$('.none').textContent) && !A.$('[data-a="ga-add"]'), 'sin agenda, galería ni reseñas, la pestaña Más lo explica');
       A.close();
     }
   }
@@ -1713,6 +1892,20 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   setChk(d.getElementById('f-i18n-bilingual'), true);
   ok(!!d.getElementById('f-brand-tagline_en'), 'al activar inglés aparecen los campos EN');
   ok(!!d.getElementById('f-brand-holidays-' + nHol + '-name_en'), 'con inglés, el nombre del festivo tiene su campo EN');
+
+  // Agenda: fecha opcional de cada evento, resumen y revisión
+  ST.S.cur.modules.push({ id: 'ev-prueba', type: 'eventos', on: true, s: { title: 'Agenda', items: [{ when: '', date: '2020-01-01', title: 'Feria vieja', desc: '', rsvp: false }, { when: 'Sábados', date: '', title: 'Taller', desc: '', rsvp: false }] } });
+  click($('[data-a="tab"][data-t="modulos"]'));
+  ok(/2 eventos · 1 ya pasó/.test($('[data-a="mod-open"][data-mid="ev-prueba"]').textContent), 'el resumen de la agenda cuenta los eventos que ya pasaron');
+  ok(ST.checks(ST.S.cur).some(c => c.s === 'warn' && /eventos que ya pasaron/.test(c.t)), 'la revisión avisa de eventos que ya pasaron');
+  click($('[data-a="mod-open"][data-mid="ev-prueba"]'));
+  const evi = ST.S.cur.modules.length - 1, evDate = $('[data-p="modules.' + evi + '.s.items.0.date"]');
+  ok(!!evDate && evDate.type === 'date' && evDate.value === '2020-01-01', 'cada evento de la agenda tiene su fecha opcional');
+  setVal(evDate, '2099-01-01');
+  ok(ST.S.cur.modules[evi].s.items[0].date === '2099-01-01' && !ST.checks(ST.S.cur).some(c => /eventos que ya pasaron/.test(c.t)), 'con una fecha que viene, la revisión ya no avisa');
+  click($('[data-a="mod-open"][data-mid="ev-prueba"]'));
+  ST.S.cur.modules.pop();
+  click($('[data-a="tab"][data-t="datos"]'));
 
   // Módulos: abrir, editar, apagar, mover, añadir y quitar
   click($('[data-a="tab"][data-t="modulos"]'));

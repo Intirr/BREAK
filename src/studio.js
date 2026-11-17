@@ -1236,7 +1236,10 @@
       case 'resenas': return (c.brand.reviewUrl ? 'Enlace de Google listo' : 'Falta enlace de Google') + lay({ destacada: 'cita grande' });
       case 'glosario': return (s.items || []).length + ' palabras';
       case 'historia': return s.year ? 'Desde ' + s.year : 'Sin año';
-      case 'eventos': return (s.items || []).length + ' eventos' + lay({ linea: 'línea de tiempo' });
+      case 'eventos': {
+        const np = (s.items || []).filter(function (e) { return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') && e.date < todayISO(); }).length;
+        return (s.items || []).length + ' eventos' + (np ? ' · ' + np + (np === 1 ? ' ya pasó' : ' ya pasaron') : '') + lay({ linea: 'línea de tiempo' });
+      }
       case 'wifi': return s.network || 'Sin red';
       case 'horario': {
         const nh = (c.brand.holidays || []).filter(function (h) { return h && h.date >= todayISO(); }).length;
@@ -1325,6 +1328,7 @@
     if (ru && ru.s.mode === 'premios' && (ru.s.options || []).filter(function (o) { return o && o.label; }).length < 2) out.push({ s: 'warn', t: 'La ruleta necesita al menos dos premios', go: 'modulos' });
     c.modules.forEach(function (m) {
       if (m && m.on !== false && m.type === 'aviso' && /^\d{4}-\d{2}-\d{2}$/.test(m.s.until || '') && m.s.until < todayISO()) out.push({ s: 'warn', t: 'El aviso «' + String(m.s.text || '').slice(0, 40) + '» ya venció', d: 'Cambia la fecha o apaga el módulo.', go: 'modulos' });
+      if (m && m.on !== false && m.type === 'eventos' && (m.s.items || []).some(function (e) { return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') && e.date < todayISO(); })) out.push({ s: 'warn', t: 'La agenda tiene eventos que ya pasaron', d: 'Ya no se ven en la app. Quítalos o cámbiales la fecha.', go: 'modulos' });
     });
     const kb = Math.round(JSON.stringify(c).length / 1024);
     if (kb > 200) out.push({ s: 'warn', t: 'La app pesa ' + kb + ' KB', d: 'Para guardarla en tu cuenta debe pesar menos de 234 KB. Usa enlaces https para las fotos o sube menos.', go: 'modulos' });
