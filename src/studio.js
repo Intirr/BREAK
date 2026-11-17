@@ -30,6 +30,12 @@
   function move(arr, i, d) { const j = i + d; if (!arr || j < 0 || j >= arr.length) return false; const x = arr.splice(i, 1)[0]; arr.splice(j, 0, x); return true; }
   function lsGet(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento local */ } }
+  /* Conexión con el panel del local (meta.panel), con la misma regla que usa el motor para pedir el contenido. */
+  function panelInfo(c) {
+    const p = (c && c.meta && c.meta.panel) || {}, api = String(p.api || '').trim().replace(/\/+$/, ''), sl = String(p.slug || '').trim();
+    const okApi = /^(https:\/\/[\w.-]+(:\d+)?|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)$/i.test(api), okSlug = /^[a-z0-9-]{2,40}$/.test(sl);
+    return { api: api, slug: sl, set: !!(api || sl), okApi: okApi, okSlug: okSlug, ok: okApi && okSlug };
+  }
   function slug(s) { return String(s || 'app').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'app'; }
   function ago(ts) {
     if (!ts) return '';
@@ -1208,6 +1214,10 @@
         '<div class="exp"><div><h3>Archivo único .html</h3><p>Para abrirlo directo o subirlo a cualquier hosting.</p></div><div class="btnrow"><button class="btn" data-a="exp-html">Descargar .html</button><button class="btn ghost" data-a="copy-html">Copiar código</button></div></div>' +
         '<div class="exp"><div><h3>Configuración .json</h3><p>Respaldo de esta app para guardarlo o importarlo después.</p></div><div class="btnrow"><button class="btn" data-a="exp-json">Descargar .json</button><label class="btn ghost filebtn">Importar .json<input type="file" accept=".json,application/json" data-a="imp-json" hidden></label></div></div>' +
         '</div><ol class="deploy"><li>Descarga el .zip.</li><li>En Cloudflare, abre Workers &amp; Pages, crea un proyecto de Pages con la opción de subir archivos y arrastra el .zip.</li><li>Copia la dirección que te da (termina en .pages.dev) y pégala abajo para generar el QR.</li></ol></section>' +
+        '<section class="card" id="panel-card"><div class="card-h"><h2>Panel del local</h2><p>Para que el dueño cambie desde su celular la carta, los precios, las promos, los avisos, el horario, la agenda y las fotos, sin que tengas que volver a publicar la app.</p></div>' +
+        fieldHTML({ k: 'api', t: 'text', label: 'Dirección del servidor del panel', ph: 'https://break-panel.tu-cuenta.workers.dev' }, 'meta.panel') +
+        fieldHTML({ k: 'slug', t: 'text', label: 'Nombre corto del local', ph: slug(S.cur.brand.name), help: 'Minúsculas, números y guiones. Va en el enlace del panel del dueño.' }, 'meta.panel') +
+        '<div id="panel-st">' + panelStatusHTML() + '</div></section>' +
         '<section class="card"><div class="card-h"><h2>Al compartir y al abrir</h2><p>Así se ve el enlace en WhatsApp o Facebook. La imagen va en el .zip; pega abajo la dirección publicada y vuelve a descargarlo para que la usen.</p></div>' +
         '<div class="ogp"><img id="og-prev" alt="Imagen para compartir" width="600" height="315" hidden><p class="qr-empty" id="og-empty">Preparando la imagen…</p></div>' +
         fieldHTML({ k: 'splash', t: 'bool', label: 'Pantalla de carga con el logo al abrir la app', def: true }, 'brand') + '</section>' +
@@ -1217,6 +1227,18 @@
         '<button class="btn pri" data-a="exp-qr" id="qr-btn"' + (/^https?:\/\/\S+$/i.test(url) ? '' : ' disabled') + '>Descargar QR (.png)</button></div></section>';
     }
   };
+  /* Estado de la conexión con el panel y los pasos para dejarlo listo. */
+  function panelStatusHTML() {
+    const pi = panelInfo(S.cur);
+    if (!pi.set) return '<p class="help">Sin conexión, la app usa la carta que trae adentro. La guía para publicar el servidor del panel en Cloudflare está en worker/LEEME.md.</p>';
+    if (!pi.ok) return '<p class="pnl-w">' + (!pi.okApi ? 'La dirección debe ser solo el servidor, con https: por ejemplo https://break-panel.tu-cuenta.workers.dev.' : 'El nombre corto lleva de 2 a 40 letras minúsculas, números o guiones, sin espacios ni tildes.') + '</p>';
+    const admin = pi.api + '/admin?local=' + pi.slug, link = pi.api + '/panel/' + pi.slug;
+    return '<ol class="deploy">' +
+      '<li>Descarga de nuevo el .zip y publícalo: la app ya sabe dónde pedir su contenido.</li>' +
+      '<li>Descarga la configuración .json y súbela en la <a href="' + attr(admin) + '" target="_blank" rel="noopener">administración del servidor</a> con tu clave: ahí eliges el PIN del dueño y se suben las fotos.</li>' +
+      '<li>Entrégale al dueño su enlace y el PIN: <code class="pnl-link">' + esc(link) + '</code> <button type="button" class="btn sm ghost" data-a="panel-copy">Copiar enlace</button></li></ol>' +
+      '<p class="help">Si después cambias el diseño, repite los pasos 1 y 2: en la administración, «Actualizar» no toca lo que cambió el dueño. Para traer al estudio lo que cambió el dueño, descarga su respaldo en la administración e impórtalo aquí.</p>';
+  }
   function summary(m) {
     const s = m.s || {}, c = S.cur;
     const tagName = function (t) { return (TAGS.filter(function (x) { return x[0] === t; })[0] || [0, t])[1]; };
@@ -1330,6 +1352,8 @@
       if (m && m.on !== false && m.type === 'aviso' && /^\d{4}-\d{2}-\d{2}$/.test(m.s.until || '') && m.s.until < todayISO()) out.push({ s: 'warn', t: 'El aviso «' + String(m.s.text || '').slice(0, 40) + '» ya venció', d: 'Cambia la fecha o apaga el módulo.', go: 'modulos' });
       if (m && m.on !== false && m.type === 'eventos' && (m.s.items || []).some(function (e) { return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date || '') && e.date < todayISO(); })) out.push({ s: 'warn', t: 'La agenda tiene eventos que ya pasaron', d: 'Ya no se ven en la app. Quítalos o cámbiales la fecha.', go: 'modulos' });
     });
+    const pi = panelInfo(c);
+    if (pi.set) out.push(pi.ok ? { s: 'ok', t: 'Conectada al panel del local (' + pi.slug + ')' } : { s: 'warn', t: 'El panel del local no está bien configurado', d: !pi.okApi ? 'La dirección del servidor del panel debe ser solo el servidor, con https: por ejemplo https://break-panel.tu-cuenta.workers.dev.' : 'El nombre corto lleva de 2 a 40 letras minúsculas, números o guiones.', go: 'publicar' });
     const kb = Math.round(JSON.stringify(c).length / 1024);
     if (kb > 200) out.push({ s: 'warn', t: 'La app pesa ' + kb + ' KB', d: 'Para guardarla en tu cuenta debe pesar menos de 234 KB. Usa enlaces https para las fotos o sube menos.', go: 'modulos' });
     return out;
@@ -1663,6 +1687,11 @@
     'exp-html': function () { exportHTML(); },
     'exp-zip': function () { exportZip(); },
     'exp-json': function () { exportJSON(); },
+    'panel-copy': function () {
+      const pi = panelInfo(S.cur), link = pi.api + '/panel/' + pi.slug;
+      if (!pi.ok) return;
+      try { navigator.clipboard.writeText(link).then(function () { toast('Enlace del panel copiado.'); }, function () { toast(link); }); } catch (e) { toast(link); }
+    },
     'copy-html': function () { copyHTML(); },
     'exp-qr': function () { exportQR(); },
     'my-save': function () {
@@ -1805,6 +1834,7 @@
     if (m) { const b = document.querySelector('[data-cat-label="' + m[1] + '"]'); if (b) b.textContent = v || 'Sin nombre'; return; }
     const mo = document.querySelector('[data-money="' + p.replace(/"/g, '') + '"]');
     if (mo) mo.textContent = money(v);
+    if (p === 'meta.panel.api' || p === 'meta.panel.slug') { const st = $('#panel-st'); if (st) st.innerHTML = panelStatusHTML(); }
     if (p === 'meta.url') {
       const ok = /^https?:\/\/\S+$/i.test(v || '');
       const b = $('#qr-btn'); if (b) b.disabled = !ok;
@@ -1950,15 +1980,17 @@
       '<\/script>\n</body>\n</html>\n';
   }
   function swSource(c, extra) {
-    const cache = 'break-' + slug(c.brand.name) + '-' + Date.now().toString(36);
+    const cache = 'break-' + slug(c.brand.name) + '-' + Date.now().toString(36), pi = panelInfo(c), fotos = pi.ok ? pi.api + '/fotos/' + pi.slug + '/' : '';
     return '/* Service worker de Break: la carta abre sin señal y se actualiza cuando hay internet. */\n' +
       'const CACHE = ' + JSON.stringify(cache) + ';\n' +
       'const CORE = ' + JSON.stringify(['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'].concat(extra || [])) + ';\n' +
+      (fotos ? '/* Fotos que sube el dueño desde su panel: nunca cambian, así que se guardan la primera vez que se ven. */\nconst FOTOS = ' + JSON.stringify(fotos) + ';\n' : '') +
       'self.addEventListener("install", function (e) { e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); })); });\n' +
       'self.addEventListener("activate", function (e) { e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf("break-") === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); })); });\n' +
       'self.addEventListener("fetch", function (e) {\n' +
       '  const r = e.request; if (r.method !== "GET") return;\n' +
       '  const u = new URL(r.url);\n' +
+      (fotos ? '  if (r.url.indexOf(FOTOS) === 0) { e.respondWith(caches.open(CACHE).then(function (c) { return c.match(r.url).then(function (hit) { return hit || fetch(r.url, { mode: "cors", credentials: "omit" }).then(function (res) { if (res.ok) c.put(r.url, res.clone()); return res; }).catch(function () { return fetch(r); }); }); })); return; }\n' : '') +
       '  if (r.mode === "navigate") { e.respondWith(fetch(r).then(function (res) { const cp = res.clone(); caches.open(CACHE).then(function (c) { c.put("./index.html", cp); }); return res; }).catch(function () { return caches.match("./index.html"); })); return; }\n' +
       '  if (u.origin === self.location.origin || /fonts\\.(googleapis|gstatic)\\.com$/.test(u.hostname)) {\n' +
       '    e.respondWith(caches.match(r).then(function (hit) { return hit || fetch(r).then(function (res) { if (res.ok || res.type === "opaque") { const cp = res.clone(); caches.open(CACHE).then(function (c) { c.put(r, cp); }); } return res; }); }));\n' +
@@ -2142,12 +2174,16 @@
     }, null, 2));
     zip.file('sw.js', swSource(c, m.files.map(function (f) { return './' + f.path; })));
     zip.file('_headers', '/sw.js\n  Cache-Control: no-cache\n/index.html\n  Cache-Control: no-cache\n');
+    const pz = panelInfo(c);
     zip.file('LEEME.txt', name + ' · app de carta hecha con Break\n\n' +
       'Qué hay en esta carpeta\n  index.html            La app completa (motor + configuración).\n  manifest.webmanifest  Permite instalarla en el celular.\n  sw.js                 Guarda la app para que abra sin señal.\n  icon-192.png, icon-512.png\n' +
       (m.files.length ? '  img/                  Las fotos de la carta.\n' : '') + '  og.png                Imagen que se ve al compartir el enlace (WhatsApp, Facebook…).\n' +
       '  _headers              Reglas de caché para Cloudflare Pages.\n\n' +
       'Publicar en Cloudflare Pages\n  1. En el panel de Cloudflare abre Workers & Pages y crea un proyecto de Pages con la opción de subir archivos.\n  2. Ponle nombre y arrastra este .zip (o la carpeta descomprimida).\n  3. Cloudflare te da una dirección que termina en .pages.dev. Pégala en Break Studio › Publicar para generar el QR de las mesas.\n\n' +
-      'Para cambiar precios o platos: edita la app en Break Studio, descarga el .zip otra vez y súbelo como nueva versión del mismo proyecto.\n');
+      (pz.ok ? 'Panel del local\n  Esta app lee su carta, promos, avisos, horario, agenda y fotos del panel del local en ' + pz.api + ' (local «' + pz.slug + '»).\n' +
+        '  El dueño entra en ' + pz.api + '/panel/' + pz.slug + ' con su PIN: lo que guarde ahí se ve en la app sin volver a subir este .zip.\n' +
+        '  Para cambiar el diseño: edita la app en Break Studio, sube este .zip otra vez y el .json en ' + pz.api + '/admin («Actualizar» no toca lo que cambió el dueño).\n'
+        : 'Para cambiar precios o platos: edita la app en Break Studio, descarga el .zip otra vez y súbelo como nueva versión del mismo proyecto.\n'));
     if (icons[0]) zip.file('icon-192.png', icons[0]);
     if (icons[1]) zip.file('icon-512.png', icons[1]);
     if (ogb) zip.file('og.png', String(await blobToDataURL(ogb)).split(',')[1] || '', { base64: true });

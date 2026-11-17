@@ -55,5 +55,6 @@ http.createServer(async (req, res) => {
   } catch (e) { res.writeHead(500); res.end(String(e && e.message)); }
 }).listen(PORT, () => {
   console.log('Panel de prueba: http://localhost:' + PORT + '/panel/' + SLUG + '  (PIN ' + PIN + ')');
+  console.log('Administración: http://localhost:' + PORT + '/admin  (clave local)');
   if (APP && existsSync(resolve(APP))) console.log('App: http://localhost:' + PORT + '/app');
 });

@@ -7,10 +7,10 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 ## Comandos
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
-- `npm run build` — une `src/` en `dist/break-studio.html` (el estudio) y `dist/break-panel.html` (el panel del local) y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila, prepara el servidor del panel (`worker/build.mjs`) y corre `test/run.js` (1006 pruebas en jsdom: motor, estudio, app exportada, servidor y panel). Debe terminar en `0 fallaron`.
+- `npm run build` — une `src/` en `dist/break-studio.html` (el estudio), `dist/break-panel.html` (el panel del local) y `dist/break-admin.html` (la administración del servidor) y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
+- `npm test` — compila, prepara el servidor del panel (`worker/build.mjs`) y corre `test/run.js` (1053 pruebas en jsdom: motor, estudio, app exportada, servidor, panel y administración). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
-- `node worker/local.mjs` — el servidor del panel en tu computador, sin Cloudflare (KV y fotos en memoria): `http://localhost:8787/panel/antojo`, PIN `123456`. Con `--app <archivo.html>` sirve también esa app exportada en `/app`; otras opciones: `--puerto`, `--local`, `--plantilla`, `--pin`.
+- `node worker/local.mjs` — el servidor del panel en tu computador, sin Cloudflare (KV y fotos en memoria): `http://localhost:8787/panel/antojo`, PIN `123456`, y la administración en `/admin` con la clave `local`. Con `--app <archivo.html>` sirve también esa app exportada en `/app`; otras opciones: `--puerto`, `--local`, `--plantilla`, `--pin`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
 
@@ -29,8 +29,11 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 - `src/templates.js` — `TEMPLATES` (Araucaria, Antojo, Casa Zócalo, La Espiga, Neblina, Los Alisos, La Esquina, Café del Parque, Asadero El Tronco, Agua Tibia, Fuente de Soda Polar, Mango Biche, Pastelería La Rosa, La Fábrica y Mesa Larga; cada estética tiene al menos una, y las pruebas lo exigen) y `blankApp()`. Solo datos; la portada de Neblina es una ilustración SVG en base64 (`NEBLINA_IMG`), no una foto. Las apps de ejemplo muestran las opciones de las etapas 9 a 12 sin perder su estilo: secciones con fondo propio, variantes de módulos, reseñas con citas, opciones de carta, aparición al bajar y, las de paleta clara, modo oscuro automático. No cambian navegación, colores por elemento, formas ni letra. En `test/run.js`, `bare(id, …claves)` da una copia sin algunas de esas opciones para las pruebas que comparan contra «auto».
 - `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `STYLE` (grupos, tarjetas y campos de la pestaña Estilo), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`), etiquetas y los nombres de los íconos en el selector (`ICON_NAMES`). Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
 - `src/studio.js` — el estudio: estado `S`, editor por pestañas (Estilo, Módulos, Carta, Datos, Publicar), vista previa en un iframe escrito con `document.write`, guardado, exportación (.html, .zip para Cloudflare Pages con manifiesto, service worker e íconos, .json, QR).
+  **Publicar › Panel del local** guarda `meta.panel {api, slug}`. `panelInfo()` usa la misma regla del motor y `panelStatusHTML()` da los pasos con los enlaces a `<api>/admin?local=<slug>` y `<api>/panel/<slug>`. `checks()` avisa si la conexión está mal o dice que está conectada. Con la app conectada, el `sw.js` del .zip (`swSource()`) guarda las fotos de `<api>/fotos/<slug>/` la primera vez que se ven, pedidas con `mode:'cors'`, y el `LEEME.txt` explica el panel; sin panel, el service worker queda igual.
 - `src/studio.css`, `src/page.html` — estilos y esqueleto del estudio. `build.js` reemplaza `/*__CSS__*/` y `/*__JS__*/`.
 - `src/panel.js`, `src/panel.css`, `src/panel.html` — el panel del local (ver «Panel del local»). `build.js` lo une con `runtime.js` y `catalog.js` en `dist/break-panel.html`, que sí va en git.
+- `src/admin.js`, `src/admin.css`, `src/admin.html` — la administración del servidor (ver «Administración del servidor»). `build.js` la une con `panel.css`, sin el motor, en `dist/break-admin.html`, que también va en git.
+- `worker/` — el servidor del panel (Cloudflare Worker). La guía para publicarlo, paso a paso, está en `worker/LEEME.md`.
 
 ### Configuración de una app
 
@@ -46,7 +49,7 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 
 ### Contenido del panel del local
 
-El dueño cambia su contenido desde un panel (en construcción por etapas) sin tocar el diseño. El contenido es solo carta, promos, menú del día, aviso, agenda, galería, reseñas, horario y festivos. `sanitizeContenido()` deja pasar solo esas claves, con tipos y largos revisados: en los módulos, solo las de contenido (`C_MODS`), nunca `layout` ni `_bg`; fotos `https` o `img/…` (y, para probar con `worker/local.mjs`, solo la ruta exacta `http://localhost/fotos/<slug>/<24hex>.<ext>`: `LOCAL_FOTO`, que también acepta `safeImg()`). Las fotos incrustadas (`data:`) o de la biblioteca (`asset:`) no pasan: al conectar una app al panel, el estudio debe subirlas antes al servidor. `mergeContenido(app, contenido)` lo pone sobre una copia de la app (solo en módulos que ya existen y son del mismo tipo) y `contenidoOf(app)` lo saca. Las tres son puras, van antes del `return` de `opts.meta` y las usan la app, el panel y el servidor.
+El dueño cambia su contenido desde un panel sin tocar el diseño. El contenido es solo carta, promos, menú del día, aviso, agenda, galería, reseñas, horario y festivos. `sanitizeContenido()` deja pasar solo esas claves, con tipos y largos revisados: en los módulos, solo las de contenido (`C_MODS`), nunca `layout` ni `_bg`; fotos `https` o `img/…` (y, para probar con `worker/local.mjs`, solo la ruta exacta `http://localhost/fotos/<slug>/<24hex>.<ext>`: `LOCAL_FOTO`, que también acepta `safeImg()`). Las fotos incrustadas (`data:`) o de la biblioteca (`asset:`) no pasan: al conectar una app al panel, el estudio debe subirlas antes al servidor. `mergeContenido(app, contenido)` lo pone sobre una copia de la app (solo en módulos que ya existen y son del mismo tipo) y `contenidoOf(app)` lo saca. Las tres son puras, van antes del `return` de `opts.meta` y las usan la app, el panel y el servidor.
 
 Si la app trae `meta.panel {api, slug}` (dirección `https`, o `http://localhost` para pruebas), `loadPanel()` la abre con la última copia guardada en el celular (`break:<id>:contenido`) o con la carta que trae, y pide `api/api/<slug>/contenido` (`{v, at, contenido}`); cuando llega, la guarda y vuelve a pintar. La vista previa del estudio no lo pide. «Agotado hoy» es `soldDate` (fecha de hoy en `brand.tz`): `isOff()` lo trata como no disponible y vuelve solo al día siguiente. Cada evento de la agenda puede llevar `date`: desde el día siguiente no se pinta, y si «Cuándo» está vacío la app muestra esa fecha (también en el mensaje de «Apartar cupo»); el estudio la pide en el módulo y `checks()` avisa de los que ya pasaron. Los festivos (`brand.holidays`) le ganan al horario de la semana en `statusInfo()` y el horario lista los próximos (`holidaysHTML()`); se editan en Datos del estudio (`holidaysCard()`, que `checks()` revisa) y en el panel.
 
@@ -55,19 +58,37 @@ Si la app trae `meta.panel {api, slug}` (dirección `https`, o `http://localhost
 Un Cloudflare Worker (`worker/src/index.js`, función `handle()`) atiende a todos los locales:
 
 - **Almacenamiento:** KV `DATA` (`local:`, `app:`, `contenido:`, `hist:` y `tries:` por local) y R2 `FOTOS`.
-- **Validación:** usa el mismo saneador que la app. `worker/build.mjs` copia `src/runtime.js` en `worker/src/runtime-meta.js` y el panel compilado en `panel-html.js`; los dos son generados e ignorados por git.
+- **Validación:** usa el mismo saneador que la app. `worker/build.mjs` copia `src/runtime.js` en `worker/src/runtime-meta.js` y el panel y la administración compilados en `panel-html.js` (`PANEL_HTML` y `ADMIN_HTML`); los dos son generados e ignorados por git. `wrangler.toml` corre `node ../build.js && node build.mjs` antes de publicar.
 - **Rutas:**
   - `GET /api/<slug>/contenido`: pública, con caché de borde de 30 s y `ETag`.
   - `POST /api/<slug>/entrar`: PIN de 6 números, 5 intentos cada 15 min.
   - Con sesión: `GET …/panel`, `PUT …/contenido` (`{base, contenido}`, que da 409 si alguien guardó antes), `POST …/deshacer`, `GET …/historial` (10 versiones) y `POST …/fotos` (JPG, PNG o WebP de hasta 2 MB, revisados por sus primeros bytes).
-  - Fotos en `GET /fotos/<slug>/<archivo>`.
-  - Administración con `ADMIN_TOKEN`: `PUT /api/admin/locales/<slug>` (nombre, PIN, app y contenido inicial) y `GET /api/admin/locales`.
-  - El panel en `GET /panel/<slug>`.
+  - Fotos en `GET /fotos/<slug>/<archivo>`. El nombre es la huella SHA-256 de la foto (`huella()`): la misma foto queda siempre en la misma dirección y no se duplica.
+  - Administración con `ADMIN_TOKEN`:
+    - `PUT /api/admin/locales/<slug>`: nombre, PIN y app. Sin contenido previo usa el de la app; con `reemplazar: true` lo vuelve a poner aunque el dueño haya cambiado algo; sin él, actualizar la app conserva el contenido.
+    - `GET /api/admin/locales`: `[{slug, name}]`.
+    - `GET /api/admin/locales/<slug>`: respaldo `{format:'break-app', version, app (con el contenido del dueño), local, contenido}`, sin el PIN, que el estudio importa tal cual.
+    - `POST /api/admin/locales/<slug>/fotos`: las fotos que trae la app al crear el local.
+  - El panel en `GET /panel/<slug>` y la administración en `GET /admin`, las dos con `X-Frame-Options: DENY` y `X-Robots-Tag: noindex`.
 - **PIN y sesiones:**
   - El PIN se guarda como HMAC con `SESSION_SECRET` (un PBKDF2 fuerte no cabe en los 10 ms de CPU del plan gratis).
   - Las sesiones son tokens firmados de 12 horas, no cookies, así que CORS abierto no expone nada.
   - Cambiar el PIN cierra las sesiones abiertas.
 - **Pruebas y despliegue:** las pruebas corren el Worker en Node con KV y R2 simulados. `cd worker && npx wrangler deploy --dry-run` lo empaqueta sin cuenta de Cloudflare.
+
+### Administración del servidor (`src/admin.*`)
+
+Página que sirve el Worker en `/admin` para quien publica las apps (no para los dueños). Existe porque el estudio, publicado en claude.ai, no puede hablar con un servidor propio: la clave de administración se escribe aquí y queda solo en `sessionStorage` (`break.admin`).
+
+- **Crear o actualizar un local:**
+  - **Archivo:** se sube el `.json` que descarga el estudio en Publicar (`{format:'break-app', app}`) o un respaldo.
+  - **Avisos:** si la app no está conectada (`meta.panel`) o pide otro nombre corto, lo avisa.
+  - **Fotos:** toma cada foto incrustada `data:image/(png|jpeg|webp)`, sin repetir, la sube a `POST /api/admin/locales/<slug>/fotos` y la cambia por su dirección `https`, tanto en la app como en su contenido inicial. Las ilustraciones SVG quedan como vienen. Si una foto falla, no guarda nada.
+  - **Guardar:** luego `PUT` con nombre, PIN y app, y `reemplazar` si se marcó.
+  - **Resultado:** el enlace del panel y el PIN, que no se vuelve a mostrar.
+- **Locales:** lista con «Abrir panel», «Descargar respaldo» (`<slug>-respaldo-<fecha>.json`) y «Cambiar PIN».
+- **PIN:** «Generar uno» da 6 números al azar, sin repetidos ni seguidos.
+- No lleva el motor; `window.__breakAdmin` expone su estado para las pruebas.
 
 ### Panel del local (`src/panel.*`)
 

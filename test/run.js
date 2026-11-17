@@ -1362,7 +1362,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const stored = JSON.parse(env.DATA.m.get('local:antojo'));
     ok(stored.pin && stored.salt && !JSON.stringify(stored).includes('123456'), 'el PIN no se guarda en claro');
     r = await call('GET', '/api/admin/locales', undefined, bearer('clave-admin'));
-    ok(r.status === 200 && r.data.locales.join() === 'antojo', 'la administración lista los locales');
+    ok(r.status === 200 && r.data.locales.map(l => l.slug).join() === 'antojo', 'la administración lista los locales');
     // Lectura pública
     r = await call('GET', '/api/antojo/contenido');
     ok(r.status === 200 && r.data.v === 1 && r.data.contenido.menu.categories.length === app.menu.categories.length && r.res.headers.get('Access-Control-Allow-Origin') === '*' && r.res.headers.get('ETag') === '"1"', 'el contenido se lee sin sesión, con su versión');
@@ -1421,6 +1421,29 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const foto = await W.handle(new Request(r.data.url), env, {});
     ok(foto.status === 200 && foto.headers.get('Content-Type') === 'image/webp' && /immutable/.test(foto.headers.get('Cache-Control')), 'la foto se sirve con su tipo y caché largo');
     r = await call('OPTIONS', '/api/antojo/contenido'); ok(r.status === 204 && /PUT/.test(r.res.headers.get('Access-Control-Allow-Methods')), 'responde a la consulta previa del navegador');
+    // Administración: página, fotos, lista con nombres, respaldo y «reemplazar»
+    r = await call('GET', '/admin');
+    ok(r.status === 200 && /Administración/.test(await r.res.text()) && r.res.headers.get('X-Frame-Options') === 'DENY' && r.res.headers.get('X-Robots-Tag') === 'noindex', 'el servidor sirve la administración, fuera de marcos y de buscadores');
+    r = await call('GET', '/panel/antojo'); ok(r.res.headers.get('X-Robots-Tag') === 'noindex', 'el panel tampoco sale en los buscadores');
+    r = await call('POST', '/api/admin/locales/antojo/fotos', webp, { 'Content-Type': 'image/webp' }); ok(r.status === 401, 'subir fotos desde la administración pide la clave');
+    r = await call('POST', '/api/admin/locales/antojo/fotos', new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]), Object.assign({ 'Content-Type': 'image/webp' }, bearer('clave-admin'))); ok(r.status === 415, 'la administración tampoco acepta archivos que no son fotos');
+    r = await call('POST', '/api/admin/locales/nuevo-local/fotos', webp, Object.assign({ 'Content-Type': 'image/webp' }, bearer('clave-admin')));
+    ok(r.status === 200 && /^https:\/\/panel\.example\.com\/fotos\/nuevo-local\/[0-9a-f]{24}\.webp$/.test(r.data.url), 'la administración sube las fotos de un local antes de crearlo');
+    r = await call('GET', '/api/admin/locales', undefined, bearer('clave-admin'));
+    eq(r.data.locales.map(l => l.slug + ':' + l.name).join(), 'antojo:Antojo,zocalo:Zócalo', 'la lista de locales trae sus nombres, en orden');
+    r = await call('GET', '/api/admin/locales/antojo'); ok(r.status === 401, 'el respaldo pide la clave de administración');
+    r = await call('GET', '/api/admin/locales/no-existe', undefined, bearer('clave-admin')); ok(r.status === 404, 'no hay respaldo de un local que no existe');
+    r = await call('GET', '/api/admin/locales/antojo', undefined, bearer('clave-admin'));
+    const resp = r.data, curA = (await call('GET', '/api/antojo/contenido')).data, pinHashA = JSON.parse(env.DATA.m.get('local:antojo')).pin;
+    ok(r.status === 200 && resp.format === 'break-app' && resp.local.slug === 'antojo' && resp.contenido.v === curA.v && !JSON.stringify(resp).includes(pinHashA) && !('pin' in resp.local) && !('salt' in resp.local), 'el respaldo trae la app y el contenido, sin el PIN');
+    ok(resp.app.theme.skin === app.theme.skin && resp.app.menu.categories[0].items[0].price === curA.contenido.menu.categories[0].items[0].price && !!(resp.app.v && resp.app.id && resp.app.theme && resp.app.menu && Array.isArray(resp.app.modules)), 'la app del respaldo trae el contenido del dueño y se puede importar en el estudio');
+    const app2 = TPL('tpl-antojo'); app2.menu.categories[0].items[0].price = 4242;
+    r = await call('PUT', '/api/admin/locales/antojo', { app: app2 }, bearer('clave-admin'));
+    let c2 = (await call('GET', '/api/antojo/contenido')).data;
+    ok(r.status === 200 && c2.v === curA.v && c2.contenido.menu.categories[0].items[0].price !== 4242 && JSON.parse(env.DATA.m.get('app:antojo')).menu.categories[0].items[0].price === 4242, 'actualizar la app conserva el contenido del dueño');
+    r = await call('PUT', '/api/admin/locales/antojo', { app: app2, reemplazar: true }, bearer('clave-admin'));
+    c2 = (await call('GET', '/api/antojo/contenido')).data;
+    ok(r.status === 200 && c2.v === curA.v + 1 && c2.contenido.menu.categories[0].items[0].price === 4242, 'con «reemplazar», el contenido vuelve al de la app como una versión nueva');
   }
 
   /* 11zh. Panel del local en jsdom, conectado al servidor (Worker) con KV simulado */
@@ -1768,6 +1791,122 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
       A.click(A.$('.tab[data-t="mas"]'));
       ok(A.$$('.none').length === 3 && /no tiene sección de agenda; pídasela/.test(A.$('.none').textContent) && !A.$('[data-a="ga-add"]'), 'sin agenda, galería ni reseñas, la pestaña Más lo explica');
       A.close();
+    }
+    /* 11zk. Administración del servidor en jsdom: crear y actualizar locales con el .json del estudio, fotos, PIN y respaldo */
+    {
+      const adminHTML = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-admin.html'), 'utf8');
+      const descargas = [];
+      const openAdmin = q => {
+        const dom = new JSDOM(adminHTML, {
+          url: 'https://panel.example.com/admin' + (q || ''), runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: quietConsole(),
+          beforeParse(w) {
+            w.scrollTo = () => {};
+            w.URL.createObjectURL = b => { descargas.push(b); return 'blob:respaldo'; }; w.URL.revokeObjectURL = () => {};
+            w.fetch = async (u, o) => {
+              if (/\/fotos$/.test(String(u))) fotoPosts++;
+              if (o && o.body && typeof o.body !== 'string') {
+                const ab = await new Promise((res, rej) => { const fr = new w.FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsArrayBuffer(o.body); });
+                o = Object.assign({}, o, { body: Buffer.from(ab) });
+              }
+              const r = await W.handle(new Request(String(u), o), env, { waitUntil() {} });
+              return { ok: r.ok, status: r.status, json: () => r.json() };
+            };
+          }
+        });
+        const w = dom.window, d = w.document;
+        return { w, d, $: s => d.querySelector(s), $$: s => [...d.querySelectorAll(s)], click: el => el.dispatchEvent(new w.MouseEvent('click', { bubbles: true })), close: () => w.close() };
+      };
+      const b64 = a => Buffer.from(a).toString('base64');
+      const jpgB = new Uint8Array(80); jpgB.set([0xFF, 0xD8, 0xFF, 0xE0]);
+      const pngB = new Uint8Array(80); pngB.set([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+      const JPG = 'data:image/jpeg;base64,' + b64(jpgB), PNG = 'data:image/png;base64,' + b64(pngB), SVG = 'data:image/svg+xml;base64,' + b64(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'));
+      const appA = TPL('tpl-alisos'); appA.brand.name = 'Los Alisos <b>';
+      appA.meta = Object.assign({}, appA.meta, { panel: { api: 'https://panel.example.com', slug: 'alisos-rio' } });
+      appA.modules.find(m => m.type === 'hero').s.img = JPG;
+      appA.menu.categories[0].items[0].img = JPG;
+      const galA = appA.modules.find(m => m.type === 'galeria'); galA.s.items[0].img = PNG;
+      appA.theme.bg = { type: 'foto', img: SVG };
+      let X = openAdmin('?local=otro');
+      const fileOf = obj => new X.w.File([JSON.stringify(obj)], 'los-alisos-break.json', { type: 'application/json' });
+      const pickFile = async file => {
+        X.$$('#up .err, .ad-sum').forEach(el => el.remove());
+        const inp = X.$('#file'); Object.defineProperty(inp, 'files', { value: [file], configurable: true });
+        inp.dispatchEvent(new X.w.Event('change', { bubbles: true }));
+        await until(() => X.$('.ad-sum') || X.$('#up .err'), 100);
+      };
+      const enviar = sel => X.$(sel).dispatchEvent(new X.w.Event('submit', { bubbles: true, cancelable: true }));
+      const entrarAdmin = async tok => { const e0 = X.$('.login .err'); if (e0) e0.remove(); X.$('#tok').value = tok; enviar('form[data-form="login"]'); await until(() => X.$('#list') || X.$('.login .err'), 100); };
+      const entrarPanel = async pin => { const r = await W.handle(new Request('https://panel.example.com/api/alisos-rio/entrar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin }) }), env, {}); return { status: r.status, data: await r.json() }; };
+      ok(!!X.$('#tok') && /Administración/.test(X.$('.login').textContent), 'la administración pide la clave');
+      await entrarAdmin('mala');
+      ok(/incorrecta/.test(X.$('.login .err').textContent) && !X.w.sessionStorage.getItem('break.admin'), 'una clave equivocada no entra');
+      await entrarAdmin('admin');
+      ok(X.$$('.ad-row').length === 3 && X.w.sessionStorage.getItem('break.admin') === 'admin', 'con la clave entra y lista los locales');
+      await pickFile(new X.w.File(['{"hola":1}'], 'otro.json', { type: 'application/json' }));
+      ok(/no es una app de Break/.test(X.$('#up .err').textContent) && !X.$('form[data-form="up"]'), 'un archivo que no es de Break se rechaza');
+      await pickFile(fileOf({ format: 'break-app', version: 1, app: appA }));
+      ok(/2 fotos por subir/.test(X.$('.ad-sum').textContent) && X.$('#slug').value === 'alisos-rio' && X.$('#name').value === 'Los Alisos <b>' && !X.$('.ad-sum b b') && !X.$$('#up .note').filter(n => !n.hidden).length, 'lee la app, cuenta las fotos sin repetir y trae el nombre corto de la app');
+      X.$('#slug').value = 'otro'; X.$('#slug').dispatchEvent(new X.w.Event('input', { bubbles: true }));
+      ok(!X.$('#slug-w').hidden && /alisos-rio/.test(X.$('#slug-w').textContent), 'avisa si el nombre corto no es el que pide la app');
+      X.$('#slug').value = 'alisos-rio'; X.$('#slug').dispatchEvent(new X.w.Event('input', { bubbles: true }));
+      ok(X.$('#slug-w').hidden && X.$('#rep-box').hidden && X.$('#go').textContent === 'Crear el local', 'con el nombre de la app no hay aviso y el local es nuevo');
+      const posts1 = fotoPosts;
+      enviar('form[data-form="up"]'); await sleep(20);
+      ok(/PIN/.test(X.$('#ferr').textContent) && !X.$('#ferr').hidden && fotoPosts === posts1 && !env.DATA.m.get('local:alisos-rio'), 'un local nuevo sin PIN no se crea');
+      X.click(X.$('[data-a="gen"][data-t="pin"]'));
+      const pinA = X.$('#pin').value;
+      ok(/^\d{6}$/.test(pinA) && pinA !== '123456' && !/^(\d)\1{5}$/.test(pinA), '«Generar uno» pone un PIN de 6 números que no es fácil de adivinar');
+      enviar('form[data-form="up"]'); await until(() => X.$('.ad-ok'), 150);
+      const appG = JSON.parse(env.DATA.m.get('app:alisos-rio')), contG = JSON.parse(env.DATA.m.get('contenido:alisos-rio')).contenido;
+      const heroG = appG.modules.find(m => m.type === 'hero').s.img, platoG = appG.menu.categories[0].items[0].img, galG = appG.modules.find(m => m.type === 'galeria').s.items[0].img;
+      ok(fotoPosts === posts1 + 2 && /^https:\/\/panel\.example\.com\/fotos\/alisos-rio\/[0-9a-f]{24}\.jpg$/.test(heroG) && platoG === heroG && /\/alisos-rio\/[0-9a-f]{24}\.png$/.test(galG) && appG.theme.bg.img === SVG, 'sube cada foto una sola vez, la cambia por su dirección y deja el SVG');
+      ok(!JSON.stringify(appG).includes('data:image/jpeg') && !JSON.stringify(appG).includes('data:image/png'), 'la app guardada ya no lleva fotos incrustadas');
+      const nFotos = env.FOTOS.m.size;
+      ok(contG.menu.categories[0].items[0].img === heroG && contG.modules[galA.id].s.items[0].img === galG, 'el contenido inicial queda con las fotos del servidor');
+      const okRes = X.$('.ad-ok');
+      ok(/Local creado/.test(okRes.textContent) && okRes.querySelector('.ad-link a').getAttribute('href') === 'https://panel.example.com/panel/alisos-rio' && X.$('.ad-pinv').textContent === pinA && /Los Alisos <b>/.test(okRes.textContent) && !okRes.querySelector('.help b'), 'el resultado da el enlace del panel y el PIN, con el nombre escapado');
+      let rr = await entrarPanel(pinA);
+      const tokA = rr.data.token;
+      ok(rr.status === 200 && !!tokA, 'el dueño entra a su panel con ese PIN');
+      ok(X.$$('.ad-row').length === 4 && X.$$('.ad-n b').some(b => b.textContent === 'Los Alisos <b>'), 'el local nuevo sale en la lista, escapado');
+      // El dueño cambia un precio; actualizar el diseño no lo toca
+      const cA = JSON.parse(JSON.stringify(contG)); cA.menu.categories[0].items[0].price = 31337;
+      await W.handle(new Request('https://panel.example.com/api/alisos-rio/contenido', { method: 'PUT', headers: { Authorization: 'Bearer ' + tokA, 'Content-Type': 'application/json' }, body: JSON.stringify({ base: 1, contenido: cA }) }), env, {});
+      appA.theme.colors.accent = '#225533';
+      await pickFile(fileOf({ format: 'break-app', version: 1, app: appA }));
+      ok(!X.$('#rep-box').hidden && X.$('#go').textContent === 'Actualizar el local' && /no cambiar el PIN/.test(X.$('#pin-h').textContent) && !X.$('.ad-ok'), 'con un local que ya existe, ofrece actualizarlo sin cambiar el PIN');
+      enviar('form[data-form="up"]'); await until(() => X.$('.ad-ok'), 150);
+      let docA = JSON.parse(env.DATA.m.get('contenido:alisos-rio'));
+      ok(/Local actualizado/.test(X.$('.ad-ok').textContent) && !X.$('.ad-pinv') && docA.contenido.menu.categories[0].items[0].price === 31337 && JSON.parse(env.DATA.m.get('app:alisos-rio')).theme.colors.accent === '#225533', 'actualizar cambia el diseño y conserva lo que cambió el dueño');
+      rr = await entrarPanel(pinA); ok(rr.status === 200, 'actualizar sin PIN no cambia el PIN');
+      ok(env.FOTOS.m.size === nFotos && JSON.parse(env.DATA.m.get('app:alisos-rio')).modules.find(m => m.type === 'hero').s.img === heroG, 'actualizar el local con las mismas fotos no las duplica: quedan en la misma dirección');
+      await pickFile(fileOf({ format: 'break-app', version: 1, app: appA }));
+      X.$('#rep-box input[name="rep"]').checked = true;
+      enviar('form[data-form="up"]'); await until(() => X.$('.ad-ok'), 150);
+      docA = JSON.parse(env.DATA.m.get('contenido:alisos-rio'));
+      ok(docA.contenido.menu.categories[0].items[0].price === appA.menu.categories[0].items[0].price && /contenido reemplazado/.test(X.$('.ad-ok').textContent), 'con «Reemplazar», el contenido vuelve al del archivo');
+      // Cambiar el PIN desde la lista
+      X.click(X.$('[data-a="pin"][data-s="alisos-rio"]'));
+      X.$('#np').value = '12'; enviar('form[data-form="pin"]'); await sleep(20);
+      ok(/6 números/.test(X.$('#toast').textContent) && !!X.$('form[data-form="pin"]'), 'un PIN que no tiene 6 números no se guarda');
+      X.$('#np').value = '246813'; enviar('form[data-form="pin"]'); await until(() => !X.$('form[data-form="pin"]'), 100);
+      ok((await entrarPanel(pinA)).status === 401 && (await entrarPanel('246813')).status === 200, 'cambiar el PIN desde la lista: el viejo deja de servir y el nuevo sí');
+      // Respaldo
+      X.click(X.$('[data-a="backup"][data-s="alisos-rio"]')); await until(() => descargas.length, 100);
+      const link = X.$('a[download]');
+      const txt = await new Promise(res => { const fr = new X.w.FileReader(); fr.onload = () => res(fr.result); fr.readAsText(descargas[0]); });
+      const bk = JSON.parse(txt), imgAhora = JSON.parse(env.DATA.m.get('contenido:alisos-rio')).contenido.menu.categories[0].items[0].img;
+      ok(!!link && /^alisos-rio-respaldo-\d{4}-\d{2}-\d{2}\.json$/.test(link.getAttribute('download')) && bk.format === 'break-app' && bk.local.slug === 'alisos-rio' && bk.app.menu.categories[0].items[0].img === imgAhora && imgAhora === heroG && !!(bk.app.v && bk.app.id && bk.app.theme), 'el respaldo se descarga en .json, con la app y sus fotos del servidor');
+      // Salir
+      X.click(X.$('[data-a="logout"]'));
+      ok(!!X.$('#tok') && !X.w.sessionStorage.getItem('break.admin'), 'salir borra la clave de esta pestaña');
+      X.close();
+      // Una app sin conexión con el panel lo advierte
+      const sinPanel = TPL('tpl-zocalo');
+      X = openAdmin(); await entrarAdmin('admin');
+      await pickFile(fileOf(sinPanel));
+      ok(/no está conectada al panel/.test(X.$('#up .note').textContent) && X.$('#slug').value === 'casa-zocalo', 'una app sin conexión con el panel lo advierte y propone un nombre corto');
+      X.close();
     }
   }
 
@@ -2412,6 +2551,7 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(['LEEME.txt', '_headers', 'index.html', 'manifest.webmanifest', 'sw.js'].every(n => names.includes(n)), 'el .zip trae index, manifiesto, service worker y guía: ' + names.join(', '));
     ok(names.includes('img/' + LA + '.webp'), 'el .zip trae las fotos de la biblioteca en img/');
     ok((await zip.file('sw.js').async('string')).includes('"./img/' + LA + '.webp"'), 'el service worker guarda las fotos para abrir sin señal');
+    ok(!(await zip.file('sw.js').async('string')).includes('FOTOS'), 'sin panel, el service worker no guarda fotos de otro servidor');
     ok((await zip.file('index.html').async('string')).includes('"img/' + LA + '.webp"'), 'la app del .zip apunta a sus fotos');
     const man = JSON.parse(await zip.file('manifest.webmanifest').async('string'));
     ok(man.display === 'standalone' && man.start_url === './', 'manifiesto instalable');
@@ -2425,6 +2565,28 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     ok(ad.querySelectorAll('.it').length === itemsIn(ST.S.cur), 'la app exportada tiene toda la carta');
     ok(ad.querySelector('.app').getAttribute('data-skin') === 'cultural', 'la app exportada conserva la estética');
     app.window.close();
+  }
+  // Panel del local: dirección y nombre corto en Publicar, revisión, service worker y LEEME del .zip
+  {
+    const pApi = d.getElementById('f-meta-panel-api'), pSlug = d.getElementById('f-meta-panel-slug');
+    ok(!!pApi && !!pSlug && /Panel del local/.test($('#panel-card').textContent) && !$('#panel-st .deploy'), 'Publicar tiene la tarjeta del panel del local, sin pasos mientras no esté conectada');
+    setVal(pApi, 'https://break-panel.ejemplo.workers.dev/admin');
+    ok(/solo el servidor/.test($('#panel-st').textContent) && ST.checks(ST.S.cur).some(c => c.s === 'warn' && /panel del local no está bien/.test(c.t)), 'una dirección con ruta da aviso en la tarjeta y en la revisión');
+    setVal(pApi, 'https://break-panel.ejemplo.workers.dev/'); setVal(pSlug, 'antojo "<i>"');
+    ok(/minúsculas/.test($('#panel-st').textContent) && !$('#panel-st i'), 'un nombre corto con otros caracteres da aviso');
+    setVal(pSlug, 'antojo-centro');
+    const adm = $('#panel-st a'), pst = $('#panel-st').textContent;
+    ok(ST.S.cur.meta.panel.slug === 'antojo-centro' && adm && adm.getAttribute('href') === 'https://break-panel.ejemplo.workers.dev/admin?local=antojo-centro' && pst.includes('https://break-panel.ejemplo.workers.dev/panel/antojo-centro'), 'con los dos datos, la tarjeta da los pasos con los enlaces de la administración y del panel');
+    ok(ST.checks(ST.S.cur).some(c => c.s === 'ok' && /Conectada al panel del local \(antojo-centro\)/.test(c.t)), 'la revisión dice que la app está conectada al panel');
+    click($('[data-a="exp-zip"]')); await sleep(900);
+    const zp = saved.filter(x => x.filename.endsWith('.zip')).pop();
+    const zip2 = await require('jszip').loadAsync(Buffer.from(await zp.data.arrayBuffer()));
+    const sw2 = await zip2.file('sw.js').async('string'), lee = await zip2.file('LEEME.txt').async('string'), idx2 = await zip2.file('index.html').async('string');
+    ok(sw2.includes('const FOTOS = "https://break-panel.ejemplo.workers.dev/fotos/antojo-centro/"') && sw2.includes('mode: "cors"'), 'el service worker de una app conectada guarda las fotos del panel');
+    ok(lee.includes('https://break-panel.ejemplo.workers.dev/panel/antojo-centro') && lee.includes('https://break-panel.ejemplo.workers.dev/admin'), 'el LEEME del .zip explica el panel del local');
+    ok(idx2.includes('"slug":"antojo-centro"'), 'la app del .zip lleva su conexión con el panel');
+    setVal(pApi, ''); setVal(pSlug, '');
+    ok(!ST.checks(ST.S.cur).some(c => /panel del local/i.test(c.t)) && !$('#panel-st .deploy'), 'sin dirección ni nombre corto, la app no está conectada y no hay aviso');
   }
   const metaUrl = d.getElementById('f-meta-url');
   setVal(metaUrl, 'https://antojo-centro.pages.dev');

@@ -3,8 +3,9 @@ name = "break-panel"
 main = "src/index.js"
 compatibility_date = "2025-06-01"
 
+# Compila el panel y la administración (build.js en la raíz) y los mete en el servidor.
 [build]
-command = "node build.mjs"
+command = "node ../build.js && node build.mjs"
 
 # Contenido de cada local, sus versiones, el PIN cifrado y los intentos de entrada.
 # Crear con: npx wrangler kv namespace create DATA   (y pegar aquí el id que muestra)
@@ -20,4 +21,4 @@ bucket_name = "break-fotos"
 
 # Secretos (no van en este archivo):
 #   npx wrangler secret put SESSION_SECRET   (una frase larga al azar: firma las sesiones y el PIN)
-#   npx wrangler secret put ADMIN_TOKEN      (la clave que usa el estudio para crear locales)
+#   npx wrangler secret put ADMIN_TOKEN      (la clave de la administración, en /admin, para crear locales)

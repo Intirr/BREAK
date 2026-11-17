@@ -30,3 +30,15 @@ if (pproblems.length) { console.error('BUILD DEL PANEL FALLÓ:\n - ' + pproblems
 const ppage = src('panel.html').replace('/*__CSS__*/', () => src('panel.css')).replace('/*__JS__*/', () => pjs);
 fs.writeFileSync(path.join(__dirname, 'dist', 'break-panel.html'), ppage);
 console.log('dist/break-panel.html', (Buffer.byteLength(ppage) / 1024).toFixed(1) + ' KB');
+
+/* Administración del servidor del panel (/admin): crear locales, PIN, fotos y respaldos. Usa los estilos del panel
+   y no lleva el motor, para que sea liviana. */
+const ajs = src('admin.js');
+const aproblems = [];
+if (/<\/script/i.test(ajs)) aproblems.push('el JS de la administración contiene </script');
+if (/<!--/.test(ajs)) aproblems.push('el JS de la administración contiene <!--');
+try { new Function(ajs); } catch (e) { aproblems.push('error de sintaxis en la administración: ' + e.message); }
+if (aproblems.length) { console.error('BUILD DE LA ADMINISTRACIÓN FALLÓ:\n - ' + aproblems.join('\n - ')); process.exit(1); }
+const apage = src('admin.html').replace('/*__CSS__*/', () => src('panel.css') + '\n' + src('admin.css')).replace('/*__JS__*/', () => ajs);
+fs.writeFileSync(path.join(__dirname, 'dist', 'break-admin.html'), apage);
+console.log('dist/break-admin.html', (Buffer.byteLength(apage) / 1024).toFixed(1) + ' KB');

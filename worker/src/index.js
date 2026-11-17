@@ -14,9 +14,10 @@
      secreto. El límite de 5 intentos cada 15 minutos protege la entrada (un PBKDF2 fuerte no cabe en los 10 ms
      de CPU del plan gratis).
    - Las sesiones son tokens firmados (no cookies), así que CORS abierto no expone nada: sin token no se escribe.
-   - El estudio administra con ADMIN_TOKEN (crear locales, cambiar PIN, subir la app). */
+   - La administración (/admin) usa ADMIN_TOKEN: crear locales, cambiar el PIN, subir la app y sus fotos y
+     descargar respaldos. La clave se escribe en esa página; nunca pasa por el estudio. */
 import { RT } from './runtime-meta.js';
-import { PANEL_HTML } from './panel-html.js';
+import { PANEL_HTML, ADMIN_HTML } from './panel-html.js';
 
 const SLUG = '([a-z0-9-]{2,40})';
 const MAX_CONT = 300 * 1024, MAX_APP = 2 * 1024 * 1024, MAX_FOTO = 2 * 1024 * 1024;
@@ -167,12 +168,15 @@ function esImagen(ext, b) {
   if (ext === 'png') return b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47;
   return String.fromCharCode(b[0], b[1], b[2], b[3]) === 'RIFF' && String.fromCharCode(b[8], b[9], b[10], b[11]) === 'WEBP';
 }
+/* Nombre de una foto: los primeros 24 caracteres de su huella SHA-256. La misma foto queda siempre en la misma
+   dirección, así que volver a subirla (al actualizar un local) no la duplica. */
+async function huella(buf) { const h = new Uint8Array(await crypto.subtle.digest('SHA-256', buf)); return [...h].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24); }
 async function subirFoto(request, env, slug) {
   const ct = String(request.headers.get('Content-Type') || '').split(';')[0].trim().toLowerCase(), ext = FOTOS[ct];
   if (!ext) throw new HttpError(415, 'Solo se pueden subir fotos JPG, PNG o WebP.');
   const buf = await readBody(request, MAX_FOTO, 'La foto pesa más de 2 MB.');
   if (!esImagen(ext, new Uint8Array(buf))) throw new HttpError(415, 'El archivo no es una foto válida.');
-  const key = slug + '/' + rand(12) + '.' + ext;
+  const key = slug + '/' + await huella(buf) + '.' + ext;
   await env.FOTOS.put(key, buf, { httpMetadata: { contentType: ct } });
   return json({ url: new URL('/fotos/' + key, request.url).toString() });
 }
@@ -192,21 +196,35 @@ async function adminLocal(request, env, slug) {
     await env.DATA.put('app:' + slug, JSON.stringify(body.app));
   }
   const cur = await env.DATA.get('contenido:' + slug, 'json');
-  const src = body.contenido || (!cur && body.app ? RT.contenidoOf(body.app) : null);
+  /* Sin contenido todavía, el de la app es el inicial. Con «reemplazar», el de la app pisa los cambios del dueño. */
+  const src = body.contenido || ((!cur || body.reemplazar === true) && body.app ? RT.contenidoOf(body.app) : null);
   const doc = src ? await guardar(env, slug, src, cur) : cur;
   if (src) await purgar(request, slug);
   await env.DATA.put('local:' + slug, JSON.stringify(local));
   return json({ slug: slug, name: local.name || slug, v: doc ? doc.v : 0 });
 }
 async function adminLista(env) {
-  const r = await env.DATA.list({ prefix: 'local:' });
-  return json({ locales: r.keys.map(k => k.name.slice(6)) });
+  const r = await env.DATA.list({ prefix: 'local:' }), locales = [];
+  for (const k of r.keys) { const l = await env.DATA.get(k.name, 'json'), slug = k.name.slice(6); locales.push({ slug: slug, name: (l && l.name) || slug }); }
+  locales.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  return json({ locales: locales });
+}
+/* Respaldo de un local: la app con el contenido actual del dueño, en el formato que importa el estudio. Sin el PIN. */
+async function adminRespaldo(env, slug) {
+  const local = await env.DATA.get('local:' + slug, 'json');
+  if (!local) throw new HttpError(404, 'No existe ese local.');
+  const app = await env.DATA.get('app:' + slug, 'json'), doc = await env.DATA.get('contenido:' + slug, 'json');
+  return json({
+    format: 'break-app', version: 1, app: app && doc ? RT.mergeContenido(app, doc.contenido) : app,
+    local: { slug: slug, name: local.name || slug, creado: local.creado || '' }, contenido: doc
+  });
 }
 
-function panelPage() {
-  if (!PANEL_HTML) throw new HttpError(404, 'El panel todavía no está instalado en este servidor.');
-  return new Response(PANEL_HTML, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer' } });
+function pagina(html, falta) {
+  if (!html) throw new HttpError(404, falta);
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex' } });
 }
+function panelPage() { return pagina(PANEL_HTML, 'El panel todavía no está instalado en este servidor.'); }
 
 export async function handle(request, env, ctx) {
   try {
@@ -231,8 +249,15 @@ export async function handle(request, env, ctx) {
       return await verFoto(env, r[1]);
     }
     if (p === '/api/admin/locales' && m === 'GET') { admin(request, env); return await adminLista(env); }
+    if ((r = new RegExp('^/api/admin/locales/' + SLUG + '/fotos$').exec(p)) && m === 'POST') {
+      admin(request, env);
+      if (!env.FOTOS) throw new HttpError(500, 'Falta configurar el almacenamiento de fotos (R2).');
+      return await subirFoto(request, env, r[1]);
+    }
+    if ((r = new RegExp('^/api/admin/locales/' + SLUG + '$').exec(p)) && m === 'GET') { admin(request, env); return await adminRespaldo(env, r[1]); }
     if ((r = new RegExp('^/api/admin/locales/' + SLUG + '$').exec(p)) && m === 'PUT') { admin(request, env); return await adminLocal(request, env, r[1]); }
     if (new RegExp('^/panel/' + SLUG + '$').test(p) && m === 'GET') return panelPage();
+    if (p === '/admin' && m === 'GET') return pagina(ADMIN_HTML, 'La administración todavía no está instalada en este servidor.');
     if (p === '/') return new Response('Break · servidor del panel del local', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
     throw new HttpError(404, 'No existe esa dirección.');
   } catch (e) {

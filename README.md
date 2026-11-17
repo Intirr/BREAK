@@ -27,10 +27,10 @@ En la pestaña Estilo se personaliza todo el diseño: estética, colores (con co
 
 Abre `dist/break-studio.html` en el navegador para usar el estudio (sin claude.ai guarda en el navegador y las descargas las hace el propio navegador).
 
-**Panel del local** (en construcción): cada local cambia desde el celular, con un PIN y sin volver a publicar la app, su carta y sus precios (con «agotado hoy» y fotos), promos, menú del día, aviso, horario, festivos, agenda, galería y reseñas. Lo atiende un Cloudflare Worker (`worker/`). Para probarlo en tu computador, sin Cloudflare:
+**Panel del local**: cada local cambia desde el celular, con un PIN y sin volver a publicar la app, su carta y sus precios (con «agotado hoy» y fotos), promos, menú del día, aviso, horario, festivos, agenda, galería y reseñas. Lo atiende un Cloudflare Worker (`worker/`), con una página de administración (`/admin`) para crear cada local con el `.json` que descarga el estudio, su PIN y sus fotos. La guía para publicarlo paso a paso está en [`worker/LEEME.md`](worker/LEEME.md). Para probarlo en tu computador, sin Cloudflare:
 
 ```bash
-node worker/local.mjs   # abre http://localhost:8787/panel/antojo con el PIN 123456
+node worker/local.mjs   # panel en http://localhost:8787/panel/antojo (PIN 123456) y administración en /admin (clave local)
 ```
 
 Detalles de arquitectura y convenciones en `CLAUDE.md`.
