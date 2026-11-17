@@ -7,9 +7,10 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 ## Comandos
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
-- `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila, prepara el servidor del panel (`worker/build.mjs`) y corre `test/run.js` (883 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm run build` — une `src/` en `dist/break-studio.html` (el estudio) y `dist/break-panel.html` (el panel del local) y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
+- `npm test` — compila, prepara el servidor del panel (`worker/build.mjs`) y corre `test/run.js` (902 pruebas en jsdom: motor, estudio, app exportada, servidor y panel). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
+- `node worker/local.mjs` — el servidor del panel en tu computador, sin Cloudflare (KV y fotos en memoria): `http://localhost:8787/panel/antojo`, PIN `123456`. Con `--app <archivo.html>` sirve también esa app exportada en `/app`; otras opciones: `--puerto`, `--local`, `--plantilla`, `--pin`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
 
@@ -29,6 +30,7 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 - `src/catalog.js` — `SKINS` (paletas, valores y muestra `art` de la tarjeta en Estilo por estética), `STYLE` (grupos, tarjetas y campos de la pestaña Estilo), `MODULES` (etiqueta, grupo, valores por defecto y campos del editor de cada módulo), `BRAND_FIELDS`, fuentes, texturas (`TEXTURES`), etiquetas y los nombres de los íconos en el selector (`ICON_NAMES`). Las texturas que necesitan el color de la paleta dentro de un SVG (hojas, ondas) se arman en `texCSS()` del motor.
 - `src/studio.js` — el estudio: estado `S`, editor por pestañas (Estilo, Módulos, Carta, Datos, Publicar), vista previa en un iframe escrito con `document.write`, guardado, exportación (.html, .zip para Cloudflare Pages con manifiesto, service worker e íconos, .json, QR).
 - `src/studio.css`, `src/page.html` — estilos y esqueleto del estudio. `build.js` reemplaza `/*__CSS__*/` y `/*__JS__*/`.
+- `src/panel.js`, `src/panel.css`, `src/panel.html` — el panel del local (ver «Panel del local»). `build.js` lo une con `runtime.js` y `catalog.js` en `dist/break-panel.html`, que sí va en git.
 
 ### Configuración de una app
 
@@ -66,6 +68,17 @@ Un Cloudflare Worker (`worker/src/index.js`, función `handle()`) atiende a todo
   - Las sesiones son tokens firmados de 12 horas, no cookies, así que CORS abierto no expone nada.
   - Cambiar el PIN cierra las sesiones abiertas.
 - **Pruebas y despliegue:** las pruebas corren el Worker en Node con KV y R2 simulados. `cd worker && npx wrangler deploy --dry-run` lo empaqueta sin cuenta de Cloudflare.
+
+### Panel del local (`src/panel.*`)
+
+Página para celular que sirve el Worker en `/panel/<slug>` (o `?local=<slug>`; `?api=http://localhost…` apunta a otro servidor en pruebas). Usa el motor solo vía `opts.meta` (`sanitizeContenido`, `mergeContenido` y `contenidoOf`) y las etiquetas `TAGS` de `catalog.js`.
+
+- **Entrada:** pide el PIN y guarda la sesión en `sessionStorage` (`break.panel.<slug>`). Si el servidor responde 401, vuelve a pedir el PIN sin perder los cambios.
+- **Estado `P`:** `doc` es la versión del servidor (`{v, at, contenido}`) y `draft` el contenido que se está editando. Cada cambio llama a `markDirty()`, que guarda el borrador en `localStorage` (`break.panel.<slug>.borrador`, `{base, contenido}`); al volver a entrar se recupera si `base` sigue siendo la versión del servidor.
+- **Guardar:** manda `{base, contenido}`. Con 409 carga la versión nueva y avisa en `P.note`. «Deshacer» pide `POST …/deshacer` y «Descartar» vuelve a `doc`.
+- **Pestañas:** `TABS` y una función en `VIEWS` por pestaña. Hoy solo Carta: categorías que se abren y cierran, buscador, interruptor «Agotado hoy» por plato, hoja de edición (`openSheet()`, `editItem()`, `editCat()`) con nombre, descripción, precio, etiquetas y disponible, y subir o bajar categorías y platos.
+- **Vista previa:** la app real en un iframe (`mode: 'preview'`) con `mergeContenido(P.app, P.draft)`; en celular se abre con «Ver la app» y desde 1100 px queda al lado.
+- Los clics van por atributos `data-a` en un solo manejador; los formularios por `data-form`. `window.__breakPanel` expone `P`, `save`, `load` y `hoy` para las pruebas.
 
 ### Añadir un módulo
 

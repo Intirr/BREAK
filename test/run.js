@@ -1382,6 +1382,103 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     r = await call('OPTIONS', '/api/antojo/contenido'); ok(r.status === 204 && /PUT/.test(r.res.headers.get('Access-Control-Allow-Methods')), 'responde a la consulta previa del navegador');
   }
 
+  /* 11zh. Panel del local en jsdom, conectado al servidor (Worker) con KV simulado */
+  {
+    const W = await import(require('url').pathToFileURL(path.join(__dirname, '..', 'worker', 'src', 'index.js')).href);
+    class KV {
+      constructor() { this.m = new Map(); }
+      async get(k, t) { const v = this.m.get(k); if (v == null) return null; return (t === 'json' || (t && t.type === 'json')) ? JSON.parse(v) : v; }
+      async put(k, v) { this.m.set(k, String(v)); }
+      async delete(k) { this.m.delete(k); }
+      async list(o) { return { keys: [...this.m.keys()].filter(k => k.startsWith((o && o.prefix) || '')).map(name => ({ name })) }; }
+    }
+    const env = { DATA: new KV(), SESSION_SECRET: 'secreto-panel', ADMIN_TOKEN: 'admin' };
+    const app = TPL('tpl-antojo'); app.menu.categories[0].items[0].name = '<img src=x onerror=alert(1)>';
+    await W.handle(new Request('https://panel.example.com/api/admin/locales/antojo', { method: 'PUT', headers: { Authorization: 'Bearer admin', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Antojo', pin: '123456', app }) }), env, {});
+    const panelHTML = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-panel.html'), 'utf8');
+    const open = (store) => {
+      const dom = new JSDOM(panelHTML, {
+        url: 'https://panel.example.com/panel/antojo', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: quietConsole(),
+        beforeParse(w) {
+          w.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
+          w.scrollTo = () => {};
+          w.fetch = async (u, o) => {
+            const r = await W.handle(new Request(String(u), o), env, { waitUntil() {} });
+            return { ok: r.ok, status: r.status, json: () => r.json() };
+          };
+          if (store) Object.keys(store).forEach(k => w.localStorage.setItem(k, store[k]));
+        }
+      });
+      const w = dom.window, d = w.document;
+      return { w, d, $: s => d.querySelector(s), $$: s => [...d.querySelectorAll(s)], click: el => el.dispatchEvent(new w.MouseEvent('click', { bubbles: true })), close: () => w.close() };
+    };
+    const until = async (fn, ms) => { for (let i = 0; i < (ms || 60); i++) { if (fn()) return true; await sleep(20); } return false; };
+    let A = open();
+    ok(!!A.$('#pin') && /antojo/.test(A.$('.login').textContent), 'el panel abre pidiendo el PIN del local');
+    const login = async (pin) => { A.$('#pin').value = pin; A.$('form[data-form="login"]').dispatchEvent(new A.w.Event('submit', { bubbles: true, cancelable: true })); };
+    await login('999999'); await until(() => A.$('.err'));
+    ok(/PIN incorrecto/.test(A.$('.err').textContent), 'un PIN incorrecto muestra el error del servidor');
+    await login('123456'); await until(() => A.$('.cat'));
+    ok(A.$$('.cat').length === app.menu.categories.length && /Antojo/.test(A.$('.top-n').textContent), 'con el PIN correcto muestra las categorías de la carta');
+    ok(!A.$('#ed img[onerror]') && /<img src=x/.test(A.$('.it-m b').textContent), 'el panel muestra los nombres escapados');
+    ok(A.$('[data-a="save"]').disabled && /versión 1/.test(A.$('.bar-st').textContent), 'sin cambios, guardar está apagado');
+    // Agotado hoy desde la lista
+    const sw = A.$$('input[data-a="sold"]')[1];
+    sw.checked = true; sw.dispatchEvent(new A.w.Event('change', { bubbles: true }));
+    const P = A.w.__breakPanel.P, hoy = A.w.__breakPanel.hoy();
+    ok(P.dirty && P.draft.menu.categories[0].items[1].soldDate === hoy && /sin guardar/.test(A.$('.bar-st').textContent) && !A.$('[data-a="save"]').disabled, 'marcar «agotado hoy» deja cambios sin guardar');
+    ok(!!A.w.localStorage.getItem('break.panel.antojo.borrador'), 'los cambios sin guardar quedan en el celular');
+    // Editar un plato en la hoja
+    A.click(A.$$('.it-m')[2]);
+    ok(!A.$('#sheet').hidden && A.$('#f-name').value === app.menu.categories[0].items[2].name, 'tocar un plato abre su hoja de edición');
+    A.$('#f-price').value = '$18.500'; A.$('#f-name').value = 'Malteada especial';
+    const tb = A.$('#sheet [data-a="tag"][aria-pressed="false"]'), tg = tb.getAttribute('data-t'); A.click(tb);
+    A.$('#sheet form').dispatchEvent(new A.w.Event('submit', { bubbles: true, cancelable: true }));
+    const it2 = P.draft.menu.categories[0].items[2];
+    ok(A.$('#sheet').hidden && it2.price === 18500 && it2.name === 'Malteada especial' && it2.tags.indexOf(tg) >= 0, 'la hoja cambia nombre, precio y etiquetas');
+    // Plato nuevo cancelado no queda
+    const n0 = P.draft.menu.categories[0].items.length;
+    A.click(A.$('[data-a="it-add"]')); A.click(A.$('#sheet [data-a="sheet-x"]'));
+    ok(P.draft.menu.categories[0].items.length === n0, 'un plato nuevo que se cancela no queda en la carta');
+    A.click(A.$('[data-a="it-add"]')); A.$('#sheet form').dispatchEvent(new A.w.Event('submit', { bubbles: true, cancelable: true }));
+    ok(!A.$('#sheet').hidden && P.draft.menu.categories[0].items.length === n0 + 1, 'un plato sin nombre no se acepta');
+    A.click(A.$('#sheet [data-a="sheet-x"]'));
+    // Vista previa con el borrador
+    await sleep(260);
+    const pvd = A.$('#pv').contentDocument;
+    ok(/18\.500/.test(pvd.querySelector('.carta-body').textContent), 'la vista previa muestra la carta con los cambios sin guardar');
+    // Guardar
+    A.click(A.$('[data-a="save"]')); await until(() => !P.saving && !P.dirty);
+    const saved = JSON.parse(env.DATA.m.get('contenido:antojo'));
+    ok(saved.v === 2 && saved.contenido.menu.categories[0].items[2].price === 18500 && saved.contenido.menu.categories[0].items[1].soldDate === hoy, 'guardar manda los cambios al servidor');
+    ok(!A.w.localStorage.getItem('break.panel.antojo.borrador') && /Guardado/.test(A.$('.bar-st').textContent), 'al guardar se borra la copia local y avisa');
+    // Conflicto: otra persona guarda primero
+    const other = JSON.parse(JSON.stringify(saved.contenido)); other.menu.categories[0].items[0].price = 100;
+    const otro = await (await W.handle(new Request('https://panel.example.com/api/antojo/entrar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: '123456' }) }), env, {})).json();
+    await W.handle(new Request('https://panel.example.com/api/antojo/contenido', { method: 'PUT', headers: { Authorization: 'Bearer ' + otro.token, 'Content-Type': 'application/json' }, body: JSON.stringify({ base: 2, contenido: other }) }), env, {});
+    const sw2 = A.$$('input[data-a="sold"]')[3]; sw2.checked = true; sw2.dispatchEvent(new A.w.Event('change', { bubbles: true }));
+    A.click(A.$('[data-a="save"]')); await until(() => !P.saving);
+    ok(P.doc.v === 3 && !P.dirty && P.draft.menu.categories[0].items[0].price === 100 && /Alguien guardó/.test(A.$('.note').textContent), 'si alguien guardó antes, carga esa versión y lo avisa');
+    // Deshacer
+    A.click(A.$('[data-a="undo"]')); A.click(A.$('[data-a="ask-yes"]')); await until(() => P.doc.v === 4);
+    ok(P.doc.v === 4 && P.draft.menu.categories[0].items[0].price !== 100 && P.draft.menu.categories[0].items[2].price === 18500 && !A.$('.note') && /versión anterior/.test(A.$('.bar-st').textContent), 'deshacer vuelve a la versión anterior');
+    // Sesión vencida al guardar: pide el PIN y conserva los cambios
+    const sw3 = A.$$('input[data-a="sold"]')[0]; sw3.checked = true; sw3.dispatchEvent(new A.w.Event('change', { bubbles: true }));
+    await W.handle(new Request('https://panel.example.com/api/admin/locales/antojo', { method: 'PUT', headers: { Authorization: 'Bearer admin', 'Content-Type': 'application/json' }, body: JSON.stringify({ pin: '654321' }) }), env, {});
+    A.click(A.$('[data-a="save"]')); await until(() => A.$('#pin'));
+    const kept = A.w.localStorage.getItem('break.panel.antojo.borrador');
+    ok(!!A.$('#pin') && /celular/.test(A.$('.err').textContent) && !!kept, 'si la sesión termina al guardar, pide el PIN y conserva los cambios');
+    A.close();
+    A = open({ 'break.panel.antojo.borrador': kept });
+    await login('654321'); await until(() => A.$('.cat'));
+    ok(/Recuperamos/.test(A.$('.note').textContent) && A.w.__breakPanel.P.dirty && A.w.__breakPanel.P.draft.menu.categories[0].items[0].soldDate === A.w.__breakPanel.hoy(), 'al volver a entrar recupera los cambios que no se guardaron');
+    A.close();
+    A = open();
+    const dom2 = new JSDOM(panelHTML, { url: 'https://panel.example.com/otra-cosa', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: quietConsole() });
+    ok(!dom2.window.document.querySelector('#pin') && /no corresponde/.test(dom2.window.document.querySelector('#ed').textContent), 'sin el nombre del local en la dirección, el panel lo explica');
+    dom2.window.close(); A.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];

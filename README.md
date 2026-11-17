@@ -27,4 +27,10 @@ En la pestaña Estilo se personaliza todo el diseño: estética, colores (con co
 
 Abre `dist/break-studio.html` en el navegador para usar el estudio (sin claude.ai guarda en el navegador y las descargas las hace el propio navegador).
 
+**Panel del local** (en construcción): cada local cambia su carta, sus precios y lo «agotado hoy» desde el celular, con un PIN, sin volver a publicar la app. Lo atiende un Cloudflare Worker (`worker/`). Para probarlo en tu computador, sin Cloudflare:
+
+```bash
+node worker/local.mjs   # abre http://localhost:8787/panel/antojo con el PIN 123456
+```
+
 Detalles de arquitectura y convenciones en `CLAUDE.md`.

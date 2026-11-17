@@ -18,3 +18,15 @@ if (problems.length) { console.error('BUILD FALLÓ:\n - ' + problems.join('\n - 
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, 'dist', 'break-studio.html'), page);
 console.log('dist/break-studio.html', (Buffer.byteLength(page) / 1024).toFixed(1) + ' KB', '· JS', (Buffer.byteLength(js) / 1024).toFixed(1) + ' KB');
+
+/* Panel del local: el motor (vista previa y saneador), el catálogo (nombres de etiquetas) y el panel. Lo sirve el
+   servidor del panel (worker/), que lo incrusta al compilarse. */
+const pjs = ['runtime.js', 'catalog.js', 'panel.js'].map(src).join('\n\n');
+const pproblems = [];
+if (/<\/script/i.test(pjs)) pproblems.push('el JS del panel contiene </script');
+if (/<!--/.test(pjs)) pproblems.push('el JS del panel contiene <!--');
+try { new Function(pjs); } catch (e) { pproblems.push('error de sintaxis en el panel: ' + e.message); }
+if (pproblems.length) { console.error('BUILD DEL PANEL FALLÓ:\n - ' + pproblems.join('\n - ')); process.exit(1); }
+const ppage = src('panel.html').replace('/*__CSS__*/', () => src('panel.css')).replace('/*__JS__*/', () => pjs);
+fs.writeFileSync(path.join(__dirname, 'dist', 'break-panel.html'), ppage);
+console.log('dist/break-panel.html', (Buffer.byteLength(ppage) / 1024).toFixed(1) + ' KB');
