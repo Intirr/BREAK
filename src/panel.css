@@ -95,6 +95,45 @@ textarea.in{min-height:88px;resize:vertical}
 .add-row{display:flex;gap:8px;padding:10px 14px 14px}
 .empty{padding:22px 16px;text-align:center;color:var(--ink2)}
 
+/* Promos, menú del día, aviso, horario y festivos */
+.sec-t{margin:26px 0 8px;font-size:18px;font-weight:800}
+.sec-t:first-child,.note+.sec-t{margin-top:4px}
+.blk{margin:0 0 14px;overflow:hidden}
+.blk-t{flex:1;min-width:0;padding:6px 0}
+.blk-t b{display:block;font-weight:800;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.blk-t small{display:block;font-size:13px;color:var(--ink2)}
+.blk .it .ib{flex:none}
+.none{margin:0 0 14px;padding:14px 16px;border-radius:14px;border:1.5px dashed var(--rule);color:var(--ink2);font-size:14px}
+.st{margin:0;padding:0 14px 4px;font-size:13px;font-weight:600;color:var(--ink2)}
+.st.ok{color:var(--ok)}
+.st.warn{color:var(--warn)}
+.cat-h+.st{padding-bottom:10px}
+.help.pad{margin:0;padding:10px 14px 0}
+.part{padding:10px 8px 10px 14px;border-bottom:1px solid var(--rule2)}
+.part .lab{margin-bottom:4px;overflow-wrap:anywhere}
+.part-r{display:flex;align-items:center;gap:6px}
+.part-r .in{flex:1;min-width:0}
+.avc{padding-top:14px}
+.avc .cat-h{margin-top:-14px}
+.av-x{margin:0 14px 10px;padding:10px 12px;border-radius:12px;background:var(--carbon-soft);font-weight:600;overflow-wrap:anywhere}
+.av-x.av-suave{background:var(--rule2)}
+.av-x.av-alerta{background:var(--warn-soft);color:var(--warn)}
+.add-row{flex-wrap:wrap}
+.hrs{padding:6px 14px 0}
+.hr-r{display:grid;grid-template-columns:38px 44px minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;min-height:54px;border-bottom:1px solid var(--rule2)}
+.hr-r:last-child{border-bottom:0}
+.hr-r b{font-size:15px}
+.hr-r.closed b{color:var(--ink2)}
+.hr-r .in{min-height:42px;padding:6px 8px;font-variant-numeric:tabular-nums}
+/* En la lista no cabe el ícono del reloj: al tocar la hora se abre igual el selector del celular. */
+.hr-r .in::-webkit-calendar-picker-indicator{display:none}
+.hr-x{grid-column:3/5;font-size:14px;color:var(--ink2)}
+.past .it-m b{color:var(--ink2)}
+.past .cat-h{flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.days .chip{padding:6px 0;font-size:13px;text-align:center}
+.sheet .row2 .fld{min-width:0}
+
 /* Barra de guardar */
 .pn-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--sheet);border-top:1px solid var(--rule);box-shadow:0 -6px 20px rgba(0,0,0,.06);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
 .bar-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}

@@ -1396,9 +1396,9 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const app = TPL('tpl-antojo'); app.menu.categories[0].items[0].name = '<img src=x onerror=alert(1)>';
     await W.handle(new Request('https://panel.example.com/api/admin/locales/antojo', { method: 'PUT', headers: { Authorization: 'Bearer admin', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Antojo', pin: '123456', app }) }), env, {});
     const panelHTML = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-panel.html'), 'utf8');
-    const open = (store) => {
+    const open = (store, slug) => {
       const dom = new JSDOM(panelHTML, {
-        url: 'https://panel.example.com/panel/antojo', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: quietConsole(),
+        url: 'https://panel.example.com/panel/' + (slug || 'antojo'), runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: quietConsole(),
         beforeParse(w) {
           w.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
           w.scrollTo = () => {};
@@ -1477,6 +1477,119 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     const dom2 = new JSDOM(panelHTML, { url: 'https://panel.example.com/otra-cosa', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: quietConsole() });
     ok(!dom2.window.document.querySelector('#pin') && /no corresponde/.test(dom2.window.document.querySelector('#ed').textContent), 'sin el nombre del local en la dirección, el panel lo explica');
     dom2.window.close(); A.close();
+
+    /* 11zi. Panel, etapa 4: promos, menú del día, aviso, horario y festivos (Café del Parque con un aviso y una segunda sección de promos) */
+    {
+      const app4 = TPL('tpl-parque');
+      app4.modules.unshift({ id: 'aviso', type: 'aviso', on: true, s: { text: 'Hoy <i>sancocho</i>', icon: '📣', style: 'acento', until: '', cta: 'none' } });
+      app4.modules.push({ id: 'combos', type: 'promos', on: true, s: { title: 'Combos <i>x</i>', items: [] } });
+      await W.handle(new Request('https://panel.example.com/api/admin/locales/parque', { method: 'PUT', headers: { Authorization: 'Bearer admin', 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Café del Parque', pin: '123456', app: app4 }) }), env, {});
+      A = open(null, 'parque');
+      const ev = (el, type) => el.dispatchEvent(new A.w.Event(type, { bubbles: true, cancelable: true }));
+      const submit = () => ev(A.$('#sheet form'), 'submit');
+      const tab = t => A.click(A.$('.tab[data-t="' + t + '"]'));
+      await login('123456'); await until(() => A.$('.cat'));
+      const P4 = A.w.__breakPanel.P, M = id => P4.draft.modules[id].s, hoy4 = A.w.__breakPanel.hoy();
+      eq(A.$$('.tab').map(t => t.textContent).join('|'), 'Carta|Promos|Avisos y horario', 'el panel tiene las pestañas Carta, Promos y Avisos y horario');
+      tab('promos');
+      ok(A.$('.tab[data-t="promos"]').getAttribute('aria-selected') === 'true' && !A.$('.cat') && A.$$('.blk[data-mod]').length === 3, 'la pestaña Promos muestra las dos secciones de promos y el menú del día');
+      ok(/Para hoy/.test(A.$('.blk[data-mod="promos"] .blk-t').textContent) && /Combos <i>x<\/i>/.test(A.$('.blk[data-mod="combos"] .blk-t').textContent) && !A.$('#ed i'), 'cada sección de promos sale con su título, escapado');
+      // Editar una promo
+      const pr0 = app4.modules.find(m => m.id === 'promos').s.items;
+      A.click(A.$('[data-a="pr-ed"][data-m="promos"]'));
+      ok(!A.$('#sheet').hidden && A.$('#f-title').value === pr0[0].title && A.$$('#sheet .days .chip').length === 7, 'tocar una promo abre su hoja con título y días');
+      A.$('#f-title').value = 'Dos <i>por</i> uno'; A.$('#f-price').value = '$9.900';
+      A.$$('#sheet .days .chip').forEach(b => { if (b.getAttribute('aria-pressed') === 'true') A.click(b); }); A.click(A.$('#sheet .days [data-t="2"]')); A.click(A.$('#sheet .days [data-t="0"]'));
+      submit();
+      ok(A.$('#sheet').hidden && M('promos').items[0].title === 'Dos <i>por</i> uno' && M('promos').items[0].price === 9900 && M('promos').items[0].days.join() === '2,0' && P4.dirty, 'la hoja cambia título, precio y días de la promo');
+      ok(/Dos <i>por<\/i> uno/.test(A.$('.blk[data-mod="promos"] .it-m b').textContent) && /Mar, dom · \$\s?9\.900/.test(A.$('.blk[data-mod="promos"] .it-m span').textContent) && !A.$('#ed i'), 'la lista muestra la promo escapada, con días y precio en pesos');
+      // Ordenar
+      const second = M('promos').items[1].title;
+      A.click(A.$('[data-a="pr-mv"][data-m="promos"][data-i="0"][data-d="1"]'));
+      ok(M('promos').items[0].title === second && M('promos').items[1].title === 'Dos <i>por</i> uno', 'las promos se pueden subir y bajar');
+      // Agregar y quitar
+      A.click(A.$('[data-a="pr-add"][data-m="combos"]')); A.click(A.$('#sheet [data-a="sheet-x"]'));
+      eq(M('combos').items.length, 0, 'una promo nueva que se cancela no queda');
+      A.click(A.$('[data-a="pr-add"][data-m="combos"]')); submit();
+      ok(!A.$('#sheet').hidden, 'una promo sin título no se acepta');
+      A.$('#f-title').value = 'Combo familiar'; A.$('#f-desc').value = 'Para cuatro'; submit();
+      ok(M('combos').items.length === 1 && M('combos').items[0].desc === 'Para cuatro' && M('combos').items[0].price === 0, 'se agrega una promo, con precio opcional');
+      A.click(A.$('[data-a="pr-add"][data-m="combos"]')); A.$('#f-title').value = 'Para borrar'; submit();
+      A.click(A.$('[data-a="pr-ed"][data-m="combos"][data-i="1"]')); A.click(A.$('[data-a="pr-del"]')); A.click(A.$('[data-a="ask-yes"]'));
+      ok(M('combos').items.length === 1 && M('combos').items[0].title === 'Combo familiar', 'se quita una promo, con confirmación');
+      A.click(A.$('[data-a="mt-ed"][data-m="combos"]')); A.$('#f-title').value = 'Combos'; submit();
+      eq(M('combos').title, 'Combos', 'se cambia el título de la sección de promos');
+      // Menú del día
+      const nParts = M('almuerzo').parts.length, part = A.$('input[data-in="part"][data-m="almuerzo"]');
+      part.value = 'Ajiaco <i>santafereño</i>'; ev(part, 'input');
+      ok(M('almuerzo').parts[0].value === 'Ajiaco <i>santafereño</i>' && A.$('input[data-in="part"][data-m="almuerzo"]') === part, 'lo de hoy de cada parte se escribe directo en la lista');
+      A.click(A.$('[data-a="pt-add"]')); A.$('#f-label').value = 'Postre'; A.$('#f-value').value = 'Flan'; submit();
+      ok(M('almuerzo').parts.length === nParts + 1 && M('almuerzo').parts[nParts].label === 'Postre', 'se agrega una parte al menú del día');
+      A.click(A.$$('[data-a="pt-ed"]')[nParts]); A.click(A.$('[data-a="pt-del"]')); A.click(A.$('[data-a="ask-yes"]'));
+      eq(M('almuerzo').parts.length, nParts, 'se quita una parte del menú del día');
+      A.click(A.$('[data-a="md-ed"]'));
+      ok(A.$('#f-from').type === 'time' && A.$('#f-from').value === '12:00', 'la hoja del menú del día trae días, horas, precio y nota');
+      A.$('#f-price').value = '16500'; A.$('#f-to').value = '15:30'; A.$('#f-note').value = 'Hasta agotar'; A.click(A.$('#sheet .days [data-t="6"]')); submit();
+      ok(M('almuerzo').price === 16500 && M('almuerzo').to === '15:30' && M('almuerzo').note === 'Hasta agotar' && M('almuerzo').days.indexOf(6) < 0 && /\$\s?16\.500/.test(A.$('.blk[data-mod="almuerzo"] .blk-t').textContent), 'cambia precio, horas, días y nota del menú del día');
+      // Aviso
+      tab('avisos');
+      ok(/Hoy <i>sancocho<\/i>/.test(A.$('.av-x').textContent) && !A.$('#ed i') && /Se muestra en la app/.test(A.$('.avc .st').textContent), 'la pestaña Avisos y horario muestra el aviso escapado y su estado');
+      A.click(A.$('[data-a="av-ed"]')); A.$('#f-until').value = '2020-01-01'; submit();
+      ok(!A.$('#sheet').hidden && M('aviso').until === '', 'una fecha «mostrar hasta» que ya pasó no se acepta');
+      A.$('#f-until').value = '2031-06-30'; A.$('#f-text').value = 'Cerramos temprano'; A.click(A.$('#sheet .seg [data-v="alerta"]')); submit();
+      ok(M('aviso').until === '2031-06-30' && M('aviso').text === 'Cerramos temprano' && M('aviso').style === 'alerta' && /hasta el/.test(A.$('.avc .st').textContent), 'el aviso cambia de texto, estilo y fecha');
+      A.click(A.$('[data-a="av-del"]')); A.click(A.$('[data-a="ask-yes"]'));
+      ok(M('aviso').text === '' && M('aviso').until === '' && !A.$('.av-x') && /No hay aviso/.test(A.$('.avc .st').textContent) && !A.$('[data-a="av-del"]'), 'quitar el aviso lo deja vacío y lo dice');
+      A.click(A.$('[data-a="av-ed"]')); A.$('#f-text').value = 'Abrimos el festivo'; A.$('#f-until').value = hoy4; submit();
+      ok(M('aviso').text === 'Abrimos el festivo' && M('aviso').until === hoy4, 'se puede escribir otro aviso, hasta hoy incluido');
+      // Horario
+      const H = () => P4.draft.hours, day = d => H().find(h => h.d === d);
+      eq(A.$$('.hr-r').length, 7, 'el horario muestra los siete días');
+      const was = day(0).closed, sw0 = A.$('input[data-a="hr-on"][data-d="0"]');
+      sw0.checked = was; ev(sw0, 'change');
+      ok(day(0).closed === !was && (day(0).closed || (!!day(0).open && !!day(0).close)), 'un día se abre o se cierra con su interruptor');
+      const sw1 = A.$('input[data-a="hr-on"][data-d="1"]'); if (day(1).closed) { sw1.checked = true; ev(sw1, 'change'); }
+      const t1 = A.$('input[data-in="hr"][data-d="1"][data-k="open"]'); t1.value = '07:30'; ev(t1, 'input');
+      eq(day(1).open, '07:30', 'la hora de abrir de un día se cambia en la lista');
+      A.click(A.$('[data-a="hr-copy"]'));
+      ok(H().every(h => h.open === '07:30' && h.close === day(1).close && h.closed === false), '«Copiar el lunes a todos» iguala la semana');
+      // Festivos
+      A.click(A.$('[data-a="hol-add"]')); submit();
+      ok(!A.$('#sheet').hidden && A.$('#hol-times').hidden, 'un festivo sin fecha no se acepta');
+      A.$('#f-date').value = '2031-12-25'; A.$('#f-name').value = 'Navidad <i>'; submit();
+      ok(P4.draft.holidays.length === 1 && P4.draft.holidays[0].closed === true && /Navidad <i>/.test(A.$('[data-a="hol-ed"] b').textContent) && /Cerrado/.test(A.$('[data-a="hol-ed"] span').textContent) && !A.$('#ed i'), 'se agrega un festivo cerrado, con el nombre escapado');
+      A.click(A.$('[data-a="hol-add"]')); A.$('#f-date').value = '2031-12-25'; submit();
+      ok(!A.$('#sheet').hidden, 'no se aceptan dos festivos en la misma fecha');
+      A.$('#f-date').value = '2031-01-01'; const op = A.$('#sheet [name="open"]'); op.checked = true; ev(op, 'change'); submit();
+      ok(!A.$('#sheet').hidden && !A.$('#hol-times').hidden, 'un festivo abierto pide sus horas');
+      A.$('#f-open_t').value = '10:00'; A.$('#f-close_t').value = '16:00'; submit();
+      ok(P4.draft.holidays.length === 2 && P4.draft.holidays[0].date === '2031-01-01' && P4.draft.holidays[0].closed === false && P4.draft.holidays[0].open === '10:00' && /10:00 a\. m\. a 4:00 p\. m\./.test(A.$('[data-a="hol-ed"] span').textContent), 'un festivo con horario especial queda ordenado por fecha');
+      A.click(A.$('[data-a="hol-add"]')); A.$('#f-date').value = '2020-07-20'; submit();
+      ok(P4.draft.holidays.length === 3 && A.$$('.past [data-a="hol-ed"]').length === 1 && !!A.$('[data-a="hol-clean"]'), 'los festivos que ya pasaron salen aparte');
+      A.click(A.$('[data-a="hol-clean"]'));
+      ok(P4.draft.holidays.length === 2 && !A.$('.past'), 'los festivos que ya pasaron se limpian de una vez');
+      A.click(A.$$('[data-a="hol-ed"]')[1]); A.click(A.$('[data-a="hol-del"]')); A.click(A.$('[data-a="ask-yes"]'));
+      ok(P4.draft.holidays.length === 1 && P4.draft.holidays[0].date === '2031-01-01', 'se quita un festivo');
+      // Vista previa y guardar
+      await sleep(260);
+      ok(/Combo familiar/.test(A.$('#pv').contentDocument.body.textContent) && /Ajiaco <i>santafereño<\/i>/.test(A.$('#pv').contentDocument.body.textContent) && !A.$('#pv').contentDocument.querySelector('.md i'), 'la vista previa muestra las promos y el menú del día sin guardar');
+      A.click(A.$('[data-a="save"]')); await until(() => !P4.saving && !P4.dirty);
+      const s4 = JSON.parse(env.DATA.m.get('contenido:parque')), c4 = s4.contenido;
+      ok(s4.v === 2 && c4.modules.promos.s.items[1].title === 'Dos <i>por</i> uno' && c4.modules.promos.s.items[1].price === 9900 && c4.modules.combos.s.title === 'Combos' && c4.modules.combos.s.items.length === 1, 'guardar manda las promos al servidor');
+      ok(c4.modules.almuerzo.s.parts[0].value === 'Ajiaco <i>santafereño</i>' && c4.modules.almuerzo.s.price === 16500 && c4.modules.almuerzo.s.parts.length === nParts, 'guardar manda el menú del día al servidor');
+      ok(c4.modules.aviso.s.text === 'Abrimos el festivo' && c4.modules.aviso.s.until === hoy4 && c4.modules.aviso.on === true, 'guardar manda el aviso al servidor');
+      ok(c4.hours.every(h => h.open === '07:30' && !h.closed) && c4.holidays.length === 1 && c4.holidays[0].date === '2031-01-01' && c4.holidays[0].open === '10:00' && c4.holidays[0].closed === false, 'guardar manda el horario y los festivos al servidor');
+      ok(!('layout' in c4.modules.promos.s) && !('_bg' in c4.modules.promos.s) && !('cta' in c4.modules.aviso.s), 'el contenido guardado no lleva claves de diseño');
+      A.close();
+      // Una app sin menú del día ni aviso (Antojo) lo explica en vez de mostrar un editor
+      A = open();
+      await login('654321'); await until(() => A.$('.cat'));
+      A.click(A.$('.tab[data-t="promos"]'));
+      ok(A.$$('.blk[data-mod]').length === 1 && A.$$('.none').length === 1 && /no tiene sección de menú del día; pídasela/.test(A.$('.none').textContent), 'sin menú del día en la app, el panel muestra una nota en vez del editor');
+      A.click(A.$('.tab[data-t="avisos"]'));
+      ok(/no tiene sección de aviso destacado/.test(A.$('.none').textContent) && !A.$('[data-a="av-ed"]') && A.$$('.hr-r').length === 7 && !!A.$('[data-a="hol-add"]'), 'sin aviso en la app hay nota, pero el horario y los festivos sí se editan');
+      A.close();
+    }
   }
 
   /* 12. Estudio completo con base de datos y descargas simuladas */
@@ -1579,9 +1692,27 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
   const sunIdx = ST.S.cur.brand.hours.findIndex(h => h.d === 0);
   setChk(d.getElementById('f-brand-hours-' + sunIdx + '-closed'), false);
   eq(ST.S.cur.brand.hours[sunIdx].closed, true, 'cerrar un día');
+  // Festivos: agregar, llenar, abrir con horario especial y quitar
+  const nHol = (ST.S.cur.brand.holidays || []).length, hp = 'brand.holidays.' + nHol, hid = k => d.getElementById('f-brand-holidays-' + nHol + '-' + k);
+  ok(!!$('[data-a="li-add"][data-p="brand.holidays"]') && /Festivos/.test($('[data-a="li-add"][data-p="brand.holidays"]').closest('.card').textContent), 'Datos tiene la tarjeta Festivos');
+  click($('[data-a="li-add"][data-p="brand.holidays"]'));
+  ok(ST.S.cur.brand.holidays.length === nHol + 1 && ST.S.cur.brand.holidays[nHol].closed === true && $('[data-p="' + hp + '.open"]').disabled, 'un festivo nuevo empieza cerrado');
+  ok(ST.checks(ST.S.cur).some(c => c.s === 'warn' && /festivo está incompleto/.test(c.t)), 'la revisión avisa de un festivo sin fecha');
+  setVal(hid('date'), '2031-12-25'); setVal(hid('name'), 'Navidad "<i>"');
+  ok(ST.S.cur.brand.holidays[nHol].date === '2031-12-25' && ST.S.cur.brand.holidays[nHol].name === 'Navidad "<i>"' && !ST.checks(ST.S.cur).some(c => /festivo/.test(c.t)), 'el festivo guarda fecha y nombre');
+  setChk(hid('closed'), true);
+  ok(ST.S.cur.brand.holidays[nHol].closed === false && !$('[data-p="' + hp + '.open"]').disabled && hid('name').value === 'Navidad "<i>"' && !$('.li i'), 'abrir el festivo enciende sus horas y el nombre sigue escapado');
+  ok(ST.checks(ST.S.cur).some(c => c.s === 'warn' && /festivo está incompleto/.test(c.t)), 'la revisión avisa de un festivo abierto sin horas');
+  setVal($('[data-p="' + hp + '.open"]'), '10:00'); setVal($('[data-p="' + hp + '.close"]'), '16:00');
+  ok(ST.S.cur.brand.holidays[nHol].open === '10:00' && ST.S.cur.brand.holidays[nHol].close === '16:00' && !ST.checks(ST.S.cur).some(c => /festivo/.test(c.t)), 'el festivo con horario especial queda completo');
+  eq(JSON.stringify(ST.meta.contenidoOf(ST.S.cur).holidays.slice(-1)[0]), JSON.stringify({ date: '2031-12-25', closed: false, open: '10:00', close: '16:00', name: 'Navidad "<i>"' }), 'el festivo del estudio tiene la forma que espera el panel');
+  click($('[data-a="li-add"][data-p="brand.holidays"]'));
+  click($('[data-a="li-del"][data-p="brand.holidays"][data-i="' + (nHol + 1) + '"]'));
+  eq(ST.S.cur.brand.holidays.length, nHol + 1, 'un festivo se quita');
   // Bilingüe muestra campos EN
   setChk(d.getElementById('f-i18n-bilingual'), true);
   ok(!!d.getElementById('f-brand-tagline_en'), 'al activar inglés aparecen los campos EN');
+  ok(!!d.getElementById('f-brand-holidays-' + nHol + '-name_en'), 'con inglés, el nombre del festivo tiene su campo EN');
 
   // Módulos: abrir, editar, apagar, mover, añadir y quitar
   click($('[data-a="tab"][data-t="modulos"]'));

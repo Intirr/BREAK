@@ -572,6 +572,22 @@
     DAYS.forEach(function (d) { if (!H.some(function (h) { return h.d === d[0]; })) H.push({ d: d[0], open: '08:00', close: '18:00', closed: true }); });
   }
 
+  /* Festivos y días especiales: una fecha con «cerrado» o con horario propio, que le gana al horario de la semana. */
+  function holidaysCard() {
+    const L = S.cur.brand.holidays = Array.isArray(S.cur.brand.holidays) ? S.cur.brand.holidays : [], td = todayISO();
+    return '<section class="card"><div class="card-h"><h2>Festivos</h2><p>Fechas en que el local cierra o abre con otro horario. Ese día le ganan al horario de la semana, y el dueño también las cambia desde su panel.</p></div>' +
+      '<div class="fld list">' + (L.length ? '<ol class="litems">' + L.map(function (h, i) {
+        const base = 'brand.holidays.' + i, open = h.closed === false;
+        return '<li class="li"><div class="li-h"><span class="li-n">Festivo ' + (i + 1) + (h.date && h.date < td ? ' · ya pasó' : '') + '</span><div class="ctl">' +
+          '<button type="button" class="ib danger" data-a="li-del" data-p="brand.holidays" data-i="' + i + '" aria-label="Eliminar">×</button></div></div>' +
+          fieldHTML({ k: 'date', t: 'date', label: 'Fecha' }, base) + fieldHTML({ k: 'name', t: 'text', label: 'Nombre', ph: 'Navidad', i18n: true }, base) +
+          '<div class="hr' + (open ? '' : ' closed') + '"><span class="hd">' + (open ? 'Abre' : 'Cerrado') + '</span><input type="checkbox" class="sw" id="' + fid(base + '.closed') + '" data-p="' + base + '.closed" data-type="boolinv"' + (open ? ' checked' : '') + ' aria-label="Abre ese día">' +
+          '<input class="in" type="time" aria-label="Abre" data-p="' + base + '.open" value="' + attr(h.open || '') + '"' + (open ? '' : ' disabled') + '>' +
+          '<input class="in" type="time" aria-label="Cierra" data-p="' + base + '.close" value="' + attr(h.close || '') + '"' + (open ? '' : ' disabled') + '></div></li>';
+      }).join('') + '</ol>' : '') +
+      '<button type="button" class="btn sm" data-a="li-add" data-p="brand.holidays" data-blank="' + attr(JSON.stringify({ date: '', name: '', closed: true, open: '', close: '' })) + '">+ Festivo</button></div></section>';
+  }
+
   /* ---------- Campos ---------- */
   function fid(path) { return 'f-' + path.replace(/[^\w]/g, '-'); }
   function bilingual() { return !!(S.cur.i18n && S.cur.i18n.bilingual); }
@@ -1171,7 +1187,7 @@
       }).join('');
       return tplBanner() + '<section class="card"><div class="card-h"><h2>Datos del local</h2><p>Lo que la app muestra en la portada, la ubicación y el contacto.</p></div>' + fields + '</section>' + appIconCard() +
         '<section class="card"><div class="card-h row"><div><h2>Horario</h2><p>Hora de Colombia. La app dice sola si está abierto, aunque el celular del turista tenga otra zona horaria.</p></div><button class="btn sm" data-a="hours-copy">Copiar lunes a todos</button></div>' +
-        '<div class="hours-e"><div class="hr hh" aria-hidden="true"><span>Día</span><span>Abre</span><span>Desde</span><span>Hasta</span></div>' + rows + '</div></section>' +
+        '<div class="hours-e"><div class="hr hh" aria-hidden="true"><span>Día</span><span>Abre</span><span>Desde</span><span>Hasta</span></div>' + rows + '</div></section>' + holidaysCard() +
         '<section class="card"><div class="card-h"><h2>Idioma y trato</h2></div>' +
         fieldHTML({ k: 'bilingual', t: 'bool', label: 'Carta en español e inglés (para turistas)' }, 'i18n') +
         fieldHTML({ k: 'usted', t: 'bool', label: 'Tratar al cliente de «usted»' }, 'i18n') +
@@ -1222,7 +1238,10 @@
       case 'historia': return s.year ? 'Desde ' + s.year : 'Sin año';
       case 'eventos': return (s.items || []).length + ' eventos' + lay({ linea: 'línea de tiempo' });
       case 'wifi': return s.network || 'Sin red';
-      case 'horario': return (c.brand.hours || []).filter(function (h) { return !h.closed; }).length + ' días abiertos' + lay({ compacto: 'compacto' });
+      case 'horario': {
+        const nh = (c.brand.holidays || []).filter(function (h) { return h && h.date >= todayISO(); }).length;
+        return (c.brand.hours || []).filter(function (h) { return !h.closed; }).length + ' días abiertos' + lay({ compacto: 'compacto' }) + (nh ? ' · ' + nh + (nh === 1 ? ' festivo' : ' festivos') : '');
+      }
       case 'ubicacion': return c.brand.address || 'Sin dirección';
       case 'contacto': return (String(c.brand.whatsapp || '').replace(/\D/g, '').length >= 11 ? 'WhatsApp listo' : 'Falta WhatsApp') + lay({ botones: 'botones' });
       case 'libre': return s.style === 'destacado' ? 'Destacado' : 'Normal';
@@ -1294,6 +1313,8 @@
     }
     const open = (c.brand.hours || []).filter(function (h) { return !h.closed && h.open && h.close; }).length;
     out.push(open ? { s: 'ok', t: 'Abre ' + open + (open === 1 ? ' día' : ' días') + ' a la semana' } : { s: 'warn', t: 'Sin horario', d: 'La app no puede decir si el local está abierto.', go: 'datos' });
+    const badHol = (c.brand.holidays || []).filter(function (h) { return !h || !/^\d{4}-\d{2}-\d{2}$/.test(h.date || '') || (h.closed === false && !(h.open && h.close)); }).length;
+    if (badHol) out.push({ s: 'warn', t: badHol === 1 ? 'Un festivo está incompleto' : badHol + ' festivos están incompletos', d: 'Cada festivo necesita la fecha y, si el local abre ese día, la hora de abrir y la de cerrar.', go: 'datos' });
     if (mod('ubicacion') && !c.brand.address && !c.brand.mapsQuery) out.push({ s: 'warn', t: 'Falta la dirección', go: 'datos' });
     if (mod('resenas')) out.push(/^https?:\/\//.test(c.brand.reviewUrl || '') ? { s: 'ok', t: 'Enlace de reseñas de Google listo' } : { s: 'warn', t: 'Falta el enlace de reseñas de Google', d: 'En el Perfil de Empresa de Google, usa la opción para pedir reseñas y copia el enlace.', go: 'datos' });
     const se = mod('sellos');
@@ -1771,7 +1792,7 @@
     if (p.indexOf('theme.colors.') === 0) { const c = $('#contrast'); if (c) c.innerHTML = contrastHTML(); const tx = $('.texs'); if (tx) tx.setAttribute('style', texVars()); if (p === 'theme.colors.accent' || p === 'theme.colors.bg') { renderHeader(); renderStageTop(); } return; }
     if (p === 'brand.name') { renderHeader(); renderStageTop(); return; }
     if (p === 'i18n.bilingual') { if (!v && S.pvLang === 'en') { S.pvLang = 'es'; if (PV.ready) PV.rt.setLang('es'); } renderEditor(); renderStageTop(); renderTabs(); return; }
-    if (t.getAttribute('data-rr') || /^brand\.hours\.\d+\.closed$/.test(p)) { renderEditor(); return; }
+    if (t.getAttribute('data-rr') || /^brand\.(hours|holidays)\.\d+\.closed$/.test(p)) { renderEditor(); return; }
     let m = /^modules\.(\d+)\.on$/.exec(p);
     if (m) { const row = t.closest('.mod'); if (row) row.classList.toggle('off', !v); return; }
     m = /^modules\.(\d+)\.s\.title$/.exec(p);

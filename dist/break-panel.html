@@ -107,6 +107,45 @@ textarea.in{min-height:88px;resize:vertical}
 .add-row{display:flex;gap:8px;padding:10px 14px 14px}
 .empty{padding:22px 16px;text-align:center;color:var(--ink2)}
 
+/* Promos, menú del día, aviso, horario y festivos */
+.sec-t{margin:26px 0 8px;font-size:18px;font-weight:800}
+.sec-t:first-child,.note+.sec-t{margin-top:4px}
+.blk{margin:0 0 14px;overflow:hidden}
+.blk-t{flex:1;min-width:0;padding:6px 0}
+.blk-t b{display:block;font-weight:800;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.blk-t small{display:block;font-size:13px;color:var(--ink2)}
+.blk .it .ib{flex:none}
+.none{margin:0 0 14px;padding:14px 16px;border-radius:14px;border:1.5px dashed var(--rule);color:var(--ink2);font-size:14px}
+.st{margin:0;padding:0 14px 4px;font-size:13px;font-weight:600;color:var(--ink2)}
+.st.ok{color:var(--ok)}
+.st.warn{color:var(--warn)}
+.cat-h+.st{padding-bottom:10px}
+.help.pad{margin:0;padding:10px 14px 0}
+.part{padding:10px 8px 10px 14px;border-bottom:1px solid var(--rule2)}
+.part .lab{margin-bottom:4px;overflow-wrap:anywhere}
+.part-r{display:flex;align-items:center;gap:6px}
+.part-r .in{flex:1;min-width:0}
+.avc{padding-top:14px}
+.avc .cat-h{margin-top:-14px}
+.av-x{margin:0 14px 10px;padding:10px 12px;border-radius:12px;background:var(--carbon-soft);font-weight:600;overflow-wrap:anywhere}
+.av-x.av-suave{background:var(--rule2)}
+.av-x.av-alerta{background:var(--warn-soft);color:var(--warn)}
+.add-row{flex-wrap:wrap}
+.hrs{padding:6px 14px 0}
+.hr-r{display:grid;grid-template-columns:38px 44px minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;min-height:54px;border-bottom:1px solid var(--rule2)}
+.hr-r:last-child{border-bottom:0}
+.hr-r b{font-size:15px}
+.hr-r.closed b{color:var(--ink2)}
+.hr-r .in{min-height:42px;padding:6px 8px;font-variant-numeric:tabular-nums}
+/* En la lista no cabe el ícono del reloj: al tocar la hora se abre igual el selector del celular. */
+.hr-r .in::-webkit-calendar-picker-indicator{display:none}
+.hr-x{grid-column:3/5;font-size:14px;color:var(--ink2)}
+.past .it-m b{color:var(--ink2)}
+.past .cat-h{flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.days .chip{padding:6px 0;font-size:13px;text-align:center}
+.sheet .row2 .fld{min-width:0}
+
 /* Barra de guardar */
 .pn-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--sheet);border-top:1px solid var(--rule);box-shadow:0 -6px 20px rgba(0,0,0,.06);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
 .bar-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -4939,7 +4978,7 @@ const BRAND_FIELDS = [
 
 
 /* Break · panel del local. El dueño entra con el PIN de su local y cambia el contenido (carta, precios, «agotado
-   hoy»…) sin tocar el diseño. Habla con el servidor del panel (worker/) en la misma dirección donde se abre:
+   hoy», promos, menú del día, aviso, horario y festivos) sin tocar el diseño. Habla con el servidor del panel (worker/) en la misma dirección donde se abre:
    /panel/<slug>. Usa el motor (breakApp) para la vista previa y su saneador para no guardar nada inválido. */
 (function () {
   'use strict';
@@ -4972,7 +5011,7 @@ const BRAND_FIELDS = [
 
   /* ---------- Estado ---------- */
   const P = {
-    token: '', name: '', app: null, doc: null, draft: null, dirty: false, saving: false,
+    token: '', name: '', app: null, base: null, doc: null, draft: null, dirty: false, saving: false,
     tab: 'carta', openCats: {}, q: '', pv: false, note: '', status: '', statusKind: '', sheet: null
   };
 
@@ -5037,7 +5076,8 @@ const BRAND_FIELDS = [
     let r;
     try { r = await api('GET', '/panel'); } catch (e) { if (e.status === 401) { showLogin(e.message); return; } $('#ed').innerHTML = '<div class="login card"><p class="err">' + esc(e.message) + '</p><button class="btn wide" data-a="retry" style="margin-top:14px">Volver a intentar</button></div>'; return; }
     P.name = r.name || SLUG; P.app = r.app || { brand: {}, menu: { categories: [] }, modules: [] }; P.doc = r.doc;
-    const base = P.doc ? P.doc.contenido : META.contenidoOf(P.app);
+    P.base = META.contenidoOf(P.app);
+    const base = P.doc ? P.doc.contenido : P.base;
     P.draft = META.sanitizeContenido(clone(base)); P.dirty = false; P.note = '';
     /* Si quedaron cambios sin guardar sobre esta misma versión (se cerró la página o venció la sesión), se recuperan. */
     const d = stGet('localStorage', K_DRAFT);
@@ -5086,7 +5126,7 @@ const BRAND_FIELDS = [
   }
 
   /* ---------- Pantalla ---------- */
-  const TABS = [['carta', 'Carta']];
+  const TABS = [['carta', 'Carta'], ['promos', 'Promos'], ['avisos', 'Avisos y horario']];
   function render() {
     $('#top').innerHTML = '<div class="top-in"><div class="top-n"><b>' + esc(P.name) + '</b><small>Panel del local</small></div>' +
       '<button type="button" class="btn sm top-pv" data-a="pv">Ver la app</button><button type="button" class="btn sm" data-a="logout">Salir</button></div>' +
@@ -5137,6 +5177,125 @@ const BRAND_FIELDS = [
         (list || '<p class="empty">' + (q ? 'Ningún plato se llama así.' : 'La carta está vacía.') + '</p>') +
         (q ? '' : '<button type="button" class="btn wide" data-a="cat-add">+ Agregar categoría</button>');
     }
+  };
+
+  /* ---------- Promos, menú del día, aviso, horario y festivos ---------- */
+  const DAYS = [[1, 'Lun', 'Lunes'], [2, 'Mar', 'Martes'], [3, 'Mié', 'Miércoles'], [4, 'Jue', 'Jueves'], [5, 'Vie', 'Viernes'], [6, 'Sáb', 'Sábado'], [0, 'Dom', 'Domingo']];
+  /* Los mismos topes del saneador (C_MAX en el motor): lo que pase de ahí se perdería al guardar. */
+  const LIM = { promos: 20, parts: 12, holidays: 40 };
+  const AV_STYLES = [['acento', 'Con color'], ['suave', 'Suave'], ['alerta', 'Alerta']];
+  /* Módulos de un tipo que la app sí tiene, en el orden de la app: el contenido solo se aplica a esos. */
+  function modsOf(type) {
+    P.draft.modules = P.draft.modules || {};
+    const base = (P.base && P.base.modules) || {};
+    return ((P.app && P.app.modules) || []).filter(function (m) { return m && m.type === type && m.id && base[m.id]; }).map(function (m) {
+      let d = P.draft.modules[m.id];
+      if (!d || d.type !== type) d = P.draft.modules[m.id] = clone(base[m.id]);
+      return { id: m.id, m: d };
+    });
+  }
+  function modS(id) { return P.draft.modules[id].s; }
+  function hours() { if (!Array.isArray(P.draft.hours) || P.draft.hours.length !== 7) P.draft.hours = clone(P.base.hours); return P.draft.hours; }
+  function holidays() { if (!Array.isArray(P.draft.holidays)) P.draft.holidays = clone(P.base.holidays || []); return P.draft.holidays; }
+  function fmtHora(t) {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); if (!m) return '';
+    const h = +m[1]; return ((h % 12) || 12) + ':' + m[2] + (h < 12 ? ' a. m.' : ' p. m.');
+  }
+  function fmtDias(days) {
+    const set = DAYS.filter(function (d) { return (days || []).map(Number).indexOf(d[0]) >= 0; });
+    if (!set.length) return '';
+    if (set.length === 7) return 'Todos los días';
+    const idx = set.map(function (d) { return DAYS.indexOf(d); });
+    const seguidos = idx.every(function (v, i) { return i === 0 || v === idx[i - 1] + 1; });
+    if (set.length >= 3 && seguidos) return set[0][1] + ' a ' + set[set.length - 1][1].toLowerCase();
+    return set.map(function (d, i) { return i ? d[1].toLowerCase() : d[1]; }).join(', ');
+  }
+  function fmtFecha(iso) {
+    try { return new Intl.DateTimeFormat('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso + 'T12:00:00Z')); } catch (e) { return iso; }
+  }
+  function none(what) { return '<p class="none">Su app no tiene sección de ' + what + '; pídasela a quien la diseñó.</p>'; }
+  function offNote(m) { return m.on === false ? '<p class="st warn">Esta sección está apagada en la app: los cambios no se ven hasta que la enciendan en el diseño.</p>' : ''; }
+  function mvBtns(act, id, i, n, what) {
+    return '<button type="button" class="ib" data-a="' + act + '" data-m="' + attr(id) + '" data-i="' + i + '" data-d="-1" aria-label="Subir ' + what + '"' + (i === 0 ? ' disabled' : '') + '>' + ICO.up + '</button>' +
+      '<button type="button" class="ib" data-a="' + act + '" data-m="' + attr(id) + '" data-i="' + i + '" data-d="1" aria-label="Bajar ' + what + '"' + (i === n - 1 ? ' disabled' : '') + '>' + ICO.down + '</button>';
+  }
+
+  function promosCard(x) {
+    const s = x.m.s, L = s.items || (s.items = []);
+    return '<section class="blk card" data-mod="' + attr(x.id) + '"><div class="cat-h"><div class="blk-t"><b>' + esc(s.title || 'Promociones') + '</b><small>' + L.length + (L.length === 1 ? ' promoción' : ' promociones') + '</small></div>' +
+      '<button type="button" class="ib" data-a="mt-ed" data-m="' + attr(x.id) + '" aria-label="Cambiar el título de la sección">' + ICO.edit + '</button></div>' + offNote(x.m) +
+      '<div class="items">' + (L.length ? L.map(function (p, i) {
+        const sub = [fmtDias(p.days), +p.price ? money(p.price) : ''].filter(Boolean).join(' · ');
+        return '<div class="it"><button type="button" class="it-m" data-a="pr-ed" data-m="' + attr(x.id) + '" data-i="' + i + '"><b>' + esc(p.title || 'Promoción sin título') + '</b><span>' + esc(sub || 'Sin días ni precio') + '</span></button>' +
+          mvBtns('pr-mv', x.id, i, L.length, 'promoción') + '</div>';
+      }).join('') : '<p class="empty">Todavía no hay promociones.</p>') +
+      (L.length < LIM.promos ? '<div class="add-row"><button type="button" class="btn sm" data-a="pr-add" data-m="' + attr(x.id) + '">+ Agregar promoción</button></div>' : '') + '</div></section>';
+  }
+  function menudiaCard(x) {
+    const s = x.m.s, L = s.parts || (s.parts = []);
+    const days = (s.days && s.days.length) ? s.days : [1, 2, 3, 4, 5];
+    const sub = [fmtDias(days), s.from && s.to ? fmtHora(s.from) + ' – ' + fmtHora(s.to) : '', +s.price ? money(s.price) : ''].filter(Boolean).join(' · ');
+    return '<section class="blk card" data-mod="' + attr(x.id) + '"><div class="cat-h"><div class="blk-t"><b>' + esc(s.title || 'Menú del día') + '</b><small>' + esc(sub) + '</small></div>' +
+      '<button type="button" class="ib" data-a="md-ed" data-m="' + attr(x.id) + '" aria-label="Cambiar días, horas, precio y nota">' + ICO.edit + '</button></div>' + offNote(x.m) +
+      '<div class="items parts">' + (L.length ? L.map(function (p, i) {
+        const id = 'pt-' + x.id + '-' + i, lab = p.label || 'Parte ' + (i + 1);
+        return '<div class="part"><label class="lab" for="' + attr(id) + '">' + esc(lab) + '</label><div class="part-r"><input class="in" id="' + attr(id) + '" type="text" data-in="part" data-m="' + attr(x.id) + '" data-i="' + i + '" maxlength="160" value="' + attr(p.value || '') + '" placeholder="Lo de hoy" autocomplete="off">' +
+          '<button type="button" class="ib" data-a="pt-ed" data-m="' + attr(x.id) + '" data-i="' + i + '" aria-label="Editar o quitar «' + attr(lab) + '»">' + ICO.edit + '</button></div></div>';
+      }).join('') : '<p class="empty">El menú no tiene partes todavía.</p>') +
+      (bilingual() && L.length ? '<p class="help pad">Su app también está en inglés: toque el lápiz de cada parte para cambiar el texto en inglés.</p>' : '') +
+      (s.note ? '<p class="help pad">Nota: ' + esc(s.note) + '</p>' : '') +
+      (L.length < LIM.parts ? '<div class="add-row"><button type="button" class="btn sm" data-a="pt-add" data-m="' + attr(x.id) + '">+ Agregar parte</button></div>' : '') + '</div></section>';
+  }
+  /* Qué pasa hoy con un aviso: sin texto o vencido, la app no lo muestra. */
+  function avisoState(m) {
+    const s = m.s;
+    if (!s.text) return ['', 'No hay aviso: la app no muestra nada.'];
+    if (m.on === false) return ['warn', 'Está apagado. Tóquelo y dé «Listo» para volver a mostrarlo.'];
+    if (s.until && s.until < hoy()) return ['warn', 'Venció el ' + fmtFecha(s.until) + ': la app ya no lo muestra.'];
+    return ['ok', s.until ? 'Se muestra en la app hasta el ' + fmtFecha(s.until) + '.' : 'Se muestra en la app.'];
+  }
+  function avisoCard(x, i, n) {
+    const s = x.m.s, st = avisoState(x.m);
+    return '<section class="blk card avc" data-mod="' + attr(x.id) + '">' + (n > 1 ? '<div class="cat-h"><div class="blk-t"><b>Aviso ' + (i + 1) + '</b></div></div>' : '') +
+      (s.text ? '<p class="av-x av-' + attr(s.style || 'acento') + '">' + (s.icon ? '<span aria-hidden="true">' + esc(s.icon) + '</span> ' : '') + esc(s.text) + '</p>' : '') +
+      '<p class="st ' + st[0] + '">' + esc(st[1]) + '</p>' +
+      '<div class="add-row"><button type="button" class="btn sm" data-a="av-ed" data-m="' + attr(x.id) + '">' + (s.text ? 'Cambiar el aviso' : 'Escribir un aviso') + '</button>' +
+      (s.text ? '<button type="button" class="btn sm bad" data-a="av-del" data-m="' + attr(x.id) + '">Quitar el aviso</button>' : '') + '</div></section>';
+  }
+  function hoursCard() {
+    const H = hours();
+    return '<section class="blk card"><div class="hrs">' + DAYS.map(function (d) {
+      const h = H.filter(function (x) { return +x.d === d[0]; })[0] || { closed: true };
+      return '<div class="hr-r' + (h.closed ? ' closed' : '') + '"><b title="' + d[2] + '">' + d[1] + '</b>' +
+        '<label class="sw"><input type="checkbox" data-a="hr-on" data-d="' + d[0] + '" aria-label="' + d[2] + ' abierto"' + (h.closed ? '' : ' checked') + '></label>' +
+        (h.closed ? '<span class="hr-x">Cerrado</span>' :
+          '<input class="in" type="time" data-in="hr" data-d="' + d[0] + '" data-k="open" aria-label="' + d[2] + ' abre" value="' + attr(h.open || '') + '">' +
+          '<input class="in" type="time" data-in="hr" data-d="' + d[0] + '" data-k="close" aria-label="' + d[2] + ' cierra" value="' + attr(h.close || '') + '">') + '</div>';
+    }).join('') + '</div><div class="add-row"><button type="button" class="btn sm" data-a="hr-copy">Copiar el lunes a todos</button></div></section>';
+  }
+  function holidayRow(x) {
+    const h = x.h;
+    return '<div class="it"><button type="button" class="it-m" data-a="hol-ed" data-i="' + x.i + '"><b>' + esc(fmtFecha(h.date)) + (h.name ? ' · ' + esc(h.name) : '') + '</b><span>' +
+      esc(h.closed ? 'Cerrado' : 'Abre de ' + fmtHora(h.open) + ' a ' + fmtHora(h.close)) + '</span></button></div>';
+  }
+  function holidaysCards() {
+    const td = hoy(), all = holidays().map(function (h, i) { return { h: h, i: i }; }).sort(function (a, b) { return a.h.date < b.h.date ? -1 : a.h.date > b.h.date ? 1 : 0; });
+    const next = all.filter(function (x) { return x.h.date >= td; }), past = all.filter(function (x) { return x.h.date < td; });
+    return '<section class="blk card"><div class="items">' + (next.length ? next.map(holidayRow).join('') : '<p class="empty">No hay festivos ni días especiales por venir.</p>') +
+      (holidays().length < LIM.holidays ? '<div class="add-row"><button type="button" class="btn sm" data-a="hol-add">+ Agregar festivo</button></div>' : '') + '</div></section>' +
+      (past.length ? '<section class="blk card past"><div class="cat-h"><div class="blk-t"><b>Ya pasaron</b><small>' + past.length + '</small></div>' +
+        '<button type="button" class="btn sm" data-a="hol-clean">Quitar los que ya pasaron</button></div><div class="items">' + past.map(holidayRow).join('') + '</div></section>' : '');
+  }
+  VIEWS.promos = function () {
+    const pr = modsOf('promos'), md = modsOf('menudia');
+    return '<h2 class="sec-t">Promociones</h2>' + (pr.length ? '<p class="intro">Toque una promoción para cambiarla. La app resalta sola las del día.</p>' + pr.map(promosCard).join('') : none('promociones')) +
+      '<h2 class="sec-t">Menú del día</h2>' + (md.length ? '<p class="intro">Escriba lo de hoy en cada parte y guarde.</p>' + md.map(menudiaCard).join('') : none('menú del día'));
+  };
+  VIEWS.avisos = function () {
+    const av = modsOf('aviso');
+    return '<h2 class="sec-t">Aviso destacado</h2>' + (av.length ? av.map(function (x, i) { return avisoCard(x, i, av.length); }).join('') : none('aviso destacado')) +
+      '<h2 class="sec-t">Horario de la semana</h2><p class="intro">Hora de Colombia. La app dice sola si el local está abierto.</p>' + hoursCard() +
+      '<h2 class="sec-t">Festivos y días especiales</h2><p class="intro">Para una fecha puntual: ese día le gana al horario de la semana.</p>' + holidaysCards();
   };
 
   /* ---------- Hojas de edición ---------- */
@@ -5216,6 +5375,109 @@ const BRAND_FIELDS = [
     setTx(c, 'name'); setTx(c, 'note');
     P.sheet.onClose = null; closeSheet(); markDirty(); render();
   }
+  /* Hojas de promos, menú del día, aviso y festivos. */
+  function sheetHead(t) { return '<div class="sheet-h"><h2 id="sheet-t">' + esc(t) + '</h2><button type="button" class="btn sm" data-a="sheet-x">Cerrar</button></div>'; }
+  function txFld(label, k, o, opt) { return fld(label, k, o[k] || '', opt) + (bilingual() ? fld(label, k + '_en', o[k + '_en'] || '', Object.assign({}, opt, { en: true, ph: '', help: '' })) : ''); }
+  function daysFld(days) {
+    return '<div class="fld"><span class="lab">Días</span><div class="chips days" role="group" aria-label="Días">' + DAYS.map(function (d) {
+      return '<button type="button" class="chip" data-a="tag" data-t="' + d[0] + '" aria-pressed="' + ((days || []).map(Number).indexOf(d[0]) >= 0) + '" aria-label="' + d[2] + '">' + d[1] + '</button>';
+    }).join('') + '</div></div>';
+  }
+  function readDays() { return $$('#sheet .days [aria-pressed="true"]').map(function (b) { return +b.getAttribute('data-t'); }); }
+  function done() { P.sheet.onClose = null; closeSheet(); markDirty(); render(); }
+  function need(name, msg) { if (val(name).trim()) return true; toast(msg); const n = $('#sheet [name="' + name + '"]'); if (n) n.focus(); return false; }
+
+  function editModTitle(id) {
+    openSheet('<form data-form="mtitle" data-m="' + attr(id) + '" novalidate>' + sheetHead('Título de la sección') +
+      txFld('Título', 'title', modS(id), { max: 80, ph: 'Promos de la semana' }) + '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div></form>');
+  }
+  function editPromo(id, i, isNew) {
+    const L = modS(id).items, p = L[i];
+    openSheet('<form data-form="promo" data-m="' + attr(id) + '" data-i="' + i + '" novalidate>' + sheetHead(isNew ? 'Promoción nueva' : 'Editar promoción') +
+      txFld('Título', 'title', p, { max: 80, ph: '2 × 1 en malteadas' }) + daysFld(p.days) +
+      txFld('Detalle', 'desc', p, { area: true, max: 240 }) +
+      fld('Precio', 'price', +p.price ? money(p.price) : '', { mode: 'numeric', ph: '$15.900', help: 'Opcional. En pesos, sin centavos.' }) +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div>' +
+      (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="pr-del">Quitar esta promoción</button></div>') + '</form>',
+      isNew ? function () { L.splice(i, 1); render(); } : null);
+  }
+  function editMenudia(id) {
+    const s = modS(id);
+    openSheet('<form data-form="menudia" data-m="' + attr(id) + '" novalidate>' + sheetHead('Menú del día') +
+      txFld('Título', 'title', s, { max: 80, ph: 'Menú del día' }) + daysFld((s.days && s.days.length) ? s.days : [1, 2, 3, 4, 5]) +
+      '<div class="row2">' + fld('Desde', 'from', s.from || '', { type: 'time' }) + fld('Hasta', 'to', s.to || '', { type: 'time' }) + '</div>' +
+      fld('Precio', 'price', +s.price ? money(s.price) : '', { mode: 'numeric', ph: '$15.000', help: 'En pesos, sin centavos.' }) +
+      txFld('Nota', 'note', s, { max: 200, ph: 'Mientras haya.', help: 'Opcional. Sale debajo del menú.' }) +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div></form>');
+  }
+  function editPart(id, i, isNew) {
+    const L = modS(id).parts, p = L[i];
+    openSheet('<form data-form="part" data-m="' + attr(id) + '" data-i="' + i + '" novalidate>' + sheetHead(isNew ? 'Parte nueva' : 'Editar parte') +
+      txFld('Nombre de la parte', 'label', p, { max: 40, ph: 'Sopa' }) + txFld('Lo de hoy', 'value', p, { max: 160, ph: 'Sancocho de gallina' }) +
+      (isNew ? '' : '<div class="fld row2"><button type="button" class="btn sm" data-a="pt-mv" data-d="-1"' + (i === 0 ? ' disabled' : '') + '>Subir en la lista</button><button type="button" class="btn sm" data-a="pt-mv" data-d="1"' + (i === L.length - 1 ? ' disabled' : '') + '>Bajar en la lista</button></div>') +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div>' +
+      (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="pt-del">Quitar esta parte</button></div>') + '</form>',
+      isNew ? function () { L.splice(i, 1); render(); } : null);
+  }
+  function editAviso(id) {
+    const s = modS(id), icons = !(P.app.theme && P.app.theme.icons === 'ninguno');
+    openSheet('<form data-form="aviso" data-m="' + attr(id) + '" novalidate>' + sheetHead(s.text ? 'Cambiar el aviso' : 'Escribir un aviso') +
+      txFld('Aviso', 'text', s, { area: true, max: 200, ph: 'Este festivo abrimos de 8:00 a. m. a 8:00 p. m.' }) +
+      (icons ? fld('Emoji', 'icon', s.icon || '', { max: 16, ph: '📣', help: 'Opcional. Va al lado del texto.' }) : '') +
+      '<div class="fld"><span class="lab">Estilo</span><div class="chips seg" role="group" aria-label="Estilo">' + AV_STYLES.map(function (o) {
+        return '<button type="button" class="chip" data-a="seg" data-v="' + o[0] + '" aria-pressed="' + ((s.style || 'acento') === o[0]) + '">' + o[1] + '</button>';
+      }).join('') + '</div></div>' +
+      fld('Mostrar hasta', 'until', s.until || '', { type: 'date', help: 'Ese día todavía se ve; al siguiente se quita solo. Vacío: se ve hasta que usted lo quite.' }) +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div></form>');
+  }
+  function editHoliday(i, isNew) {
+    const h = holidays()[i], open = !h.closed;
+    openSheet('<form data-form="holiday" data-i="' + i + '" novalidate>' + sheetHead(isNew ? 'Festivo nuevo' : 'Editar festivo') +
+      fld('Fecha', 'date', h.date || '', { type: 'date' }) + txFld('Nombre', 'name', h, { max: 60, ph: 'Navidad', help: 'Opcional.' }) +
+      '<div class="fld"><label class="sw"><input type="checkbox" name="open" data-a="hol-open"' + (open ? ' checked' : '') + '>Abrimos ese día, con otro horario</label></div>' +
+      '<div class="row2" id="hol-times"' + (open ? '' : ' hidden') + '>' + fld('Abre', 'open_t', h.open || '', { type: 'time' }) + fld('Cierra', 'close_t', h.close || '', { type: 'time' }) + '</div>' +
+      '<p class="help" id="hol-closed"' + (open ? ' hidden' : '') + '>La app dirá «Cerrado» ese día.</p>' +
+      '<div class="sheet-f"><button type="submit" class="btn pri">Listo</button></div>' +
+      (isNew ? '' : '<div class="danger"><button type="button" class="btn bad wide" data-a="hol-del">Quitar este festivo</button></div>') + '</form>',
+      isNew ? function () { holidays().splice(i, 1); render(); } : null);
+  }
+  const TIME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/;
+  const APPLY = {
+    mtitle: function (f) { setTx(modS(f.getAttribute('data-m')), 'title'); done(); },
+    promo: function (f) {
+      const p = modS(f.getAttribute('data-m')).items[+f.getAttribute('data-i')];
+      if (!need('title', 'Escriba el título de la promoción.')) return;
+      setTx(p, 'title'); setTx(p, 'desc'); p.days = readDays(); p.price = priceIn(val('price')); done();
+    },
+    menudia: function (f) {
+      const s = modS(f.getAttribute('data-m')), a = val('from'), b = val('to');
+      if ((a || b) && !(TIME_RE.test(a) && TIME_RE.test(b))) { toast('Escriba las dos horas, o deje las dos vacías.'); return; }
+      setTx(s, 'title'); setTx(s, 'note'); s.days = readDays(); s.from = a; s.to = b; s.price = priceIn(val('price')); done();
+    },
+    part: function (f) {
+      const p = modS(f.getAttribute('data-m')).parts[+f.getAttribute('data-i')];
+      if (!val('label').trim() && !val('value').trim()) { toast('Escriba el nombre de la parte.'); return; }
+      setTx(p, 'label'); setTx(p, 'value'); done();
+    },
+    aviso: function (f) {
+      const m = P.draft.modules[f.getAttribute('data-m')], s = m.s, u = val('until');
+      if (!need('text', 'Escriba el aviso.')) return;
+      if (u && u < hoy()) { toast('Esa fecha ya pasó: el aviso no se vería. Cámbiela o déjela vacía.'); return; }
+      setTx(s, 'text'); s.until = u;
+      const ic = $('#sheet [name="icon"]'); if (ic) s.icon = ic.value.trim();
+      const st = $('#sheet .seg [aria-pressed="true"]'); s.style = st ? st.getAttribute('data-v') : 'acento';
+      m.on = true; done();
+    },
+    holiday: function (f) {
+      const H = holidays(), i = +f.getAttribute('data-i'), h = H[i], date = val('date'), open = $('#sheet [name="open"]').checked;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { toast('Elija la fecha.'); return; }
+      if (H.some(function (x, k) { return k !== i && x.date === date; })) { toast('Ya hay un festivo en esa fecha.'); return; }
+      if (open && !(TIME_RE.test(val('open_t')) && TIME_RE.test(val('close_t')))) { toast('Escriba la hora de abrir y la de cerrar.'); return; }
+      h.date = date; setTx(h, 'name'); h.closed = !open; h.open = open ? val('open_t') : ''; h.close = open ? val('close_t') : '';
+      H.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+      done();
+    }
+  };
   function move(arr, i, d) { const j = i + d; if (j < 0 || j >= arr.length) return false; const x = arr[i]; arr[i] = arr[j]; arr[j] = x; return true; }
 
   /* ---------- Vista previa ---------- */
@@ -5239,7 +5501,7 @@ const BRAND_FIELDS = [
   /* ---------- Eventos ---------- */
   document.addEventListener('click', function (e) {
     const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
-    const a = b.getAttribute('data-a'), ci = +b.getAttribute('data-c'), ii = +b.getAttribute('data-i');
+    const a = b.getAttribute('data-a'), ci = +b.getAttribute('data-c'), ii = +b.getAttribute('data-i'), mid = b.getAttribute('data-m');
     switch (a) {
       case 'retry': load(); break;
       case 'logout': if (P.dirty) ask('¿Salir sin guardar?', 'Tiene cambios sin guardar. Quedan guardados en este celular para la próxima vez.', 'Salir', function () { showLogin(); }); else showLogin(); break;
@@ -5271,6 +5533,45 @@ const BRAND_FIELDS = [
         ask('¿Eliminar el plato?', 'Se elimina «' + (cats()[k].items[j].name || 'Plato sin nombre') + '» de la carta.', 'Eliminar', function () { cats()[k].items.splice(j, 1); markDirty(); render(); }, true);
         break;
       }
+      case 'mt-ed': editModTitle(mid); break;
+      case 'pr-ed': editPromo(mid, ii); break;
+      case 'pr-add': { const L = modS(mid).items; L.push({ days: [], title: '', desc: '', price: 0 }); editPromo(mid, L.length - 1, true); break; }
+      case 'pr-mv': if (move(modS(mid).items, ii, +b.getAttribute('data-d'))) { markDirty(); render(); } break;
+      case 'pr-del': {
+        const form = $('#sheet form'), id = form.getAttribute('data-m'), j = +form.getAttribute('data-i');
+        ask('¿Quitar la promoción?', 'Se quita «' + (modS(id).items[j].title || 'Promoción sin título') + '».', 'Quitar', function () { modS(id).items.splice(j, 1); markDirty(); render(); }, true);
+        break;
+      }
+      case 'md-ed': editMenudia(mid); break;
+      case 'pt-ed': editPart(mid, ii); break;
+      case 'pt-add': { const L = modS(mid).parts; L.push({ label: '', value: '' }); editPart(mid, L.length - 1, true); break; }
+      case 'pt-mv': {
+        const form = $('#sheet form'), id = form.getAttribute('data-m'), j = +form.getAttribute('data-i'), d = +b.getAttribute('data-d'), L = modS(id).parts;
+        setTx(L[j], 'label'); setTx(L[j], 'value');
+        if (move(L, j, d)) { markDirty(); editPart(id, j + d); render(); }
+        break;
+      }
+      case 'pt-del': {
+        const form = $('#sheet form'), id = form.getAttribute('data-m'), j = +form.getAttribute('data-i');
+        ask('¿Quitar esta parte?', 'Se quita «' + (modS(id).parts[j].label || 'Parte ' + (j + 1)) + '» del menú del día.', 'Quitar', function () { modS(id).parts.splice(j, 1); markDirty(); render(); }, true);
+        break;
+      }
+      case 'av-ed': editAviso(mid); break;
+      case 'av-del': ask('¿Quitar el aviso?', 'La app deja de mostrarlo. Después puede escribir otro.', 'Quitar', function () { const s = modS(mid); s.text = ''; delete s.text_en; s.until = ''; markDirty(); render(); }, true); break;
+      case 'seg': $$('[data-a="seg"]', b.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); break;
+      case 'hr-copy': {
+        const H = hours(), mon = H.filter(function (h) { return +h.d === 1; })[0];
+        if (mon) { H.forEach(function (h) { if (h !== mon) { h.open = mon.open; h.close = mon.close; h.closed = mon.closed; } }); markDirty(); render(); toast('El horario del lunes quedó en toda la semana.'); }
+        break;
+      }
+      case 'hol-ed': editHoliday(ii); break;
+      case 'hol-add': { const H = holidays(); H.push({ date: '', closed: true, open: '', close: '', name: '' }); editHoliday(H.length - 1, true); break; }
+      case 'hol-del': {
+        const j = +$('#sheet form').getAttribute('data-i');
+        ask('¿Quitar el festivo?', 'Ese día vuelve al horario de la semana.', 'Quitar', function () { holidays().splice(j, 1); markDirty(); render(); }, true);
+        break;
+      }
+      case 'hol-clean': { const td = hoy(); P.draft.holidays = holidays().filter(function (h) { return h.date >= td; }); markDirty(); render(); toast('Se quitaron los festivos que ya pasaron.'); break; }
       case 'tag': b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); break;
       case 'sheet-x': closeSheet(true); break;
       case 'ask-yes': { const fn = P.sheet && P.sheet.yes; closeSheet(); if (fn) fn(); break; }
@@ -5283,9 +5584,31 @@ const BRAND_FIELDS = [
       if (t.checked) it.soldDate = hoy(); else delete it.soldDate;
       markDirty(); render();
     }
+    if (t.getAttribute('data-a') === 'hr-on') {
+      /* Al abrir un día se le pone el horario de otro día abierto, para no dejarlo sin horas. */
+      const H = hours(), h = H.filter(function (x) { return +x.d === +t.getAttribute('data-d'); })[0];
+      if (!h) return;
+      if (t.checked) {
+        const ref = H.filter(function (x) { return !x.closed && x.open && x.close; })[0];
+        h.closed = false; if (!h.open || !h.close) { h.open = ref ? ref.open : '08:00'; h.close = ref ? ref.close : '18:00'; }
+      } else h.closed = true;
+      markDirty(); render();
+    }
+    if (t.getAttribute('data-a') === 'hol-open') { $('#hol-times').hidden = !t.checked; $('#hol-closed').hidden = t.checked; }
+    /* Una hora que se dejó a medias vuelve a la que estaba. */
+    if (t.getAttribute('data-in') === 'hr' && !t.value) render();
   });
   document.addEventListener('input', function (e) {
     const t = e.target;
+    /* Lo de hoy en el menú del día y las horas de la semana se escriben directo, sin abrir una hoja. */
+    if (t.getAttribute('data-in') === 'part') {
+      const p = modS(t.getAttribute('data-m')).parts[+t.getAttribute('data-i')];
+      if (p) { p.value = t.value; markDirty(); }
+    }
+    if (t.getAttribute('data-in') === 'hr' && TIME_RE.test(t.value)) {
+      const h = hours().filter(function (x) { return +x.d === +t.getAttribute('data-d'); })[0];
+      if (h) { h[t.getAttribute('data-k')] = t.value; markDirty(); }
+    }
     if (t.getAttribute('data-in') === 'q') {
       P.q = t.value; const pos = t.selectionStart; render();
       const q = $('#q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (err) { /* sin selección */ } }
@@ -5297,6 +5620,7 @@ const BRAND_FIELDS = [
     if (kind === 'login') { const p = f.querySelector('[name="pin"]'); login(String((p && p.value) || '').trim()); }
     if (kind === 'item') applyItem(f);
     if (kind === 'cat') applyCat(f);
+    if (APPLY[kind]) APPLY[kind](f);
   });
   $('#sheetbg').addEventListener('click', function () { closeSheet(true); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && P.sheet) closeSheet(true); });

@@ -309,6 +309,9 @@ input[type="range"]{width:100%;accent-color:var(--carbon)}
 .hd{font-weight:600;font-size:14px}
 .hr.closed .hd{color:var(--ink2)}
 .hr .in{min-height:40px;padding:6px 8px;font-variant-numeric:tabular-nums}
+/* Festivos (Datos): dentro de la lista no caben las cuatro columnas; el interruptor va arriba y las horas debajo. */
+.li .hr{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.li .hr .sw{justify-self:end}
 .logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .logo-row img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:1px solid var(--rule)}
 .img-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}

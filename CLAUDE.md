@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` (el estudio) y `dist/break-panel.html` (el panel del local) y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila, prepara el servidor del panel (`worker/build.mjs`) y corre `test/run.js` (902 pruebas en jsdom: motor, estudio, app exportada, servidor y panel). Debe terminar en `0 fallaron`.
+- `npm test` — compila, prepara el servidor del panel (`worker/build.mjs`) y corre `test/run.js` (954 pruebas en jsdom: motor, estudio, app exportada, servidor y panel). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
 - `node worker/local.mjs` — el servidor del panel en tu computador, sin Cloudflare (KV y fotos en memoria): `http://localhost:8787/panel/antojo`, PIN `123456`. Con `--app <archivo.html>` sirve también esa app exportada en `/app`; otras opciones: `--puerto`, `--local`, `--plantilla`, `--pin`.
 
@@ -48,7 +48,7 @@ Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está act
 
 El dueño cambia su contenido desde un panel (en construcción por etapas) sin tocar el diseño. El contenido es solo carta, promos, menú del día, aviso, agenda, galería, reseñas, horario y festivos. `sanitizeContenido()` deja pasar solo esas claves, con tipos y largos revisados: en los módulos, solo las de contenido (`C_MODS`), nunca `layout` ni `_bg`; fotos `https` o `img/…`. `mergeContenido(app, contenido)` lo pone sobre una copia de la app (solo en módulos que ya existen y son del mismo tipo) y `contenidoOf(app)` lo saca. Las tres son puras, van antes del `return` de `opts.meta` y las usan la app, el panel y el servidor.
 
-Si la app trae `meta.panel {api, slug}` (dirección `https`, o `http://localhost` para pruebas), `loadPanel()` la abre con la última copia guardada en el celular (`break:<id>:contenido`) o con la carta que trae, y pide `api/api/<slug>/contenido` (`{v, at, contenido}`); cuando llega, la guarda y vuelve a pintar. La vista previa del estudio no lo pide. «Agotado hoy» es `soldDate` (fecha de hoy en `brand.tz`): `isOff()` lo trata como no disponible y vuelve solo al día siguiente. Los festivos (`brand.holidays`) le ganan al horario de la semana en `statusInfo()` y el horario lista los próximos (`holidaysHTML()`).
+Si la app trae `meta.panel {api, slug}` (dirección `https`, o `http://localhost` para pruebas), `loadPanel()` la abre con la última copia guardada en el celular (`break:<id>:contenido`) o con la carta que trae, y pide `api/api/<slug>/contenido` (`{v, at, contenido}`); cuando llega, la guarda y vuelve a pintar. La vista previa del estudio no lo pide. «Agotado hoy» es `soldDate` (fecha de hoy en `brand.tz`): `isOff()` lo trata como no disponible y vuelve solo al día siguiente. Los festivos (`brand.holidays`) le ganan al horario de la semana en `statusInfo()` y el horario lista los próximos (`holidaysHTML()`); se editan en Datos del estudio (`holidaysCard()`, que `checks()` revisa) y en el panel.
 
 ### Servidor del panel (`worker/`)
 
@@ -76,7 +76,11 @@ Página para celular que sirve el Worker en `/panel/<slug>` (o `?local=<slug>`; 
 - **Entrada:** pide el PIN y guarda la sesión en `sessionStorage` (`break.panel.<slug>`). Si el servidor responde 401, vuelve a pedir el PIN sin perder los cambios.
 - **Estado `P`:** `doc` es la versión del servidor (`{v, at, contenido}`) y `draft` el contenido que se está editando. Cada cambio llama a `markDirty()`, que guarda el borrador en `localStorage` (`break.panel.<slug>.borrador`, `{base, contenido}`); al volver a entrar se recupera si `base` sigue siendo la versión del servidor.
 - **Guardar:** manda `{base, contenido}`. Con 409 carga la versión nueva y avisa en `P.note`. «Deshacer» pide `POST …/deshacer` y «Descartar» vuelve a `doc`.
-- **Pestañas:** `TABS` y una función en `VIEWS` por pestaña. Hoy solo Carta: categorías que se abren y cierran, buscador, interruptor «Agotado hoy» por plato, hoja de edición (`openSheet()`, `editItem()`, `editCat()`) con nombre, descripción, precio, etiquetas y disponible, y subir o bajar categorías y platos.
+- **Pestañas:** `TABS` y una función en `VIEWS` por pestaña.
+  - **Carta:** categorías que se abren y cierran, buscador, interruptor «Agotado hoy» por plato, hoja de edición (`openSheet()`, `editItem()`, `editCat()`) con nombre, descripción, precio, etiquetas y disponible, y subir o bajar categorías y platos.
+  - **Promos:** promociones (título, días, detalle y precio opcional; agregar, quitar y ordenar) y menú del día. Lo de hoy de cada parte se escribe directo en la lista (`data-in="part"`); días, horas, precio y nota van en su hoja.
+  - **Avisos y horario:** aviso destacado con su estado (se muestra, venció o no hay), «Mostrar hasta» (no acepta una fecha pasada) y «Quitar el aviso» (texto vacío); el horario de la semana con interruptor y horas por día (`data-in="hr"`) y «Copiar el lunes a todos»; y los festivos, cerrados o con horario especial, ordenados por fecha, con los que ya pasaron aparte.
+  - `modsOf(tipo)` da los módulos de ese tipo que la app sí tiene (el contenido solo se aplica a esos); si no hay, sale una nota para pedírselo a quien diseñó la app. `hours()` y `holidays()` dan los de `P.draft`. Cada hoja es un formulario con su función en `APPLY`, y `LIM` repite los topes de `C_MAX` para no ofrecer más de lo que el saneador guarda.
 - **Vista previa:** la app real en un iframe (`mode: 'preview'`) con `mergeContenido(P.app, P.draft)`; en celular se abre con «Ver la app» y desde 1100 px queda al lado.
 - Los clics van por atributos `data-a` en un solo manejador; los formularios por `data-form`. `window.__breakPanel` expone `P`, `save`, `load` y `hoy` para las pruebas.
 
