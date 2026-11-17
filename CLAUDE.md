@@ -8,7 +8,7 @@ Todo el texto de interfaz está en español de Colombia. Escribe el código nuev
 
 - `npm install` — instala jsdom, jszip y qrcode-generator (solo para pruebas).
 - `npm run build` — une `src/` en `dist/break-studio.html` y revisa la sintaxis. Falla si el JS contiene `</script` o `<!--`.
-- `npm test` — compila y corre `test/run.js` (829 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
+- `npm test` — compila y corre `test/run.js` (847 pruebas en jsdom: motor, estudio y app exportada). Debe terminar en `0 fallaron`.
 - `npm run demos` — genera `dist/demo-*.html`, una por cada app de ejemplo de `TEMPLATES`.
 
 Revisión visual con `test/visual.js`. Necesita Playwright con Chromium, que no está en `package.json`, y acceso a Google Fonts:
@@ -32,7 +32,7 @@ Sin frameworks ni bundler: JavaScript vanilla, un solo HTML de salida.
 
 ### Configuración de una app
 
-`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, legal, city, address, whatsapp, hours[{d,open,close,closed}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}, type{titleWeight,titleCase,titleSpacing,titleScale,textScale,lineHeight,priceFont}, shape{btn,btnFill,photo,chip,card,border}, nav, top{align,bg,logo,name,status}, foot{style,align,tagline,hours,social}, space{density,sep}, heads{align,orn,kicker}, carta{shape,size,pos,desc,cols,lead,price,tags,cat,catPhoto,catIcon,tabs}, fx{entry,reveal,tap,speed,marquee,deco,confetti}, dark{mode,colors{…}}, css}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on}]}]}, modules[{id,type,on,s{…, layout, kicker, _bg, _align, _pad}}], meta{credit,url} }`
+`{ v, id, brand{name, tagline, logo{type,value,shape,imgPos,ico}, appIcon{content,icon,bg}, splash, legal, city, address, whatsapp, hours[{d,open,close,closed}], holidays[{date,closed,open,close,name}], tz, …}, i18n{bilingual, usted}, theme{skin, colors{bg,surface,ink,muted,accent,accent2,accent3}, fonts{display,body}, radius, motion, texture, buttons, textSize, icons, roles{btn,title,kicker,price,sel,tag,top,foot}, bg{type,tint,img,imgPos,veil}, type{titleWeight,titleCase,titleSpacing,titleScale,textScale,lineHeight,priceFont}, shape{btn,btnFill,photo,chip,card,border}, nav, top{align,bg,logo,name,status}, foot{style,align,tagline,hours,social}, space{density,sep}, heads{align,orn,kicker}, carta{shape,size,pos,desc,cols,lead,price,tags,cat,catPhoto,catIcon,tabs}, fx{entry,reveal,tap,speed,marquee,deco,confetti}, dark{mode,colors{…}}, css}, menu{categories[{id,name,icon,ico,img,imgPos,note,items[{id,name,desc,price,emoji,ico,img,imgPos,tags[],on,soldDate}]}]}, modules[{id,type,on,s{…, layout, kicker, _bg, _align, _pad}}], meta{credit,url,panel{api,slug}} }`
 
 El logo (`brand.logo.type`) puede ser `mono` (iniciales), `emoji`, `icon` (un ícono de `ICONS`) o `img`; `shape` es `circulo`, `cuadrado` u `horizontal` (solo imágenes: se muestra completo y reemplaza el nombre en el encabezado). El ícono de la app (`brand.appIcon`) lleva el logo, las iniciales o un ícono sobre un color de la paleta; lo dibujan `svgIcon()` e `iconBlob()` en `studio.js`.
 
@@ -41,6 +41,12 @@ El logo (`brand.logo.type`) puede ser `mono` (iniciales), `emoji`, `icon` (un í
 Una foto (`img` de platos, categorías, portada y galería; `brand.logo.value` si el logo es imagen) puede ser un enlace https, una imagen incrustada (`data:image/…`), una foto de la biblioteca (`asset:<id>`) o, solo en la app exportada en .zip, un archivo `img/<id>.webp`. Su encuadre va en la clave hermana `imgPos` (`top`, `center` o `bottom`).
 
 Cualquier texto admite una variante `campo_en` cuando `i18n.bilingual` está activo. Los días van con 0 = domingo. La hora siempre se calcula en `brand.tz` (America/Bogota).
+
+### Contenido del panel del local
+
+El dueño cambia su contenido desde un panel (en construcción por etapas) sin tocar el diseño. El contenido es solo carta, promos, menú del día, aviso, agenda, galería, reseñas, horario y festivos. `sanitizeContenido()` deja pasar solo esas claves, con tipos y largos revisados: en los módulos, solo las de contenido (`C_MODS`), nunca `layout` ni `_bg`; fotos `https` o `img/…`. `mergeContenido(app, contenido)` lo pone sobre una copia de la app (solo en módulos que ya existen y son del mismo tipo) y `contenidoOf(app)` lo saca. Las tres son puras, van antes del `return` de `opts.meta` y las usan la app, el panel y el servidor.
+
+Si la app trae `meta.panel {api, slug}` (dirección `https`, o `http://localhost` para pruebas), `loadPanel()` la abre con la última copia guardada en el celular (`break:<id>:contenido`) o con la carta que trae, y pide `api/api/<slug>/contenido` (`{v, at, contenido}`); cuando llega, la guarda y vuelve a pintar. La vista previa del estudio no lo pide. «Agotado hoy» es `soldDate` (fecha de hoy en `brand.tz`): `isOff()` lo trata como no disponible y vuelve solo al día siguiente. Los festivos (`brand.holidays`) le ganan al horario de la semana en `statusInfo()` y el horario lista los próximos (`holidaysHTML()`).
 
 ### Añadir un módulo
 

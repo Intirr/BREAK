@@ -555,7 +555,7 @@ function breakApp(win, doc, initialCfg, opts) {
     es: {
       menu: 'Secciones', close: 'Cerrar', open: 'Abierto', closed: 'Cerrado',
       stOpen: 'Abierto ahora · cierra a las {t}', stClosedToday: 'Cerrado · abre hoy a las {t}',
-      stClosedTomorrow: 'Cerrado · abre mañana a las {t}', stClosedDay: 'Cerrado · abre el {d} a las {t}', stClosedNoInfo: 'Cerrado por ahora',
+      stClosedTomorrow: 'Cerrado · abre mañana a las {t}', stClosedDay: 'Cerrado · abre el {d} a las {t}', stClosedNoInfo: 'Cerrado por ahora', holidays: 'Festivos',
       today: 'hoy', all: 'Todo', search: 'Buscar en la carta', noResults: 'No hay platos con ese filtro.', soldOut: 'Agotado',
       add: 'Agregar', added: 'Agregado a tu pedido', viewOrder: 'Ver pedido', yourOrder: 'Tu pedido',
       subtotal: 'Subtotal', delivery: 'Domicilio', toAgree: 'Por confirmar', total: 'Total',
@@ -602,7 +602,7 @@ function breakApp(win, doc, initialCfg, opts) {
     en: {
       menu: 'Sections', close: 'Close', open: 'Open', closed: 'Closed',
       stOpen: 'Open now · closes at {t}', stClosedToday: 'Closed · opens today at {t}',
-      stClosedTomorrow: 'Closed · opens tomorrow at {t}', stClosedDay: 'Closed · opens {d} at {t}', stClosedNoInfo: 'Closed for now',
+      stClosedTomorrow: 'Closed · opens tomorrow at {t}', stClosedDay: 'Closed · opens {d} at {t}', stClosedNoInfo: 'Closed for now', holidays: 'Holidays',
       today: 'today', all: 'All', search: 'Search the menu', noResults: 'No dishes match that filter.', soldOut: 'Sold out',
       add: 'Add', added: 'Added to your order', viewOrder: 'View order', yourOrder: 'Your order',
       subtotal: 'Subtotal', delivery: 'Delivery', toAgree: 'To be confirmed', total: 'Total',
@@ -1079,6 +1079,7 @@ textarea.inp{resize:vertical;min-height:76px}
 .hrow dd{margin:0;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
 .hrow .lead{transform:none}
 .hrow.today dt,.hrow.today dd{color:var(--ink);font-weight:800}
+.hol-t{margin:22px 0 2px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .hrow .hoy{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-left:8px;padding:2px 7px;border-radius:999px;background:var(--accent);color:var(--on-accent)}
 .mapcard{padding:0;overflow:hidden}
 .map-art{height:150px;position:relative;background:linear-gradient(90deg,transparent 44%,color-mix(in srgb,var(--ink) 13%,transparent) 44% 56%,transparent 56%) 0 0/84px 84px,linear-gradient(0deg,transparent 44%,color-mix(in srgb,var(--ink) 13%,transparent) 44% 56%,transparent 56%) 0 0/84px 84px,color-mix(in srgb,var(--accent2) 14%,var(--surface))}
@@ -2429,6 +2430,113 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   const HERO_VARIANTS = ['texto', 'foto', 'arriba', 'tarjeta'];
   const HERO_DECOS = ['stickers', 'fachada', 'lomas', 'neon', 'araucarias', 'cafetal', 'guadua', 'termales', 'willys', 'garabatos', 'brasas', 'damero', 'monstera', 'toldo', 'obra'];
   const ART = { araucarias: araucariasSVG, cafetal: cafetalSVG, guadua: guaduaSVG, termales: termalesSVG, willys: willysSVG, garabatos: garabatosSVG, brasas: brasasSVG, monstera: monsteraSVG };
+  /* ---------- Contenido editable desde el panel del local ----------
+     El panel solo cambia carta, promos, menú del día, aviso, agenda, galería, reseñas, horario y festivos; el diseño
+     sigue en el estudio. sanitizeContenido() deja pasar solo esas claves, con tipos y largos revisados (la usan la app,
+     el panel y el servidor), mergeContenido() las pone sobre una app y contenidoOf() las saca de una app. Puras y
+     declaradas antes del return de opts.meta, para que el panel y el servidor las usen. */
+  const C_MAX = { cats: 30, items: 80, promos: 20, parts: 12, events: 20, photos: 24, quotes: 6, holidays: 40 };
+  function cStr(v, max) {
+    if (typeof v === 'number' && isFinite(v)) v = String(v);
+    if (typeof v !== 'string') return '';
+    return v.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, max);
+  }
+  function cInt(v, max) { const n = Math.round(Number(v)); return isFinite(n) && n > 0 ? Math.min(n, max) : 0; }
+  function cImg(v) { v = cStr(v, 600); return /^https:\/\/[^\s"'<>]+$/i.test(v) || /^img\/[\w-]{1,64}\.(webp|jpe?g|png|gif)$/i.test(v) ? v : ''; }
+  function cId(v, i) { v = cStr(v, 40); return /^[\w-]{1,40}$/.test(v) ? v : 'x' + i; }
+  function cDays(v) { return (Array.isArray(v) ? v : []).map(Number).filter(function (d, i, a) { return d >= 0 && d <= 6 && d % 1 === 0 && a.indexOf(d) === i; }); }
+  function cTime(v) { v = cStr(v, 5); return /^([01]?\d|2[0-3]):[0-5]\d$/.test(v) ? v : ''; }
+  function cDate(v) { v = cStr(v, 10); return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : ''; }
+  function cIco(v) { v = cStr(v, 30); return Object.prototype.hasOwnProperty.call(ICONS, v) ? v : ''; }
+  function cPos(v) { return v === 'top' || v === 'bottom' ? v : ''; }
+  function cList(v, max, fn) { return (Array.isArray(v) ? v : []).filter(function (x) { return x && typeof x === 'object'; }).slice(0, max).map(fn); }
+  /* Copia un texto y su versión en inglés, si la hay. */
+  function cTx(o, src, k, max) { o[k] = cStr(src[k], max); const en = cStr(src[k + '_en'], max); if (en) o[k + '_en'] = en; return o; }
+  const C_MODS = {
+    promos: function (s) {
+      return cTx({ items: cList(s.items, C_MAX.promos, function (x) { const o = { days: cDays(x.days), price: cInt(x.price, 100000000) }; cTx(o, x, 'title', 80); return cTx(o, x, 'desc', 240); }) }, s, 'title', 80);
+    },
+    menudia: function (s) {
+      const o = { days: cDays(s.days), from: cTime(s.from), to: cTime(s.to), price: cInt(s.price, 100000000),
+        parts: cList(s.parts, C_MAX.parts, function (x) { return cTx(cTx({}, x, 'label', 40), x, 'value', 160); }) };
+      return cTx(cTx(o, s, 'title', 80), s, 'note', 200);
+    },
+    aviso: function (s) {
+      const o = { icon: cStr(s.icon, 16), ico: cIco(s.ico), until: cDate(s.until), style: ['acento', 'suave', 'alerta'].indexOf(s.style) >= 0 ? s.style : 'acento' };
+      return cTx(o, s, 'text', 200);
+    },
+    eventos: function (s) {
+      return cTx({ items: cList(s.items, C_MAX.events, function (x) { const o = { rsvp: !!x.rsvp }; cTx(o, x, 'when', 60); cTx(o, x, 'title', 80); return cTx(o, x, 'desc', 300); }) }, s, 'title', 80);
+    },
+    galeria: function (s) {
+      return cTx({ items: cList(s.items, C_MAX.photos, function (x) { return cTx({ img: cImg(x.img), imgPos: cPos(x.imgPos), emoji: cStr(x.emoji, 16), ico: cIco(x.ico) }, x, 'caption', 120); }) }, s, 'title', 80);
+    },
+    resenas: function (s) {
+      return { quotes: cList(s.quotes, C_MAX.quotes, function (x) { return cTx({ author: cStr(x.author, 40) }, x, 'text', 300); }) };
+    }
+  };
+  function cItem(x, i) {
+    const o = { id: cId(x.id, i), price: cInt(x.price, 100000000), emoji: cStr(x.emoji, 16), ico: cIco(x.ico), img: cImg(x.img), imgPos: cPos(x.imgPos),
+      tags: (Array.isArray(x.tags) ? x.tags : []).filter(function (t, k, a) { return TAG_ORDER.indexOf(t) >= 0 && a.indexOf(t) === k; }), on: x.on !== false };
+    const sd = cDate(x.soldDate); if (sd) o.soldDate = sd;
+    return cTx(cTx(o, x, 'name', 80), x, 'desc', 300);
+  }
+  function cCat(x, i) {
+    const o = { id: cId(x.id, i), icon: cStr(x.icon, 16), ico: cIco(x.ico), img: cImg(x.img), imgPos: cPos(x.imgPos),
+      items: cList(x.items, C_MAX.items, function (it, k) { return cItem(it, i + '-' + k); }) };
+    return cTx(cTx(o, x, 'name', 60), x, 'note', 160);
+  }
+  function cHours(v) {
+    const H = Array.isArray(v) ? v : [];
+    return [1, 2, 3, 4, 5, 6, 0].map(function (d) {
+      const h = H.filter(function (x) { return x && +x.d === d; })[0] || {}, o = cTime(h.open), c = cTime(h.close);
+      return o && c && !h.closed ? { d: d, open: o, close: c, closed: false } : { d: d, open: '', close: '', closed: true };
+    });
+  }
+  function cHoliday(x) {
+    const o = { date: cDate(x.date), closed: x.closed !== false, open: cTime(x.open), close: cTime(x.close) };
+    if (!o.open || !o.close) { o.closed = true; o.open = ''; o.close = ''; }
+    return cTx(o, x, 'name', 60);
+  }
+  function sanitizeContenido(raw) {
+    raw = raw && typeof raw === 'object' ? raw : {};
+    const out = {};
+    if (raw.menu && Array.isArray(raw.menu.categories)) out.menu = { categories: cList(raw.menu.categories, C_MAX.cats, cCat) };
+    if (raw.modules && typeof raw.modules === 'object' && !Array.isArray(raw.modules)) {
+      out.modules = {};
+      Object.keys(raw.modules).slice(0, 40).forEach(function (id) {
+        const m = raw.modules[id];
+        if (!/^[\w-]{1,40}$/.test(id) || !m || typeof m !== 'object' || !C_MODS[m.type]) return;
+        out.modules[id] = { type: m.type, on: m.on !== false, s: C_MODS[m.type](m.s && typeof m.s === 'object' ? m.s : {}) };
+      });
+    }
+    if (Array.isArray(raw.hours)) out.hours = cHours(raw.hours);
+    if (Array.isArray(raw.holidays)) out.holidays = cList(raw.holidays, C_MAX.holidays, cHoliday).filter(function (h) { return h.date; });
+    return out;
+  }
+  /* Pone el contenido sobre una copia de la app: los módulos solo cambian si existen y son del mismo tipo, y en ellos
+     solo se reemplazan las claves de contenido (el diseño de la sección se queda). */
+  function mergeContenido(base, raw) {
+    const c = JSON.parse(JSON.stringify(base || {})), k = sanitizeContenido(raw);
+    c.brand = c.brand || {}; c.menu = c.menu || {};
+    if (k.menu) c.menu.categories = k.menu.categories;
+    if (k.hours) c.brand.hours = k.hours;
+    if (k.holidays) c.brand.holidays = k.holidays;
+    if (k.modules) (c.modules || []).forEach(function (m) {
+      const n = m && k.modules[m.id];
+      if (!n || n.type !== m.type) return;
+      m.on = n.on; m.s = m.s || {};
+      Object.keys(n.s).forEach(function (key) { m.s[key] = n.s[key]; });
+    });
+    return c;
+  }
+  function contenidoOf(c) {
+    c = c || {};
+    const mods = {};
+    (c.modules || []).forEach(function (m) { if (m && C_MODS[m.type] && m.id) mods[m.id] = { type: m.type, on: m.on !== false, s: m.s || {} }; });
+    return sanitizeContenido({ menu: { categories: (c.menu && c.menu.categories) || [] }, modules: mods, hours: (c.brand && c.brand.hours) || [], holidays: (c.brand && c.brand.holidays) || [] });
+  }
+
   /* Miniatura de una decoración de portada para el estudio (sin datos de la app). */
   function decoPreview(k) {
     if (k === 'stickers') return '<div class="hero-in">' + ['☕', '🧁', '🍓', '🥐'].map(function (e, i) { return '<span class="stk s' + (i + 1) + '">' + e + '</span>'; }).join('') + '</div>';
@@ -2442,7 +2550,8 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   /* El estudio pide las constantes del motor (tipografías, estéticas, íconos…) para no repetirlas en su catálogo. */
   if (opts.meta) return { fonts: FONTS, skins: Object.keys(CSS_SKIN), tags: TAG_ORDER, icons: ICONS, iconSets: ICON_SETS, emoIcon: EMO_ICON, iconOf: emoIcon, glyph: glyphOf,
-    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview, darkOf: darkOf, genDark: genDark, cleanCSS: cleanCSS };
+    decoCSS: DECO_CSS, artVars: artVars, heroAuto: HERO_AUTO, heroDeco: decoPreview, darkOf: darkOf, genDark: genDark, cleanCSS: cleanCSS,
+    sanitizeContenido: sanitizeContenido, mergeContenido: mergeContenido, contenidoOf: contenidoOf };
 
   /* ---------- Estado ---------- */
   let cfg = normalize(initialCfg);
@@ -2590,24 +2699,30 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     } catch (e) { return iso; }
   }
 
+  function isoAdd(iso, k) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); if (!m) return '';
+    return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]) + k * 86400000).toISOString().slice(0, 10);
+  }
+  function holidayOn(iso) { return (cfg.brand.holidays || []).filter(function (h) { return h && h.date === iso; })[0] || null; }
   function statusInfo() {
     const H = cfg.brand.hours || [];
     if (!H.some(function (h) { return h && !h.closed && toMin(h.open) != null && toMin(h.close) != null; })) return null;
     const now = nowLocal();
-    const get = function (d) { return H.filter(function (h) { return h && +h.d === d; })[0]; };
+    /* Horario de un día contado desde hoy: el festivo de esa fecha le gana al de la semana. */
+    const get = function (k) { const hd = holidayOn(isoAdd(now.iso, k)); if (hd) return hd; const d = ((now.d + k) % 7 + 7) % 7; return H.filter(function (h) { return h && +h.d === d; })[0]; };
     const span = function (h) { return { o: toMin(h.open), c: toMin(h.close) }; };
-    const td = get(now.d);
+    const td = get(0);
     if (td && !td.closed) {
       const t = span(td);
       if (t.o != null && t.c != null && (t.c > t.o ? (now.min >= t.o && now.min < t.c) : now.min >= t.o)) return { open: true, text: ui('stOpen', { t: fmtTime(td.close) }) };
     }
-    const yd = get((now.d + 6) % 7);
+    const yd = get(-1);
     if (yd && !yd.closed) {
       const t = span(yd);
       if (t.o != null && t.c != null && t.c <= t.o && now.min < t.c) return { open: true, text: ui('stOpen', { t: fmtTime(yd.close) }) };
     }
     for (let k = 0; k <= 7; k++) {
-      const dd = (now.d + k) % 7, h = get(dd);
+      const dd = (now.d + k) % 7, h = get(k);
       if (!h || h.closed) continue;
       const t = span(h);
       if (t.o == null) continue;
@@ -2633,6 +2748,8 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     cfg.menu.categories.forEach(function (c) { c.items.forEach(function (it) { if (it) out.push(it); }); });
     return out;
   }
+  /* Un plato no se puede pedir si está apagado o si el local lo marcó «agotado hoy» (vuelve solo al día siguiente). */
+  function isOff(it) { return !it || it.on === false || (!!it.soldDate && it.soldDate === nowLocal().iso); }
   function catOf(id) { return cfg.menu.categories.filter(function (c) { return c.items.some(function (it) { return it && it.id === id; }); })[0] || null; }
   function findItem(id) { return allItems().filter(function (it) { return it.id === id; })[0] || null; }
   function anchor(m) { return 's-' + m.id; }
@@ -2653,6 +2770,19 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     return '<span class="logo mono ' + size + '">' + esc(String(mono).slice(0, 3)) + '</span>';
   }
   /* Horario compacto: los días seguidos con el mismo horario van juntos («Lunes a viernes»). */
+  /* Próximos festivos (hoy y las siete semanas siguientes), con su horario o «Cerrado». */
+  function holidaysHTML(now) {
+    const end = isoAdd(now.iso, 49);
+    const list = (cfg.brand.holidays || []).filter(function (h) { return h && h.date >= now.iso && h.date <= end; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : 1; }).slice(0, 4);
+    if (!list.length) return '';
+    return '<p class="hol-t">' + esc(ui('holidays')) + '</p><dl class="hours hol">' + list.map(function (h) {
+      const td = h.date === now.iso, closed = h.closed || !h.open || !h.close;
+      return '<div class="hrow ' + (td ? 'today' : '') + '"><dt>' + esc(cap(fmtDate(h.date, lang()))) + (tx(h, 'name') ? ' · ' + esc(tx(h, 'name')) : '') +
+        (td ? '<span class="hoy">' + esc(ui('today')) + '</span>' : '') + '</dt><span class="lead" aria-hidden="true"></span><dd>' +
+        esc(closed ? ui('closed') : fmtTime(h.open) + ' – ' + fmtTime(h.close)) + '</dd></div>';
+    }).join('') + '</dl>';
+  }
   function hoursCompact(H, today) {
     const order = [1, 2, 3, 4, 5, 6, 0], groups = [];
     order.forEach(function (d) {
@@ -2687,7 +2817,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   function qtyOf(id) { return state.cart.filter(function (l) { return l.id === id; }).reduce(function (a, l) { return a + l.qty; }, 0); }
   function qBadge(id) { const n = qtyOf(id); return n ? '<b class="q">' + n + '</b>' : ''; }
   function addBtn(it) {
-    if (!ordering() || it.on === false) return '';
+    if (!ordering() || isOff(it)) return '';
     return '<button class="add" data-act="add" data-id="' + attr(it.id) + '" aria-label="' + attr(ui('add') + ' ' + tx(it, 'name')) + '">' + ico('mas') + qBadge(it.id) + '</button>';
   }
   function facadeSVG(label) {
@@ -3039,7 +3169,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
 
     destacados: function (m) {
       const s = m.s, tag = s.tag || 'chef', max = clamp(+s.max || 4, 1, 10);
-      const items = allItems().filter(function (it) { return (it.tags || []).indexOf(tag) >= 0 && it.on !== false; }).slice(0, max);
+      const items = allItems().filter(function (it) { return (it.tags || []).indexOf(tag) >= 0 && !isOff(it); }).slice(0, max);
       if (!items.length) return emptyNote('Marca platos con la etiqueta «' + tagLabel(tag) + '» para que aparezcan aquí.');
       /* Diseño: carrusel (el de siempre), cuadrícula de dos columnas o lista con foto pequeña. */
       const lay = s.layout === 'cuadricula' || s.layout === 'lista' ? s.layout : '';
@@ -3141,15 +3271,15 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     horario: function (m) {
       const s = m.s, H = cfg.brand.hours || [];
       if (!H.length) return emptyNote('Configura el horario en la pestaña Datos.');
-      const now = nowLocal(), st = statusInfo();
+      const now = nowLocal(), st = statusInfo(), hol = holidaysHTML(now);
       if (s.layout === 'compacto') return '<div class="wrap">' + sh(m) + (st ? '<p class="hstat ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.text) + '</p>' : '') +
-        hoursCompact(H, now.d) + (tx(s, 'note') ? '<p class="small" style="margin-top:12px">' + esc(tx(s, 'note')) + '</p>' : '') + '</div>';
+        hoursCompact(H, now.d) + hol + (tx(s, 'note') ? '<p class="small" style="margin-top:12px">' + esc(tx(s, 'note')) + '</p>' : '') + '</div>';
       return '<div class="wrap">' + sh(m) + (st ? '<p class="hstat ' + (st.open ? 'on' : 'off') + '"><i></i>' + esc(st.text) + '</p>' : '') +
         '<dl class="hours">' + [1, 2, 3, 4, 5, 6, 0].map(function (d) {
           const h = H.filter(function (x) { return +x.d === d; })[0], closed = !h || h.closed || !h.open;
           return '<div class="hrow ' + (d === now.d ? 'today' : '') + '"><dt>' + esc(cap(dayName(d))) + (d === now.d ? '<span class="hoy">' + esc(ui('today')) + '</span>' : '') + '</dt><span class="lead" aria-hidden="true"></span><dd>' +
             esc(closed ? ui('closed') : fmtTime(h.open) + ' – ' + fmtTime(h.close)) + '</dd></div>';
-        }).join('') + '</dl>' + (tx(s, 'note') ? '<p class="small" style="margin-top:12px">' + esc(tx(s, 'note')) + '</p>' : '') + '</div>';
+        }).join('') + '</dl>' + hol + (tx(s, 'note') ? '<p class="small" style="margin-top:12px">' + esc(tx(s, 'note')) + '</p>' : '') + '</div>';
     },
 
     ubicacion: function (m) {
@@ -3340,7 +3470,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
 
   function itemHTML(it, lay, ps, i) {
-    const off = it.on === false, name = tx(it, 'name'), desc = tx(it, 'desc');
+    const off = isOff(it), name = tx(it, 'name'), desc = tx(it, 'desc');
     const tags = tagsHTML(it) + (off ? '<span class="tag sold">' + esc(ui('soldOut')) + '</span>' : '');
     const price = '<span class="price">' + esc(money(it.price, ps)) + '</span>';
     if (lay === 'lista') {
@@ -3370,7 +3500,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
       return (s.options || []).filter(function (o) { return o && tx(o, 'label'); }).slice(0, 10).map(function (o) { return { label: tx(o, 'label'), short: short(tx(o, 'label')) }; });
     }
     const day = nowLocal().iso;
-    let items = allItems().filter(function (it) { return it.on !== false && (!s.category || (catOf(it.id) || {}).id === s.category); });
+    let items = allItems().filter(function (it) { return !isOff(it) && (!s.category || (catOf(it.id) || {}).id === s.category); });
     items = items.slice().sort(function (a, b) { return hash(a.id + day) - hash(b.id + day); }).slice(0, 8);
     return items.map(function (it) { return { id: it.id, label: tx(it, 'name'), short: (it.emoji && iconMode() === 'emoji' ? it.emoji + ' ' : '') + short(tx(it, 'name')) }; });
   }
@@ -3379,7 +3509,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     if (o.id) {
       const it = findItem(o.id);
       return '<div class="wres"><span class="small">' + esc(ui('got')) + '</span><b>' + esc(o.label) + '</b>' + (it ? '<span class="price">' + esc(money(it.price, priceStyle())) + '</span>' : '') +
-        '<div class="btns center" style="margin-top:8px">' + (ordering() && it && it.on !== false ? '<button class="btn pri sm" data-act="add" data-id="' + attr(o.id) + '">' + esc(ui('add')) + '</button>' : '') +
+        '<div class="btns center" style="margin-top:8px">' + (ordering() && it && !isOff(it) ? '<button class="btn pri sm" data-act="add" data-id="' + attr(o.id) + '">' + esc(ui('add')) + '</button>' : '') +
         '<button class="btn ghost sm" data-act="item" data-id="' + attr(o.id) + '">' + esc(ui('seeDish')) + '</button></div></div>';
     }
     return '<div class="wres"><span class="small">' + esc(ui('got')) + '</span><b>' + esc(o.label) + '</b><span class="small">' + esc(ui('showStaff')) + '</span></div>';
@@ -3463,7 +3593,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   function cartSubtotal() { return cartLines().reduce(function (a, l) { return a + l.price * l.qty; }, 0); }
   function saveCart() { sset(key('cart'), state.cart); }
   function addToCart(id, qty, note) {
-    const it = findItem(id); if (!it || it.on === false) return;
+    const it = findItem(id); if (!it || isOff(it)) return;
     const k = id + (note ? '|' + note : '');
     const line = state.cart.filter(function (l) { return l.k === k; })[0];
     if (line) line.qty = clamp(line.qty + qty, 1, 99);
@@ -3664,7 +3794,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   function renderItemSheet() {
     const st = state.itemSheet; if (!st) return;
     const it = findItem(st.id); if (!it) return;
-    const can = ordering() && it.on !== false;
+    const can = ordering() && !isOff(it);
     openSheet('<div class="sheet-h"><span></span><button class="x" data-act="close" aria-label="' + attr(ui('close')) + '">' + ico('cerrar') + '</button></div><div class="isheet">' + mediaHTML(it, 0) +
       '<h3>' + esc(tx(it, 'name')) + '</h3>' + (tx(it, 'desc') ? '<p>' + esc(tx(it, 'desc')) + '</p>' : '') +
       (tagsHTML(it) ? '<div class="it-tags">' + tagsHTML(it) + '</div>' : '') + '<p class="price big">' + esc(money(it.price, priceStyle())) + '</p></div>' +
@@ -4466,6 +4596,37 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
   }
   function onKey(e) { if (e.key === 'Escape' && root.classList.contains('sheet-open')) closeSheet(); }
 
+  /* ---------- Contenido del panel del local ----------
+     Si la app está conectada al panel (meta.panel), abre con la última copia guardada en el celular o, si no hay, con la
+     carta que trae adentro, y pide el contenido vigente al servidor: cuando llega, lo guarda y vuelve a pintar. */
+  let baseCfg = null;
+  function panelURL() {
+    const p = cfg.meta && cfg.meta.panel;
+    if (!p || PREVIEW || typeof win.fetch !== 'function') return '';
+    const api = String(p.api || '').trim().replace(/\/+$/, ''), slug = String(p.slug || '').trim();
+    if (!/^(https:\/\/[\w.-]+(:\d+)?|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)$/i.test(api) || !/^[a-z0-9-]{2,40}$/.test(slug)) return '';
+    return api + '/api/' + slug + '/contenido';
+  }
+  function applyPanel(docu) {
+    if (!docu || typeof docu !== 'object' || !docu.contenido) return false;
+    cfg = normalize(mergeContenido(baseCfg, docu.contenido));
+    return true;
+  }
+  function loadPanel() {
+    const url = panelURL(); if (!url) return;
+    baseCfg = JSON.parse(JSON.stringify(cfg));
+    const cached = sget(key('contenido'), null);
+    if (cached) applyPanel(cached);
+    let ctrl = null; try { ctrl = new win.AbortController(); } catch (e) { ctrl = null; }
+    if (ctrl) later(function () { ctrl.abort(); }, 12000);
+    win.fetch(url, { cache: 'no-cache', signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { return r && r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.contenido || (cached && cached.v === d.v && cached.at === d.at)) return;
+        if (applyPanel(d)) { sset(key('contenido'), { v: d.v, at: d.at, contenido: d.contenido }); if (root) renderAll(true); }
+      }, function () { /* sin conexión: queda la copia guardada o la carta de la app */ });
+  }
+
   /* ---------- Arranque ---------- */
   function boot() {
     root = doc.createElement('div');
@@ -4477,6 +4638,7 @@ html[data-tex="zocalo"] .m.sb::before,html[data-tex="zocalo"] .m.sb+.m::before{d
     state.lang = saved || (!PREVIEW && /^en/i.test(nav) ? 'en' : 'es');
     const cart = sget(key('cart'), []);
     state.cart = Array.isArray(cart) ? cart.filter(function (l) { return l && l.k && l.qty > 0; }) : [];
+    loadPanel();
     root.addEventListener('click', onClick);
     win.addEventListener('scroll', onScrollTop, { passive: true });
     root.addEventListener('input', onInput);

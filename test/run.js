@@ -1220,6 +1220,68 @@ const itemsIn = cfg => cfg.menu.categories.reduce((a, c) => a + c.items.length, 
     w2.close();
   }
 
+  /* 11zf. Contenido del panel del local: saneador, mezcla, agotado hoy, festivos y lectura remota */
+  {
+    const M = ctx.breakApp(null, null, null, { meta: true });
+    const NOW = '2026-11-06T15:30:00Z'; // viernes 10:30 a. m. en Bogotá
+    // Saneador
+    const k = M.sanitizeContenido({ evil: 1, menu: { categories: [{ name: 'C', items: [{ id: 'a b', name: 'Pan', price: '3.500,9', tags: ['nuevo', 'x'], img: 'javascript:alert(1)', html: '<b>', soldDate: 'mañana' }] }] },
+      modules: { promos: { type: 'promos', s: { layout: 'carrusel', _bg: 'acento', items: [{ title: 'P', price: -3, days: [1, 1, 9] }] } }, raro: { type: 'pedido', s: {} } }, hours: [{ d: 1, open: '25:00', close: '10:00' }] });
+    const it = k.menu.categories[0].items[0];
+    ok(!('evil' in k) && !('html' in it) && !('soldDate' in it) && it.img === '' && it.id !== 'a b' && it.price === 0 && it.tags.join() === 'nuevo', 'el saneador del contenido descarta claves, enlaces y valores no permitidos');
+    ok(!k.modules.raro && !('layout' in k.modules.promos.s) && !('_bg' in k.modules.promos.s) && k.modules.promos.s.items[0].days.join() === '1' && k.modules.promos.s.items[0].price === 0, 'el contenido de un módulo no trae diseño ni módulos que no se pueden editar');
+    ok(k.hours.length === 7 && k.hours.every(h => h.closed), 'las horas imposibles dejan el día cerrado');
+    // Mezcla
+    const base = TPL('tpl-antojo'), pm = base.modules.find(m => m.type === 'promos');
+    const cont = M.contenidoOf(base);
+    cont.modules[pm.id].s.items[0].title = 'Promo nueva'; cont.modules[pm.id].s.layout = 'otra';
+    cont.menu.categories[0].items[0].price = 9900;
+    const mixed = M.mergeContenido(base, cont), pm2 = mixed.modules.find(m => m.id === pm.id);
+    ok(pm2.s.items[0].title === 'Promo nueva' && pm2.s.layout === pm.s.layout && pm2.s._bg === pm.s._bg && mixed.theme.skin === base.theme.skin, 'la mezcla cambia el contenido y respeta el diseño de la sección y de la app');
+    ok(mixed.menu.categories[0].items[0].price === 9900 && base.menu.categories[0].items[0].price !== 9900, 'la mezcla no toca la app original');
+    ok(JSON.stringify(M.contenidoOf(M.mergeContenido(base, M.contenidoOf(base)))) === JSON.stringify(M.contenidoOf(base)), 'sacar y volver a poner el contenido no cambia nada');
+    // Agotado hoy
+    const sold = TPL('tpl-antojo'); const s0 = sold.menu.categories[0].items[0], s1 = sold.menu.categories[0].items[1];
+    s0.soldDate = '2026-11-06'; s1.soldDate = '2026-11-05';
+    let A = mount(sold, { now: NOW });
+    const a0 = A.$('.carta-body .it[data-id="' + s0.id + '"]'), a1 = A.$('.carta-body .it[data-id="' + s1.id + '"]');
+    ok(a0.classList.contains('off') && /Agotado/.test(a0.textContent) && !a0.querySelector('.add'), 'un plato «agotado hoy» se ve agotado y no se puede pedir');
+    ok(!a1.classList.contains('off') && !!a1.querySelector('.add'), 'el agotado de ayer ya no cuenta: el plato vuelve solo');
+    A.close();
+    // Festivos
+    const hol = TPL('tpl-zocalo'); hol.brand.holidays = [{ date: '2026-11-06', closed: true, name: 'Festivo de prueba' }, { date: '2026-11-16', closed: false, open: '09:00', close: '14:00' }, { date: '2027-03-01', closed: true }];
+    A = mount(hol, { now: NOW });
+    ok(A.$('.hero-st').classList.contains('off'), 'en un festivo cerrado la app dice que está cerrado');
+    const rows = A.$$('section.m-horario .hol .hrow');
+    ok(rows.length === 2 && rows[0].classList.contains('today') && /Festivo de prueba/.test(rows[0].textContent) && /9:00/.test(rows[1].textContent) && /Festivos/.test(A.$('section.m-horario .hol-t').textContent), 'el horario lista los próximos festivos con su horario');
+    A.close();
+    hol.brand.holidays = [{ date: '2026-11-06', closed: false, open: '10:00', close: '11:00' }];
+    A = mount(hol, { now: NOW }); ok(A.$('.hero-st').classList.contains('on') && /11:00/.test(A.$('.hero-st').textContent), 'en un festivo con horario especial manda ese horario'); A.close();
+    // Lectura remota
+    const app = TPL('tpl-antojo'); app.meta.panel = { api: 'https://panel.example.com', slug: 'antojo' };
+    const first = app.menu.categories[0].items[0];
+    const remote = M.contenidoOf(app); remote.menu.categories[0].items[0].price = 4321; remote.menu.categories[0].items[0].name = 'Arepa del panel';
+    const calls = [];
+    const fetchOk = w => { w.fetch = async u => { calls.push(String(u)); return { ok: true, json: async () => ({ v: 3, at: '2026-11-06T15:00:00Z', contenido: remote }) }; }; };
+    A = mount(app, { now: NOW, setup: fetchOk }); await sleep(30);
+    const name = () => (A.$('.carta-body .it[data-id="' + first.id + '"] h4') || {}).textContent;
+    ok(calls[0] === 'https://panel.example.com/api/antojo/contenido' && name() === 'Arepa del panel' && /4\.321/.test(A.$('.carta-body .it[data-id="' + first.id + '"]').textContent), 'la app lee el contenido del panel y muestra los cambios');
+    const stored = JSON.parse(A.w.localStorage.getItem('break:' + app.id + ':contenido') || 'null');
+    ok(!!stored && stored.v === 3 && stored.contenido.menu.categories[0].items[0].price === 4321, 'guarda la última versión en el celular');
+    A.close();
+    const offline = w => { w.localStorage.setItem('break:' + app.id + ':contenido', JSON.stringify(stored)); w.fetch = async () => { throw new Error('sin conexión'); }; };
+    A = mount(app, { now: NOW, setup: offline }); await sleep(30); ok(name() === 'Arepa del panel', 'sin conexión usa la copia guardada'); A.close();
+    A = mount(app, { now: NOW, setup: w => { w.fetch = async () => { throw new Error('sin conexión'); }; } }); await sleep(30); ok(name() === first.name, 'sin conexión y sin copia usa la carta que trae la app'); A.close();
+    calls.length = 0;
+    A = mount(app, { now: NOW, mode: 'preview', setup: fetchOk }); await sleep(30); ok(!calls.length && name() === first.name, 'la vista previa del estudio no pide el contenido del panel'); A.close();
+    const bad = TPL('tpl-antojo'); bad.meta.panel = { api: 'http://otro.example.com', slug: 'antojo' };
+    A = mount(bad, { now: NOW, setup: fetchOk }); await sleep(30); ok(!calls.length, 'solo pide el contenido a una dirección https'); A.close();
+    const xss = M.contenidoOf(app); xss.menu.categories[0].items[0].name = '<img src=x onerror=alert(1)>';
+    A = mount(app, { now: NOW, setup: w => { w.fetch = async () => ({ ok: true, json: async () => ({ v: 4, contenido: xss }) }); } }); await sleep(30);
+    ok(!A.$('.carta-body img[onerror]') && /<img src=x/.test(name()), 'el contenido del panel se muestra escapado');
+    A.close();
+  }
+
   /* 12. Estudio completo con base de datos y descargas simuladas */
   const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'break-studio.html'), 'utf8');
   const docs = new Map(); const listeners = []; const saved = [];
